@@ -1,10 +1,10 @@
 #  config.py
 import os
 from pydantic_settings import BaseSettings
-from dotnev import load_dotnev
+from dotenv import load_dotenv
 
 # Charge .env au démarrage
-load_dotnev()
+load_dotenv()
 
 class Settings(BaseSettings):
     """

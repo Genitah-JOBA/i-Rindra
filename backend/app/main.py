@@ -1,14 +1,43 @@
 # main.py
+
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-# Création de l'instance de l'apk
-app = FastAPI()
+from app.routers import auth
+from app.core.database import engine, Base
+import app.models  # noqa: F401 — enregistre tous les modèles sur Base.metadata
 
-# Routes
+# Création de l'application
+app = FastAPI(
+    title="Kanto - API",
+    description="Plateforme de gestion de projets assistée par l'IA",
+    version="0.1.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Enregistrement des routers
+app.include_router(auth.router)
+
+@app.on_event("startup")
+async def init_db():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
 @app.get("/")
-def read_root():
-    return {"message": "Hello World"}
+async def root():
+    return {
+        "message": "Bienvenue sur l'API Gestion projet",
+        "docs": "/docs",
+        "redoc": "/redoc",
+    }
 
-if __name__ == "_main_":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}

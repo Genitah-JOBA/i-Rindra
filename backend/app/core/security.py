@@ -9,13 +9,21 @@ from fastapi import HTTPException, status
 from app.core.config import settings
 
 # Hachage des MDP
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    default="bcrypt",
+    bcrypt__rounds=12,
+)
 
 def hash_password(password: str) -> str:
     """
     Hache un mot de passe en clair.
     Utilise bcrypt avec un salt généré automatiquement.
     """
+    password_bytes = password.encode('utf-8')
+    if len(password_bytes) > 72:
+        password = password[:72]
+    
     return pwd_context.hash(password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -23,6 +31,10 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     Vérifie qu'un mot de passe en clair correspond au hash stocké.
     Retourne True si OK.
     """
+    password_bytes = plain_password.encode('utf-8')
+    if len(password_bytes) > 72:
+        plain_password = plain_password[:72]
+    
     return pwd_context.verify(plain_password, hashed_password)
 
 # JWT
@@ -36,7 +48,6 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     """
     to_encode = data.copy()
     
-    # Définit la date d'expiration
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
@@ -44,7 +55,6 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     
     to_encode.update({"exp": expire})
     
-    # Génère le token signé
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
 
