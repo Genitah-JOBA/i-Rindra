@@ -8,7 +8,7 @@ from typing import List, Optional
 from app.core.database import get_db
 from app.core.security import decode_access_token
 from app.routers.auth import oauth2_scheme, get_current_user_id, get_current_user_role
-from app.models.projet import Projet, StatutSante
+from app.models.projet import Projet, ProjetMembre, StatutSante
 from app.models.client import Client
 from app.models.utilisateur import Utilisateur
 from app.schemas.projet import ProjetCreate, ProjetUpdate, ProjetResponse, ProjetListResponse
@@ -28,6 +28,67 @@ async def check_direction_or_chef_projet(role: str = Depends(get_current_user_ro
             detail="Seul la direction ou le chef de projet peut effectuer cette action"
         )
     return role
+
+
+async def check_projet_access(
+    projet_id: int,
+    token: str = Depends(oauth2_scheme),
+    db: AsyncSession = Depends(get_db),
+) -> Projet:
+    """
+    Vérifie que l'utilisateur connecté a le droit d'accéder au projet `projet_id`,
+    et renvoie le projet.
+
+    Règles (RF-03, RF-22) :
+      - direction : accès à tout
+      - equipe (chef de projet) : responsable OU membre du projet
+      - client : uniquement le projet de son client_id
+
+    Peut aussi être appelée en interne avec `token=None` : dans ce cas on ne
+    revalide pas le rôle (l'appelant a déjà authentifié) et on se contente de
+    vérifier que le projet existe.
+    """
+    # 1. Récupère le projet
+    result = await db.execute(select(Projet).where(Projet.id == projet_id))
+    projet = result.scalar_one_or_none()
+    if not projet:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Projet non trouvé",
+        )
+
+    # 2. Appel interne sans token : on ne vérifie que l'existence
+    if token is None:
+        return projet
+
+    # 3. Vérifie les permissions selon le rôle
+    payload = decode_access_token(token)
+    user_id = int(payload.get("sub"))
+    role = payload.get("role")
+    client_id = payload.get("client_id")
+
+    if role == "direction":
+        return projet
+
+    if role == "equipe":
+        if projet.responsable_id == user_id:
+            return projet
+        membre = await db.execute(
+            select(ProjetMembre).where(
+                ProjetMembre.projet_id == projet_id,
+                ProjetMembre.utilisateur_id == user_id,
+            )
+        )
+        if membre.scalar_one_or_none() is not None:
+            return projet
+
+    if role == "client" and projet.client_id == client_id:
+        return projet
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Vous n'avez pas accès à ce projet",
+    )
 
 # ----- ENDPOINTS -----
 

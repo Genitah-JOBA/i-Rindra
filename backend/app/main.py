@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import auth, projets, taches
+from app.routers import auth, projets, taches, dashboard, client
 from app.core.database import engine, Base
 import app.models
 
@@ -26,6 +26,8 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(projets.router)
 app.include_router(taches.router)
+app.include_router(dashboard.router)
+app.include_router(client.router)
 
 @app.on_event("startup")
 async def init_db():

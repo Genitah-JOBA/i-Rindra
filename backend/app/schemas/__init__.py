@@ -23,6 +23,12 @@ from app.schemas.tache import (
     SaisieTempsResponse,
 )
 
+from app.schemas.dashboard import (
+    DashboardProjet,
+    DashboardIndicateurs,
+    DashboardAlerte,
+)
+
 __all__ = [
     # Projets
     "ProjetBase",
@@ -43,4 +49,8 @@ __all__ = [
     "CommentaireTacheResponse",
     "SaisieTempsCreate",
     "SaisieTempsResponse",
+    # Dashboard
+    "DashboardProjet",
+    "DashboardIndicateurs",
+    "DashboardAlerte",
 ]
