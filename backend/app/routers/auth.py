@@ -8,6 +8,7 @@ from sqlalchemy import select
 from app.core.database import get_db
 from app.core.security import hash_password, verify_password, create_access_token, decode_access_token
 from app.models.utilisateur import Utilisateur, RoleUtilisateur
+from app.models.client import Client
 from pydantic import BaseModel, EmailStr
 from datetime import timedelta
 from typing import Optional
@@ -165,6 +166,7 @@ class RegisterRequest(BaseModel):
     nom: str
     prenom: str
     role: Optional[str] = "equipe"
+    client_id: Optional[int] = None   # obligatoire UNIQUEMENT si role = "client"
 
 class RegisterResponse(BaseModel):
     id: int
@@ -207,8 +209,29 @@ async def register(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Rôle invalide. Choisir parmi : {[r.value for r in RoleUtilisateur]}"
         )
-    
-    # 3. Crée le nouvel utilisateur
+
+    # 3. Règle métier (CDC) : cohérence rôle / client_id
+    #    - un compte 'client' DOIT être rattaché à un client existant
+    #    - un compte interne (direction/equipe) N'est rattaché à aucun client
+    if role_enum == RoleUtilisateur.CLIENT:
+        if user_data.client_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Un compte 'client' doit être rattaché à un client (client_id requis)."
+            )
+        result = await db.execute(
+            select(Client).where(Client.id == user_data.client_id)
+        )
+        if result.scalar_one_or_none() is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Le client id={user_data.client_id} n'existe pas."
+            )
+        client_id_final = user_data.client_id
+    else:
+        client_id_final = None   # imposé par la contrainte chk_client_lien
+
+    # 4. Crée le nouvel utilisateur
     new_user = Utilisateur(
         email=user_data.email,
         mot_de_passe_hash=hash_password(user_data.mot_de_passe),
@@ -216,10 +239,10 @@ async def register(
         prenom=user_data.prenom,
         role=role_enum,
         actif=True,
-        client_id=None,
+        client_id=client_id_final,
     )
     
-    # 4. Sauvegarde en base de données
+    # 5. Sauvegarde en base de données
     db.add(new_user)
     await db.commit()
     await db.refresh(new_user)

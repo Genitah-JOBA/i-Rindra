@@ -1,5 +1,5 @@
 # utilisateur.py
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 import enum
@@ -25,7 +25,7 @@ class Utilisateur(Base):
     email = Column(String(255), unique=True, index=True, nullable=False)
     mot_de_passe_hash = Column(String(255), nullable=False)
     role = Column(pg_enum(RoleUtilisateur, "role_utilisateur"), nullable=False, default=RoleUtilisateur.EQUIPE)
-    client_id = Column(Integer, nullable=True)
+    client_id = Column(Integer, ForeignKey("client.id", ondelete="SET NULL"), nullable=True)
     actif = Column(Boolean, default=True, nullable=False)
     cree_le = Column(DateTime(timezone=True), server_default=func.now())
 

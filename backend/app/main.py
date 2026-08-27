@@ -3,9 +3,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import auth
+from app.routers import auth, projets
 from app.core.database import engine, Base
-import app.models  # noqa: F401 — enregistre tous les modèles sur Base.metadata
+import app.models
 
 # Création de l'application
 app = FastAPI(
@@ -24,6 +24,7 @@ app.add_middleware(
 
 # Enregistrement des routers
 app.include_router(auth.router)
+app.include_router(projets.router)
 
 @app.on_event("startup")
 async def init_db():
