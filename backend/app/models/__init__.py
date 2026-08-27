@@ -17,12 +17,15 @@ from app.models.analyse_ia import (
 )
 
 __all__ = [
-    "Utilisateur", "RoleUtilisateur",
+    "Utilisateur",
+    "RoleUtilisateur",
     "Client",
-    "Projet", "ProjetMembre", "StatutSante",
-    "Tache", "CommentaireTache", "StatutTache", "PrioriteTache",
-    "Jalon",
-    "Fichier",
+    "Projet",
+    "StatutSante",
+    "ProjetMembre",
+    "Tache",
+    "StatutTache",
+    "PrioriteTache",
+    "CommentaireTache",
     "SaisieTemps",
-    "AnalyseIA", "SuggestionTache", "TypeAnalyseIA", "StatutSuggestion",
 ]

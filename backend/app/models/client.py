@@ -24,5 +24,7 @@ class Client(Base):
     # 1 Client -> N Projets
     projets = relationship("Projet", back_populates="client")
 
+    cree_le = Column(DateTime(timezone=True), server_default=func.now())
+    
     def __repr__(self):
         return f"<Client {self.nom}>"
