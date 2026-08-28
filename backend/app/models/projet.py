@@ -1,7 +1,7 @@
 # projet.py
 from sqlalchemy import (
     Column, Integer, String, Text, Date, DateTime, Boolean, ForeignKey,
-    CheckConstraint,
+    CheckConstraint, UniqueConstraint,
 )
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
@@ -63,9 +63,13 @@ class ProjetMembre(Base):
     Porte le rôle du membre dans le projet (developpeur, integrateur, designer...).
     """
     __tablename__ = "projet_membre"
+    __table_args__ = (
+        UniqueConstraint("projet_id", "utilisateur_id", name="uq_projet_membre"),
+    )
 
-    projet_id = Column(Integer, ForeignKey("projet.id", ondelete="CASCADE"), primary_key=True)
-    utilisateur_id = Column(Integer, ForeignKey("utilisateur.id", ondelete="CASCADE"), primary_key=True)
+    id = Column(Integer, primary_key=True, index=True)
+    projet_id = Column(Integer, ForeignKey("projet.id", ondelete="CASCADE"), nullable=False, index=True)
+    utilisateur_id = Column(Integer, ForeignKey("utilisateur.id", ondelete="CASCADE"), nullable=False, index=True)
     role_dans_projet = Column(String(60), nullable=True)
 
     projet = relationship("Projet", back_populates="membres")

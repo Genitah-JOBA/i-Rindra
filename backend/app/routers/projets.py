@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete, or_, and_, func
 from typing import List, Optional
+from datetime import date, datetime
 from app.models.jalon import Jalon
 
 from app.core.database import get_db
@@ -50,25 +51,34 @@ async def check_projet_access(
 ):
     """
     Vérifie que l'utilisateur a accès au projet.
+
+    Utilisable de deux façons :
+      - en dépendance FastAPI (token fourni par oauth2_scheme) -> contrôle complet du rôle ;
+      - en appel interne avec token=None -> vérifie seulement que le projet existe
+        (l'endpoint appelant a déjà authentifié l'utilisateur).
     """
-    # 1. Récupère l'utilisateur
-    payload = decode_access_token(token)
-    user_id = int(payload.get("sub"))
-    role = payload.get("role")
-    client_id = payload.get("client_id")
-    
     # 2. Récupère le projet
     result = await db.execute(
         select(Projet).where(Projet.id == projet_id)
     )
     projet = result.scalar_one_or_none()
-    
+
     if not projet:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Projet non trouvé"
         )
-    
+
+    # Appel interne sans token : on s'arrête à la vérification d'existence
+    if token is None:
+        return projet
+
+    # 1. Récupère l'utilisateur
+    payload = decode_access_token(token)
+    user_id = int(payload.get("sub"))
+    role = payload.get("role")
+    client_id = payload.get("client_id")
+
     # 3. Vérifie les permissions selon le rôle
     if role == "direction":
         return projet
@@ -223,7 +233,7 @@ async def create_projet(
         date_debut=projet_data.date_debut,
         date_fin_prevue=projet_data.date_fin_prevue,
         statut_sante=StatutSante.VERT,
-        avancement_pct=0.0,
+        avancement_pct=0,
         archive=False,
     )
     
@@ -709,7 +719,7 @@ async def get_projet_jalons(
     
     return [JalonListResponse.model_validate(j) for j in jalons]
 
-@router.get("/{projet_id}/jalons/{jalon_id}", response_model=JalonResponse)
+@router.get("/{projet_id}/jalons/{jalon_id:int}", response_model=JalonResponse)
 async def get_jalon(
     projet_id: int,
     jalon_id: int,

@@ -5,6 +5,7 @@ Schémas Pydantic pour les tâches (validation des données).
 """
 
 from pydantic import BaseModel, Field, ConfigDict
+import datetime as dtmod
 from datetime import date, datetime
 from typing import Optional
 from enum import Enum
@@ -87,12 +88,14 @@ class CommentaireTacheResponse(CommentaireTacheBase):
 # ----- SCHÉMAS POUR LE SUIVI DU TEMPS -----
 
 class SaisieTempsBase(BaseModel):
-    duree_min: float = Field(..., gt=0, description="Durée en minutes")
-    date: Optional[date] = None
+    duree_min: int = Field(..., gt=0, description="Durée en minutes")
+    # dtmod.date évite la collision entre le nom de champ 'date' et le type 'date'
+    date: Optional[dtmod.date] = None
     note: Optional[str] = Field(None, max_length=500)
 
 class SaisieTempsCreate(SaisieTempsBase):
-    tache_id: int
+    # tache_id vient de l'URL (/taches/{tache_id}/temps), pas besoin de le répéter dans le body
+    pass
 
 class SaisieTempsResponse(SaisieTempsBase):
     id: int
