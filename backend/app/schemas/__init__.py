@@ -29,6 +29,29 @@ from app.schemas.dashboard import (
     DashboardAlerte,
 )
 
+from app.schemas.membre import (
+    MembreBase,
+    MembreCreate,
+    MembreUpdate,
+    MembreResponse,
+    MembreListResponse,
+)
+
+from app.schemas.jalon import (
+    JalonBase,
+    JalonCreate,
+    JalonUpdate,
+    JalonResponse,
+    JalonListResponse,
+)
+
+from app.schemas.fichier import (
+    FichierBase,
+    FichierCreate,
+    FichierResponse,
+    FichierListResponse,
+)
+
 __all__ = [
     # Projets
     "ProjetBase",
@@ -53,4 +76,22 @@ __all__ = [
     "DashboardProjet",
     "DashboardIndicateurs",
     "DashboardAlerte",
+    # Membres
+    "MembreBase",
+    "MembreCreate",
+    "MembreUpdate",
+    "MembreResponse",
+    "MembreListResponse",
+    # Jalons
+    "JalonBase",
+    "JalonCreate",
+    "JalonUpdate",
+    "JalonResponse",
+    "JalonListResponse",
+
+    # Fichiers
+    "FichierBase",
+    "FichierCreate",
+    "FichierResponse",
+    "FichierListResponse",
 ]

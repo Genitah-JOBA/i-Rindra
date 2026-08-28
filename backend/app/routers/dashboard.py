@@ -16,7 +16,7 @@ from app.core.security import decode_access_token
 from app.routers.auth import oauth2_scheme
 from app.models.projet import Projet, StatutSante
 from app.models.tache import Tache, StatutTache
-from app.models.projet_membre import ProjetMembre
+from app.models.projet import ProjetMembre
 from app.models.utilisateur import Utilisateur
 from app.schemas.dashboard import (
     DashboardProjet,

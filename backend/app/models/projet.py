@@ -49,8 +49,8 @@ class Projet(Base):
     taches = relationship("Tache", back_populates="projet", cascade="all, delete-orphan")
     jalons = relationship("Jalon", back_populates="projet", cascade="all, delete-orphan")
     fichiers = relationship("Fichier", back_populates="projet", cascade="all, delete-orphan")
-    analyses_ia = relationship("AnalyseIA", back_populates="projet", cascade="all, delete-orphan")
-    suggestions = relationship("SuggestionTache", back_populates="projet", cascade="all, delete-orphan")
+    # analyses_ia = relationship("AnalyseIA", back_populates="projet", cascade="all, delete-orphan")
+    # suggestions = relationship("SuggestionTache", back_populates="projet", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Projet {self.nom} ({self.statut_sante})>"

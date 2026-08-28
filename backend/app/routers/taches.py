@@ -15,7 +15,7 @@ from app.routers.auth import oauth2_scheme, get_current_user_id, get_current_use
 from app.routers.projets import check_projet_access, check_direction_or_chef_projet
 from app.models.projet import Projet
 from app.models.tache import Tache, StatutTache, PrioriteTache
-from app.models.commentaire_tache import CommentaireTache
+from app.models.tache import CommentaireTache
 from app.models.saisie_temps import SaisieTemps
 from app.models.utilisateur import Utilisateur
 from app.schemas.tache import (
