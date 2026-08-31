@@ -28,7 +28,7 @@ export default function Dashboard() {
   return (
     <div>
       <h1 className="mb-1 text-2xl font-bold text-slate-900">
-        Bonjour {user?.prenom} 👋
+        Bonjour {user?.prenom} {user?.nom} !
       </h1>
       <p className="mb-6 text-sm text-slate-500">
         Voici l'ensemble des projets.
