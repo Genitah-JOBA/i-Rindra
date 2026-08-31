@@ -1,4 +1,4 @@
-# Kanto — Fondations techniques
+# i-Rindra — Fondations techniques
 
 > Base de travail pour démarrer le développement. Ne contient **aucun code** :
 > uniquement les structures, modèles et cartographies à coder toi-même.
