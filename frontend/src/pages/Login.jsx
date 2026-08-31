@@ -13,11 +13,64 @@ export default function Login() {
   const [motDePasse, setMotDePasse] = useState("");
   const [erreur, setErreur] = useState("");
   const [enCours, setEnCours] = useState(false);
-  const [afficherMotDePasse, setAfficherMotDePasse] = useState(false); // Nouvel état
+  const [afficherMotDePasse, setAfficherMotDePasse] = useState(false);
+  
+  // États pour la validation des champs
+  const [emailTouche, setEmailTouche] = useState(false);
+  const [motDePasseTouche, setMotDePasseTouche] = useState(false);
+
+  // Fonction de validation de l'email
+  const validerEmail = (email) => {
+    // Vérifier si l'email a au moins 5 caractères (4 + 1 pour @)
+    if (email.length < 5) {
+      return "L'email doit contenir au moins 5 caractères";
+    }
+    // Vérifier le format email basique
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return "Veuillez entrer un email valide (ex: nom@domaine.com)";
+    }
+    return "";
+  };
+
+  // Fonction de validation du mot de passe
+  const validerMotDePasse = (motDePasse) => {
+    if (motDePasse.length <= 4) {
+      return "Le mot de passe doit contenir au moins 5 caractères";
+    }
+    return "";
+  };
+
+  // Obtenir les messages d'erreur
+  const erreurEmail = emailTouche ? validerEmail(email) : "";
+  const erreurMotDePasse = motDePasseTouche ? validerMotDePasse(motDePasse) : "";
+
+  // Vérifier si le formulaire est valide
+  const estFormulaireValide = () => {
+    return (
+      email.length >= 5 &&
+      validerEmail(email) === "" &&
+      motDePasse.length > 4 &&
+      validerMotDePasse(motDePasse) === ""
+    );
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErreur("");
+    
+    // Valider tous les champs avant soumission
+    setEmailTouche(true);
+    setMotDePasseTouche(true);
+    
+    const emailErr = validerEmail(email);
+    const mdpErr = validerMotDePasse(motDePasse);
+    
+    if (emailErr || mdpErr) {
+      setErreur("Veuillez corriger les erreurs du formulaire");
+      return;
+    }
+
     setEnCours(true);
     try {
       const { user } = await login(email, motDePasse);
@@ -42,8 +95,8 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
-      <div className="grid w-full max-w-4xl overflow-hidden bg-white shadow-xl md:grid-cols-2">
+    <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4 animate__animated animate__backInDown">
+      <div className="grid w-full max-w-5xl overflow-hidden bg-white shadow-xl md:grid-cols-2">
         {/* COLONNE GAUCHE : formulaire */}
         <div className="flex flex-col justify-center p-8 sm:p-12 border">
           {/* Logo visible surtout en mobile (le panneau de droite est masqué) */}
@@ -53,7 +106,7 @@ export default function Login() {
             className="mb-6 h-16 w-auto self-center md:hidden"
           />
 
-          <h1 className="mb-1 text-2xl font-bold text-slate-900 text-center py-2">CONNEXION</h1>
+          <h1 className="mb-1 text-4xl font-bold text-slate-900 text-center py-2">CONNEXION</h1>
           <p className="mb-6 text-sm text-slate-500 text-center">
             Accédez à votre espace i-Rindra.
           </p>
@@ -64,40 +117,78 @@ export default function Login() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div>
               <label className="mb-1 text-sm font-medium text-slate-700">
-                Email
+                Email <span className="text-red-500">*</span>
               </label>
-              <div className="flex gap-1 block mb-2 w-full border border-slate-300 px-3 py-2.5 text-sm transition focus:border-[#00B2A0] focus:ring-2 focus:ring-[#00B2A0]/30">
+              <div className={`flex gap-1 block mb-2 w-full border px-3 py-2.5 text-sm transition focus:ring-2 ${
+                emailTouche && erreurEmail
+                  ? "border-red-500 focus:border-red-500 focus:ring-red-500/30"
+                  : emailTouche && !erreurEmail
+                  ? "border-green-500 focus:border-green-500 focus:ring-green-500/30"
+                  : "border-slate-300 focus:border-[#00B2A0] focus:ring-[#00B2A0]/30"
+              }`}>
                 <img src="/adresse.png" alt="email" className="w-5" />
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (emailTouche) setEmailTouche(true);
+                  }}
+                  onBlur={() => setEmailTouche(true)}
                   required
                   autoComplete="email"
                   placeholder="  vous@exemple.com"
                   className="w-full bg-transparent outline-none"
+                  minLength={5}
                 />
+                {emailTouche && !erreurEmail && email.length > 0 && (
+                  <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
               </div>
+              {emailTouche && erreurEmail && (
+                <p className="mt-1 text-xs text-red-500">{erreurEmail}</p>
+              )}
+              <p className="mt-0.5 text-xs text-slate-400">
+                Minimum 5 caractères (ex: nom@domaine.com)
+              </p>
             </div>
 
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700">
-                Mot de passe
+                Mot de passe <span className="text-red-500">*</span>
               </label>
-              <div className="flex items-center gap-1 w-full border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-[#00B2A0] focus:ring-2 focus:ring-[#00B2A0]/30">
+              <div className={`flex items-center gap-1 w-full border px-3 py-2.5 text-sm outline-none transition focus:ring-2 ${
+                motDePasseTouche && erreurMotDePasse
+                  ? "border-red-500 focus:border-red-500 focus:ring-red-500/30"
+                  : motDePasseTouche && !erreurMotDePasse
+                  ? "border-green-500 focus:border-green-500 focus:ring-green-500/30"
+                  : "border-slate-300 focus:border-[#00B2A0] focus:ring-[#00B2A0]/30"
+              }`}>
                 <img src="/fermer-a-cle.png" alt="email" className="w-6" />
                 <input
                   type={afficherMotDePasse ? "text" : "password"}
                   value={motDePasse}
-                  onChange={(e) => setMotDePasse(e.target.value)}
+                  onChange={(e) => {
+                    setMotDePasse(e.target.value);
+                    if (motDePasseTouche) setMotDePasseTouche(true);
+                  }}
+                  onBlur={() => setMotDePasseTouche(true)}
                   required
                   autoComplete="current-password"
                   placeholder="  ••••••••"
                   className="w-full bg-transparent outline-none"
+                  minLength={5}
                 />
+                {motDePasseTouche && !erreurMotDePasse && motDePasse.length > 0 && (
+                  <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
                 {/* Bouton pour afficher/masquer le mot de passe */}
                 <button
                   type="button"
@@ -106,7 +197,6 @@ export default function Login() {
                   aria-label={afficherMotDePasse ? "Masquer le mot de passe" : "Afficher le mot de passe"}
                 >
                   {afficherMotDePasse ? (
-                    // Icône "œil barré" (masquer)
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -122,7 +212,6 @@ export default function Login() {
                       />
                     </svg>
                   ) : (
-                    // Icône "œil" (afficher)
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -145,6 +234,12 @@ export default function Login() {
                   )}
                 </button>
               </div>
+              {motDePasseTouche && erreurMotDePasse && (
+                <p className="mt-1 text-xs text-red-500">{erreurMotDePasse}</p>
+              )}
+              <p className="mt-0.5 text-xs text-slate-400">
+                Minimum 5 caractères
+              </p>
             </div>
 
             <div className="block mx-auto text-right transition hover:text-[#ff0040] cursor-pointer text-[12px]">
@@ -153,8 +248,12 @@ export default function Login() {
 
             <button
               type="submit"
-              disabled={enCours}
-              className="block mx-auto bg-[#63B23E] py-3 px-5 text-sm font-semibold text-white transition hover:bg-[#3F894E] disabled:opacity-50"
+              disabled={enCours || !estFormulaireValide()}
+              className={`block mx-auto py-3 px-5 text-sm font-semibold text-white transition disabled:opacity-50 ${
+                estFormulaireValide()
+                  ? "bg-[#63B23E] hover:bg-[#3F894E] cursor-pointer"
+                  : "bg-gray-400 cursor-not-allowed"
+              }`}
             >
               {enCours ? "Connexion…" : "Se connecter"}
             </button>
