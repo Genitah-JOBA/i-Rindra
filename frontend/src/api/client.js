@@ -28,4 +28,36 @@ api.interceptors.response.use(
   }
 );
 
+export const clientsService = {
+  // Liste des clients
+  list: async () => {
+    const response = await api.get('/clients');
+    return response.data;
+  },
+
+  // Détail d'un client
+  get: async (id) => {
+    const response = await api.get(`/clients/${id}`);
+    return response.data;
+  },
+
+  // Créer un client
+  create: async (data) => {
+    const response = await api.post('/clients', data);
+    return response.data;
+  },
+
+  // Mettre à jour un client
+  update: async (id, data) => {
+    const response = await api.put(`/clients/${id}`, data);
+    return response.data;
+  },
+
+  // Supprimer un client
+  delete: async (id) => {
+    const response = await api.delete(`/clients/${id}`);
+    return response.data;
+  },
+};
+
 export default api;

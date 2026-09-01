@@ -5,6 +5,7 @@ import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import MonProjet from "./pages/MonProjet";
+import Projets from './pages/Projets';
 
 export default function App() {
   return (
@@ -21,7 +22,9 @@ export default function App() {
         }
       >
         <Route index element={<Dashboard />} />
-        <Route path="projets" element={<Dashboard />} />
+        <Route path="projets" element={<Projets />} />
+        {/* Ajout d'une route pour les détails d'un projet (à venir) */}
+        <Route path="projets/:id" element={<Projets />} />
       </Route>
 
       {/* Espace client (cloisonné) */}
