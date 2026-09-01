@@ -64,29 +64,6 @@ export default function Layout() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Fermer la sidebar quand on redimensionne en desktop
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768 && sidebarOpen) {
-        setSidebarOpen(false);
-      }
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [sidebarOpen]);
-
-  // Empêcher le scroll du body quand la sidebar est ouverte sur mobile
-  useEffect(() => {
-    if (sidebarOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [sidebarOpen]);
-
   // Changer la langue
   const changerLangue = (nouvelleLangue) => {
     setLangue(nouvelleLangue);
@@ -103,12 +80,13 @@ export default function Layout() {
         />
       )}
 
-      {/* 1. SIDEBAR VERTICALE RESPONSIVE AVEC HAMBURGER */}
+      {/* 1. SIDEBAR - En flex pour que le conteneur s'adapte */}
       <aside className={`
         w-72 sm:w-64 md:w-52 
         bg-[#3B3B3B] border-r border-slate-600 
-        min-h-screen flex flex-col 
-        fixed left-0 top-0 z-40 
+        min-h-screen flex-shrink-0
+        flex flex-col 
+        fixed md:relative left-0 top-0 z-40 
         transition-transform duration-300 ease-in-out 
         md:translate-x-0
         shadow-2xl md:shadow-none
@@ -330,14 +308,14 @@ export default function Layout() {
         </div>
       </aside>
 
-      {/* 2. CONTENEUR PRINCIPAL */}
-      <div className="flex-1 md:ml-52 flex flex-col min-h-screen animate__animated animate__fadeInDownBig">
+      {/* 2. CONTENEUR PRINCIPAL - S'adapte automatiquement */}
+      <div className="flex-1 flex flex-col min-h-screen w-0 min-w-0">
         {/* Header supérieur avec menu déroulant */}
-        <header className="border-b bg-white px-6 py-4 flex justify-between md:justify-end items-center sticky top-0 z-30 shadow-sm">
+        <header className="border-b bg-white px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center sticky top-0 z-30 shadow-sm">
           {/* Bouton Hamburger visible uniquement sur mobile */}
           <button 
             onClick={() => setSidebarOpen(true)}
-            className="md:hidden p-2 rounded-md text-slate-700 hover:bg-slate-100 focus:outline-none"
+            className="md:hidden p-2 rounded-md text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#63B23E] transition-colors"
             aria-label="Ouvrir le menu"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -346,15 +324,18 @@ export default function Layout() {
           </button>
 
           {/* Profil avec menu déroulant */}
-          <div className="relative" ref={profilMenuRef}>
+          <div className="relative ml-auto" ref={profilMenuRef}>
             <button
               onClick={toggleProfilMenu}
-              className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-slate-100 transition-colors focus:outline-none"
+              className="flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 rounded-md hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#63B23E]"
               aria-expanded={profilMenuOpen}
               aria-haspopup="true"
             >
-              <span className="text-sm text-slate-700 font-medium">
+              <span className="text-sm text-slate-700 font-medium hidden sm:inline">
                 {user?.prenom} {user?.nom}
+              </span>
+              <span className="text-sm text-slate-700 font-medium sm:hidden">
+                {user?.prenom?.charAt(0)}{user?.nom?.charAt(0)}
               </span>
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
@@ -370,7 +351,7 @@ export default function Layout() {
 
             {/* Menu déroulant */}
             {profilMenuOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white shadow-lg border border-slate-200 py-1 z-50 animate__animated animate__fadeInDown">
+              <div className="absolute right-0 mt-2 w-56 bg-white shadow-lg border border-slate-200 py-1 z-50 animate__animated animate__fadeInDown rounded-lg">
                 {/* Information utilisateur */}
                 <div className="px-4 py-3 border-b border-slate-100">
                   <p className="text-sm font-medium text-slate-900">
@@ -453,8 +434,8 @@ export default function Layout() {
           </div>
         </header>
 
-        {/* Corps de la page */}
-        <main className="flex-1 p-8 max-w-7xl w-full mx-auto">
+        {/* Corps de la page - RESPONSIVE */}
+        <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-7xl w-full mx-auto">
           <Outlet />
         </main>
       </div>
