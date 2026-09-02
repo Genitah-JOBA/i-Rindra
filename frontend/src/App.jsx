@@ -25,10 +25,8 @@ export default function App() {
       >
         <Route index element={<Dashboard />} />
         <Route path="projets" element={<Projets />} />
-        {/* Ajout d'une route pour les détails d'un projet (à venir) */}
-        <Route path="projets/:id" element={<Projets />} />
-        <Route path="taches" element={<Taches />} />
         <Route path="projets/:id" element={<ProjetDetail />} />
+        <Route path="taches" element={<Taches />} />
       </Route>
 
       {/* Espace client (cloisonné) */}

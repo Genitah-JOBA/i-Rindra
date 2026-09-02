@@ -1,586 +1,326 @@
-// src/pages/Projets/index.jsx
-import { useState, useEffect } from "react";
+// src/pages/Projets/index.jsx — liste + création de projets (RF-05, RF-06).
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { projetsService } from "../../api/projets";
 import { clientsService } from "../../api/client";
-import { utilisateursService } from "../../api/utilisateurs"; // Nouveau service
-import { useAuth } from "../../auth/AuthContext";
-import 'animate.css';
+import { utilisateursService } from "../../api/utilisateurs";
 
-// Icônes SVG
-const PlusIcon = ({ className = "w-5 h-5" }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-  </svg>
-);
-
-const SearchIcon = ({ className = "w-5 h-5" }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-  </svg>
-);
-
-const CloseIcon = ({ className = "w-5 h-5" }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-  </svg>
-);
-
-const ChevronDownIcon = ({ className = "w-5 h-5" }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-  </svg>
-);
-
-// Couleurs des statuts
 const couleurStatut = {
   vert: "bg-green-100 text-green-800",
   orange: "bg-orange-100 text-orange-800",
   rouge: "bg-red-100 text-red-800",
 };
 
-const statutIcone = {
-  vert: "🟢",
-  orange: "🟠",
-  rouge: "🔴",
+const FORM_VIDE = {
+  nom: "",
+  description: "",
+  client_id: "",
+  responsable_id: "",
+  date_debut: "",
+  date_fin_prevue: "",
 };
 
 export default function Projets() {
-  const { user } = useAuth();
+  const navigate = useNavigate();
+
   const [projets, setProjets] = useState([]);
   const [clients, setClients] = useState([]);
   const [responsables, setResponsables] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erreur, setErreur] = useState("");
-  const [filtreStatut, setFiltreStatut] = useState("tous");
-  const [recherche, setRecherche] = useState("");
-  const [rechercheLocale, setRechercheLocale] = useState("");
+
   const [modalOuvert, setModalOuvert] = useState(false);
-  const [formData, setFormData] = useState({
-    nom: "",
-    description: "",
-    client_id: "",
-    responsable_id: "",
-    date_debut: "",
-    date_fin_prevue: "",
-  });
-  const [formLoading, setFormLoading] = useState(false);
+  const [form, setForm] = useState(FORM_VIDE);
   const [formErreur, setFormErreur] = useState("");
-  const [stats, setStats] = useState({
-    total: 0,
-    enCours: 0,
-    termines: 0,
-    enRetard: 0,
-  });
+  const [enCours, setEnCours] = useState(false);
 
   useEffect(() => {
-    chargerDonnees();
+    charger();
   }, []);
 
-  const chargerDonnees = async () => {
+  const charger = async () => {
     setLoading(true);
+    setErreur("");
     try {
-      // Charger projets, clients et responsables en parallèle
-      const [projetsData, clientsData, responsablesData] = await Promise.all([
+      const [projetsData, clientsData, usersData] = await Promise.all([
         projetsService.list(),
         clientsService.list().catch(() => []),
-        utilisateursService.list().catch(() => [])
+        utilisateursService.list().catch(() => []),
       ]);
-      
       setProjets(projetsData || []);
       setClients(clientsData || []);
-      setResponsables(responsablesData || []);
-      calculerStats(projetsData || []);
+      // Un responsable de projet est un compte interne (direction ou équipe)
+      setResponsables(
+        (usersData || []).filter((u) => u.role === "direction" || u.role === "equipe")
+      );
     } catch (err) {
-      setErreur(err.response?.data?.detail || "Erreur de chargement des données.");
+      setErreur(err.response?.data?.detail || "Erreur de chargement des projets.");
     } finally {
       setLoading(false);
     }
   };
 
-  const calculerStats = (data) => {
-    const total = data.length;
-    const enCours = data.filter(p => p.avancement_pct < 100).length;
-    const termines = data.filter(p => p.avancement_pct === 100).length;
-    const enRetard = data.filter(p => p.statut_sante === "rouge" || p.statut_sante === "orange").length;
-    setStats({ total, enCours, termines, enRetard });
-  };
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
-  const getStatutLabel = (statut) => {
-    const labels = { vert: "Bon", orange: "Attention", rouge: "Critique" };
-    return labels[statut] || statut;
-  };
-
-  // Filtrage des projets
-  const projetsFiltres = projets.filter(projet => {
-    if (filtreStatut === "enCours" && projet.avancement_pct === 100) return false;
-    if (filtreStatut === "termines" && projet.avancement_pct !== 100) return false;
-    if (filtreStatut === "enRetard") {
-      if (projet.statut_sante !== "rouge" && projet.statut_sante !== "orange") return false;
-    }
-
-    if (recherche) {
-      const search = recherche.toLowerCase();
-      const nom = projet.nom?.toLowerCase() || "";
-      const clientNom = projet.client?.nom?.toLowerCase() || projet.client?.toLowerCase() || "";
-      const responsableNom = projet.responsable?.nom?.toLowerCase() || "";
-      if (!nom.includes(search) && !clientNom.includes(search) && !responsableNom.includes(search)) return false;
-    }
-
-    return true;
-  });
-
-  const handleRechercheSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setRecherche(rechercheLocale);
-  };
-
-  const handleRechercheClear = () => {
-    setRechercheLocale("");
-    setRecherche("");
-  };
-
-  const handleStatutClick = (statut) => {
-    setFiltreStatut(statut === filtreStatut ? "tous" : statut);
-  };
-
-  const handleFormChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    setFormLoading(true);
     setFormErreur("");
+    if (!form.nom.trim()) return setFormErreur("Le nom du projet est requis.");
+    if (!form.client_id) return setFormErreur("Veuillez choisir un client.");
+    if (!form.responsable_id)
+      return setFormErreur("Veuillez choisir un responsable.");
 
-    // Validation
-    if (!formData.nom.trim()) {
-      setFormErreur("Le nom du projet est requis.");
-      setFormLoading(false);
-      return;
-    }
-    if (!formData.client_id) {
-      setFormErreur("Veuillez sélectionner un client.");
-      setFormLoading(false);
-      return;
-    }
-
+    setEnCours(true);
     try {
-      const nouveauProjet = await projetsService.create({
-        nom: formData.nom,
-        description: formData.description || null,
-        client_id: parseInt(formData.client_id),
-        responsable_id: formData.responsable_id ? parseInt(formData.responsable_id) : null,
-        date_debut: formData.date_debut || null,
-        date_fin_prevue: formData.date_fin_prevue || null,
+      await projetsService.create({
+        nom: form.nom,
+        description: form.description || null,
+        client_id: parseInt(form.client_id, 10),
+        responsable_id: parseInt(form.responsable_id, 10),
+        date_debut: form.date_debut || null,
+        date_fin_prevue: form.date_fin_prevue || null,
       });
-      
-      // Ajouter les relations pour l'affichage
-      const clientTrouve = clients.find(c => c.id === parseInt(formData.client_id));
-      if (clientTrouve) {
-        nouveauProjet.client = clientTrouve;
-      }
-      
-      if (formData.responsable_id) {
-        const responsableTrouve = responsables.find(r => r.id === parseInt(formData.responsable_id));
-        if (responsableTrouve) {
-          nouveauProjet.responsable = responsableTrouve;
-        }
-      }
-      
-      setProjets([nouveauProjet, ...projets]);
-      calculerStats([nouveauProjet, ...projets]);
       setModalOuvert(false);
-      setFormData({
-        nom: "",
-        description: "",
-        client_id: "",
-        responsable_id: "",
-        date_debut: "",
-        date_fin_prevue: "",
-      });
+      setForm(FORM_VIDE);
+      await charger();
     } catch (err) {
-      setFormErreur(err.response?.data?.detail || "Erreur lors de la création du projet.");
+      setFormErreur(
+        err.response?.data?.detail || "Erreur lors de la création du projet."
+      );
     } finally {
-      setFormLoading(false);
+      setEnCours(false);
     }
   };
 
-  const statuts = [
-    { id: "tous", label: "Tous", color: "bg-slate-100 text-slate-700" },
-    { id: "enCours", label: "En cours", color: "bg-blue-100 text-blue-700" },
-    { id: "termines", label: "Terminés", color: "bg-green-100 text-green-700" },
-    { id: "enRetard", label: "En retard", color: "bg-red-100 text-red-700" },
-  ];
+  const supprimer = async (projet, e) => {
+    e.stopPropagation(); // ne pas déclencher la navigation vers la fiche
+    if (
+      !window.confirm(
+        `Supprimer définitivement le projet « ${projet.nom} » ?\nSes tâches, jalons et membres seront aussi supprimés.`
+      )
+    )
+      return;
+    try {
+      await projetsService.remove(projet.id);
+      setProjets((prev) => prev.filter((p) => p.id !== projet.id));
+    } catch (err) {
+      alert(
+        err.response?.data?.detail || "Erreur lors de la suppression du projet."
+      );
+    }
+  };
+
+  const nomClient = (id) => clients.find((c) => c.id === id)?.nom || "—";
 
   return (
-    <div className="animate__animated animate__fadeIn w-full px-4 sm:px-6 lg:px-8">
+    <div>
       {/* En-tête */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900">
-            Projets
-          </h1>
+          <h1 className="text-2xl font-bold text-slate-900">Projets</h1>
           <p className="text-sm text-slate-500">
-            Gérez tous vos projets depuis cet espace.
+            {projets.length} projet{projets.length > 1 ? "s" : ""}
           </p>
         </div>
         <button
-          onClick={() => setModalOuvert(true)}
-          className="mt-2 sm:mt-0 flex items-center gap-2 px-4 py-2 bg-[#63B23E] text-white text-sm hover:bg-[#3F894E] transition-colors"
+          onClick={() => {
+            setForm(FORM_VIDE);
+            setFormErreur("");
+            setModalOuvert(true);
+          }}
+          className="rounded-lg bg-[#00B2A0] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#074E56]"
         >
-          <PlusIcon className="w-4 h-4" />
-          Nouveau projet
+          + Nouveau projet
         </button>
       </div>
 
-      {/* Statistiques */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4 mb-6">
-        <div className="bg-white border border-slate-200 p-3 md:p-4 shadow-sm">
-          <p className="text-xs text-slate-500 uppercase tracking-wider">Total</p>
-          <p className="text-xl md:text-2xl font-bold text-slate-900">{stats.total}</p>
-        </div>
-        <div className="bg-white border border-slate-200 p-3 md:p-4 shadow-sm">
-          <p className="text-xs text-slate-500 uppercase tracking-wider">En cours</p>
-          <p className="text-xl md:text-2xl font-bold text-blue-600">{stats.enCours}</p>
-        </div>
-        <div className="bg-white border border-slate-200 p-3 md:p-4 shadow-sm">
-          <p className="text-xs text-slate-500 uppercase tracking-wider">Terminés</p>
-          <p className="text-xl md:text-2xl font-bold text-green-600">{stats.termines}</p>
-        </div>
-        <div className="bg-white border border-slate-200 p-3 md:p-4 shadow-sm">
-          <p className="text-xs text-slate-500 uppercase tracking-wider">En retard</p>
-          <p className="text-xl md:text-2xl font-bold text-red-600">{stats.enRetard}</p>
-        </div>
-      </div>
+      {loading && <p className="text-slate-500">Chargement…</p>}
+      {erreur && <p className="text-red-600">{erreur}</p>}
 
-      {/* Filtres et recherche */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-        <div className="flex flex-wrap gap-1.5">
-          {statuts.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => handleStatutClick(s.id)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-[2px] transition-colors ${
-                filtreStatut === s.id
-                  ? s.color + " ring-2 ring-offset-1 ring-slate-300"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-slate-400 whitespace-nowrap">
-            {projetsFiltres.length} projet{projetsFiltres.length > 1 ? "s" : ""}
-          </span>
-          <form onSubmit={handleRechercheSubmit} className="relative">
-            <input
-              type="text"
-              value={rechercheLocale}
-              onChange={(e) => setRechercheLocale(e.target.value)}
-              placeholder="Rechercher..."
-              className="w-48 sm:w-56 pl-8 pr-8 py-1.5 text-sm border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
-            />
-            <SearchIcon className="w-4 h-4 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-            {rechercheLocale && (
-              <button
-                type="button"
-                onClick={handleRechercheClear}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-              >
-                <CloseIcon className="w-4 h-4" />
-              </button>
-            )}
-          </form>
-        </div>
-      </div>
-
-      {/* Chargement */}
-      {loading && (
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#63B23E]"></div>
-          <span className="ml-3 text-slate-500">Chargement des projets…</span>
-        </div>
-      )}
-
-      {/* Erreur */}
-      {erreur && (
-        <div className="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-700 border border-red-200">
-          <div className="flex items-center justify-between">
-            <span>⚠️ {erreur}</span>
-            <button onClick={chargerDonnees} className="text-red-600 hover:text-red-800 underline">
-              Réessayer
-            </button>
-          </div>
+      {!loading && !erreur && projets.length === 0 && (
+        <div className="rounded-lg border border-dashed p-10 text-center text-slate-500">
+          Aucun projet. Cliquez sur « Nouveau projet » pour commencer.
         </div>
       )}
 
       {/* Grille des projets */}
-      {!loading && !erreur && (
-        <>
-          {projetsFiltres.length > 0 ? (
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-              {projetsFiltres.map((projet) => (
-                <div
-                  key={projet.id}
-                  className="group border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer hover:border-[#63B23E]"
-                  onClick={() => window.location.href = `/projets/${projet.id}`}
-                >
-                  <div className="mb-2 flex items-start justify-between gap-2">
-                    <h2 className="font-semibold text-slate-900 truncate text-sm md:text-base">
-                      {projet.nom || "Sans nom"}
-                    </h2>
-                    <span
-                      className={`flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-medium whitespace-nowrap flex-shrink-0 ${
-                        couleurStatut[projet.statut_sante] || "bg-slate-100 text-slate-700"
-                      }`}
-                    >
-                      <span className="text-xs">{statutIcone[projet.statut_sante] || "⚪"}</span>
-                      <span className="hidden sm:inline text-xs">{getStatutLabel(projet.statut_sante)}</span>
-                    </span>
-                  </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {projets.map((p) => (
+          <div
+            key={p.id}
+            onClick={() => navigate(`/projets/${p.id}`)}
+            className="group relative cursor-pointer rounded-lg border bg-white p-4 shadow-sm transition hover:shadow-md"
+          >
+            {/* Bouton supprimer (apparaît au survol) */}
+            <button
+              onClick={(e) => supprimer(p, e)}
+              title="Supprimer le projet"
+              className="absolute right-2 top-2 rounded p-1 text-slate-300 opacity-0 transition hover:bg-red-50 hover:text-red-600 group-hover:opacity-100"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+              </svg>
+            </button>
 
-                  {/* Client */}
-                  {projet.client && (
-                    <div className="flex items-center gap-1 text-xs text-slate-500 mb-1 truncate">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3 flex-shrink-0">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                      </svg>
-                      {projet.client.nom || projet.client}
-                    </div>
-                  )}
-
-                  {/* Responsable */}
-                  {projet.responsable && (
-                    <div className="flex items-center gap-1 text-xs text-slate-500 mb-2 truncate">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3 flex-shrink-0">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                      </svg>
-                      <span className="text-slate-400">Resp:</span> {projet.responsable.nom || projet.responsable}
-                    </div>
-                  )}
-
-                  {/* Barre de progression */}
-                  <div className="mb-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-                    <div
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        (projet.avancement_pct || 0) >= 80
-                          ? "bg-green-500"
-                          : (projet.avancement_pct || 0) >= 40
-                          ? "bg-yellow-500"
-                          : "bg-blue-500"
-                      }`}
-                      style={{ width: `${projet.avancement_pct || 0}%` }}
-                    />
-                  </div>
-
-                  <div className="flex justify-between items-center mt-1">
-                    <p className="text-xs text-slate-500">
-                      {projet.avancement_pct || 0}% terminé
-                    </p>
-                    <span className="text-xs text-slate-400 flex items-center gap-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      {projet.taches_terminees || 0}/{projet.taches_total || 0}
-                    </span>
-                  </div>
-
-                  {projet.date_fin_prevue && (
-                    <div className="flex items-center gap-1 text-xs text-slate-400 mt-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                      </svg>
-                      {new Date(projet.date_fin_prevue).toLocaleDateString("fr-FR")}
-                    </div>
-                  )}
-                </div>
-              ))}
+            <div className="mb-2 flex items-start justify-between gap-2 pr-6">
+              <h2 className="font-semibold text-slate-900">{p.nom}</h2>
+              <span
+                className={`shrink-0 rounded px-2 py-0.5 text-xs font-medium ${
+                  couleurStatut[p.statut_sante] || "bg-slate-100 text-slate-700"
+                }`}
+              >
+                {p.statut_sante}
+              </span>
             </div>
-          ) : (
-            <div className="text-center py-12 bg-slate-50 rounded-lg border border-slate-200">
-              {recherche || filtreStatut !== "tous" ? (
-                <>
-                  <p className="text-slate-500">Aucun projet ne correspond à vos filtres.</p>
-                  <button
-                    onClick={() => { setFiltreStatut("tous"); setRecherche(""); setRechercheLocale(""); }}
-                    className="mt-2 text-[#63B23E] hover:underline"
-                  >
-                    Réinitialiser les filtres
-                  </button>
-                </>
-              ) : (
-                <>
-                  <p className="text-slate-500">Aucun projet pour le moment.</p>
-                  <button
-                    onClick={() => setModalOuvert(true)}
-                    className="mt-4 px-4 py-2 bg-[#63B23E] text-white rounded-md hover:bg-[#3F894E] transition-colors"
-                  >
-                    + Créer votre premier projet
-                  </button>
-                </>
-              )}
+            <p className="mb-3 text-xs text-slate-500">
+              Client : {nomClient(p.client_id)}
+            </p>
+            <div className="mb-1 h-2 w-full overflow-hidden rounded bg-slate-100">
+              <div
+                className="h-full bg-[#00B2A0]"
+                style={{ width: `${p.avancement_pct || 0}%` }}
+              />
             </div>
-          )}
-        </>
-      )}
+            <p className="text-xs text-slate-500">{p.avancement_pct || 0}% terminé</p>
+          </div>
+        ))}
+      </div>
 
-      {/* Modal de création avec tous les attributs */}
+      {/* Modal création */}
       {modalOuvert && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate__animated animate__fadeIn">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto animate__animated animate__zoomIn">
-            {/* En-tête */}
-            <div className="flex items-center justify-between p-4 border-b border-slate-200">
-              <h2 className="text-lg font-semibold text-slate-900">Nouveau projet</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-slate-900">Nouveau projet</h2>
               <button
                 onClick={() => setModalOuvert(false)}
-                className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                className="text-slate-400 hover:text-slate-700"
               >
-                <CloseIcon className="w-5 h-5" />
+                ✕
               </button>
             </div>
 
-            {/* Formulaire */}
-            <form onSubmit={handleFormSubmit} className="p-4 space-y-4">
-              {formErreur && (
-                <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 border border-red-200">
-                  ⚠️ {formErreur}
-                </div>
-              )}
+            {formErreur && (
+              <div className="mb-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+                {formErreur}
+              </div>
+            )}
 
-              {/* Nom du projet */}
+            <form onSubmit={handleSubmit} className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Nom du projet <span className="text-red-500">*</span>
+                <label className="mb-1 block text-sm font-medium text-slate-700">
+                  Nom *
                 </label>
                 <input
-                  type="text"
                   name="nom"
-                  value={formData.nom}
-                  onChange={handleFormChange}
-                  required
-                  placeholder="Ex: Site Web Kanto"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent text-sm"
+                  value={form.nom}
+                  onChange={handleChange}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
+                  placeholder="Site vitrine…"
                 />
               </div>
 
-              {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="mb-1 block text-sm font-medium text-slate-700">
                   Description
                 </label>
                 <textarea
                   name="description"
-                  value={formData.description}
-                  onChange={handleFormChange}
-                  rows={3}
-                  placeholder="Description du projet..."
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent text-sm resize-none"
+                  value={form.description}
+                  onChange={handleChange}
+                  rows={2}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
                 />
               </div>
 
-              {/* Client - Obligatoire */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Client <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <select
-                    name="client_id"
-                    value={formData.client_id}
-                    onChange={handleFormChange}
-                    required
-                    className="w-full px-3 py-2 pr-10 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent text-sm appearance-none bg-white"
-                  >
-                    <option value="">Sélectionner un client</option>
-                    {clients.map((client) => (
-                      <option key={client.id} value={client.id}>
-                        {client.nom} {client.prenom ? `- ${client.prenom}` : ''}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDownIcon className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                </div>
-                {clients.length === 0 && (
-                  <p className="mt-1 text-xs text-amber-600">
-                    ⚠️ Aucun client disponible. Veuillez d'abord créer un client.
-                  </p>
-                )}
-              </div>
-
-              {/* Responsable - Optionnel */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Responsable
-                </label>
-                <div className="relative">
-                  <select
-                    name="responsable_id"
-                    value={formData.responsable_id}
-                    onChange={handleFormChange}
-                    className="w-full px-3 py-2 pr-10 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent text-sm appearance-none bg-white"
-                  >
-                    <option value="">Aucun responsable</option>
-                    {responsables.map((resp) => (
-                      <option key={resp.id} value={resp.id}>
-                        {resp.prenom} {resp.nom} ({resp.role})
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDownIcon className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                </div>
-              </div>
-
-              {/* Dates */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Date début
+                  <label className="mb-1 block text-sm font-medium text-slate-700">
+                    Client *
+                  </label>
+                  <select
+                    name="client_id"
+                    value={form.client_id}
+                    onChange={handleChange}
+                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
+                  >
+                    <option value="">— Choisir —</option>
+                    {clients.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.nom}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-slate-700">
+                    Responsable *
+                  </label>
+                  <select
+                    name="responsable_id"
+                    value={form.responsable_id}
+                    onChange={handleChange}
+                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
+                  >
+                    <option value="">— Choisir —</option>
+                    {responsables.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.prenom} {r.nom}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-slate-700">
+                    Début
                   </label>
                   <input
                     type="date"
                     name="date_debut"
-                    value={formData.date_debut}
-                    onChange={handleFormChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent text-sm"
+                    value={form.date_debut}
+                    onChange={handleChange}
+                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Date fin prévue
+                  <label className="mb-1 block text-sm font-medium text-slate-700">
+                    Fin prévue
                   </label>
                   <input
                     type="date"
                     name="date_fin_prevue"
-                    value={formData.date_fin_prevue}
-                    onChange={handleFormChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent text-sm"
+                    value={form.date_fin_prevue}
+                    onChange={handleChange}
+                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
                   />
                 </div>
               </div>
 
-              {/* Boutons */}
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
+              {clients.length === 0 && (
+                <p className="text-xs text-orange-600">
+                  Aucun client disponible — créez d'abord un client.
+                </p>
+              )}
+
+              <div className="flex justify-end gap-2 pt-2">
                 <button
                   type="button"
                   onClick={() => setModalOuvert(false)}
-                  className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-md transition-colors"
+                  className="rounded-md border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
-                  disabled={formLoading || !formData.client_id || !formData.nom.trim()}
-                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                    formData.client_id && formData.nom.trim()
-                      ? "bg-[#63B23E] text-white hover:bg-[#3F894E]"
-                      : "bg-slate-300 text-slate-500 cursor-not-allowed"
-                  }`}
+                  disabled={enCours}
+                  className="rounded-md bg-[#00B2A0] px-4 py-2 text-sm font-semibold text-white hover:bg-[#074E56] disabled:opacity-50"
                 >
-                  {formLoading ? "Création..." : "Créer le projet"}
+                  {enCours ? "Création…" : "Créer"}
                 </button>
               </div>
             </form>

@@ -508,11 +508,11 @@ async def retirer_membre(
     projet: Projet = Depends(check_projet_access),
     db: AsyncSession = Depends(get_db),
     current_user_id: int = Depends(get_current_user_id),
-    _: str = Depends(check_direction_or_chef_projet)
+    role: str = Depends(check_direction_or_chef_projet)
 ):
     """
     Retire un membre d'un projet (RF-06).
-    
+
     **Permissions :** Seule la direction ou le chef de projet peut retirer des membres.
     """
     # 1. Vérifie que le membre existe
@@ -540,7 +540,6 @@ async def retirer_membre(
         )
     
     # 3. Empêche de se retirer soi-même (sauf si direction)
-    role = await get_current_user_role()
     if utilisateur_id == current_user_id and role != "direction":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
