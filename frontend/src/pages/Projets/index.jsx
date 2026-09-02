@@ -49,10 +49,8 @@ export default function Projets() {
       ]);
       setProjets(projetsData || []);
       setClients(clientsData || []);
-      // Un responsable de projet est un compte interne (direction ou équipe)
-      setResponsables(
-        (usersData || []).filter((u) => u.role === "direction" || u.role === "equipe")
-      );
+      // Le responsable d'un projet est obligatoirement un membre de la direction
+      setResponsables((usersData || []).filter((u) => u.role === "direction"));
     } catch (err) {
       setErreur(err.response?.data?.detail || "Erreur de chargement des projets.");
     } finally {

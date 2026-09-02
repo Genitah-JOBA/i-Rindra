@@ -107,6 +107,7 @@ async def create_utilisateur(
         email=utilisateur_data.email,
         mot_de_passe_hash=hash_password(utilisateur_data.mot_de_passe),
         role=role_enum,
+        metier=utilisateur_data.metier,
         client_id=client_id_final,
         actif=True,
     )

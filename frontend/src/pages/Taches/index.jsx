@@ -77,7 +77,8 @@ export default function Taches() {
   const nomResponsable = (responsableId) => {
     if (!responsableId) return null;
     const m = membres.find((x) => x.utilisateur_id === responsableId);
-    return m ? `${m.prenom} ${m.nom}` : `#${responsableId}`;
+    if (!m) return `#${responsableId}`;
+    return `${m.prenom} ${m.nom}${m.metier ? ` (${m.metier})` : ""}`;
   };
 
   const creerTache = async (e) => {
@@ -196,6 +197,7 @@ export default function Taches() {
               {membres.map((m) => (
                 <option key={m.id} value={m.utilisateur_id}>
                   {m.prenom} {m.nom}
+                  {m.metier ? ` — ${m.metier}` : ""}
                 </option>
               ))}
             </select>

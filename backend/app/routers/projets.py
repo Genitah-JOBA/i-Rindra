@@ -218,10 +218,10 @@ async def create_projet(
             detail="Responsable non trouvé"
         )
     
-    if responsable.role not in ["direction", "equipe"]:
+    if responsable.role != RoleUtilisateur.DIRECTION:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Le responsable doit être un chef de projet ou un membre de la direction"
+            detail="Le responsable d'un projet doit être un membre de la direction."
         )
     
     # Crée le projet
@@ -346,6 +346,7 @@ async def get_projet_membres(
             prenom=membre.Utilisateur.prenom,
             email=membre.Utilisateur.email,
             role_global=membre.Utilisateur.role.value,
+            metier=membre.Utilisateur.metier,
             role_dans_projet=membre.ProjetMembre.role_dans_projet,
             est_responsable=(membre.ProjetMembre.utilisateur_id == projet.responsable_id),
             cree_le=membre.ProjetMembre.cree_le if hasattr(membre.ProjetMembre, 'cree_le') else None,
@@ -430,6 +431,7 @@ async def ajouter_membre(
         prenom=utilisateur.prenom,
         email=utilisateur.email,
         role_global=utilisateur.role.value,
+        metier=utilisateur.metier,
         role_dans_projet=nouveau_membre.role_dans_projet,
         est_responsable=(utilisateur.id == projet.responsable_id),
         message=f"{utilisateur.prenom} {utilisateur.nom} a été ajouté au projet avec succès"
@@ -686,6 +688,7 @@ async def get_membres_disponibles(
             "prenom": u.prenom,
             "email": u.email,
             "role": u.role.value,
+            "metier": u.metier,
             "actif": u.actif,
         }
         for u in utilisateurs

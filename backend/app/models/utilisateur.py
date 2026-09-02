@@ -26,6 +26,8 @@ class Utilisateur(Base):
     mot_de_passe_hash = Column(String(255), nullable=False)
     role = Column(pg_enum(RoleUtilisateur, "role_utilisateur"), nullable=False, default=RoleUtilisateur.EQUIPE)
     client_id = Column(Integer, ForeignKey("client.id", ondelete="SET NULL"), nullable=True)
+    # Métier du membre (développeur, graphiste, intégrateur…) — sert à savoir qui affecter à une tâche
+    metier = Column(String(100), nullable=True)
     actif = Column(Boolean, default=True, nullable=False)
     cree_le = Column(DateTime(timezone=True), server_default=func.now())
 

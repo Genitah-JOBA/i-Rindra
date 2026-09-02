@@ -30,6 +30,7 @@ class MembreResponse(BaseModel):
     prenom: str
     email: str
     role_global: str  # direction, equipe, client
+    metier: Optional[str] = None  # métier du membre (dev, graphiste…)
     role_dans_projet: Optional[str]
     est_responsable: bool = False
     message: Optional[str] = None
@@ -45,6 +46,7 @@ class MembreListResponse(BaseModel):
     prenom: str
     email: str
     role_global: str
+    metier: Optional[str] = None
     role_dans_projet: Optional[str]
     est_responsable: bool = False
     cree_le: Optional[datetime] = None

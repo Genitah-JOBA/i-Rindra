@@ -25,9 +25,8 @@ export default function ProjetDetail() {
   const [loading, setLoading] = useState(true);
   const [erreur, setErreur] = useState("");
 
-  // Formulaire d'ajout de membre
+  // Formulaire d'ajout de membre (on n'a plus besoin d'un rôle : le métier du membre suffit)
   const [nouvelUtilisateurId, setNouvelUtilisateurId] = useState("");
-  const [roleDansProjet, setRoleDansProjet] = useState("");
   const [ajoutErreur, setAjoutErreur] = useState("");
   const [ajoutEnCours, setAjoutEnCours] = useState(false);
 
@@ -65,10 +64,8 @@ export default function ProjetDetail() {
     try {
       await projetsService.addMembre(id, {
         utilisateur_id: parseInt(nouvelUtilisateurId, 10),
-        role_dans_projet: roleDansProjet || null,
       });
       setNouvelUtilisateurId("");
-      setRoleDansProjet("");
       await charger(); // recharge membres + disponibles
     } catch (err) {
       setAjoutErreur(err.response?.data?.detail || "Erreur lors de l'ajout.");
@@ -191,7 +188,7 @@ export default function ProjetDetail() {
                   >
                     {m.role_global}
                   </span>
-                  {m.role_dans_projet && ` · ${m.role_dans_projet}`}
+                  {m.metier && ` · ${m.metier}`}
                 </p>
               </div>
               {!m.est_responsable && (
@@ -223,22 +220,11 @@ export default function ProjetDetail() {
               <option value="">— Choisir un utilisateur —</option>
               {disponibles.map((u) => (
                 <option key={u.id} value={u.id}>
-                  {u.prenom} {u.nom} ({u.role})
+                  {u.prenom} {u.nom}
+                  {u.metier ? ` — ${u.metier}` : ` (${u.role})`}
                 </option>
               ))}
             </select>
-          </div>
-          <div className="flex-1">
-            <label className="mb-1 block text-xs font-medium text-slate-600">
-              Rôle dans le projet
-            </label>
-            <input
-              type="text"
-              value={roleDansProjet}
-              onChange={(e) => setRoleDansProjet(e.target.value)}
-              placeholder="développeur, graphiste…"
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
-            />
           </div>
           <button
             type="submit"

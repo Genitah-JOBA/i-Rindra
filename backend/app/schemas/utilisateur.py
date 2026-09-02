@@ -12,6 +12,7 @@ class UtilisateurBase(BaseModel):
     prenom: str = Field(..., min_length=1, max_length=100)
     email: EmailStr
     role: str = Field("equipe", description="direction | equipe | client")
+    metier: Optional[str] = Field(None, description="développeur, graphiste, intégrateur…")
     client_id: Optional[int] = None
 
 
@@ -24,6 +25,7 @@ class UtilisateurUpdate(BaseModel):
     prenom: Optional[str] = Field(None, min_length=1, max_length=100)
     email: Optional[EmailStr] = None
     role: Optional[str] = None
+    metier: Optional[str] = None
     client_id: Optional[int] = None
     actif: Optional[bool] = None
 
@@ -34,6 +36,7 @@ class UtilisateurResponse(BaseModel):
     prenom: str
     email: str
     role: str
+    metier: Optional[str] = None
     client_id: Optional[int] = None
     actif: bool
     cree_le: Optional[datetime] = None
