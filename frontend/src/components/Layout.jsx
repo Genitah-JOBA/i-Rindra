@@ -71,7 +71,7 @@ export default function Layout() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="h-screen overflow-hidden bg-slate-50 flex">
       {/* Overlay sombre avec animation */}
       {sidebarOpen && (
         <div 
@@ -82,11 +82,11 @@ export default function Layout() {
 
       {/* 1. SIDEBAR - En flex pour que le conteneur s'adapte */}
       <aside className={`
-        w-72 sm:w-64 md:w-52 
-        bg-[#3B3B3B] border-r border-slate-600 
-        min-h-screen flex-shrink-0
-        flex flex-col 
-        fixed md:relative left-0 top-0 z-40 
+        w-72 sm:w-64 md:w-52
+        bg-[#3B3B3B] border-r border-slate-600
+        h-screen flex-shrink-0
+        flex flex-col
+        fixed md:relative left-0 top-0 z-40
         transition-transform duration-300 ease-in-out 
         md:translate-x-0
         shadow-2xl md:shadow-none
@@ -167,17 +167,13 @@ export default function Layout() {
                 </p>
               </div>
 
-              {/* Membres - en développement */}
-              <LienPlaceholder 
-                className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors rounded-md text-white hover:bg-slate-600 opacity-75`}
-                titre="Membres"
-              >
+              {/* Membres - annuaire de l'équipe */}
+              <NavLink to="/membres" className={lienClass}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 flex-shrink-0">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
                 </svg>
                 Membres
-                <span className="ml-auto text-[10px] bg-yellow-500/20 text-yellow-300 px-2 py-0.5 rounded-full flex-shrink-0">Bientôt</span>
-              </LienPlaceholder>
+              </NavLink>
 
               {/* === SECTION IA === */}
               {estDirection && (
@@ -304,8 +300,8 @@ export default function Layout() {
         </div>
       </aside>
 
-      {/* 2. CONTENEUR PRINCIPAL - S'adapte automatiquement */}
-      <div className="flex-1 flex flex-col min-h-screen w-0 min-w-0">
+      {/* 2. CONTENEUR PRINCIPAL - hauteur d'écran, seul le contenu défile */}
+      <div className="flex-1 flex flex-col h-screen w-0 min-w-0">
         {/* Header supérieur avec menu déroulant */}
         <header className="border-b bg-white px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center sticky top-0 z-30 shadow-sm">
           {/* Bouton Hamburger visible uniquement sur mobile */}
@@ -430,9 +426,11 @@ export default function Layout() {
           </div>
         </header>
 
-        {/* Corps de la page - RESPONSIVE */}
-        <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-7xl w-full mx-auto">
-          <Outlet />
+        {/* Corps de la page - seul cet espace défile */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
+          <div className="max-w-7xl w-full mx-auto">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

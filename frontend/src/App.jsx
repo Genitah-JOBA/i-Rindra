@@ -8,6 +8,7 @@ import MonProjet from "./pages/MonProjet";
 import Projets from './pages/Projets';
 import Taches from './pages/Taches';
 import ProjetDetail from './pages/ProjetDetail';
+import Membres from './pages/Membres';
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
         <Route path="projets" element={<Projets />} />
         <Route path="projets/:id" element={<ProjetDetail />} />
         <Route path="taches" element={<Taches />} />
+        <Route path="membres" element={<Membres />} />
       </Route>
 
       {/* Espace client (cloisonné) */}
