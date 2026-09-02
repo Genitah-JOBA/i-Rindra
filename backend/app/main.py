@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import auth, projets, taches, dashboard, client, fichiers
+from app.routers import auth, projets, taches, dashboard, client, fichiers, utilisateurs
 from app.core.database import engine, Base
 import app.models
 
@@ -16,7 +16,9 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    # Autorise n'importe quel port localhost/127.0.0.1 en développement
+    # (Vite peut basculer sur 5174, 5175… si 5173 est déjà pris).
+    allow_origin_regex=r"http://(localhost|127\.0\.0\.1):\d+",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -29,6 +31,7 @@ app.include_router(taches.router)
 app.include_router(dashboard.router)
 app.include_router(client.router)
 app.include_router(fichiers.router)
+app.include_router(utilisateurs.router)
 
 @app.on_event("startup")
 async def init_db():

@@ -81,9 +81,16 @@ export default function Login() {
           : location.state?.from?.pathname || "/";
       navigate(destination, { replace: true });
     } catch (err) {
-      setErreur(
-        err.response?.data?.detail || "Email ou mot de passe incorrect."
-      );
+      if (!err.response) {
+        // Pas de réponse = serveur injoignable ou CORS (souvent : backend éteint)
+        setErreur(
+          "Impossible de joindre le serveur. Vérifiez que le backend est démarré (http://localhost:8000)."
+        );
+      } else if (err.response.status === 401) {
+        setErreur("Email ou mot de passe incorrect.");
+      } else {
+        setErreur(err.response.data?.detail || "Une erreur est survenue.");
+      }
     } finally {
       setEnCours(false);
     }
@@ -263,7 +270,7 @@ export default function Login() {
         {/* COLONNE DROITE : panneau de marque (masqué en mobile) */}
         <div className="relative hidden flex-col items-center justify-center bg-[#3B3B3B] p-12 text-center md:flex border">
           <img
-            src="/.png"
+            src="/logo2.png"
             alt="Logo i-Rindra"
             className="mb-6 w-56 max-w-full text-white"
           />

@@ -95,7 +95,7 @@ export default function Layout() {
         {/* Logo avec bouton de fermeture sur mobile */}
         <div className="p-4 border-b border-slate-600 flex justify-between items-center">
           <img
-            src="/logo.png" 
+            src="/logo2.png"
             alt="Logo i-Rindra"
             className="h-12 w-auto"
           />

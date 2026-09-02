@@ -52,6 +52,13 @@ from app.schemas.fichier import (
     FichierListResponse,
 )
 
+from app.schemas.utilisateur import (
+    UtilisateurBase,
+    UtilisateurCreate,
+    UtilisateurUpdate,
+    UtilisateurResponse,
+)
+
 __all__ = [
     # Projets
     "ProjetBase",
@@ -94,4 +101,9 @@ __all__ = [
     "FichierCreate",
     "FichierResponse",
     "FichierListResponse",
+    # Utilisateurs
+    "UtilisateurBase",
+    "UtilisateurCreate",
+    "UtilisateurUpdate",
+    "UtilisateurResponse",
 ]

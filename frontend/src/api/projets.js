@@ -1,5 +1,5 @@
 // src/api/projets.js
-import api from './client'; // Import depuis votre client.js
+import api from './client';
 
 export const projetsService = {
   // Liste des projets
@@ -11,6 +11,12 @@ export const projetsService = {
   // Détail d'un projet
   get: async (id) => {
     const response = await api.get(`/projets/${id}`);
+    return response.data;
+  },
+
+  // Membres d'un projet
+  getMembres: async (id) => {
+    const response = await api.get(`/projets/${id}/membres`);
     return response.data;
   },
 

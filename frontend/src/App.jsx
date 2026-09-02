@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import MonProjet from "./pages/MonProjet";
 import Projets from './pages/Projets';
 import Taches from './pages/Taches';
+import ProjetDetail from './pages/ProjetDetail';
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
         {/* Ajout d'une route pour les détails d'un projet (à venir) */}
         <Route path="projets/:id" element={<Projets />} />
         <Route path="taches" element={<Taches />} />
+        <Route path="projets/:id" element={<ProjetDetail />} />
       </Route>
 
       {/* Espace client (cloisonné) */}
