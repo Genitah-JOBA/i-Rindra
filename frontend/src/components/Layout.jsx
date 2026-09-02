@@ -141,7 +141,7 @@ export default function Layout() {
           {/* === SECTION INTERNE (Direction + Équipe) === */}
           {estInterne && (
             <>
-              {/* Projets - Maintenant vers la vraie page */}
+              {/* Projets */}
               <NavLink to="/projets" className={lienClass}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 flex-shrink-0">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.06-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
@@ -149,17 +149,13 @@ export default function Layout() {
                 Projets
               </NavLink>
 
-              {/* Tâches - en développement */}
-              <LienPlaceholder 
-                className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors rounded-md text-white hover:bg-slate-600 opacity-75`}
-                titre="Tâches"
-              >
+              {/* ✅ TÂCHES - MAINTENANT UN VRAI LIEN VERS LA PAGE */}
+              <NavLink to="/taches" className={lienClass}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 flex-shrink-0">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 Tâches
-                <span className="ml-auto text-[10px] bg-yellow-500/20 text-yellow-300 px-2 py-0.5 rounded-full flex-shrink-0">Bientôt</span>
-              </LienPlaceholder>
+              </NavLink>
 
               {/* Séparateur */}
               <div className="my-3 border-t border-slate-600"></div>
