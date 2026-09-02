@@ -227,7 +227,7 @@ export default function Projets() {
         </div>
         <button
           onClick={() => setModalOuvert(true)}
-          className="mt-2 sm:mt-0 flex items-center gap-2 px-4 py-2 bg-[#63B23E] text-white text-sm rounded-md hover:bg-[#3F894E] transition-colors"
+          className="mt-2 sm:mt-0 flex items-center gap-2 px-4 py-2 bg-[#63B23E] text-white text-sm hover:bg-[#3F894E] transition-colors"
         >
           <PlusIcon className="w-4 h-4" />
           Nouveau projet
@@ -236,19 +236,19 @@ export default function Projets() {
 
       {/* Statistiques */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4 mb-6">
-        <div className="bg-white rounded-lg border border-slate-200 p-3 md:p-4 shadow-sm">
+        <div className="bg-white border border-slate-200 p-3 md:p-4 shadow-sm">
           <p className="text-xs text-slate-500 uppercase tracking-wider">Total</p>
           <p className="text-xl md:text-2xl font-bold text-slate-900">{stats.total}</p>
         </div>
-        <div className="bg-white rounded-lg border border-slate-200 p-3 md:p-4 shadow-sm">
+        <div className="bg-white border border-slate-200 p-3 md:p-4 shadow-sm">
           <p className="text-xs text-slate-500 uppercase tracking-wider">En cours</p>
           <p className="text-xl md:text-2xl font-bold text-blue-600">{stats.enCours}</p>
         </div>
-        <div className="bg-white rounded-lg border border-slate-200 p-3 md:p-4 shadow-sm">
+        <div className="bg-white border border-slate-200 p-3 md:p-4 shadow-sm">
           <p className="text-xs text-slate-500 uppercase tracking-wider">Terminés</p>
           <p className="text-xl md:text-2xl font-bold text-green-600">{stats.termines}</p>
         </div>
-        <div className="bg-white rounded-lg border border-slate-200 p-3 md:p-4 shadow-sm">
+        <div className="bg-white border border-slate-200 p-3 md:p-4 shadow-sm">
           <p className="text-xs text-slate-500 uppercase tracking-wider">En retard</p>
           <p className="text-xl md:text-2xl font-bold text-red-600">{stats.enRetard}</p>
         </div>
@@ -261,7 +261,7 @@ export default function Projets() {
             <button
               key={s.id}
               onClick={() => handleStatutClick(s.id)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
+              className={`px-3 py-1.5 text-xs font-medium rounded-[2px] transition-colors ${
                 filtreStatut === s.id
                   ? s.color + " ring-2 ring-offset-1 ring-slate-300"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -282,7 +282,7 @@ export default function Projets() {
               value={rechercheLocale}
               onChange={(e) => setRechercheLocale(e.target.value)}
               placeholder="Rechercher..."
-              className="w-48 sm:w-56 pl-8 pr-8 py-1.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+              className="w-48 sm:w-56 pl-8 pr-8 py-1.5 text-sm border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
             />
             <SearchIcon className="w-4 h-4 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
             {rechercheLocale && (
@@ -326,7 +326,7 @@ export default function Projets() {
               {projetsFiltres.map((projet) => (
                 <div
                   key={projet.id}
-                  className="group rounded-lg border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer hover:border-[#63B23E]"
+                  className="group border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer hover:border-[#63B23E]"
                   onClick={() => window.location.href = `/projets/${projet.id}`}
                 >
                   <div className="mb-2 flex items-start justify-between gap-2">
