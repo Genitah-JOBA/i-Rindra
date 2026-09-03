@@ -53,7 +53,7 @@ class ProjetListResponse(BaseModel):
     id: int
     nom: str
     client_id: int
-    responsable_id: int
+    responsable_id: Optional[int] = None
     statut_sante: StatutSanteEnum
     avancement_pct: float
     archive: bool

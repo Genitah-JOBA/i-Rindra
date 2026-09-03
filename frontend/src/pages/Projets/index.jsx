@@ -127,7 +127,7 @@ export default function Projets() {
             setFormErreur("");
             setModalOuvert(true);
           }}
-          className="rounded-lg bg-[#00B2A0] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#074E56]"
+          className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#074E56]"
         >
           + Nouveau projet
         </button>
@@ -137,7 +137,7 @@ export default function Projets() {
       {erreur && <p className="text-red-600">{erreur}</p>}
 
       {!loading && !erreur && projets.length === 0 && (
-        <div className="rounded-lg border border-dashed p-10 text-center text-slate-500">
+        <div className="border border-dashed p-10 text-center text-slate-500">
           Aucun projet. Cliquez sur « Nouveau projet » pour commencer.
         </div>
       )}
@@ -148,13 +148,13 @@ export default function Projets() {
           <div
             key={p.id}
             onClick={() => navigate(`/projets/${p.id}`)}
-            className="group relative cursor-pointer rounded-lg border bg-white p-4 shadow-sm transition hover:shadow-md"
+            className="group relative cursor-pointer border bg-white p-4 shadow-sm transition hover:shadow-md"
           >
             {/* Bouton supprimer (apparaît au survol) */}
             <button
               onClick={(e) => supprimer(p, e)}
               title="Supprimer le projet"
-              className="absolute right-2 top-2 rounded p-1 text-slate-300 opacity-0 transition hover:bg-red-50 hover:text-red-600 group-hover:opacity-100"
+              className="absolute right-2 top-2 p-1 text-slate-300 opacity-0 transition hover:bg-red-50 hover:text-red-600 group-hover:opacity-100"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
@@ -164,7 +164,7 @@ export default function Projets() {
             <div className="mb-2 flex items-start justify-between gap-2 pr-6">
               <h2 className="font-semibold text-slate-900">{p.nom}</h2>
               <span
-                className={`shrink-0 rounded px-2 py-0.5 text-xs font-medium ${
+                className={`shrink-0 px-2 py-0.5 text-xs font-medium ${
                   couleurStatut[p.statut_sante] || "bg-slate-100 text-slate-700"
                 }`}
               >
@@ -174,7 +174,7 @@ export default function Projets() {
             <p className="mb-3 text-xs text-slate-500">
               Client : {nomClient(p.client_id)}
             </p>
-            <div className="mb-1 h-2 w-full overflow-hidden rounded bg-slate-100">
+            <div className="mb-1 h-2 w-full overflow-hidden bg-slate-100">
               <div
                 className="h-full bg-[#00B2A0]"
                 style={{ width: `${p.avancement_pct || 0}%` }}
@@ -188,7 +188,7 @@ export default function Projets() {
       {/* Modal création */}
       {modalOuvert && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
+          <div className="w-full max-w-lg bg-white p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-bold text-slate-900">Nouveau projet</h2>
               <button
@@ -200,7 +200,7 @@ export default function Projets() {
             </div>
 
             {formErreur && (
-              <div className="mb-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+              <div className="mb-3 bg-red-50 px-3 py-2 text-sm text-red-700">
                 {formErreur}
               </div>
             )}
@@ -214,7 +214,7 @@ export default function Projets() {
                   name="nom"
                   value={form.nom}
                   onChange={handleChange}
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
+                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
                   placeholder="Site vitrine…"
                 />
               </div>
@@ -228,7 +228,7 @@ export default function Projets() {
                   value={form.description}
                   onChange={handleChange}
                   rows={2}
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
+                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
                 />
               </div>
 
@@ -241,7 +241,7 @@ export default function Projets() {
                     name="client_id"
                     value={form.client_id}
                     onChange={handleChange}
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
                   >
                     <option value="">— Choisir —</option>
                     {clients.map((c) => (
@@ -260,7 +260,7 @@ export default function Projets() {
                     name="responsable_id"
                     value={form.responsable_id}
                     onChange={handleChange}
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
                   >
                     <option value="">— Choisir —</option>
                     {responsables.map((r) => (
@@ -282,7 +282,7 @@ export default function Projets() {
                     name="date_debut"
                     value={form.date_debut}
                     onChange={handleChange}
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
                   />
                 </div>
                 <div>
@@ -294,7 +294,7 @@ export default function Projets() {
                     name="date_fin_prevue"
                     value={form.date_fin_prevue}
                     onChange={handleChange}
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
                   />
                 </div>
               </div>
@@ -309,14 +309,14 @@ export default function Projets() {
                 <button
                   type="button"
                   onClick={() => setModalOuvert(false)}
-                  className="rounded-md border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                  className="border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={enCours}
-                  className="rounded-md bg-[#00B2A0] px-4 py-2 text-sm font-semibold text-white hover:bg-[#074E56] disabled:opacity-50"
+                  className="bg-[#00B2A0] px-4 py-2 text-sm font-semibold text-white hover:bg-[#074E56] disabled:opacity-50"
                 >
                   {enCours ? "Création…" : "Créer"}
                 </button>
