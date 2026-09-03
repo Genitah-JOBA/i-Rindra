@@ -170,7 +170,7 @@ export default function ProjetDetail() {
           {membres.map((m) => (
             <li key={m.id} className="flex items-center justify-between py-3">
               <div>
-                <p className="font-medium text-slate-800">
+                <p className="font-medium text-slate-800 py-1">
                   {m.prenom} {m.nom}
                   {m.est_responsable && (
                     <span className="ml-2 bg-[#00B2A0]/10 px-2 py-0.5 text-xs font-medium text-[#00B2A0]">
@@ -229,9 +229,9 @@ export default function ProjetDetail() {
           <button
             type="submit"
             disabled={ajoutEnCours || disponibles.length === 0}
-            className="bg-[#00B2A0] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#074E56] disabled:opacity-50"
+            className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#074E56] disabled:opacity-50"
           >
-            {ajoutEnCours ? "Ajout…" : "Ajouter"}
+            {ajoutEnCours ? "Ajout…" : " + Ajouter"}
           </button>
         </form>
         {ajoutErreur && <p className="mt-2 text-sm text-red-600">{ajoutErreur}</p>}

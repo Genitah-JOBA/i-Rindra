@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import NotificationBell from "./NotificationBell";
 import 'animate.css';
 
 // Fonction pour les liens actifs
@@ -314,9 +315,13 @@ export default function Layout() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             </svg>
           </button>
+          {/* Cloche de notifications */}
+          <div className="ml-auto">
+            <NotificationBell />
+          </div>
 
           {/* Profil avec menu déroulant */}
-          <div className="relative ml-auto" ref={profilMenuRef}>
+          <div className="relative" ref={profilMenuRef}>
             <button
               onClick={toggleProfilMenu}
               className="flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#63B23E]"

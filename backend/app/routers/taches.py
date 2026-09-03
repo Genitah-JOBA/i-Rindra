@@ -14,6 +14,7 @@ from app.core.security import decode_access_token
 from app.routers.auth import oauth2_scheme, get_current_user_id, get_current_user_role
 from app.routers.projets import check_projet_access, check_direction_or_chef_projet
 from app.models.projet import Projet
+from app.services import notifications as notif_service
 from app.models.tache import Tache, StatutTache, PrioriteTache
 from app.models.tache import CommentaireTache
 from app.models.saisie_temps import SaisieTemps
@@ -317,7 +318,26 @@ async def update_tache_statut(
     
     # 6. Met à jour l'avancement du projet
     await update_projet_avancement(tache.projet_id, db)
-    
+
+    # 7. Notifications d'avancement : direction + client + membres (sauf l'auteur)
+    res_p = await db.execute(select(Projet).where(Projet.id == tache.projet_id))
+    projet = res_p.scalar_one_or_none()
+    destinataires = await notif_service.ids_direction(db)
+    destinataires += await notif_service.ids_membres_projet(db, tache.projet_id)
+    if projet:
+        destinataires += await notif_service.ids_clients_du_projet(db, projet.client_id)
+    destinataires = [d for d in destinataires if d != current_user_id]
+    labels = {"a_faire": "À faire", "en_cours": "En cours", "en_revue": "En revue", "termine": "Terminé"}
+    statut_txt = labels.get(nouveau_statut.value, nouveau_statut.value)
+    await notif_service.notifier(
+        db,
+        destinataires,
+        "tache_avancement",
+        f"Tâche « {tache.titre} » déplacée vers « {statut_txt} »",
+        "/taches",
+    )
+    await db.commit()
+
     return TacheResponse.model_validate(tache)
 
 @router.patch("/{tache_id}/affectation", response_model=TacheResponse)

@@ -13,6 +13,7 @@ from app.models.projet import Projet, StatutSante
 from app.models.client import Client
 from app.models.utilisateur import Utilisateur, RoleUtilisateur
 from app.models.projet import ProjetMembre
+from app.services import notifications as notif_service
 from app.schemas.projet import ProjetCreate, ProjetUpdate, ProjetResponse, ProjetListResponse
 from app.schemas.membre import (
     MembreCreate,
@@ -249,7 +250,19 @@ async def create_projet(
     )
     db.add(membre)
     await db.commit()
-    
+
+    # Notifications : direction (admin) + client du projet
+    destinataires = await notif_service.ids_direction(db)
+    destinataires += await notif_service.ids_clients_du_projet(db, new_projet.client_id)
+    await notif_service.notifier(
+        db,
+        destinataires,
+        "projet_cree",
+        f"Nouveau projet : « {new_projet.nom} »",
+        f"/projets/{new_projet.id}",
+    )
+    await db.commit()
+
     return ProjetResponse.model_validate(new_projet)
 
 @router.put("/{projet_id}", response_model=ProjetResponse)
@@ -421,7 +434,17 @@ async def ajouter_membre(
     db.add(nouveau_membre)
     await db.commit()
     await db.refresh(nouveau_membre)
-    
+
+    # Notifie le membre qu'il a été affecté au projet
+    await notif_service.notifier(
+        db,
+        [nouveau_membre.utilisateur_id],
+        "membre_ajoute",
+        f"Vous avez été affecté au projet « {projet.nom} »",
+        f"/projets/{projet.id}",
+    )
+    await db.commit()
+
     # 6. Retourne la réponse
     return MembreResponse(
         id=nouveau_membre.id,

@@ -7,6 +7,7 @@ from app.models.tache import Tache, StatutTache, PrioriteTache, CommentaireTache
 from app.models.saisie_temps import SaisieTemps
 from app.models.jalon import Jalon
 from app.models.fichier import Fichier
+from app.models.notification import Notification
 
 __all__ = [
     "Utilisateur",
@@ -22,4 +23,5 @@ __all__ = [
     "SaisieTemps",
     "Jalon",
     "Fichier",
+    "Notification",
 ]

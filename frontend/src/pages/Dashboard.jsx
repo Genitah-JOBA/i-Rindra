@@ -614,7 +614,7 @@ function ProjectCard({ projet }) {
           {projet.nom || 'Sans nom'}
         </h2>
         <span
-          className={`flex items-center gap-0.5 sm:gap-1 rounded-full px-1.5 sm:px-2.5 py-0.5 text-[10px] sm:text-xs font-medium whitespace-nowrap flex-shrink-0 ${
+          className={`flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2.5 py-0.5 text-[10px] sm:text-xs font-medium whitespace-nowrap flex-shrink-0 ${
             couleurStatut[projet.statut_sante] || "bg-slate-100 text-slate-700"
           }`}
         >
@@ -632,9 +632,9 @@ function ProjectCard({ projet }) {
         </div>
       )}
 
-      <div className="mb-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+      <div className="mb-1 h-1.5 w-full overflow-hidden bg-slate-100">
         <div
-          className={`h-full rounded-full transition-all duration-500 ${
+          className={`h-full transition-all duration-500 ${
             (projet.avancement_pct || 0) >= 80
               ? "bg-green-500"
               : (projet.avancement_pct || 0) >= 40
