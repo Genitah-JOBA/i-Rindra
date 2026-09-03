@@ -148,7 +148,7 @@ export default function ProjetDetail() {
         </div>
         <div className="mt-4">
           <Link
-            to="/taches"
+            to={`/taches?projet=${id}`}
             className="text-sm font-medium text-[#00B2A0] hover:underline"
           >
             Voir les tâches (Kanban) →

@@ -334,7 +334,7 @@ async def update_tache_statut(
         destinataires,
         "tache_avancement",
         f"Tâche « {tache.titre} » déplacée vers « {statut_txt} »",
-        "/taches",
+        f"/taches?projet={tache.projet_id}",
     )
     await db.commit()
 

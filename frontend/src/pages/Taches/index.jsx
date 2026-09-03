@@ -1,5 +1,6 @@
 // src/pages/Taches/index.jsx — Kanban des tâches d'un projet (RF-11 à RF-15).
 import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { tachesService } from "../../api/taches";
 import { projetsService } from "../../api/projets";
 
@@ -18,6 +19,10 @@ const couleurPriorite = {
 };
 
 export default function Taches() {
+  // Projet ciblé via l'URL, ex: /taches?projet=5 (depuis une fiche projet ou une notification)
+  const [searchParams] = useSearchParams();
+  const projetParam = searchParams.get("projet");
+
   const [projets, setProjets] = useState([]);
   const [projetId, setProjetId] = useState("");
   const [membres, setMembres] = useState([]);
@@ -36,18 +41,30 @@ export default function Taches() {
   const [creation, setCreation] = useState(false);
   const [formErreur, setFormErreur] = useState("");
 
-  // 1) Charger la liste des projets au montage
+  // 1) Charger la liste des projets au montage (présélectionne le projet de l'URL si présent)
   useEffect(() => {
     projetsService
       .list()
       .then((data) => {
         setProjets(data || []);
-        if (data && data.length > 0) setProjetId(String(data[0].id));
+        setProjetId((prev) => {
+          if (prev) return prev;
+          if (projetParam && (data || []).some((p) => String(p.id) === String(projetParam))) {
+            return String(projetParam);
+          }
+          return data && data.length > 0 ? String(data[0].id) : "";
+        });
       })
       .catch((err) =>
         setErreur(err.response?.data?.detail || "Erreur de chargement des projets.")
       );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Réagit si on arrive sur /taches?projet=X vers un autre projet (ex: clic sur une notification)
+  useEffect(() => {
+    if (projetParam) setProjetId(String(projetParam));
+  }, [projetParam]);
 
   // 2) Charger tâches + membres quand le projet change
   const chargerTaches = useCallback(async () => {
