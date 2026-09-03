@@ -4,6 +4,7 @@ import { utilisateursService } from "../api/utilisateurs";
 import { useAuth } from "../auth/AuthContext";
 
 const couleurRole = {
+  admin: "bg-rose-100 text-rose-700",
   direction: "bg-purple-100 text-purple-700",
   equipe: "bg-blue-100 text-blue-700",
   client: "bg-amber-100 text-amber-700",
@@ -21,7 +22,7 @@ const FORM_VIDE = {
 
 export default function Membres() {
   const { user } = useAuth();
-  const estDirection = user?.role === "direction";
+  const estGestion = user?.role === "admin" || user?.role === "direction";
 
   const [utilisateurs, setUtilisateurs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -150,7 +151,7 @@ export default function Membres() {
             placeholder="Rechercher…"
             className="border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
           />
-          {estDirection && (
+          {estGestion && (
             <button
               onClick={ouvrirAjout}
               className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#074E56]"
@@ -198,7 +199,7 @@ export default function Membres() {
                   </span>
                 )}
               </div>
-              {estDirection && (
+              {estGestion && (
                 <div className="mt-3 flex justify-end gap-2 border-t pt-2">
                   <button
                     onClick={() => ouvrirEdition(u)}
@@ -288,6 +289,7 @@ export default function Membres() {
                     onChange={(e) => setForm({ ...form, role: e.target.value })}
                     className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
                   >
+                    <option value="admin">Admin</option>
                     <option value="direction">Direction</option>
                     <option value="equipe">Équipe</option>
                   </select>

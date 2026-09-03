@@ -38,7 +38,7 @@ async def check_direction_or_chef_projet(role: str = Depends(get_current_user_ro
     """
     Vérifie que l'utilisateur est direction ou chef de projet.
     """
-    if role not in ["direction", "equipe"]:
+    if role not in ["admin", "direction", "equipe"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Seul la direction ou le chef de projet peut effectuer cette action"
@@ -81,7 +81,7 @@ async def check_projet_access(
     client_id = payload.get("client_id")
 
     # 3. Vérifie les permissions selon le rôle
-    if role == "direction":
+    if role in ("direction", "admin"):
         return projet
     
     elif role == "equipe":
@@ -142,7 +142,7 @@ async def get_projets(
     
     query = select(Projet)
     
-    if role == "direction":
+    if role in ("direction", "admin"):
         pass
     elif role == "equipe":
         subquery_membre = select(ProjetMembre.projet_id).where(
@@ -219,7 +219,7 @@ async def create_projet(
             detail="Responsable non trouvé"
         )
     
-    if responsable.role != RoleUtilisateur.DIRECTION:
+    if responsable.role not in (RoleUtilisateur.DIRECTION, RoleUtilisateur.ADMIN):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Le responsable d'un projet doit être un membre de la direction."
@@ -565,7 +565,7 @@ async def retirer_membre(
         )
     
     # 3. Empêche de se retirer soi-même (sauf si direction)
-    if utilisateur_id == current_user_id and role != "direction":
+    if utilisateur_id == current_user_id and role not in ("direction", "admin"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Vous ne pouvez pas vous retirer vous-même du projet. Contactez un chef de projet."

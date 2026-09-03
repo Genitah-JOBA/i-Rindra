@@ -17,10 +17,10 @@ export default function App() {
       {/* Page publique */}
       <Route path="/login" element={<Login />} />
 
-      {/* Espace interne (direction + équipe) */}
+      {/* Espace interne (admin + direction + équipe) */}
       <Route
         element={
-          <ProtectedRoute roles={["direction", "equipe"]}>
+          <ProtectedRoute roles={["admin", "direction", "equipe"]}>
             <Layout />
           </ProtectedRoute>
         }

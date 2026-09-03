@@ -15,9 +15,11 @@ from app.models.projet import ProjetMembre
 # ---------- Récupération des destinataires ----------
 
 async def ids_direction(db: AsyncSession):
-    """Tous les comptes de la direction (= l'admin)."""
+    """Tous les comptes de pilotage : admin ET direction."""
     res = await db.execute(
-        select(Utilisateur.id).where(Utilisateur.role == RoleUtilisateur.DIRECTION)
+        select(Utilisateur.id).where(
+            Utilisateur.role.in_([RoleUtilisateur.ADMIN, RoleUtilisateur.DIRECTION])
+        )
     )
     return [r[0] for r in res.all()]
 

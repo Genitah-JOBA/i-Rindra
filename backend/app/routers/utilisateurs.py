@@ -21,7 +21,7 @@ router = APIRouter(prefix="/utilisateurs", tags=["Utilisateurs"])
 
 async def _direction_seulement(role: str = Depends(get_current_user_role)):
     """Réserve l'action à la direction."""
-    if role != "direction":
+    if role not in ("direction", "admin"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Action réservée à la direction",

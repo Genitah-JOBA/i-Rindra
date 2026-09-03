@@ -191,7 +191,7 @@ async def update_tache(
     await check_projet_access(tache.projet_id, db=db, token=None)
     
     # 3. Vérifie les permissions
-    if role not in ["direction", "equipe"]:
+    if role not in ["admin", "direction", "equipe"]:
         # Les membres de l'équipe peuvent seulement modifier le statut et le responsable
         if tache_data.statut is None and tache_data.responsable_id is None:
             raise HTTPException(

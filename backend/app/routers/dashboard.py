@@ -52,7 +52,7 @@ async def get_dashboard_projets(
     query = select(Projet).where(Projet.archive == False)
     
     # 3. Filtrage selon le rôle
-    if role == "direction":
+    if role in ("direction", "admin"):
         # Direction : voit tout
         pass
     
@@ -145,7 +145,7 @@ async def get_dashboard_indicateurs(
     # 2. Filtre les projets accessibles
     query_projets = select(Projet).where(Projet.archive == False)
     
-    if role == "direction":
+    if role in ("direction", "admin"):
         pass
     elif role == "equipe":
         subquery_membre = select(ProjetMembre.projet_id).where(
@@ -261,7 +261,7 @@ async def get_dashboard_alertes(
     # 2. Filtre les projets accessibles
     query_projets = select(Projet).where(Projet.archive == False)
     
-    if role == "direction":
+    if role in ("direction", "admin"):
         pass
     elif role == "equipe":
         subquery_membre = select(ProjetMembre.projet_id).where(

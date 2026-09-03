@@ -10,6 +10,7 @@ const couleurStatut = {
 };
 
 const couleurRoleGlobal = {
+  admin: "bg-rose-100 text-rose-700",
   direction: "bg-purple-100 text-purple-700",
   equipe: "bg-blue-100 text-blue-700",
   client: "bg-amber-100 text-amber-700",

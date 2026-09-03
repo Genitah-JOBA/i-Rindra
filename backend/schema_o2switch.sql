@@ -1,7 +1,7 @@
 -- Schema i-Rindra pour o2switch (PostgreSQL) -- genere depuis les modeles SQLAlchemy
 -- A importer dans phpPgAdmin (base sc3hara3701_i_rindra)
 
-CREATE TYPE role_utilisateur AS ENUM ('direction', 'equipe', 'client');
+CREATE TYPE role_utilisateur AS ENUM ('admin', 'direction', 'equipe', 'client');
 CREATE TYPE statut_sante AS ENUM ('vert', 'orange', 'rouge');
 CREATE TYPE statut_tache AS ENUM ('a_faire', 'en_cours', 'en_revue', 'termine');
 CREATE TYPE priorite_tache AS ENUM ('basse', 'moyenne', 'haute');
@@ -49,8 +49,8 @@ CREATE TABLE projet (
 	FOREIGN KEY(client_id) REFERENCES client (id) ON DELETE RESTRICT, 
 	FOREIGN KEY(responsable_id) REFERENCES utilisateur (id) ON DELETE SET NULL
 );
-CREATE INDEX ix_projet_client_id ON projet (client_id);
 CREATE INDEX ix_projet_responsable_id ON projet (responsable_id);
+CREATE INDEX ix_projet_client_id ON projet (client_id);
 CREATE INDEX ix_projet_id ON projet (id);
 CREATE TABLE notification (
 	id SERIAL NOT NULL, 
@@ -63,8 +63,8 @@ CREATE TABLE notification (
 	PRIMARY KEY (id), 
 	FOREIGN KEY(destinataire_id) REFERENCES utilisateur (id) ON DELETE CASCADE
 );
-CREATE INDEX ix_notification_destinataire_id ON notification (destinataire_id);
 CREATE INDEX ix_notification_id ON notification (id);
+CREATE INDEX ix_notification_destinataire_id ON notification (destinataire_id);
 CREATE TABLE projet_membre (
 	id SERIAL NOT NULL, 
 	projet_id INTEGER NOT NULL, 
@@ -75,9 +75,9 @@ CREATE TABLE projet_membre (
 	FOREIGN KEY(projet_id) REFERENCES projet (id) ON DELETE CASCADE, 
 	FOREIGN KEY(utilisateur_id) REFERENCES utilisateur (id) ON DELETE CASCADE
 );
-CREATE INDEX ix_projet_membre_projet_id ON projet_membre (projet_id);
-CREATE INDEX ix_projet_membre_utilisateur_id ON projet_membre (utilisateur_id);
 CREATE INDEX ix_projet_membre_id ON projet_membre (id);
+CREATE INDEX ix_projet_membre_utilisateur_id ON projet_membre (utilisateur_id);
+CREATE INDEX ix_projet_membre_projet_id ON projet_membre (projet_id);
 CREATE TABLE tache (
 	id SERIAL NOT NULL, 
 	projet_id INTEGER NOT NULL, 
@@ -125,8 +125,8 @@ CREATE TABLE fichier (
 	FOREIGN KEY(projet_id) REFERENCES projet (id) ON DELETE CASCADE, 
 	FOREIGN KEY(televerse_par) REFERENCES utilisateur (id) ON DELETE SET NULL
 );
-CREATE INDEX ix_fichier_id ON fichier (id);
 CREATE INDEX ix_fichier_projet_id ON fichier (projet_id);
+CREATE INDEX ix_fichier_id ON fichier (id);
 CREATE TABLE commentaire_tache (
 	id SERIAL NOT NULL, 
 	tache_id INTEGER NOT NULL, 

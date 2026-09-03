@@ -49,8 +49,10 @@ export default function Projets() {
       ]);
       setProjets(projetsData || []);
       setClients(clientsData || []);
-      // Le responsable d'un projet est obligatoirement un membre de la direction
-      setResponsables((usersData || []).filter((u) => u.role === "direction"));
+      // Le responsable d'un projet est un membre du pilotage (admin ou direction)
+      setResponsables(
+        (usersData || []).filter((u) => u.role === "direction" || u.role === "admin")
+      );
     } catch (err) {
       setErreur(err.response?.data?.detail || "Erreur de chargement des projets.");
     } finally {
@@ -235,7 +237,7 @@ export default function Projets() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-slate-700">
-                    Client *
+                    Entrepise client *
                   </label>
                   <select
                     name="client_id"

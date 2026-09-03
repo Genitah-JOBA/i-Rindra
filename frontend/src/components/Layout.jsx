@@ -45,8 +45,9 @@ export default function Layout() {
     navigate("/login");
   };
 
-  const estInterne = user?.role === "direction" || user?.role === "equipe";
-  const estDirection = user?.role === "direction";
+  const estAdmin = user?.role === "admin"; // seul rôle avec accès à l'argent (finance)
+  const estGestion = user?.role === "admin" || user?.role === "direction"; // pilotage
+  const estInterne = estGestion || user?.role === "equipe";
   const estClient = user?.role === "client";
 
   // Basculer le menu profil
@@ -185,7 +186,7 @@ export default function Layout() {
               </NavLink>
 
               {/* === SECTION IA === */}
-              {estDirection && (
+              {estGestion && (
                 <>
                   <div className="my-3 border-t border-slate-600"></div>
                   <div className="mb-2">
@@ -208,8 +209,8 @@ export default function Layout() {
                 </>
               )}
 
-              {/* === SECTION FINANCIÈRE (Direction uniquement) === */}
-              {estDirection && (
+              {/* === SECTION FINANCIÈRE (ADMIN uniquement — accès à l'argent) === */}
+              {estAdmin && (
                 <>
                   <div className="my-3 border-t border-slate-600"></div>
                   <div className="mb-2">
