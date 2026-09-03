@@ -145,7 +145,7 @@ export default function Taches() {
         <select
           value={projetId}
           onChange={(e) => setProjetId(e.target.value)}
-          className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
+          className="border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
         >
           {projets.length === 0 && <option value="">Aucun projet</option>}
           {projets.map((p) => (
@@ -162,7 +162,7 @@ export default function Taches() {
       {projetId && (
         <form
           onSubmit={creerTache}
-          className="mb-6 flex flex-col gap-3 rounded-lg border bg-white p-4 shadow-sm md:flex-row md:items-end"
+          className="mb-6 flex flex-col gap-3 border bg-white p-4 shadow-sm md:flex-row md:items-end"
         >
           <div className="flex-1">
             <label className="mb-1 block text-xs font-medium text-slate-600">Titre</label>
@@ -171,7 +171,7 @@ export default function Taches() {
               value={form.titre}
               onChange={(e) => setForm({ ...form, titre: e.target.value })}
               placeholder="Nouvelle tâche…"
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
+              className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
             />
           </div>
           <div>
@@ -179,7 +179,7 @@ export default function Taches() {
             <select
               value={form.priorite}
               onChange={(e) => setForm({ ...form, priorite: e.target.value })}
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
+              className="border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
             >
               <option value="basse">Basse</option>
               <option value="moyenne">Moyenne</option>
@@ -191,7 +191,7 @@ export default function Taches() {
             <select
               value={form.responsable_id}
               onChange={(e) => setForm({ ...form, responsable_id: e.target.value })}
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
+              className="border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
             >
               <option value="">— Aucun —</option>
               {membres.map((m) => (
@@ -208,13 +208,13 @@ export default function Taches() {
               type="date"
               value={form.echeance}
               onChange={(e) => setForm({ ...form, echeance: e.target.value })}
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
+              className="border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
             />
           </div>
           <button
             type="submit"
             disabled={creation}
-            className="rounded-md bg-[#00B2A0] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#074E56] disabled:opacity-50"
+            className="bg-[#00B2A0] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#074E56] disabled:opacity-50"
           >
             {creation ? "Ajout…" : "Ajouter"}
           </button>
@@ -229,10 +229,10 @@ export default function Taches() {
           {COLONNES.map((col) => {
             const tachesCol = taches.filter((t) => t.statut === col.statut);
             return (
-              <div key={col.statut} className="rounded-lg bg-slate-100 p-3">
+              <div key={col.statut} className="bg-slate-100 p-3">
                 <h2 className="mb-3 flex items-center justify-between text-sm font-semibold text-slate-700">
                   {col.label}
-                  <span className="rounded-full bg-white px-2 text-xs text-slate-500">
+                  <span className="bg-white px-2 text-xs text-slate-500">
                     {tachesCol.length}
                   </span>
                 </h2>
@@ -241,11 +241,11 @@ export default function Taches() {
                   {tachesCol.map((t) => {
                     const idx = indexStatut(t.statut);
                     return (
-                      <div key={t.id} className="rounded-md border bg-white p-3 shadow-sm">
+                      <div key={t.id} className="border bg-white p-3 shadow-sm">
                         <div className="mb-1 flex items-start justify-between gap-2">
                           <p className="text-sm font-medium text-slate-800">{t.titre}</p>
                           <span
-                            className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium ${
+                            className={`shrink-0 px-1.5 py-0.5 text-[10px] font-medium ${
                               couleurPriorite[t.priorite] || "bg-slate-100 text-slate-600"
                             }`}
                           >
@@ -261,7 +261,7 @@ export default function Taches() {
                             <button
                               disabled={idx === 0}
                               onClick={() => deplacer(t, COLONNES[idx - 1].statut)}
-                              className="rounded border px-1.5 text-xs text-slate-500 hover:bg-slate-50 disabled:opacity-30"
+                              className="border px-1.5 text-xs text-slate-500 hover:bg-slate-50 disabled:opacity-30"
                               title="Reculer"
                             >
                               ←
@@ -269,7 +269,7 @@ export default function Taches() {
                             <button
                               disabled={idx === COLONNES.length - 1}
                               onClick={() => deplacer(t, COLONNES[idx + 1].statut)}
-                              className="rounded border px-1.5 text-xs text-slate-500 hover:bg-slate-50 disabled:opacity-30"
+                              className="border px-1.5 text-xs text-slate-500 hover:bg-slate-50 disabled:opacity-30"
                               title="Avancer"
                             >
                               →
