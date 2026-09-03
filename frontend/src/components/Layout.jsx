@@ -6,7 +6,7 @@ import 'animate.css';
 
 // Fonction pour les liens actifs
 const lienClass = ({ isActive }) =>
-  `flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors rounded-md ${
+  `flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${
     isActive ? "bg-[#63B23E] text-white" : "text-white hover:bg-slate-600"
   }`;
 
@@ -102,7 +102,7 @@ export default function Layout() {
           {/* Bouton de fermeture visible uniquement sur mobile */}
           <button
             onClick={() => setSidebarOpen(false)}
-            className="md:hidden p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-600 transition-colors"
+            className="md:hidden p-1.5 text-slate-400 hover:text-white hover:bg-slate-600 transition-colors"
             aria-label="Fermer le menu"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
@@ -187,14 +187,14 @@ export default function Layout() {
 
                   {/* Assistant IA - en développement */}
                   <LienPlaceholder 
-                    className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors rounded-md text-white hover:bg-slate-600 opacity-75`}
+                    className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-white hover:bg-slate-600 opacity-75`}
                     titre="Assistant IA"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 flex-shrink-0">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
                     </svg>
                     Assistant IA
-                    <span className="ml-auto text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full flex-shrink-0">IA</span>
+                    <span className="ml-auto text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 flex-shrink-0">IA</span>
                   </LienPlaceholder>
                 </>
               )}
@@ -214,25 +214,25 @@ export default function Layout() {
                     href="https://b-estimation.example.com" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors rounded-md text-white hover:bg-slate-600"
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-white hover:bg-slate-600"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 flex-shrink-0">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h12m-12 2.25h12M3.375 4.5h17.25c.621 0 1.125.504 1.125 1.125v12.75c0 .621-.504 1.125-1.125 1.125H3.375a1.125 1.125 0 01-1.125-1.125V5.625c0-.621.504-1.125 1.125-1.125z" />
                     </svg>
                     Devis & Estimations
-                    <span className="ml-auto text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full flex-shrink-0">↗</span>
+                    <span className="ml-auto text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 flex-shrink-0">↗</span>
                   </a>
 
                   {/* Facturation - en développement */}
                   <LienPlaceholder 
-                    className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors rounded-md text-white hover:bg-slate-600 opacity-75`}
+                    className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-white hover:bg-slate-600 opacity-75`}
                     titre="Facturation"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 flex-shrink-0">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
                     </svg>
                     Facturation
-                    <span className="ml-auto text-[10px] bg-yellow-500/20 text-yellow-300 px-2 py-0.5 rounded-full flex-shrink-0">Bientôt</span>
+                    <span className="ml-auto text-[10px] bg-yellow-500/20 text-yellow-300 px-2 py-0.5 flex-shrink-0">Bientôt</span>
                   </LienPlaceholder>
                 </>
               )}
@@ -254,13 +254,13 @@ export default function Layout() {
                 href="https://e-resaka.example.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors rounded-md text-white hover:bg-slate-600"
+                className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-white hover:bg-slate-600"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 flex-shrink-0">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 8.511v.011m0 4.5v.011m0-4.5h-4.5m4.5 0h-4.5m0-4.5h4.5m0 0h-4.5m0 4.5h4.5m0 4.5h-4.5m4.5 0h-4.5m-9 4.5h4.5m-4.5 0h-4.5m4.5 0v-4.5m0 4.5V12m0-4.5h4.5m-4.5 0h-4.5m4.5 0v4.5m0 0h-4.5m0 4.5h4.5" />
                 </svg>
                 Chat (e-resaka)
-                <span className="ml-auto text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full flex-shrink-0">↗</span>
+                <span className="ml-auto text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 flex-shrink-0">↗</span>
               </a>
 
               {/* Devis - redirection B-estimation */}
@@ -268,25 +268,25 @@ export default function Layout() {
                 href="https://b-estimation.example.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors rounded-md text-white hover:bg-slate-600"
+                className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-white hover:bg-slate-600"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 flex-shrink-0">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h12m-12 2.25h12M3.375 4.5h17.25c.621 0 1.125.504 1.125 1.125v12.75c0 .621-.504 1.125-1.125 1.125H3.375a1.125 1.125 0 01-1.125-1.125V5.625c0-.621.504-1.125 1.125-1.125z" />
                 </svg>
                 Mes devis
-                <span className="ml-auto text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full flex-shrink-0">↗</span>
+                <span className="ml-auto text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 flex-shrink-0">↗</span>
               </a>
 
               {/* Documents - en développement */}
               <LienPlaceholder 
-                className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors rounded-md text-white hover:bg-slate-600 opacity-75`}
+                className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-white hover:bg-slate-600 opacity-75`}
                 titre="Documents"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 flex-shrink-0">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                 </svg>
                 Documents
-                <span className="ml-auto text-[10px] bg-yellow-500/20 text-yellow-300 px-2 py-0.5 rounded-full flex-shrink-0">Bientôt</span>
+                <span className="ml-auto text-[10px] bg-yellow-500/20 text-yellow-300 px-2 py-0.5 flex-shrink-0">Bientôt</span>
               </LienPlaceholder>
             </>
           )}
@@ -307,7 +307,7 @@ export default function Layout() {
           {/* Bouton Hamburger visible uniquement sur mobile */}
           <button 
             onClick={() => setSidebarOpen(true)}
-            className="md:hidden p-2 rounded-md text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#63B23E] transition-colors"
+            className="md:hidden p-2 text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#63B23E] transition-colors"
             aria-label="Ouvrir le menu"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -319,7 +319,7 @@ export default function Layout() {
           <div className="relative ml-auto" ref={profilMenuRef}>
             <button
               onClick={toggleProfilMenu}
-              className="flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 rounded-md hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#63B23E]"
+              className="flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#63B23E]"
               aria-expanded={profilMenuOpen}
               aria-haspopup="true"
             >
@@ -343,7 +343,7 @@ export default function Layout() {
 
             {/* Menu déroulant */}
             {profilMenuOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white shadow-lg border border-slate-200 py-1 z-50 animate__animated animate__fadeInDown rounded-lg">
+              <div className="absolute right-0 mt-2 w-56 bg-white shadow-lg border border-slate-200 py-1 z-50 animate__animated animate__fadeInDown">
                 {/* Information utilisateur */}
                 <div className="px-4 py-3 border-b border-slate-100">
                   <p className="text-sm font-medium text-slate-900">
@@ -367,7 +367,7 @@ export default function Layout() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                   Paramètres
-                  <span className="ml-auto text-[10px] bg-yellow-500/20 text-yellow-600 px-2 py-0.5 rounded-full">Bientôt</span>
+                  <span className="ml-auto text-[10px] bg-yellow-500/20 text-yellow-600 px-2 py-0.5">Bientôt</span>
                 </button>
 
                 {/* Langue avec sous-menu */}
@@ -383,7 +383,7 @@ export default function Layout() {
                         : "text-slate-700 hover:bg-slate-50"
                     }`}
                   >
-                    <img src="/france.png" alt="Drapeau France" className="w-5 h-5 object-cover rounded" />
+                    <img src="/france.png" alt="Drapeau France" className="w-5 h-5 object-cover" />
                     Français
                     {langue === "Français" && (
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 ml-auto text-[#63B23E]">
@@ -399,7 +399,7 @@ export default function Layout() {
                         : "text-slate-700 hover:bg-slate-50"
                     }`}
                   >
-                    <img src="/RU.png" alt="Drapeau UK" className="w-5 h-5 object-cover rounded" />
+                    <img src="/RU.png" alt="Drapeau UK" className="w-5 h-5 object-cover" />
                     English
                     {langue === "English" && (
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 ml-auto text-[#63B23E]">
