@@ -9,6 +9,7 @@ import Projets from './pages/Projets';
 import Taches from './pages/Taches';
 import ProjetDetail from './pages/ProjetDetail';
 import Membres from './pages/Membres';
+import Clients from './pages/Clients';
 
 export default function App() {
   return (
@@ -29,6 +30,7 @@ export default function App() {
         <Route path="projets/:id" element={<ProjetDetail />} />
         <Route path="taches" element={<Taches />} />
         <Route path="membres" element={<Membres />} />
+        <Route path="clients" element={<Clients />} />
       </Route>
 
       {/* Espace client (cloisonné) */}
