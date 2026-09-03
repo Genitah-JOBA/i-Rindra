@@ -147,12 +147,12 @@ export default function Membres() {
             value={recherche}
             onChange={(e) => setRecherche(e.target.value)}
             placeholder="Rechercher…"
-            className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
+            className="border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
           />
           {estDirection && (
             <button
               onClick={ouvrirAjout}
-              className="rounded-md bg-[#00B2A0] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#074E56]"
+              className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#074E56]"
             >
               + Ajouter
             </button>
@@ -166,9 +166,9 @@ export default function Membres() {
       {!loading && !erreur && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtres.map((u) => (
-            <div key={u.id} className="rounded-lg border bg-white p-4 shadow-sm">
+            <div key={u.id} className="border bg-white p-4 shadow-sm">
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#00B2A0]/10 text-sm font-semibold text-[#00B2A0]">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center bg-[#00B2A0]/10 text-sm font-semibold text-[#00B2A0]">
                   {initiales(u)}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -180,19 +180,19 @@ export default function Membres() {
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <span
-                  className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${
+                  className={`px-1.5 py-0.5 text-[10px] font-medium ${
                     couleurRole[u.role] || "bg-slate-100 text-slate-600"
                   }`}
                 >
                   {u.role}
                 </span>
                 {u.metier && (
-                  <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600">
+                  <span className="bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600">
                     {u.metier}
                   </span>
                 )}
                 {!u.actif && (
-                  <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] text-red-600">
+                  <span className="bg-red-100 px-1.5 py-0.5 text-[10px] text-red-600">
                     inactif
                   </span>
                 )}
@@ -224,7 +224,7 @@ export default function Membres() {
       {/* MODAL AJOUT / ÉDITION */}
       {modalOuvert && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+          <div className="w-full max-w-md bg-white p-6 shadow-xl">
             <h2 className="mb-4 text-lg font-semibold text-slate-900">
               {editionId ? "Modifier le membre" : "Ajouter un membre"}
             </h2>
@@ -237,7 +237,7 @@ export default function Membres() {
                     value={form.prenom}
                     onChange={(e) => setForm({ ...form, prenom: e.target.value })}
                     required
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
                   />
                 </div>
                 <div>
@@ -247,7 +247,7 @@ export default function Membres() {
                     value={form.nom}
                     onChange={(e) => setForm({ ...form, nom: e.target.value })}
                     required
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
                   />
                 </div>
               </div>
@@ -259,7 +259,7 @@ export default function Membres() {
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   required
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
+                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
                 />
               </div>
 
@@ -274,7 +274,7 @@ export default function Membres() {
                     onChange={(e) => setForm({ ...form, mot_de_passe: e.target.value })}
                     required
                     minLength={4}
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
                   />
                 </div>
               )}
@@ -285,7 +285,7 @@ export default function Membres() {
                   <select
                     value={form.role}
                     onChange={(e) => setForm({ ...form, role: e.target.value })}
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
                   >
                     <option value="direction">Direction</option>
                     <option value="equipe">Équipe</option>
@@ -298,7 +298,7 @@ export default function Membres() {
                     value={form.metier}
                     onChange={(e) => setForm({ ...form, metier: e.target.value })}
                     placeholder="développeur, graphiste…"
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
                   />
                 </div>
               </div>
@@ -320,14 +320,14 @@ export default function Membres() {
                 <button
                   type="button"
                   onClick={() => setModalOuvert(false)}
-                  className="rounded-md border border-slate-300 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                  className="border border-slate-300 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={enregistrement}
-                  className="rounded-md bg-[#00B2A0] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#074E56] disabled:opacity-50"
+                  className="bg-[#00B2A0] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#074E56] disabled:opacity-50"
                 >
                   {enregistrement ? "Enregistrement…" : editionId ? "Enregistrer" : "Ajouter"}
                 </button>
