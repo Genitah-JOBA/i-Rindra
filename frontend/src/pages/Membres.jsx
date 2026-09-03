@@ -327,7 +327,7 @@ export default function Membres() {
                 <button
                   type="submit"
                   disabled={enregistrement}
-                  className="bg-[#00B2A0] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#074E56] disabled:opacity-50"
+                  className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#074E56] disabled:opacity-50"
                 >
                   {enregistrement ? "Enregistrement…" : editionId ? "Enregistrer" : "Ajouter"}
                 </button>
