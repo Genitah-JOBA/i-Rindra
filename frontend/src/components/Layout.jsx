@@ -97,7 +97,7 @@ export default function Layout() {
           <img
             src="/.png"
             alt="Logo i-Rindra"
-            className="h-12 w-auto"
+            className="h-12 w-auto text-white"
           />
           {/* Bouton de fermeture visible uniquement sur mobile */}
           <button
