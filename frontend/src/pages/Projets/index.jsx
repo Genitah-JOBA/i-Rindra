@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { projetsService } from "../../api/projets";
 import { clientsService } from "../../api/client";
 import { utilisateursService } from "../../api/utilisateurs";
+import { useLang } from "../../i18n/LangContext";
 
 const couleurStatut = {
   vert: "bg-green-100 text-green-800",
@@ -22,6 +23,7 @@ const FORM_VIDE = {
 
 export default function Projets() {
   const navigate = useNavigate();
+  const { t } = useLang();
 
   const [projets, setProjets] = useState([]);
   const [clients, setClients] = useState([]);
@@ -51,10 +53,14 @@ export default function Projets() {
       setClients(clientsData || []);
       // Le responsable d'un projet est un membre du pilotage (admin ou direction)
       setResponsables(
-        (usersData || []).filter((u) => u.role === "direction" || u.role === "admin")
+        (usersData || []).filter(
+          (u) => u.role === "direction" || u.role === "admin",
+        ),
       );
     } catch (err) {
-      setErreur(err.response?.data?.detail || "Erreur de chargement des projets.");
+      setErreur(
+        err.response?.data?.detail || "Erreur de chargement des projets.",
+      );
     } finally {
       setLoading(false);
     }
@@ -86,7 +92,7 @@ export default function Projets() {
       await charger();
     } catch (err) {
       setFormErreur(
-        err.response?.data?.detail || "Erreur lors de la création du projet."
+        err.response?.data?.detail || "Erreur lors de la création du projet.",
       );
     } finally {
       setEnCours(false);
@@ -97,7 +103,7 @@ export default function Projets() {
     e.stopPropagation(); // ne pas déclencher la navigation vers la fiche
     if (
       !window.confirm(
-        `Supprimer définitivement le projet « ${projet.nom} » ?\nSes tâches, jalons et membres seront aussi supprimés.`
+        `Supprimer définitivement le projet « ${projet.nom} » ?\nSes tâches, jalons et membres seront aussi supprimés.`,
       )
     )
       return;
@@ -106,7 +112,8 @@ export default function Projets() {
       setProjets((prev) => prev.filter((p) => p.id !== projet.id));
     } catch (err) {
       alert(
-        err.response?.data?.detail || "Erreur lors de la suppression du projet."
+        err.response?.data?.detail ||
+          "Erreur lors de la suppression du projet.",
       );
     }
   };
@@ -118,9 +125,11 @@ export default function Projets() {
       {/* En-tête */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Projets</h1>
+          <h1 className="text-2xl font-bold text-slate-900">
+            {t("projets.titre")}
+          </h1>
           <p className="text-sm text-slate-500">
-            {projets.length} projet{projets.length > 1 ? "s" : ""}
+            {projets.length} {t("projets.compteur")}
           </p>
         </div>
         <button
@@ -131,16 +140,16 @@ export default function Projets() {
           }}
           className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#074E56]"
         >
-          + Nouveau projet
+          {t("projets.nouveau")}
         </button>
       </div>
 
-      {loading && <p className="text-slate-500">Chargement…</p>}
+      {loading && <p className="text-slate-500">{t("common.chargement")}</p>}
       {erreur && <p className="text-red-600">{erreur}</p>}
 
       {!loading && !erreur && projets.length === 0 && (
         <div className="border border-dashed p-10 text-center text-slate-500">
-          Aucun projet. Cliquez sur « Nouveau projet » pour commencer.
+          {t("projets.vide")}
         </div>
       )}
 
@@ -158,8 +167,19 @@ export default function Projets() {
               title="Supprimer le projet"
               className="absolute right-2 top-2 p-1 text-slate-300 opacity-0 transition hover:bg-red-50 hover:text-red-600 group-hover:opacity-100"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                />
               </svg>
             </button>
 
@@ -174,7 +194,7 @@ export default function Projets() {
               </span>
             </div>
             <p className="mb-3 text-xs text-slate-500">
-              Client : {nomClient(p.client_id)}
+              {t("projets.client")} : {nomClient(p.client_id)}
             </p>
             <div className="mb-1 h-2 w-full overflow-hidden bg-slate-100">
               <div
@@ -182,7 +202,9 @@ export default function Projets() {
                 style={{ width: `${p.avancement_pct || 0}%` }}
               />
             </div>
-            <p className="text-xs text-slate-500">{p.avancement_pct || 0}% terminé</p>
+            <p className="text-xs text-slate-500">
+              {p.avancement_pct || 0}% {t("dash.termine")}
+            </p>
           </div>
         ))}
       </div>
@@ -192,7 +214,9 @@ export default function Projets() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="w-full max-w-lg bg-white p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-slate-900">Nouveau projet</h2>
+              <h2 className="text-lg font-bold text-slate-900">
+                {t("projets.modal.titre")}
+              </h2>
               <button
                 onClick={() => setModalOuvert(false)}
                 className="text-slate-400 hover:text-slate-700"
@@ -210,7 +234,7 @@ export default function Projets() {
             <form onSubmit={handleSubmit} className="space-y-3">
               <div>
                 <label className="mb-1 block text-sm font-medium text-slate-700">
-                  Nom *
+                  {t("projets.form.nom")} *
                 </label>
                 <input
                   name="nom"
@@ -223,7 +247,7 @@ export default function Projets() {
 
               <div>
                 <label className="mb-1 block text-sm font-medium text-slate-700">
-                  Description
+                  {t("projets.form.description")}
                 </label>
                 <textarea
                   name="description"
@@ -237,7 +261,7 @@ export default function Projets() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-slate-700">
-                    Entrepise client *
+                    {t("projets.form.client")} *
                   </label>
                   <select
                     name="client_id"
@@ -256,7 +280,7 @@ export default function Projets() {
 
                 <div>
                   <label className="mb-1 block text-sm font-medium text-slate-700">
-                    Responsable *
+                    {t("projets.form.responsable")} *
                   </label>
                   <select
                     name="responsable_id"
@@ -277,7 +301,7 @@ export default function Projets() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-slate-700">
-                    Début
+                    {t("projets.form.dateDebut")}
                   </label>
                   <input
                     type="date"
@@ -289,7 +313,7 @@ export default function Projets() {
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-slate-700">
-                    Fin prévue
+                    {t("projets.form.dateFin")}
                   </label>
                   <input
                     type="date"
@@ -313,14 +337,16 @@ export default function Projets() {
                   onClick={() => setModalOuvert(false)}
                   className="border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
                 >
-                  Annuler
+                  {t("common.annuler")}
                 </button>
                 <button
                   type="submit"
                   disabled={enCours}
                   className="bg-[#00B2A0] px-4 py-2 text-sm font-semibold text-white hover:bg-[#074E56] disabled:opacity-50"
                 >
-                  {enCours ? "Création…" : "Créer"}
+                  {enCours
+                    ? t("common.enregistrement")
+                    : t("projets.form.creer")}
                 </button>
               </div>
             </form>

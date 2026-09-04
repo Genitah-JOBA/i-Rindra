@@ -5,11 +5,12 @@ import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import MonProjet from "./pages/MonProjet";
-import Projets from './pages/Projets';
-import Taches from './pages/Taches';
-import ProjetDetail from './pages/ProjetDetail';
-import Membres from './pages/Membres';
-import Clients from './pages/Clients';
+import Projets from "./pages/Projets";
+import Taches from "./pages/Taches";
+import ProjetDetail from "./pages/ProjetDetail";
+import Membres from "./pages/Membres";
+import Clients from "./pages/Clients";
+import Parametres from "./pages/Parametres";
 
 export default function App() {
   return (
@@ -43,6 +44,17 @@ export default function App() {
         }
       >
         <Route index element={<MonProjet />} />
+      </Route>
+
+      {/* Paramètres — accessible à tous les rôles connectés */}
+      <Route
+        element={
+          <ProtectedRoute roles={["admin", "direction", "equipe", "client"]}>
+            <Layout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/parametres" element={<Parametres />} />
       </Route>
 
       {/* Tout le reste -> accueil */}

@@ -14,8 +14,12 @@ export default function ProjetStats({ stats }) {
           key={item.label}
           className="bg-white rounded-lg border border-slate-200 p-3 md:p-4 shadow-sm"
         >
-          <p className="text-xs text-slate-500 uppercase tracking-wider">{item.label}</p>
-          <p className={`text-xl md:text-2xl font-bold ${item.color}`}>{item.value}</p>
+          <p className="text-xs text-slate-500 uppercase tracking-wider">
+            {item.label}
+          </p>
+          <p className={`text-xl md:text-2xl font-bold ${item.color}`}>
+            {item.value}
+          </p>
         </div>
       ))}
     </div>

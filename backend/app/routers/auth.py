@@ -135,10 +135,81 @@ async def get_current_user(
         client_id=user.client_id,
     )
 
+class UpdateMeRequest(BaseModel):
+    nom: Optional[str] = None
+    prenom: Optional[str] = None
+    email: Optional[EmailStr] = None
+    # Changement de mot de passe (optionnel) : les deux champs requis ensemble
+    mot_de_passe_actuel: Optional[str] = None
+    nouveau_mot_de_passe: Optional[str] = None
+
+
+@router.put("/me", response_model=UserResponse)
+async def update_me(
+    data: UpdateMeRequest,
+    token: str = Depends(oauth2_scheme),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Met à jour les informations du **compte connecté** (nom, prénom, email,
+    et éventuellement le mot de passe). Chaque utilisateur ne modifie que lui-même.
+    """
+    payload = decode_access_token(token)
+    user_id = int(payload.get("sub"))
+
+    result = await db.execute(select(Utilisateur).where(Utilisateur.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Utilisateur non trouvé")
+
+    # Email : vérifier l'unicité si modifié
+    if data.email and data.email != user.email:
+        r = await db.execute(select(Utilisateur).where(Utilisateur.email == data.email))
+        if r.scalar_one_or_none():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Cet email est déjà utilisé"
+            )
+        user.email = data.email
+
+    if data.nom:
+        user.nom = data.nom
+    if data.prenom:
+        user.prenom = data.prenom
+
+    # Changement de mot de passe : vérifier l'ancien
+    if data.nouveau_mot_de_passe:
+        if not data.mot_de_passe_actuel or not verify_password(
+            data.mot_de_passe_actuel, user.mot_de_passe_hash
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Le mot de passe actuel est incorrect.",
+            )
+        if len(data.nouveau_mot_de_passe) < 4:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Le nouveau mot de passe est trop court (4 caractères minimum).",
+            )
+        user.mot_de_passe_hash = hash_password(data.nouveau_mot_de_passe)
+
+    await db.commit()
+    await db.refresh(user)
+
+    return UserResponse(
+        id=user.id,
+        email=user.email,
+        nom=user.nom,
+        prenom=user.prenom,
+        role=user.role.value,
+        actif=user.actif,
+        client_id=user.client_id,
+    )
+
+
 @router.post("/logout")
 async def logout():
     """
-    Déconnexion côté client : 
+    Déconnexion côté client :
     Le token est invalidé côté frontend (on le supprime du localStorage).
     Ici, on ne fait rien car l'API est stateless (JWT).
     """

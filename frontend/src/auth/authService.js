@@ -32,4 +32,10 @@ export const authService = {
     const { data } = await api.get("/auth/me");
     return data; // { id, email, nom, prenom, role, actif, client_id }
   },
+
+  // Mise à jour de MON profil (nom, prénom, email, mot de passe).
+  async updateMe(data) {
+    const res = await api.put("/auth/me", data);
+    return res.data; // utilisateur mis à jour
+  },
 };

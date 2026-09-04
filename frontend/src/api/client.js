@@ -25,13 +25,13 @@ api.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export const clientsService = {
   // Liste des clients
   list: async () => {
-    const response = await api.get('/clients/');
+    const response = await api.get("/clients/");
     return response.data;
   },
 
@@ -43,7 +43,7 @@ export const clientsService = {
 
   // Créer un client
   create: async (data) => {
-    const response = await api.post('/clients/', data);
+    const response = await api.post("/clients/", data);
     return response.data;
   },
 

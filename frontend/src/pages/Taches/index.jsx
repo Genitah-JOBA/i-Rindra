@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { tachesService } from "../../api/taches";
 import { projetsService } from "../../api/projets";
+import { useLang } from "../../i18n/LangContext";
 
 // Les 4 colonnes du Kanban = les statuts du backend
 const COLONNES = [
@@ -22,6 +23,8 @@ export default function Taches() {
   // Projet ciblé via l'URL, ex: /taches?projet=5 (depuis une fiche projet ou une notification)
   const [searchParams] = useSearchParams();
   const projetParam = searchParams.get("projet");
+  // 't' est déjà utilisé pour "tâche" dans le rendu -> on aliase la traduction en 'tr'
+  const { t: tr } = useLang();
 
   const [projets, setProjets] = useState([]);
   const [projetId, setProjetId] = useState("");
@@ -49,14 +52,19 @@ export default function Taches() {
         setProjets(data || []);
         setProjetId((prev) => {
           if (prev) return prev;
-          if (projetParam && (data || []).some((p) => String(p.id) === String(projetParam))) {
+          if (
+            projetParam &&
+            (data || []).some((p) => String(p.id) === String(projetParam))
+          ) {
             return String(projetParam);
           }
           return data && data.length > 0 ? String(data[0].id) : "";
         });
       })
       .catch((err) =>
-        setErreur(err.response?.data?.detail || "Erreur de chargement des projets.")
+        setErreur(
+          err.response?.data?.detail || "Erreur de chargement des projets.",
+        ),
       );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -79,7 +87,9 @@ export default function Taches() {
       setTaches(t || []);
       setMembres(m || []);
     } catch (err) {
-      setErreur(err.response?.data?.detail || "Erreur de chargement des tâches.");
+      setErreur(
+        err.response?.data?.detail || "Erreur de chargement des tâches.",
+      );
       setTaches([]);
     } finally {
       setLoading(false);
@@ -118,10 +128,18 @@ export default function Taches() {
           : null,
         echeance: form.echeance || null,
       });
-      setForm({ titre: "", description: "", priorite: "moyenne", responsable_id: "", echeance: "" });
+      setForm({
+        titre: "",
+        description: "",
+        priorite: "moyenne",
+        responsable_id: "",
+        echeance: "",
+      });
       await chargerTaches();
     } catch (err) {
-      setFormErreur(err.response?.data?.detail || "Erreur lors de la création.");
+      setFormErreur(
+        err.response?.data?.detail || "Erreur lors de la création.",
+      );
     } finally {
       setCreation(false);
     }
@@ -153,10 +171,10 @@ export default function Taches() {
     <div>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Tâches — Kanban</h1>
-          <p className="text-sm text-slate-500">
-            Organisez les tâches du projet par statut.
-          </p>
+          <h1 className="text-2xl font-bold text-slate-900">
+            {tr("taches.titre")}
+          </h1>
+          <p className="text-sm text-slate-500">{tr("taches.sousTitre")}</p>
         </div>
         {/* Sélecteur de projet */}
         <select
@@ -164,7 +182,9 @@ export default function Taches() {
           onChange={(e) => setProjetId(e.target.value)}
           className="border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
         >
-          {projets.length === 0 && <option value="">Aucun projet</option>}
+          {projets.length === 0 && (
+            <option value="">{tr("taches.aucunProjet")}</option>
+          )}
           {projets.map((p) => (
             <option key={p.id} value={p.id}>
               {p.nom}
@@ -182,35 +202,43 @@ export default function Taches() {
           className="mb-6 flex flex-col gap-3 border bg-white p-4 shadow-sm md:flex-row md:items-end"
         >
           <div className="flex-1">
-            <label className="mb-1 block text-xs font-medium text-slate-600">Titre</label>
+            <label className="mb-1 block text-xs font-medium text-slate-600">
+              {tr("taches.form.titre")}
+            </label>
             <input
               type="text"
               value={form.titre}
               onChange={(e) => setForm({ ...form, titre: e.target.value })}
-              placeholder="Nouvelle tâche…"
+              placeholder={tr("taches.form.placeholder")}
               className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-600">Priorité</label>
+            <label className="mb-1 block text-xs font-medium text-slate-600">
+              {tr("taches.form.priorite")}
+            </label>
             <select
               value={form.priorite}
               onChange={(e) => setForm({ ...form, priorite: e.target.value })}
               className="border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
             >
-              <option value="basse">Basse</option>
-              <option value="moyenne">Moyenne</option>
-              <option value="haute">Haute</option>
+              <option value="basse">{tr("priorite.basse")}</option>
+              <option value="moyenne">{tr("priorite.moyenne")}</option>
+              <option value="haute">{tr("priorite.haute")}</option>
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-600">Responsable</label>
+            <label className="mb-1 block text-xs font-medium text-slate-600">
+              {tr("taches.form.responsable")}
+            </label>
             <select
               value={form.responsable_id}
-              onChange={(e) => setForm({ ...form, responsable_id: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, responsable_id: e.target.value })
+              }
               className="border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
             >
-              <option value="">— Aucun —</option>
+              <option value="">{tr("common.aucun")}</option>
               {membres.map((m) => (
                 <option key={m.id} value={m.utilisateur_id}>
                   {m.prenom} {m.nom}
@@ -220,7 +248,9 @@ export default function Taches() {
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-600">Échéance</label>
+            <label className="mb-1 block text-xs font-medium text-slate-600">
+              {tr("taches.form.echeance")}
+            </label>
             <input
               type="date"
               value={form.echeance}
@@ -233,14 +263,16 @@ export default function Taches() {
             disabled={creation}
             className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#074E56] disabled:opacity-50"
           >
-            {creation ? "Ajout…" : " + Ajouter"}
+            {creation
+              ? tr("common.enregistrement")
+              : "+ " + tr("common.ajouter")}
           </button>
         </form>
       )}
       {formErreur && <p className="mb-4 text-sm text-red-600">{formErreur}</p>}
 
       {loading ? (
-        <p className="text-slate-500">Chargement des tâches…</p>
+        <p className="text-slate-500">{tr("common.chargement")}</p>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {COLONNES.map((col) => {
@@ -248,7 +280,7 @@ export default function Taches() {
             return (
               <div key={col.statut} className="bg-slate-100 p-3">
                 <h2 className="mb-3 flex items-center justify-between text-sm font-semibold text-slate-700">
-                  {col.label}
+                  {tr("kanban." + col.statut)}
                   <span className="bg-white px-2 text-xs text-slate-500">
                     {tachesCol.length}
                   </span>
@@ -260,24 +292,30 @@ export default function Taches() {
                     return (
                       <div key={t.id} className="border bg-white p-3 shadow-sm">
                         <div className="mb-1 flex items-start justify-between gap-2">
-                          <p className="text-sm font-medium text-slate-800">{t.titre}</p>
+                          <p className="text-sm font-medium text-slate-800">
+                            {t.titre}
+                          </p>
                           <span
                             className={`shrink-0 px-1.5 py-0.5 text-[10px] font-medium ${
-                              couleurPriorite[t.priorite] || "bg-slate-100 text-slate-600"
+                              couleurPriorite[t.priorite] ||
+                              "bg-slate-100 text-slate-600"
                             }`}
                           >
-                            {t.priorite}
+                            {tr("priorite." + t.priorite)}
                           </span>
                         </div>
                         <p className="mb-2 text-xs text-slate-500">
-                          {nomResponsable(t.responsable_id) || "Non assignée"}
+                          {nomResponsable(t.responsable_id) ||
+                            tr("taches.nonAssignee")}
                           {t.echeance && ` · ${t.echeance}`}
                         </p>
                         <div className="flex items-center justify-between">
                           <div className="flex gap-1">
                             <button
                               disabled={idx === 0}
-                              onClick={() => deplacer(t, COLONNES[idx - 1].statut)}
+                              onClick={() =>
+                                deplacer(t, COLONNES[idx - 1].statut)
+                              }
                               className="border px-1.5 text-xs text-slate-500 hover:bg-slate-50 disabled:opacity-30"
                               title="Reculer"
                             >
@@ -285,7 +323,9 @@ export default function Taches() {
                             </button>
                             <button
                               disabled={idx === COLONNES.length - 1}
-                              onClick={() => deplacer(t, COLONNES[idx + 1].statut)}
+                              onClick={() =>
+                                deplacer(t, COLONNES[idx + 1].statut)
+                              }
                               className="border px-1.5 text-xs text-slate-500 hover:bg-slate-50 disabled:opacity-30"
                               title="Avancer"
                             >
@@ -297,7 +337,7 @@ export default function Taches() {
                             className="text-xs text-slate-400 hover:text-red-600"
                             title="Supprimer"
                           >
-                            Supprimer
+                            {tr("common.supprimer")}
                           </button>
                         </div>
                       </div>

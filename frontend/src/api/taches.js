@@ -16,7 +16,10 @@ export const tachesService = {
 
   // Créer une tâche dans un projet
   create: async (projetId, tache) => {
-    const { data } = await api.post(`/taches/projets/${projetId}/taches`, tache);
+    const { data } = await api.post(
+      `/taches/projets/${projetId}/taches`,
+      tache,
+    );
     return data;
   },
 

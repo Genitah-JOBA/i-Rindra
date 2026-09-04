@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import { useLang } from "../i18n/LangContext";
 
 export default function Login() {
   const { login } = useAuth();
+  const { t } = useLang();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -14,7 +16,7 @@ export default function Login() {
   const [erreur, setErreur] = useState("");
   const [enCours, setEnCours] = useState(false);
   const [afficherMotDePasse, setAfficherMotDePasse] = useState(false);
-  
+
   // États pour la validation des champs
   const [emailTouche, setEmailTouche] = useState(false);
   const [motDePasseTouche, setMotDePasseTouche] = useState(false);
@@ -43,7 +45,9 @@ export default function Login() {
 
   // Obtenir les messages d'erreur
   const erreurEmail = emailTouche ? validerEmail(email) : "";
-  const erreurMotDePasse = motDePasseTouche ? validerMotDePasse(motDePasse) : "";
+  const erreurMotDePasse = motDePasseTouche
+    ? validerMotDePasse(motDePasse)
+    : "";
 
   // Vérifier si le formulaire est valide
   const estFormulaireValide = () => {
@@ -58,14 +62,14 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErreur("");
-    
+
     // Valider tous les champs avant soumission
     setEmailTouche(true);
     setMotDePasseTouche(true);
-    
+
     const emailErr = validerEmail(email);
     const mdpErr = validerMotDePasse(motDePasse);
-    
+
     if (emailErr || mdpErr) {
       setErreur("Veuillez corriger les erreurs du formulaire");
       return;
@@ -83,13 +87,11 @@ export default function Login() {
     } catch (err) {
       if (!err.response) {
         // Pas de réponse = serveur injoignable ou CORS (souvent : backend éteint)
-        setErreur(
-          "Impossible de joindre le serveur. Vérifiez que le backend est démarré (http://localhost:8000)."
-        );
+        setErreur(t("login.errServeur"));
       } else if (err.response.status === 401) {
-        setErreur("Email ou mot de passe incorrect.");
+        setErreur(t("login.errIdentifiants"));
       } else {
-        setErreur(err.response.data?.detail || "Une erreur est survenue.");
+        setErreur(err.response.data?.detail || t("login.errGeneric"));
       }
     } finally {
       setEnCours(false);
@@ -113,9 +115,11 @@ export default function Login() {
             className="mb-6 h-16 w-auto self-center md:hidden"
           />
 
-          <h1 className="mb-1 text-4xl font-bold text-slate-900 text-center py-2">CONNEXION</h1>
+          <h1 className="mb-1 text-4xl font-bold text-slate-900 text-center py-2">
+            {t("login.titre")}
+          </h1>
           <p className="mb-6 text-sm text-slate-500 text-center">
-            Accédez à votre espace i-Rindra.
+            {t("login.sousTitre")}
           </p>
 
           {erreur && (
@@ -129,13 +133,15 @@ export default function Login() {
               <label className="mb-1 text-sm font-medium text-slate-700">
                 Email <span className="text-red-500">*</span>
               </label>
-              <div className={`flex gap-1 block mb-2 w-full border px-3 py-2.5 text-sm transition focus:ring-2 ${
-                emailTouche && erreurEmail
-                  ? "border-red-500 focus:border-red-500 focus:ring-red-500/30"
-                  : emailTouche && !erreurEmail
-                  ? "border-green-500 focus:border-green-500 focus:ring-green-500/30"
-                  : "border-slate-300 focus:border-[#00B2A0] focus:ring-[#00B2A0]/30"
-              }`}>
+              <div
+                className={`flex gap-1 block mb-2 w-full border px-3 py-2.5 text-sm transition focus:ring-2 ${
+                  emailTouche && erreurEmail
+                    ? "border-red-500 focus:border-red-500 focus:ring-red-500/30"
+                    : emailTouche && !erreurEmail
+                      ? "border-green-500 focus:border-green-500 focus:ring-green-500/30"
+                      : "border-slate-300 focus:border-[#00B2A0] focus:ring-[#00B2A0]/30"
+                }`}
+              >
                 <img src="/adresse.png" alt="email" className="w-5" />
                 <input
                   type="email"
@@ -147,13 +153,23 @@ export default function Login() {
                   onBlur={() => setEmailTouche(true)}
                   required
                   autoComplete="email"
-                  placeholder="  vous@exemple.com"
+                  placeholder=" vous@exemple.com"
                   className="w-full bg-transparent outline-none"
                   minLength={5}
                 />
                 {emailTouche && !erreurEmail && email.length > 0 && (
-                  <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  <svg
+                    className="w-5 h-5 text-green-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
                 )}
               </div>
@@ -169,13 +185,15 @@ export default function Login() {
               <label className="mb-1 block text-sm font-medium text-slate-700">
                 Mot de passe <span className="text-red-500">*</span>
               </label>
-              <div className={`flex items-center gap-1 w-full border px-3 py-2.5 text-sm outline-none transition focus:ring-2 ${
-                motDePasseTouche && erreurMotDePasse
-                  ? "border-red-500 focus:border-red-500 focus:ring-red-500/30"
-                  : motDePasseTouche && !erreurMotDePasse
-                  ? "border-green-500 focus:border-green-500 focus:ring-green-500/30"
-                  : "border-slate-300 focus:border-[#00B2A0] focus:ring-[#00B2A0]/30"
-              }`}>
+              <div
+                className={`flex items-center gap-1 w-full border px-3 py-2.5 text-sm outline-none transition focus:ring-2 ${
+                  motDePasseTouche && erreurMotDePasse
+                    ? "border-red-500 focus:border-red-500 focus:ring-red-500/30"
+                    : motDePasseTouche && !erreurMotDePasse
+                      ? "border-green-500 focus:border-green-500 focus:ring-green-500/30"
+                      : "border-slate-300 focus:border-[#00B2A0] focus:ring-[#00B2A0]/30"
+                }`}
+              >
                 <img src="/fermer-a-cle.png" alt="email" className="w-6" />
                 <input
                   type={afficherMotDePasse ? "text" : "password"}
@@ -187,21 +205,37 @@ export default function Login() {
                   onBlur={() => setMotDePasseTouche(true)}
                   required
                   autoComplete="current-password"
-                  placeholder="  ••••••••"
+                  placeholder=" ••••••••"
                   className="w-full bg-transparent outline-none"
                   minLength={5}
                 />
-                {motDePasseTouche && !erreurMotDePasse && motDePasse.length > 0 && (
-                  <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
+                {motDePasseTouche &&
+                  !erreurMotDePasse &&
+                  motDePasse.length > 0 && (
+                    <svg
+                      className="w-5 h-5 text-green-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  )}
                 {/* Bouton pour afficher/masquer le mot de passe */}
                 <button
                   type="button"
                   onClick={toggleAfficherMotDePasse}
                   className="flex items-center justify-center p-1 text-slate-500 hover:text-slate-700 transition-colors"
-                  aria-label={afficherMotDePasse ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                  aria-label={
+                    afficherMotDePasse
+                      ? "Masquer le mot de passe"
+                      : "Afficher le mot de passe"
+                  }
                 >
                   {afficherMotDePasse ? (
                     <svg
@@ -250,7 +284,7 @@ export default function Login() {
             </div>
 
             <div className="block mx-auto text-right transition hover:text-[#ff0040] cursor-pointer text-[12px]">
-              Mot de passe oublié
+              {t("login.oubli")}
             </div>
 
             <button
@@ -262,7 +296,7 @@ export default function Login() {
                   : "bg-gray-400 cursor-not-allowed"
               }`}
             >
-              {enCours ? "Connexion…" : "Se connecter"}
+              {enCours ? t("login.connexion") : t("login.seConnecter")}
             </button>
           </form>
         </div>
@@ -275,11 +309,10 @@ export default function Login() {
             className="mb-6 w-56 max-w-full text-white"
           />
           <h2 className="text-xl font-semibold text-white">
-            Gestion de projets assistée par l'IA
+            {t("login.brandTitre")}
           </h2>
           <p className="mt-2 max-w-xs text-sm text-teal-100/80">
-            Centralisez vos projets, suivez l'avancement et laissez l'assistant
-            IA vous épauler.
+            {t("login.brandDesc")}
           </p>
         </div>
       </div>

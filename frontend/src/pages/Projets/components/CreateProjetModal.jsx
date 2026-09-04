@@ -4,8 +4,19 @@ import { projetsService } from "../../../api/projets";
 
 // Icône Fermer
 const CloseIcon = ({ className = "w-6 h-6" }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={2}
+    stroke="currentColor"
+    className={className}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M6 18L18 6M6 6l12 12"
+    />
   </svg>
 );
 
@@ -36,9 +47,17 @@ export default function CreateProjetModal({ isOpen, onClose, onProjetCree }) {
       const nouveauProjet = await projetsService.create(formData);
       onProjetCree(nouveauProjet);
       onClose();
-      setFormData({ nom: "", description: "", client: "", date_debut: "", date_fin: "" });
+      setFormData({
+        nom: "",
+        description: "",
+        client: "",
+        date_debut: "",
+        date_fin: "",
+      });
     } catch (err) {
-      setErreur(err.response?.data?.detail || "Erreur lors de la création du projet.");
+      setErreur(
+        err.response?.data?.detail || "Erreur lors de la création du projet.",
+      );
     } finally {
       setLoading(false);
     }
@@ -49,7 +68,9 @@ export default function CreateProjetModal({ isOpen, onClose, onProjetCree }) {
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto animate__animated animate__zoomIn">
         {/* En-tête */}
         <div className="flex items-center justify-between p-4 border-b border-slate-200">
-          <h2 className="text-lg font-semibold text-slate-900">Nouveau projet</h2>
+          <h2 className="text-lg font-semibold text-slate-900">
+            Nouveau projet
+          </h2>
           <button
             onClick={onClose}
             className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"

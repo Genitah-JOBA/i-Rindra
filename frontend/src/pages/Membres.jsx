@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { utilisateursService } from "../api/utilisateurs";
 import { useAuth } from "../auth/AuthContext";
+import { useLang } from "../i18n/LangContext";
 
 const couleurRole = {
   admin: "bg-rose-100 text-rose-700",
@@ -22,6 +23,7 @@ const FORM_VIDE = {
 
 export default function Membres() {
   const { user } = useAuth();
+  const { t } = useLang();
   const estGestion = user?.role === "admin" || user?.role === "direction";
 
   const [utilisateurs, setUtilisateurs] = useState([]);
@@ -43,7 +45,9 @@ export default function Membres() {
       // Membres = équipe interne uniquement (direction + équipe). Les clients ont leur propre page.
       setUtilisateurs((data || []).filter((u) => u.role !== "client"));
     } catch (err) {
-      setErreur(err.response?.data?.detail || "Erreur de chargement des membres.");
+      setErreur(
+        err.response?.data?.detail || "Erreur de chargement des membres.",
+      );
     } finally {
       setLoading(false);
     }
@@ -104,14 +108,17 @@ export default function Membres() {
       setModalOuvert(false);
       await charger();
     } catch (err) {
-      setFormErreur(err.response?.data?.detail || "Erreur lors de l'enregistrement.");
+      setFormErreur(
+        err.response?.data?.detail || "Erreur lors de l'enregistrement.",
+      );
     } finally {
       setEnregistrement(false);
     }
   };
 
   const supprimer = async (u) => {
-    if (!window.confirm(`Supprimer le compte de ${u.prenom} ${u.nom} ?`)) return;
+    if (!window.confirm(`Supprimer le compte de ${u.prenom} ${u.nom} ?`))
+      return;
     try {
       await utilisateursService.delete(u.id);
       setUtilisateurs((prev) => prev.filter((x) => x.id !== u.id));
@@ -138,17 +145,17 @@ export default function Membres() {
     <div>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Membres</h1>
-          <p className="text-sm text-slate-500">
-            Annuaire de l'équipe et de leurs métiers.
-          </p>
+          <h1 className="text-2xl font-bold text-slate-900">
+            {t("membres.titre")}
+          </h1>
+          <p className="text-sm text-slate-500">{t("membres.sousTitre")}</p>
         </div>
         <div className="flex gap-2">
           <input
             type="text"
             value={recherche}
             onChange={(e) => setRecherche(e.target.value)}
-            placeholder="Rechercher…"
+            placeholder={t("common.rechercher")}
             className="border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
           />
           {estGestion && (
@@ -156,13 +163,13 @@ export default function Membres() {
               onClick={ouvrirAjout}
               className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#074E56]"
             >
-              + Ajouter
+              + {t("common.ajouter")}
             </button>
           )}
         </div>
       </div>
 
-      {loading && <p className="text-slate-500">Chargement…</p>}
+      {loading && <p className="text-slate-500">{t("common.chargement")}</p>}
       {erreur && <p className="text-red-600">{erreur}</p>}
 
       {!loading && !erreur && (
@@ -195,7 +202,7 @@ export default function Membres() {
                 )}
                 {!u.actif && (
                   <span className="bg-red-100 px-1.5 py-0.5 text-[10px] text-red-600">
-                    inactif
+                    {t("common.inactif")}
                   </span>
                 )}
               </div>
@@ -205,20 +212,20 @@ export default function Membres() {
                     onClick={() => ouvrirEdition(u)}
                     className="text-xs text-slate-500 hover:text-[#00B2A0]"
                   >
-                    Modifier
+                    {t("common.modifier")}
                   </button>
                   <button
                     onClick={() => supprimer(u)}
                     className="text-xs text-slate-500 hover:text-red-600"
                   >
-                    Supprimer
+                    {t("common.supprimer")}
                   </button>
                 </div>
               )}
             </div>
           ))}
           {filtres.length === 0 && (
-            <p className="text-sm text-slate-500">Aucun membre trouvé.</p>
+            <p className="text-sm text-slate-500">{t("membres.vide")}</p>
           )}
         </div>
       )}
@@ -228,22 +235,30 @@ export default function Membres() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="w-full max-w-md bg-white p-6 shadow-xl">
             <h2 className="mb-4 text-lg font-semibold text-slate-900">
-              {editionId ? "Modifier le membre" : "Ajouter un membre"}
+              {editionId
+                ? t("membres.modal.edition")
+                : t("membres.modal.ajout")}
             </h2>
             <form onSubmit={enregistrer} className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-slate-600">Prénom</label>
+                  <label className="mb-1 block text-xs font-medium text-slate-600">
+                    {t("common.prenom")}
+                  </label>
                   <input
                     type="text"
                     value={form.prenom}
-                    onChange={(e) => setForm({ ...form, prenom: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, prenom: e.target.value })
+                    }
                     required
                     className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-slate-600">Nom</label>
+                  <label className="mb-1 block text-xs font-medium text-slate-600">
+                    {t("common.nom")}
+                  </label>
                   <input
                     type="text"
                     value={form.nom}
@@ -255,7 +270,9 @@ export default function Membres() {
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-medium text-slate-600">Email</label>
+                <label className="mb-1 block text-xs font-medium text-slate-600">
+                  {t("common.email")}
+                </label>
                 <input
                   type="email"
                   value={form.email}
@@ -273,7 +290,9 @@ export default function Membres() {
                   <input
                     type="password"
                     value={form.mot_de_passe}
-                    onChange={(e) => setForm({ ...form, mot_de_passe: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, mot_de_passe: e.target.value })
+                    }
                     required
                     minLength={4}
                     className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
@@ -283,7 +302,9 @@ export default function Membres() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-slate-600">Rôle</label>
+                  <label className="mb-1 block text-xs font-medium text-slate-600">
+                    {t("common.role")}
+                  </label>
                   <select
                     value={form.role}
                     onChange={(e) => setForm({ ...form, role: e.target.value })}
@@ -295,11 +316,15 @@ export default function Membres() {
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-slate-600">Métier</label>
+                  <label className="mb-1 block text-xs font-medium text-slate-600">
+                    {t("common.metier")}
+                  </label>
                   <input
                     type="text"
                     value={form.metier}
-                    onChange={(e) => setForm({ ...form, metier: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, metier: e.target.value })
+                    }
                     placeholder="développeur, graphiste…"
                     className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
                   />
@@ -311,13 +336,17 @@ export default function Membres() {
                   <input
                     type="checkbox"
                     checked={form.actif}
-                    onChange={(e) => setForm({ ...form, actif: e.target.checked })}
+                    onChange={(e) =>
+                      setForm({ ...form, actif: e.target.checked })
+                    }
                   />
-                  Compte actif
+                  {t("common.actif")}
                 </label>
               )}
 
-              {formErreur && <p className="text-sm text-red-600">{formErreur}</p>}
+              {formErreur && (
+                <p className="text-sm text-red-600">{formErreur}</p>
+              )}
 
               <div className="flex justify-end gap-2 pt-2">
                 <button
@@ -325,14 +354,18 @@ export default function Membres() {
                   onClick={() => setModalOuvert(false)}
                   className="border border-slate-300 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
                 >
-                  Annuler
+                  {t("common.annuler")}
                 </button>
                 <button
                   type="submit"
                   disabled={enregistrement}
                   className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#074E56] disabled:opacity-50"
                 >
-                  {enregistrement ? "Enregistrement…" : editionId ? "Enregistrer" : "Ajouter"}
+                  {enregistrement
+                    ? t("common.enregistrement")
+                    : editionId
+                      ? t("common.enregistrer")
+                      : t("common.ajouter")}
                 </button>
               </div>
             </form>

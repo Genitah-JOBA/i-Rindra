@@ -13,8 +13,9 @@ export default function MonProjet() {
       .then((res) => setProjet(res.data))
       .catch((err) =>
         setErreur(
-          err.response?.data?.detail || "Aucun projet trouvé pour votre compte."
-        )
+          err.response?.data?.detail ||
+            "Aucun projet trouvé pour votre compte.",
+        ),
       )
       .finally(() => setLoading(false));
   }, []);

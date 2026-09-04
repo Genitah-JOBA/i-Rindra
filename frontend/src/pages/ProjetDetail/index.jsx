@@ -76,7 +76,8 @@ export default function ProjetDetail() {
   };
 
   const retirerMembre = async (membre) => {
-    if (!window.confirm(`Retirer ${membre.prenom} ${membre.nom} du projet ?`)) return;
+    if (!window.confirm(`Retirer ${membre.prenom} ${membre.nom} du projet ?`))
+      return;
     try {
       await projetsService.removeMembre(id, membre.utilisateur_id);
       await charger();
@@ -86,7 +87,10 @@ export default function ProjetDetail() {
   };
 
   const supprimerProjet = async () => {
-    if (!window.confirm(`Supprimer définitivement le projet « ${projet.nom} » ?`)) return;
+    if (
+      !window.confirm(`Supprimer définitivement le projet « ${projet.nom} » ?`)
+    )
+      return;
     try {
       await projetsService.remove(id);
       navigate("/projets");
@@ -127,7 +131,8 @@ export default function ProjetDetail() {
           <h1 className="text-2xl font-bold text-slate-900">{projet.nom}</h1>
           <span
             className={`shrink-0 px-2 py-0.5 text-xs font-medium ${
-              couleurStatut[projet.statut_sante] || "bg-slate-100 text-slate-700"
+              couleurStatut[projet.statut_sante] ||
+              "bg-slate-100 text-slate-700"
             }`}
           >
             {projet.statut_sante}
@@ -145,7 +150,9 @@ export default function ProjetDetail() {
         <div className="flex flex-wrap gap-4 text-xs text-slate-500">
           <span>{projet.avancement_pct || 0}% terminé</span>
           {projet.date_debut && <span>Début : {projet.date_debut}</span>}
-          {projet.date_fin_prevue && <span>Échéance : {projet.date_fin_prevue}</span>}
+          {projet.date_fin_prevue && (
+            <span>Échéance : {projet.date_fin_prevue}</span>
+          )}
         </div>
         <div className="mt-4">
           <Link
@@ -164,7 +171,9 @@ export default function ProjetDetail() {
         </h2>
 
         {membres.length === 0 && (
-          <p className="mb-4 text-sm text-slate-500">Aucun membre pour l'instant.</p>
+          <p className="mb-4 text-sm text-slate-500">
+            Aucun membre pour l'instant.
+          </p>
         )}
 
         <ul className="mb-6 divide-y">
@@ -184,7 +193,8 @@ export default function ProjetDetail() {
                   {" · "}
                   <span
                     className={`px-1.5 py-0.5 ${
-                      couleurRoleGlobal[m.role_global] || "bg-slate-100 text-slate-600"
+                      couleurRoleGlobal[m.role_global] ||
+                      "bg-slate-100 text-slate-600"
                     }`}
                   >
                     {m.role_global}
@@ -235,7 +245,9 @@ export default function ProjetDetail() {
             {ajoutEnCours ? "Ajout…" : " + Ajouter"}
           </button>
         </form>
-        {ajoutErreur && <p className="mt-2 text-sm text-red-600">{ajoutErreur}</p>}
+        {ajoutErreur && (
+          <p className="mt-2 text-sm text-red-600">{ajoutErreur}</p>
+        )}
         {disponibles.length === 0 && (
           <p className="mt-2 text-xs text-slate-400">
             Tous les utilisateurs sont déjà membres de ce projet.

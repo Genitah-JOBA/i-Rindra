@@ -5,36 +5,91 @@ import { projetsService } from "../../api/projets";
 import { tachesService } from "../../api/taches";
 import { utilisateursService } from "../../api/utilisateurs";
 import { useAuth } from "../../auth/AuthContext";
-import 'animate.css';
+import "animate.css";
 
 // Icônes SVG
 const ArrowLeftIcon = ({ className = "w-5 h-5" }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={2}
+    stroke="currentColor"
+    className={className}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
+    />
   </svg>
 );
 
 const EditIcon = ({ className = "w-5 h-5" }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className={className}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+    />
   </svg>
 );
 
 const PlusIcon = ({ className = "w-5 h-5" }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={2}
+    stroke="currentColor"
+    className={className}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M12 4.5v15m7.5-7.5h-15"
+    />
   </svg>
 );
 
 const CloseIcon = ({ className = "w-5 h-5" }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={2}
+    stroke="currentColor"
+    className={className}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M6 18L18 6M6 6l12 12"
+    />
   </svg>
 );
 
 const ChevronDownIcon = ({ className = "w-5 h-5" }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={2}
+    stroke="currentColor"
+    className={className}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+    />
   </svg>
 );
 
@@ -87,7 +142,7 @@ export default function ProjetDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+
   const [projet, setProjet] = useState(null);
   const [taches, setTaches] = useState([]);
   const [membres, setMembres] = useState([]);
@@ -124,12 +179,12 @@ export default function ProjetDetail() {
     try {
       const [projetData, tachesData] = await Promise.all([
         projetsService.get(id),
-        tachesService.listByProjet(id).catch(() => [])
+        tachesService.listByProjet(id).catch(() => []),
       ]);
-      
+
       setProjet(projetData);
       setTaches(tachesData || []);
-      
+
       // Récupérer les membres du projet (si l'API existe)
       try {
         const membresData = await projetsService.getMembres(id);
@@ -138,7 +193,9 @@ export default function ProjetDetail() {
         setMembres([]);
       }
     } catch (err) {
-      setErreur(err.response?.data?.detail || "Erreur de chargement du projet.");
+      setErreur(
+        err.response?.data?.detail || "Erreur de chargement du projet.",
+      );
     } finally {
       setLoading(false);
     }
@@ -173,7 +230,9 @@ export default function ProjetDetail() {
       setProjet(updated);
       setModalEditOuvert(false);
     } catch (err) {
-      setFormErreur(err.response?.data?.detail || "Erreur lors de la mise à jour.");
+      setFormErreur(
+        err.response?.data?.detail || "Erreur lors de la mise à jour.",
+      );
     } finally {
       setFormLoading(false);
     }
@@ -197,9 +256,11 @@ export default function ProjetDetail() {
         statut: formTache.statut,
         priorite: formTache.priorite,
         echeance: formTache.echeance || null,
-        responsable_id: formTache.responsable_id ? parseInt(formTache.responsable_id) : null,
+        responsable_id: formTache.responsable_id
+          ? parseInt(formTache.responsable_id)
+          : null,
       });
-      
+
       setTaches([nouvelleTache, ...taches]);
       setModalTacheOuvert(false);
       setFormTache({
@@ -211,7 +272,9 @@ export default function ProjetDetail() {
         responsable_id: "",
       });
     } catch (err) {
-      setFormErreur(err.response?.data?.detail || "Erreur lors de la création de la tâche.");
+      setFormErreur(
+        err.response?.data?.detail || "Erreur lors de la création de la tâche.",
+      );
     } finally {
       setFormLoading(false);
     }
@@ -219,14 +282,16 @@ export default function ProjetDetail() {
 
   const handleStatutChange = async (tacheId, nouveauStatut) => {
     try {
-      const tache = taches.find(t => t.id === tacheId);
+      const tache = taches.find((t) => t.id === tacheId);
       if (!tache) return;
-      
+
       await tachesService.update(tacheId, { ...tache, statut: nouveauStatut });
-      
-      setTaches(taches.map(t => 
-        t.id === tacheId ? { ...t, statut: nouveauStatut } : t
-      ));
+
+      setTaches(
+        taches.map((t) =>
+          t.id === tacheId ? { ...t, statut: nouveauStatut } : t,
+        ),
+      );
     } catch (err) {
       alert("Erreur lors du changement de statut.");
     }
@@ -234,10 +299,10 @@ export default function ProjetDetail() {
 
   const handleDeleteTache = async (tacheId) => {
     if (!window.confirm("Voulez-vous vraiment supprimer cette tâche ?")) return;
-    
+
     try {
       await tachesService.delete(tacheId);
-      setTaches(taches.filter(t => t.id !== tacheId));
+      setTaches(taches.filter((t) => t.id !== tacheId));
     } catch (err) {
       alert("Erreur lors de la suppression de la tâche.");
     }
@@ -246,9 +311,9 @@ export default function ProjetDetail() {
   // Statistiques des tâches
   const statsTaches = {
     total: taches.length,
-    a_faire: taches.filter(t => t.statut === "a_faire").length,
-    en_cours: taches.filter(t => t.statut === "en_cours").length,
-    terminee: taches.filter(t => t.statut === "terminee").length,
+    a_faire: taches.filter((t) => t.statut === "a_faire").length,
+    en_cours: taches.filter((t) => t.statut === "en_cours").length,
+    terminee: taches.filter((t) => t.statut === "terminee").length,
   };
 
   const statutOptions = [
@@ -277,7 +342,10 @@ export default function ProjetDetail() {
     return (
       <div className="text-center py-12">
         <p className="text-red-600">⚠️ {erreur}</p>
-        <button onClick={() => navigate("/projets")} className="mt-4 text-[#63B23E] hover:underline">
+        <button
+          onClick={() => navigate("/projets")}
+          className="mt-4 text-[#63B23E] hover:underline"
+        >
           Retour à la liste des projets
         </button>
       </div>
@@ -288,7 +356,10 @@ export default function ProjetDetail() {
     return (
       <div className="text-center py-12">
         <p className="text-slate-500">Projet non trouvé.</p>
-        <button onClick={() => navigate("/projets")} className="mt-4 text-[#63B23E] hover:underline">
+        <button
+          onClick={() => navigate("/projets")}
+          className="mt-4 text-[#63B23E] hover:underline"
+        >
           Retour à la liste des projets
         </button>
       </div>
@@ -312,10 +383,12 @@ export default function ProjetDetail() {
             </h1>
             <span
               className={`flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full ${
-                couleurStatut[projet.statut_sante] || "bg-slate-100 text-slate-700"
+                couleurStatut[projet.statut_sante] ||
+                "bg-slate-100 text-slate-700"
               }`}
             >
-              {statutIcone[projet.statut_sante] || "⚪"} {labelStatut[projet.statut_sante] || projet.statut_sante}
+              {statutIcone[projet.statut_sante] || "⚪"}{" "}
+              {labelStatut[projet.statut_sante] || projet.statut_sante}
             </span>
           </div>
           <button
@@ -331,47 +404,113 @@ export default function ProjetDetail() {
       {/* Informations du projet */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
-          <h2 className="text-sm font-semibold text-slate-700 mb-3">Informations générales</h2>
+          <h2 className="text-sm font-semibold text-slate-700 mb-3">
+            Informations générales
+          </h2>
           <div className="space-y-2 text-sm">
             {projet.description && (
               <p className="text-slate-600">{projet.description}</p>
             )}
             <div className="flex items-center gap-2 text-slate-500">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-4 h-4"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+                />
               </svg>
-              Client: <span className="text-slate-700 font-medium">{projet.client?.nom || "Non défini"}</span>
+              Client:{" "}
+              <span className="text-slate-700 font-medium">
+                {projet.client?.nom || "Non défini"}
+              </span>
             </div>
             {projet.responsable && (
               <div className="flex items-center gap-2 text-slate-500">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-4 h-4"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+                  />
                 </svg>
-                Responsable: <span className="text-slate-700 font-medium">{projet.responsable.prenom} {projet.responsable.nom}</span>
+                Responsable:{" "}
+                <span className="text-slate-700 font-medium">
+                  {projet.responsable.prenom} {projet.responsable.nom}
+                </span>
               </div>
             )}
             <div className="flex items-center gap-2 text-slate-500">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-4 h-4"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
+                />
               </svg>
-              Début: <span className="text-slate-700">{projet.date_debut ? new Date(projet.date_debut).toLocaleDateString("fr-FR") : "Non définie"}</span>
+              Début:{" "}
+              <span className="text-slate-700">
+                {projet.date_debut
+                  ? new Date(projet.date_debut).toLocaleDateString("fr-FR")
+                  : "Non définie"}
+              </span>
             </div>
             <div className="flex items-center gap-2 text-slate-500">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-4 h-4"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
+                />
               </svg>
-              Fin prévue: <span className="text-slate-700">{projet.date_fin_prevue ? new Date(projet.date_fin_prevue).toLocaleDateString("fr-FR") : "Non définie"}</span>
+              Fin prévue:{" "}
+              <span className="text-slate-700">
+                {projet.date_fin_prevue
+                  ? new Date(projet.date_fin_prevue).toLocaleDateString("fr-FR")
+                  : "Non définie"}
+              </span>
             </div>
           </div>
         </div>
 
         <div className="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
-          <h2 className="text-sm font-semibold text-slate-700 mb-3">Avancement</h2>
+          <h2 className="text-sm font-semibold text-slate-700 mb-3">
+            Avancement
+          </h2>
           <div className="space-y-3">
             <div>
               <div className="flex justify-between text-sm mb-1">
                 <span className="text-slate-500">Progression</span>
-                <span className="font-medium text-slate-700">{projet.avancement_pct || 0}%</span>
+                <span className="font-medium text-slate-700">
+                  {projet.avancement_pct || 0}%
+                </span>
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
                 <div
@@ -379,8 +518,8 @@ export default function ProjetDetail() {
                     (projet.avancement_pct || 0) >= 80
                       ? "bg-green-500"
                       : (projet.avancement_pct || 0) >= 40
-                      ? "bg-yellow-500"
-                      : "bg-blue-500"
+                        ? "bg-yellow-500"
+                        : "bg-blue-500"
                   }`}
                   style={{ width: `${projet.avancement_pct || 0}%` }}
                 />
@@ -389,15 +528,21 @@ export default function ProjetDetail() {
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="bg-slate-50 rounded p-2">
                 <p className="text-xs text-slate-500">À faire</p>
-                <p className="text-lg font-bold text-slate-700">{statsTaches.a_faire}</p>
+                <p className="text-lg font-bold text-slate-700">
+                  {statsTaches.a_faire}
+                </p>
               </div>
               <div className="bg-slate-50 rounded p-2">
                 <p className="text-xs text-slate-500">En cours</p>
-                <p className="text-lg font-bold text-blue-600">{statsTaches.en_cours}</p>
+                <p className="text-lg font-bold text-blue-600">
+                  {statsTaches.en_cours}
+                </p>
               </div>
               <div className="bg-slate-50 rounded p-2">
                 <p className="text-xs text-slate-500">Terminées</p>
-                <p className="text-lg font-bold text-green-600">{statsTaches.terminee}</p>
+                <p className="text-lg font-bold text-green-600">
+                  {statsTaches.terminee}
+                </p>
               </div>
             </div>
           </div>
@@ -410,11 +555,17 @@ export default function ProjetDetail() {
           <h2 className="text-sm font-semibold text-slate-700 mb-3">Équipe</h2>
           <div className="flex flex-wrap gap-2">
             {membres.map((membre) => (
-              <div key={membre.id} className="flex items-center gap-2 bg-slate-50 rounded-full px-3 py-1.5">
+              <div
+                key={membre.id}
+                className="flex items-center gap-2 bg-slate-50 rounded-full px-3 py-1.5"
+              >
                 <div className="w-6 h-6 rounded-full bg-[#63B23E]/20 text-[#63B23E] flex items-center justify-center text-xs font-semibold">
-                  {membre.prenom?.charAt(0)}{membre.nom?.charAt(0)}
+                  {membre.prenom?.charAt(0)}
+                  {membre.nom?.charAt(0)}
                 </div>
-                <span className="text-sm text-slate-700">{membre.prenom} {membre.nom}</span>
+                <span className="text-sm text-slate-700">
+                  {membre.prenom} {membre.nom}
+                </span>
               </div>
             ))}
           </div>
@@ -424,7 +575,9 @@ export default function ProjetDetail() {
       {/* Tâches */}
       <div className="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-slate-700">Tâches ({taches.length})</h2>
+          <h2 className="text-sm font-semibold text-slate-700">
+            Tâches ({taches.length})
+          </h2>
           <button
             onClick={() => setModalTacheOuvert(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-[#63B23E] text-white rounded-md hover:bg-[#3F894E] transition-colors"
@@ -446,7 +599,9 @@ export default function ProjetDetail() {
                     <h3 className="font-medium text-slate-900 text-sm truncate">
                       {tache.titre}
                     </h3>
-                    <span className={`px-2 py-0.5 text-[10px] rounded-full ${couleurPriorite[tache.priorite] || "bg-slate-100"}`}>
+                    <span
+                      className={`px-2 py-0.5 text-[10px] rounded-full ${couleurPriorite[tache.priorite] || "bg-slate-100"}`}
+                    >
                       {labelPriorite[tache.priorite] || tache.priorite}
                     </span>
                   </div>
@@ -464,11 +619,15 @@ export default function ProjetDetail() {
                 <div className="flex items-center gap-2 ml-4">
                   <select
                     value={tache.statut}
-                    onChange={(e) => handleStatutChange(tache.id, e.target.value)}
+                    onChange={(e) =>
+                      handleStatutChange(tache.id, e.target.value)
+                    }
                     className="text-xs border border-slate-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-[#63B23E]"
                   >
                     {statutOptions.map((s) => (
-                      <option key={s.id} value={s.id}>{s.label}</option>
+                      <option key={s.id} value={s.id}>
+                        {s.label}
+                      </option>
                     ))}
                   </select>
                   <button
@@ -499,7 +658,9 @@ export default function ProjetDetail() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate__animated animate__fadeIn">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto animate__animated animate__zoomIn">
             <div className="flex items-center justify-between p-4 border-b border-slate-200">
-              <h2 className="text-lg font-semibold text-slate-900">Modifier le projet</h2>
+              <h2 className="text-lg font-semibold text-slate-900">
+                Modifier le projet
+              </h2>
               <button
                 onClick={() => setModalEditOuvert(false)}
                 className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
@@ -595,7 +756,9 @@ export default function ProjetDetail() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate__animated animate__fadeIn">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto animate__animated animate__zoomIn">
             <div className="flex items-center justify-between p-4 border-b border-slate-200">
-              <h2 className="text-lg font-semibold text-slate-900">Nouvelle tâche</h2>
+              <h2 className="text-lg font-semibold text-slate-900">
+                Nouvelle tâche
+              </h2>
               <button
                 onClick={() => setModalTacheOuvert(false)}
                 className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
@@ -652,7 +815,9 @@ export default function ProjetDetail() {
                     className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent text-sm appearance-none bg-white"
                   >
                     {statutOptions.map((s) => (
-                      <option key={s.id} value={s.id}>{s.label}</option>
+                      <option key={s.id} value={s.id}>
+                        {s.label}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -667,7 +832,9 @@ export default function ProjetDetail() {
                     className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent text-sm appearance-none bg-white"
                   >
                     {prioriteOptions.map((p) => (
-                      <option key={p.id} value={p.id}>{p.label}</option>
+                      <option key={p.id} value={p.id}>
+                        {p.label}
+                      </option>
                     ))}
                   </select>
                 </div>

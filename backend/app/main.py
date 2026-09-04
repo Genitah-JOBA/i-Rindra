@@ -16,9 +16,11 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    # Autorise n'importe quel port localhost/127.0.0.1 en développement
-    # (Vite peut basculer sur 5174, 5175… si 5173 est déjà pris).
-    allow_origin_regex=r"http://(localhost|127\.0\.0\.1):\d+",
+    # Dev : tout port localhost/127.0.0.1  |  Prod : les (sous-)domaines bef4prod.com en HTTPS
+    allow_origin_regex=(
+        r"https?://(localhost|127\.0\.0\.1)(:\d+)?"
+        r"|https://([a-z0-9-]+\.)?bef4prod\.com"
+    ),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

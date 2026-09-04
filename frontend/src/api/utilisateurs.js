@@ -1,10 +1,10 @@
 // src/api/utilisateurs.js
-import api from './client';
+import api from "./client";
 
 export const utilisateursService = {
   // Liste des utilisateurs
   list: async () => {
-    const response = await api.get('/utilisateurs');
+    const response = await api.get("/utilisateurs");
     return response.data;
   },
 
@@ -16,7 +16,7 @@ export const utilisateursService = {
 
   // Créer un utilisateur
   create: async (data) => {
-    const response = await api.post('/utilisateurs', data);
+    const response = await api.post("/utilisateurs", data);
     return response.data;
   },
 
