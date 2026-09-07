@@ -144,7 +144,7 @@ export const translations = {
     // Projets
     "projets.titre": "Projets",
     "projets.compteur": "projet(s)",
-    "projets.nouveau": "+ Nouveau projet",
+    "projets.nouveau": "Nouveau projet",
     "projets.vide":
       "Aucun projet. Cliquez sur « Nouveau projet » pour commencer.",
     "projets.client": "Client",
