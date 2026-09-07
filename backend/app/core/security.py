@@ -15,15 +15,17 @@ pwd_context = CryptContext(
     bcrypt__rounds=12,
 )
 
+_BCRYPT_MAX_BYTES = 72
+
 def hash_password(password: str) -> str:
     """
     Hache un mot de passe en clair.
     Utilise bcrypt avec un salt généré automatiquement.
     """
     password_bytes = password.encode('utf-8')
-    if len(password_bytes) > 72:
-        password = password[:72]
-    
+    if len(password_bytes) > _BCRYPT_MAX_BYTES:
+        password = password_bytes[:_BCRYPT_MAX_BYTES].decode('utf-8', errors='ignore')
+
     return pwd_context.hash(password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -32,9 +34,9 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     Retourne True si OK.
     """
     password_bytes = plain_password.encode('utf-8')
-    if len(password_bytes) > 72:
-        plain_password = plain_password[:72]
-    
+    if len(password_bytes) > _BCRYPT_MAX_BYTES:
+        plain_password = password_bytes[:_BCRYPT_MAX_BYTES].decode('utf-8', errors='ignore')
+
     return pwd_context.verify(plain_password, hashed_password)
 
 # JWT

@@ -19,12 +19,17 @@ class Settings(BaseSettings):
     ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 60))
 
-    # OpenIA
-    # OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    # Environnement : "development", "production", "test"
+    APP_ENV: str = os.getenv("APP_ENV", "development")
 
-    # class Config:
-    #     env_file = ".env"
-    #     env_file_encoding = "utf-8"
+    # Au chargement, refuse un secret faible en production
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if self.APP_ENV == "production" and self.SECRET_KEY == "1234":
+            raise RuntimeError(
+                "SECRET_KEY ne doit PAS être la valeur par défaut en production. "
+                "Définissez une SECRET_KEY forte dans .env (ex: openssl rand -hex 32)."
+            )
 
 # Instance accessible partout
 settings = Settings()

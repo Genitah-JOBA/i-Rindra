@@ -257,8 +257,8 @@ async def register(
     Crée un nouvel utilisateur.
     Le mot de passe est hashé automatiquement.
     
-    Pour la version prototype, tout le monde peut s'inscrire.
-    En production, seul un admin/direction peut créer des comptes.
+    L'inscription publique est réservée aux rôles 'equipe' et 'client' —
+    les comptes 'admin'/'direction' doivent être créés par un administrateur.
     """
     # 1. Vérifie que l'email n'est pas déjà utilisé
     result = await db.execute(
@@ -279,6 +279,13 @@ async def register(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Rôle invalide. Choisir parmi : {[r.value for r in RoleUtilisateur]}"
+        )
+
+    # 2.bis Empêche l'escalade de privilèges via auto-inscription
+    if role_enum in (RoleUtilisateur.ADMIN, RoleUtilisateur.DIRECTION):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Les comptes 'admin' et 'direction' ne peuvent pas être créés par inscription publique"
         )
 
     # 3. Règle métier (CDC) : cohérence rôle / client_id

@@ -15,7 +15,7 @@
 -- ------------------------------------------------------------
 --  TYPES ÉNUMÉRÉS
 -- ------------------------------------------------------------
-CREATE TYPE role_utilisateur   AS ENUM ('direction', 'chef_projet', 'equipe', 'client');
+CREATE TYPE role_utilisateur   AS ENUM ('admin', 'direction', 'equipe', 'client');
 CREATE TYPE statut_sante       AS ENUM ('vert', 'orange', 'rouge');
 CREATE TYPE statut_tache       AS ENUM ('a_faire', 'en_cours', 'en_revue', 'termine');
 CREATE TYPE priorite_tache     AS ENUM ('basse', 'moyenne', 'haute');
@@ -46,6 +46,8 @@ CREATE TABLE utilisateur (
     role                role_utilisateur NOT NULL,
     -- rempli UNIQUEMENT si role = 'client' (cloisonnement RF-03)
     client_id           BIGINT REFERENCES client(id) ON DELETE SET NULL,
+    -- métier du membre (développeur, graphiste, intégrateur…)
+    metier              VARCHAR(100),
     actif               BOOLEAN NOT NULL DEFAULT TRUE,
     cree_le             TIMESTAMPTZ NOT NULL DEFAULT now(),
     -- un compte "client" DOIT être rattaché à un client ; les autres non

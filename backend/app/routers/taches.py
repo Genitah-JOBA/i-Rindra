@@ -100,7 +100,7 @@ async def get_taches_by_projet(
 async def get_tache(
     tache_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user_id: int = Depends(get_current_user_id)
+    token: str = Depends(oauth2_scheme)
 ):
     """
     Récupère les détails d'une tâche spécifique.
@@ -118,11 +118,7 @@ async def get_tache(
         )
     
     # 2. Vérifie que l'utilisateur a accès au projet
-    # On utilise check_projet_access mais on ne peut pas l'injecter directement
-    # car elle attend un projet_id. On vérifie manuellement.
-    await check_projet_access(tache.projet_id, db=db, token=None)
-    # Note: ce n'est pas idéal, mais pour l'instant ça fonctionne.
-    # On améliorera plus tard avec une dépendance plus sophistiquée.
+    await check_projet_access(tache.projet_id, db=db, token=token)
     
     return TacheResponse.model_validate(tache)
 
@@ -192,7 +188,7 @@ async def update_tache(
     tache_id: int,
     tache_data: TacheUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user_id: int = Depends(get_current_user_id),
+    token: str = Depends(oauth2_scheme),
     role: str = Depends(get_current_user_role)
 ):
     """
@@ -215,7 +211,7 @@ async def update_tache(
         )
     
     # 2. Vérifie l'accès au projet
-    await check_projet_access(tache.projet_id, db=db, token=None)
+    await check_projet_access(tache.projet_id, db=db, token=token)
     
     # 3. Vérifie les permissions
     if role not in ["admin", "direction", "equipe"]:
@@ -301,6 +297,7 @@ async def update_tache_statut(
     tache_id: int,
     nouveau_statut: StatutTacheEnum,
     db: AsyncSession = Depends(get_db),
+    token: str = Depends(oauth2_scheme),
     current_user_id: int = Depends(get_current_user_id),
     role: str = Depends(get_current_user_role)
 ):
@@ -322,7 +319,7 @@ async def update_tache_statut(
         )
     
     # 2. Vérifie l'accès au projet
-    await check_projet_access(tache.projet_id, db=db, token=None)
+    await check_projet_access(tache.projet_id, db=db, token=token)
     
     # 3. Change le statut
     old_statut = tache.statut
@@ -418,7 +415,7 @@ async def update_tache_affectation(
 async def get_commentaires(
     tache_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user_id: int = Depends(get_current_user_id)
+    token: str = Depends(oauth2_scheme)
 ):
     """
     Récupère tous les commentaires d'une tâche (RF-14).
@@ -436,7 +433,7 @@ async def get_commentaires(
         )
     
     # 2. Vérifie l'accès au projet
-    await check_projet_access(tache.projet_id, db=db, token=None)
+    await check_projet_access(tache.projet_id, db=db, token=token)
     
     # 3. Récupère les commentaires
     result = await db.execute(
@@ -453,6 +450,7 @@ async def create_commentaire(
     tache_id: int,
     commentaire_data: CommentaireTacheCreate,
     db: AsyncSession = Depends(get_db),
+    token: str = Depends(oauth2_scheme),
     current_user_id: int = Depends(get_current_user_id)
 ):
     """
@@ -473,7 +471,7 @@ async def create_commentaire(
         )
     
     # 2. Vérifie l'accès au projet
-    await check_projet_access(tache.projet_id, db=db, token=None)
+    await check_projet_access(tache.projet_id, db=db, token=token)
     
     # 3. Crée le commentaire
     new_commentaire = CommentaireTache(
@@ -497,6 +495,7 @@ async def saisir_temps(
     tache_id: int,
     temps_data: SaisieTempsCreate,
     db: AsyncSession = Depends(get_db),
+    token: str = Depends(oauth2_scheme),
     current_user_id: int = Depends(get_current_user_id)
 ):
     """
@@ -517,7 +516,7 @@ async def saisir_temps(
         )
     
     # 2. Vérifie l'accès au projet
-    await check_projet_access(tache.projet_id, db=db, token=None)
+    await check_projet_access(tache.projet_id, db=db, token=token)
     
     # 3. Crée la saisie de temps
     new_temps = SaisieTemps(

@@ -36,12 +36,12 @@ router = APIRouter(prefix="/projets", tags=["Projets"])
 
 async def check_direction_or_chef_projet(role: str = Depends(get_current_user_role)):
     """
-    Vérifie que l'utilisateur est direction ou chef de projet.
+    Vérifie que l'utilisateur est direction ou admin.
     """
-    if role not in ["admin", "direction", "equipe"]:
+    if role not in ["admin", "direction"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Seul la direction ou le chef de projet peut effectuer cette action"
+            detail="Seul la direction ou l'administrateur peut effectuer cette action"
         )
     return role
 
