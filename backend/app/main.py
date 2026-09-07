@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import auth, projets, taches, dashboard, client, fichiers, utilisateurs, notifications, clients
+from app.routers import auth, projets, taches, dashboard, client, fichiers, utilisateurs, notifications, clients, factures
 from app.core.database import engine, Base
 import app.models
 
@@ -36,6 +36,7 @@ app.include_router(fichiers.router)
 app.include_router(utilisateurs.router)
 app.include_router(notifications.router)
 app.include_router(clients.router)
+app.include_router(factures.router)
 
 @app.on_event("startup")
 async def init_db():

@@ -347,10 +347,7 @@ export default function Layout() {
                     </span>
                   </a>
 
-                  <LienPlaceholder
-                    className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-white hover:bg-slate-600 opacity-75 rounded-md`}
-                    titre="Facturation"
-                  >
+                  <NavLink to="/facturation" className={lienClass}>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -366,10 +363,7 @@ export default function Layout() {
                       />
                     </svg>
                     {t("nav.facturation")}
-                    <span className="ml-auto text-[10px] bg-yellow-500/20 text-yellow-300 px-2 py-0.5 rounded-full flex-shrink-0">
-                      Bientôt
-                    </span>
-                  </LienPlaceholder>
+                  </NavLink>
                 </>
               )}
             </>
@@ -384,32 +378,6 @@ export default function Layout() {
                   {t("section.monEspace")}
                 </p>
               </div>
-
-              <a
-                href="https://e-resaka.example.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-white hover:bg-slate-600 rounded-md"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-5 h-5 flex-shrink-0"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M20.25 8.511v.011m0 4.5v.011m0-4.5h-4.5m4.5 0h-4.5m0-4.5h4.5m0 0h-4.5m0 4.5h4.5m0 4.5h-4.5m4.5 0h-4.5m-9 4.5h4.5m-4.5 0h-4.5m4.5 0v-4.5m0 4.5V12m0-4.5h4.5m-4.5 0h-4.5m4.5 0v4.5m0 0h-4.5m0 4.5h4.5"
-                  />
-                </svg>
-                {t("nav.chat")}
-                <span className="ml-auto text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full flex-shrink-0">
-                  ↗
-                </span>
-              </a>
 
               <a
                 href="https://b-estimation.example.com"
@@ -476,6 +444,36 @@ export default function Layout() {
       <div className="flex-1 flex flex-col h-screen w-0 min-w-0">
         {/* Header */}
         <header className="border-b bg-white px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center sticky top-0 z-30 shadow-sm">
+
+          {/* Chat e-resaka — accessible à tous les rôles (deep-link produit externe) */}
+          <a
+            href={
+              import.meta.env.VITE_ERESAKA_URL ||
+              "https://e-resaka.example.com"
+            }
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors bg-slate-200 hover:bg-slate-400 rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-5 h-5 flex-shrink-0"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M20.25 8.511v.011m0 4.5v.011m0-4.5h-4.5m4.5 0h-4.5m0-4.5h4.5m0 0h-4.5m0 4.5h4.5m0 4.5h-4.5m4.5 0h-4.5m-9 4.5h4.5m-4.5 0h-4.5m4.5 0v-4.5m0 4.5V12m0-4.5h4.5m-4.5 0h-4.5m4.5 0v4.5m0 0h-4.5m0 4.5h4.5"
+              />
+            </svg>
+            {t("nav.chat")}
+            <span className="ml-auto text-[10px] bg-blue-500/20 text-blue-700 px-2 py-0.5 rounded-full flex-shrink-0">
+              ↗
+            </span>
+          </a>
           <button
             onClick={() => setSidebarOpen(true)}
             className="md:hidden p-2 text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#63B23E] transition-colors rounded-md"

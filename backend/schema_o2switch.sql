@@ -5,6 +5,7 @@ CREATE TYPE role_utilisateur AS ENUM ('admin', 'direction', 'equipe', 'client');
 CREATE TYPE statut_sante AS ENUM ('vert', 'orange', 'rouge');
 CREATE TYPE statut_tache AS ENUM ('a_faire', 'en_cours', 'en_revue', 'termine');
 CREATE TYPE priorite_tache AS ENUM ('basse', 'moyenne', 'haute');
+CREATE TYPE statut_facture AS ENUM ('brouillon', 'envoyee', 'payee', 'en_retard', 'annulee');
 CREATE TABLE client (
 	id SERIAL NOT NULL, 
 	nom VARCHAR(150) NOT NULL, 
@@ -156,3 +157,28 @@ CREATE TABLE saisie_temps (
 CREATE INDEX ix_saisie_temps_utilisateur_id ON saisie_temps (utilisateur_id);
 CREATE INDEX ix_saisie_temps_id ON saisie_temps (id);
 CREATE INDEX ix_saisie_temps_tache_id ON saisie_temps (tache_id);
+CREATE TABLE facture (
+	id SERIAL NOT NULL,
+	numero VARCHAR(30) NOT NULL,
+	client_id INTEGER NOT NULL,
+	projet_id INTEGER,
+	statut statut_facture NOT NULL,
+	date_emission DATE NOT NULL,
+	date_echeance DATE,
+	montant_ht NUMERIC(12, 2) NOT NULL,
+	taux_tva NUMERIC(5, 2) NOT NULL,
+	montant_tva NUMERIC(12, 2) NOT NULL,
+	montant_ttc NUMERIC(12, 2) NOT NULL,
+	notes TEXT,
+	cree_par INTEGER,
+	cree_le TIMESTAMP WITH TIME ZONE DEFAULT now(),
+	modifie_le TIMESTAMP WITH TIME ZONE DEFAULT now(),
+	PRIMARY KEY (id),
+	FOREIGN KEY(client_id) REFERENCES client (id) ON DELETE RESTRICT,
+	FOREIGN KEY(projet_id) REFERENCES projet (id) ON DELETE SET NULL,
+	FOREIGN KEY(cree_par) REFERENCES utilisateur (id) ON DELETE SET NULL
+);
+CREATE UNIQUE INDEX ix_facture_numero ON facture (numero);
+CREATE INDEX ix_facture_id ON facture (id);
+CREATE INDEX ix_facture_client_id ON facture (client_id);
+CREATE INDEX ix_facture_projet_id ON facture (projet_id);

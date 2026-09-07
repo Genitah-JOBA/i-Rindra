@@ -8,6 +8,7 @@ from app.models.saisie_temps import SaisieTemps
 from app.models.jalon import Jalon
 from app.models.fichier import Fichier
 from app.models.notification import Notification
+from app.models.facture import Facture, StatutFacture
 
 __all__ = [
     "Utilisateur",
@@ -24,4 +25,6 @@ __all__ = [
     "Jalon",
     "Fichier",
     "Notification",
+    "Facture",
+    "StatutFacture",
 ]

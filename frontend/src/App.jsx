@@ -10,6 +10,7 @@ import Taches from "./pages/Taches";
 import ProjetDetail from "./pages/ProjetDetail";
 import Membres from "./pages/Membres";
 import Clients from "./pages/Clients";
+import Facturation from "./pages/Facturation";
 import Parametres from "./pages/Parametres";
 
 export default function App() {
@@ -32,6 +33,17 @@ export default function App() {
         <Route path="taches" element={<Taches />} />
         <Route path="membres" element={<Membres />} />
         <Route path="clients" element={<Clients />} />
+      </Route>
+
+      {/* Volet financier — ADMIN uniquement (la direction n'a pas accès à l'argent) */}
+      <Route
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <Layout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/facturation" element={<Facturation />} />
       </Route>
 
       {/* Espace client (cloisonné) */}
