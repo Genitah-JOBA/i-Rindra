@@ -8,7 +8,7 @@ import "animate.css";
 
 // Fonction pour les liens actifs
 const lienClass = ({ isActive }) =>
-  `flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors rounded-md ${
+  `flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors  ${
     isActive ? "bg-[#63B23E] text-white" : "text-white hover:bg-slate-600"
   }`;
 
@@ -115,7 +115,7 @@ export default function Layout() {
           {/* Bouton de fermeture visible uniquement sur mobile */}
           <button
             onClick={() => setSidebarOpen(false)}
-            className="md:hidden p-1.5 text-slate-400 hover:text-white hover:bg-slate-600 transition-colors rounded-md"
+            className="md:hidden p-1.5 text-slate-400 hover:text-white hover:bg-slate-600 transition-colors "
             aria-label="Fermer le menu"
           >
             <svg
@@ -286,7 +286,7 @@ export default function Layout() {
                   </div>
 
                   <LienPlaceholder
-                    className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-white hover:bg-slate-600 opacity-75 rounded-md`}
+                    className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-white hover:bg-slate-600 opacity-75 `}
                     titre="Assistant IA"
                   >
                     <svg
@@ -304,7 +304,7 @@ export default function Layout() {
                       />
                     </svg>
                     {t("nav.assistantIA")}
-                    <span className="ml-auto text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full flex-shrink-0">
+                    <span className="ml-auto text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5  flex-shrink-0">
                       IA
                     </span>
                   </LienPlaceholder>
@@ -325,7 +325,7 @@ export default function Layout() {
                     href="https://b-estimation.example.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-white hover:bg-slate-600 rounded-md"
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-white hover:bg-slate-600 "
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -342,7 +342,7 @@ export default function Layout() {
                       />
                     </svg>
                     {t("nav.devis")}
-                    <span className="ml-auto text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full flex-shrink-0">
+                    <span className="ml-auto text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5  flex-shrink-0">
                       ↗
                     </span>
                   </a>
@@ -383,7 +383,7 @@ export default function Layout() {
                 href="https://b-estimation.example.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-white hover:bg-slate-600 rounded-md"
+                className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-white hover:bg-slate-600 "
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -400,13 +400,13 @@ export default function Layout() {
                   />
                 </svg>
                 {t("nav.mesDevis")}
-                <span className="ml-auto text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full flex-shrink-0">
+                <span className="ml-auto text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5  flex-shrink-0">
                   ↗
                 </span>
               </a>
 
               <LienPlaceholder
-                className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-white hover:bg-slate-600 opacity-75 rounded-md`}
+                className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-white hover:bg-slate-600 opacity-75 `}
                 titre="Documents"
               >
                 <svg
@@ -424,7 +424,7 @@ export default function Layout() {
                   />
                 </svg>
                 {t("nav.documents")}
-                <span className="ml-auto text-[10px] bg-yellow-500/20 text-yellow-300 px-2 py-0.5 rounded-full flex-shrink-0">
+                <span className="ml-auto text-[10px] bg-yellow-500/20 text-yellow-300 px-2 py-0.5  flex-shrink-0">
                   Bientôt
                 </span>
               </LienPlaceholder>
@@ -453,7 +453,7 @@ export default function Layout() {
             }
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors bg-slate-200 hover:bg-slate-400 rounded-md"
+            className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors bg-slate-200 hover:bg-slate-400 "
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -470,13 +470,13 @@ export default function Layout() {
               />
             </svg>
             {t("nav.chat")}
-            <span className="ml-auto text-[10px] bg-blue-500/20 text-blue-700 px-2 py-0.5 rounded-full flex-shrink-0">
+            <span className="ml-auto text-[10px] bg-blue-500/20 text-blue-700 px-2 py-0.5  flex-shrink-0">
               ↗
             </span>
           </a>
           <button
             onClick={() => setSidebarOpen(true)}
-            className="md:hidden p-2 text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#63B23E] transition-colors rounded-md"
+            className="md:hidden p-2 text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#63B23E] transition-colors "
             aria-label="Ouvrir le menu"
           >
             <svg
@@ -502,7 +502,7 @@ export default function Layout() {
           <div className="relative" ref={profilMenuRef}>
             <button
               onClick={toggleProfilMenu}
-              className="flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#63B23E] rounded-md"
+              className="flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#63B23E] "
               aria-expanded={profilMenuOpen}
               aria-haspopup="true"
             >
@@ -530,7 +530,7 @@ export default function Layout() {
             </button>
 
             {profilMenuOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white shadow-lg border border-slate-200 py-1 z-50 animate__animated animate__fadeInDown rounded-lg">
+              <div className="absolute right-0 mt-2 w-56 bg-white shadow-lg border border-slate-200 py-1 z-50 animate__animated animate__fadeInDown ">
                 <div className="px-4 py-3 border-b border-slate-100">
                   <p className="text-sm font-medium text-slate-900">
                     {user?.prenom} {user?.nom}

@@ -211,7 +211,8 @@ export default function Taches() {
 
   return (
     <div className="animate__animated animate__fadeIn w-full px-4 sm:px-6 lg:px-8">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+      {/* En-tête avec animation */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 animate__animated animate__fadeInDown">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
             {tr("taches.titre")}
@@ -234,13 +235,13 @@ export default function Taches() {
         </select>
       </div>
 
-      {erreur && <p className="mb-4 text-red-600">{erreur}</p>}
+      {erreur && <p className="mb-4 text-red-600 animate__animated animate__shakeX">{erreur}</p>}
 
-      {/* Formulaire de création */}
+      {/* Formulaire de création avec animation */}
       {projetId && (
         <form
           onSubmit={creerTache}
-          className="mb-6 flex flex-col gap-3 border border-slate-200 bg-white p-4 shadow-sm  md:flex-row md:items-end"
+          className="mb-6 flex flex-col gap-3 border border-slate-200 bg-white p-4 shadow-sm  md:flex-row md:items-end animate__animated animate__fadeInUp"
         >
           <div className="flex-1">
             <label className="mb-1 block text-xs font-medium text-slate-600">
@@ -310,19 +311,23 @@ export default function Taches() {
           </button>
         </form>
       )}
-      {formErreur && <p className="mb-4 text-sm text-red-600">{formErreur}</p>}
+      {formErreur && <p className="mb-4 text-sm text-red-600 animate__animated animate__shakeX">{formErreur}</p>}
 
       {loading ? (
-        <div className="flex justify-center items-center py-12">
+        <div className="flex justify-center items-center py-12 animate__animated animate__pulse">
           <div className="animate-spin  h-8 w-8 border-b-2 border-[#63B23E]"></div>
           <span className="ml-3 text-slate-500">{tr("common.chargement")}</span>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {COLONNES.map((col) => {
+          {COLONNES.map((col, colIndex) => {
             const tachesCol = taches.filter((t) => t.statut === col.statut);
             return (
-              <div key={col.statut} className="bg-slate-50  p-3">
+              <div 
+                key={col.statut} 
+                className="bg-slate-50  p-3 animate__animated animate__fadeInUp"
+                style={{ animationDelay: `${0.1 + (colIndex * 0.1)}s` }}
+              >
                 <h2 className="mb-3 flex items-center justify-between text-sm font-semibold text-slate-700">
                   {tr("kanban." + col.statut)}
                   <span className="bg-white px-2 py-0.5 text-xs text-slate-500 ">
@@ -331,12 +336,13 @@ export default function Taches() {
                 </h2>
 
                 <div className="space-y-3">
-                  {tachesCol.map((t) => {
+                  {tachesCol.map((t, index) => {
                     const idx = indexStatut(t.statut);
                     return (
                       <div
                         key={t.id}
-                        className="cursor-pointer border border-slate-200 bg-white p-3 shadow-sm hover:shadow-md hover:border-[#63B23E]  transition-all duration-200"
+                        className="cursor-pointer border border-slate-200 bg-white p-3 shadow-sm hover:shadow-md hover:border-[#63B23E]  transition-all duration-200 hover:-translate-y-1 animate__animated animate__fadeInUp"
+                        style={{ animationDelay: `${0.1 + (index * 0.05)}s` }}
                         onClick={() => setTacheActive(t)}
                         title={tr("taches.ouvrirDetail")}
                       >
@@ -366,7 +372,7 @@ export default function Taches() {
                                 e.stopPropagation();
                                 deplacer(t, COLONNES[idx - 1].statut);
                               }}
-                              className="border border-slate-300 rounded px-1.5 py-0.5 text-xs text-slate-500 hover:bg-slate-50 disabled:opacity-30"
+                              className="border border-slate-300 rounded px-1.5 py-0.5 text-xs text-slate-500 hover:bg-slate-50 disabled:opacity-30 transition-colors"
                               title="Reculer"
                             >
                               ←
@@ -377,7 +383,7 @@ export default function Taches() {
                                 e.stopPropagation();
                                 deplacer(t, COLONNES[idx + 1].statut);
                               }}
-                              className="border border-slate-300 rounded px-1.5 py-0.5 text-xs text-slate-500 hover:bg-slate-50 disabled:opacity-30"
+                              className="border border-slate-300 rounded px-1.5 py-0.5 text-xs text-slate-500 hover:bg-slate-50 disabled:opacity-30 transition-colors"
                               title="Avancer"
                             >
                               →
@@ -387,7 +393,7 @@ export default function Taches() {
                                 e.stopPropagation();
                                 setTacheActive(t);
                               }}
-                              className="flex items-center gap-1 px-2 text-[11px] text-slate-500 hover:text-[#63B23E]"
+                              className="flex items-center gap-1 px-2 text-[11px] text-slate-500 hover:text-[#63B23E] transition-colors"
                               title={tr("taches.ouvrirDetail")}
                             >
                               <svg

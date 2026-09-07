@@ -423,7 +423,7 @@ export default function Projets() {
             setFormErreur("");
             setModalOuvert(true);
           }}
-          className="flex items-center gap-2 bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white rounded-md transition hover:bg-[#4a8f2e]"
+          className="flex items-center gap-2 bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white  transition hover:bg-[#4a8f2e]"
         >
           <PlusIcon className="w-4 h-4" />
           {t("projets.nouveau")}
@@ -437,7 +437,7 @@ export default function Projets() {
             <button
               key={s.id}
               onClick={() => setFiltreStatut(s.id)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
+              className={`px-3 py-1.5 text-xs font-medium  transition-colors ${
                 filtreStatut === s.id
                   ? s.color + " ring-2 ring-offset-1 ring-slate-300"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -456,7 +456,7 @@ export default function Projets() {
             <button
               key={a.id}
               onClick={() => setFiltreArchive(a.id)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
+              className={`px-3 py-1.5 text-xs font-medium  transition-colors ${
                 filtreArchive === a.id
                   ? "bg-slate-800 text-white ring-2 ring-offset-1 ring-slate-400"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -472,7 +472,7 @@ export default function Projets() {
             value={recherche}
             onChange={(e) => setRecherche(e.target.value)}
             placeholder="Rechercher un projet..."
-            className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+            className="w-full px-3 py-1.5 text-sm border border-slate-300  focus:outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
           />
         </div>
         <span className="text-xs text-slate-400 whitespace-nowrap">
@@ -482,14 +482,14 @@ export default function Projets() {
 
       {loading && (
         <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#63B23E]"></div>
+          <div className="animate-spin  h-8 w-8 border-b-2 border-[#63B23E]"></div>
           <span className="ml-3 text-slate-500">{t("common.chargement")}</span>
         </div>
       )}
       {erreur && <p className="text-red-600">{erreur}</p>}
 
       {!loading && !erreur && projetsFiltres.length === 0 && (
-        <div className="border border-dashed border-slate-300 p-10 text-center text-slate-500 rounded-lg">
+        <div className="border border-dashed border-slate-300 p-10 text-center text-slate-500 ">
           {recherche || filtreStatut !== "tous" || filtreArchive !== "actifs" ? (
             <>
               <p>Aucun projet ne correspond à vos filtres.</p>
@@ -512,7 +512,7 @@ export default function Projets() {
           <div
             key={p.id}
             onClick={() => navigate(`/projets/${p.id}`)}
-            className="group relative cursor-pointer border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:border-[#63B23E] rounded-lg animate__animated animate__fadeInUp"
+            className="group relative cursor-pointer border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:border-[#63B23E]  animate__animated animate__fadeInUp"
             style={{ animationDelay: `${index * 50}ms` }}
           >
             {/* En-tête avec nom et statut */}
@@ -525,13 +525,13 @@ export default function Projets() {
                 {p.nom}
               </h2>
               {p.archive ? (
-                <span className="flex items-center gap-1 shrink-0 px-2 py-0.5 text-xs font-medium rounded-full bg-slate-200 text-slate-600">
+                <span className="flex items-center gap-1 shrink-0 px-2 py-0.5 text-xs font-medium  bg-slate-200 text-slate-600">
                   <ArchiveIcon className="w-3 h-3" />
                   <span className="hidden sm:inline">Archivé</span>
                 </span>
               ) : (
                 <span
-                  className={`flex items-center gap-2 shrink-0 px-2 py-0.5 text-xs font-medium rounded-full ${
+                  className={`flex items-center gap-2 shrink-0 px-2 py-0.5 text-xs font-medium  ${
                     couleurStatut[p.statut_sante] || "bg-slate-100 text-slate-700"
                   }`}
                 >
@@ -569,9 +569,9 @@ export default function Projets() {
 
             {/* Barre de progression */}
             <div className="mt-3">
-              <div className="mb-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+              <div className="mb-1 h-1.5 w-full overflow-hidden  bg-slate-100">
                 <div
-                  className={`h-full rounded-full transition-all duration-500 ${
+                  className={`h-full  transition-all duration-500 ${
                     (p.avancement_pct || 0) >= 80
                       ? "bg-green-500"
                       : (p.avancement_pct || 0) >= 40
@@ -598,14 +598,14 @@ export default function Projets() {
                   <button
                     onClick={(e) => restaurer(p, e)}
                     title="Restaurer le projet"
-                    className="p-1.5 text-slate-500 hover:text-[#63B23E] hover:bg-green-50 rounded-md transition-colors"
+                    className="p-1.5 text-slate-500 hover:text-[#63B23E] hover:bg-green-50  transition-colors"
                   >
                     <RestoreIcon className="w-4 h-4" />
                   </button>
                   <button
                     onClick={(e) => supprimer(p, e)}
                     title="Supprimer définitivement"
-                    className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                    className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50  transition-colors"
                   >
                     <TrashIcon className="w-4 h-4" />
                   </button>
@@ -615,21 +615,21 @@ export default function Projets() {
                   <button
                     onClick={(e) => archiver(p, e)}
                     title="Archiver le projet"
-                    className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-md transition-colors"
+                    className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50  transition-colors"
                   >
                     <ArchiveIcon className="w-4 h-4" />
                   </button>
                   <button
                     onClick={(e) => ouvrirEdition(p, e)}
                     title="Modifier le projet"
-                    className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                    className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50  transition-colors"
                   >
                     <EditIcon className="w-4 h-4" />
                   </button>
                   <button
                     onClick={(e) => supprimer(p, e)}
                     title="Supprimer le projet"
-                    className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                    className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50  transition-colors"
                   >
                     <TrashIcon className="w-4 h-4" />
                   </button>
@@ -643,7 +643,7 @@ export default function Projets() {
       {/* Modal création */}
       {modalOuvert && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate__animated animate__fadeIn">
-          <div className="w-full max-w-lg bg-white p-6 shadow-xl rounded-lg animate__animated animate__zoomIn">
+          <div className="w-full max-w-lg bg-white p-6 shadow-xl  animate__animated animate__zoomIn">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-bold text-slate-900">
                 {t("projets.modal.titre")}
@@ -657,7 +657,7 @@ export default function Projets() {
             </div>
 
             {formErreur && (
-              <div className="mb-3 bg-red-50 px-3 py-2 text-sm text-red-700 border border-red-200 rounded-md">
+              <div className="mb-3 bg-red-50 px-3 py-2 text-sm text-red-700 border border-red-200 ">
                 ⚠️ {formErreur}
               </div>
             )}
@@ -671,7 +671,7 @@ export default function Projets() {
                   name="nom"
                   value={form.nom}
                   onChange={handleChange}
-                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none rounded-md focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
                   placeholder="Site vitrine…"
                 />
               </div>
@@ -685,7 +685,7 @@ export default function Projets() {
                   value={form.description}
                   onChange={handleChange}
                   rows={2}
-                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none rounded-md focus:ring-2 focus:ring-[#63B23E] focus:border-transparent resize-none"
+                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent resize-none"
                   placeholder="Description optionnelle..."
                 />
               </div>
@@ -699,7 +699,7 @@ export default function Projets() {
                     name="client_id"
                     value={form.client_id}
                     onChange={handleChange}
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none rounded-md focus:ring-2 focus:ring-[#63B23E] focus:border-transparent appearance-none bg-white"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent appearance-none bg-white"
                   >
                     <option value="">— Choisir —</option>
                     {clients.map((c) => (
@@ -718,7 +718,7 @@ export default function Projets() {
                     name="responsable_id"
                     value={form.responsable_id}
                     onChange={handleChange}
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none rounded-md focus:ring-2 focus:ring-[#63B23E] focus:border-transparent appearance-none bg-white"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent appearance-none bg-white"
                   >
                     <option value="">— Choisir —</option>
                     {responsables.map((r) => (
@@ -741,7 +741,7 @@ export default function Projets() {
                     value={form.date_debut}
                     onChange={handleChange}
                     required
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none rounded-md focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
                   />
                 </div>
                 <div>
@@ -754,7 +754,7 @@ export default function Projets() {
                     value={form.date_fin_prevue}
                     onChange={handleChange}
                     required
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none rounded-md focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
                   />
                 </div>
               </div>
@@ -769,14 +769,14 @@ export default function Projets() {
                 <button
                   type="button"
                   onClick={() => setModalOuvert(false)}
-                  className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-md transition-colors"
+                  className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100  transition-colors"
                 >
                   {t("common.annuler")}
                 </button>
                 <button
                   type="submit"
                   disabled={enCours}
-                  className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white rounded-md transition hover:bg-[#4a8f2e] disabled:opacity-50"
+                  className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white  transition hover:bg-[#4a8f2e] disabled:opacity-50"
                 >
                   {enCours ? t("common.enregistrement") : t("projets.form.creer")}
                 </button>
@@ -789,7 +789,7 @@ export default function Projets() {
       {/* Modal Édition */}
       {modalEditionOuvert && projetEdition && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate__animated animate__fadeIn">
-          <div className="w-full max-w-lg bg-white p-6 shadow-xl rounded-lg animate__animated animate__zoomIn">
+          <div className="w-full max-w-lg bg-white p-6 shadow-xl  animate__animated animate__zoomIn">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-bold text-slate-900">
                 Modifier le projet
@@ -806,7 +806,7 @@ export default function Projets() {
             </div>
 
             {formErreur && (
-              <div className="mb-3 bg-red-50 px-3 py-2 text-sm text-red-700 border border-red-200 rounded-md">
+              <div className="mb-3 bg-red-50 px-3 py-2 text-sm text-red-700 border border-red-200 ">
                 ⚠️ {formErreur}
               </div>
             )}
@@ -820,7 +820,7 @@ export default function Projets() {
                   name="nom"
                   value={form.nom}
                   onChange={handleChange}
-                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none rounded-md focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
                   placeholder="Site vitrine…"
                 />
               </div>
@@ -834,7 +834,7 @@ export default function Projets() {
                   value={form.description}
                   onChange={handleChange}
                   rows={2}
-                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none rounded-md focus:ring-2 focus:ring-[#63B23E] focus:border-transparent resize-none"
+                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent resize-none"
                   placeholder="Description optionnelle..."
                 />
               </div>
@@ -848,7 +848,7 @@ export default function Projets() {
                     name="client_id"
                     value={form.client_id}
                     onChange={handleChange}
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none rounded-md focus:ring-2 focus:ring-[#63B23E] focus:border-transparent appearance-none bg-white"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent appearance-none bg-white"
                   >
                     <option value="">— Choisir —</option>
                     {clients.map((c) => (
@@ -867,7 +867,7 @@ export default function Projets() {
                     name="responsable_id"
                     value={form.responsable_id}
                     onChange={handleChange}
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none rounded-md focus:ring-2 focus:ring-[#63B23E] focus:border-transparent appearance-none bg-white"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent appearance-none bg-white"
                   >
                     <option value="">— Choisir —</option>
                     {responsables.map((r) => (
@@ -890,7 +890,7 @@ export default function Projets() {
                     value={form.date_debut}
                     onChange={handleChange}
                     required
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none rounded-md focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
                   />
                 </div>
                 <div>
@@ -903,7 +903,7 @@ export default function Projets() {
                     value={form.date_fin_prevue}
                     onChange={handleChange}
                     required
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none rounded-md focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
                   />
                 </div>
               </div>
@@ -915,14 +915,14 @@ export default function Projets() {
                     setModalEditionOuvert(false);
                     setProjetEdition(null);
                   }}
-                  className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-md transition-colors"
+                  className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100  transition-colors"
                 >
                   {t("common.annuler")}
                 </button>
                 <button
                   type="submit"
                   disabled={enCours}
-                  className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white rounded-md transition hover:bg-[#4a8f2e] disabled:opacity-50"
+                  className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white  transition hover:bg-[#4a8f2e] disabled:opacity-50"
                 >
                   {enCours ? t("common.enregistrement") : "Modifier"}
                 </button>

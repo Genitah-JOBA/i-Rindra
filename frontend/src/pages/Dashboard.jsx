@@ -1,4 +1,4 @@
-// Dashboard.jsx — vue d'accueil interne (RF-16) avec données réelles
+// Dashboard.jsx — vue d'accueil interne (RF-16) avec données réelles et animations
 import { useEffect, useState } from "react";
 import { projetsService } from "../api/projets";
 import { useAuth } from "../auth/AuthContext";
@@ -17,6 +17,7 @@ import {
   Filler,
 } from "chart.js";
 import { Bar, Doughnut, Line } from "react-chartjs-2";
+import 'animate.css';
 
 // Enregistrer les composants Chart.js
 ChartJS.register(
@@ -107,114 +108,6 @@ const TachesIcon = ({ className = "w-5 h-5" }) => (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-    />
-  </svg>
-);
-
-// Icône Membres
-const MembresIcon = ({ className = "w-5 h-5" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className={className}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
-    />
-  </svg>
-);
-
-// Icône Assistant IA
-const IAIcon = ({ className = "w-5 h-5" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className={className}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
-    />
-  </svg>
-);
-
-// Icône Devis
-const DevisIcon = ({ className = "w-5 h-5" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className={className}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h12m-12 2.25h12M3.375 4.5h17.25c.621 0 1.125.504 1.125 1.125v12.75c0 .621-.504 1.125-1.125 1.125H3.375a1.125 1.125 0 01-1.125-1.125V5.625c0-.621.504-1.125 1.125-1.125z"
-    />
-  </svg>
-);
-
-// Icône Facturation
-const FacturationIcon = ({ className = "w-5 h-5" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className={className}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"
-    />
-  </svg>
-);
-
-// Icône Chat
-const ChatIcon = ({ className = "w-5 h-5" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className={className}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"
-    />
-  </svg>
-);
-
-// Icône Documents
-const DocumentsIcon = ({ className = "w-5 h-5" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className={className}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
     />
   </svg>
 );
@@ -608,9 +501,9 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="animate__animated animate__fadeIn">
-      {/* En-tête */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+    <div className="animate__animated animate__fadeIn w-full px-4 sm:px-6 lg:px-8">
+      {/* En-tête avec animation */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 animate__animated animate__fadeInDown">
         <div>
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900">
             {t("dash.bonjour")} {user?.prenom || ""} {user?.nom || ""} !
@@ -620,16 +513,16 @@ export default function Dashboard() {
         <button
           onClick={handleRefresh}
           disabled={loading}
-          className="mt-2 sm:mt-0 flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-[#63B23E] text-white text-sm sm:text-base hover:bg-[#3F894E] transition-colors disabled:opacity-50"
+          className="mt-2 sm:mt-0 flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-[#63B23E] text-white text-sm sm:text-base  hover:bg-[#3F894E] transition-colors disabled:opacity-50"
         >
           <RefreshIcon spinning={loading} className="w-4 h-4" />
           {loading ? t("common.chargement") : t("dash.refresh")}
         </button>
       </div>
 
-      {/* Chargement */}
+      {/* Chargement avec animation */}
       {loading && (
-        <div className="flex justify-center items-center py-12">
+        <div className="flex justify-center items-center py-12 animate__animated animate__pulse">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#63B23E]"></div>
           <span className="ml-3 text-slate-500">{t("common.chargement")}</span>
         </div>
@@ -637,7 +530,7 @@ export default function Dashboard() {
 
       {/* Erreur */}
       {erreur && (
-        <div className="mb-4 bg-red-50 px-4 py-3 text-sm text-red-700 border border-red-200">
+        <div className="mb-4  bg-red-50 px-4 py-3 text-sm text-red-700 border border-red-200 animate__animated animate__shakeX">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <span>⚠️ {erreur}</span>
             <button
@@ -652,52 +545,64 @@ export default function Dashboard() {
 
       {!loading && !erreur && (
         <>
-          {/* Cartes statistiques avec icônes SVG */}
+          {/* Cartes statistiques avec animation */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
-            <StatCard
-              title={t("dash.total")}
-              value={stats.total}
-              color="text-slate-900"
-              icon={<DashboardIcon className="w-5 h-5 text-slate-600" />}
-            />
-            <StatCard
-              title={t("statut.vert")}
-              value={stats.vert}
-              color="text-green-600"
-              icon={<BonIcon className="w-5 h-5 text-green-600" />}
-            />
-            <StatCard
-              title={t("statut.orange")}
-              value={stats.orange}
-              color="text-orange-600"
-              icon={<AttentionIcon className="w-5 h-5 text-orange-600" />}
-            />
-            <StatCard
-              title={t("statut.rouge")}
-              value={stats.rouge}
-              color="text-red-600"
-              icon={<CritiqueIcon className="w-5 h-5 text-red-600" />}
-            />
-            <StatCard
-              title={t("dash.moyenne")}
-              value={`${stats.avancementMoyen}%`}
-              color="text-blue-600"
-              icon={<TachesIcon className="w-5 h-5 text-blue-600" />}
-            />
-            <StatCard
-              title={t("dash.taches")}
-              value={`${stats.tachesTerminees}/${stats.tachesTotales}`}
-              color="text-purple-600"
-              icon={<TachesIcon className="w-5 h-5 text-purple-600" />}
-            />
+            <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.05s' }}>
+              <StatCard
+                title={t("dash.total")}
+                value={stats.total}
+                color="text-slate-900"
+                icon={<DashboardIcon className="w-5 h-5 text-slate-600" />}
+              />
+            </div>
+            <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.10s' }}>
+              <StatCard
+                title={t("statut.vert")}
+                value={stats.vert}
+                color="text-green-600"
+                icon={<BonIcon className="w-5 h-5 text-green-600" />}
+              />
+            </div>
+            <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.15s' }}>
+              <StatCard
+                title={t("statut.orange")}
+                value={stats.orange}
+                color="text-orange-600"
+                icon={<AttentionIcon className="w-5 h-5 text-orange-600" />}
+              />
+            </div>
+            <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.20s' }}>
+              <StatCard
+                title={t("statut.rouge")}
+                value={stats.rouge}
+                color="text-red-600"
+                icon={<CritiqueIcon className="w-5 h-5 text-red-600" />}
+              />
+            </div>
+            <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.25s' }}>
+              <StatCard
+                title={t("dash.moyenne")}
+                value={`${stats.avancementMoyen}%`}
+                color="text-blue-600"
+                icon={<TachesIcon className="w-5 h-5 text-blue-600" />}
+              />
+            </div>
+            <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.30s' }}>
+              <StatCard
+                title={t("dash.taches")}
+                value={`${stats.tachesTerminees}/${stats.tachesTotales}`}
+                color="text-purple-600"
+                icon={<TachesIcon className="w-5 h-5 text-purple-600" />}
+              />
+            </div>
           </div>
 
-          {/* Graphiques */}
+          {/* Graphiques avec animation */}
           {projets.length > 0 ? (
             <>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
                 {/* Graphique en barres */}
-                <div className="bg-white border border-slate-200 p-3 sm:p-4 shadow-sm">
+                <div className="bg-white border border-slate-200 p-3 sm:p-4 shadow-sm  animate__animated animate__fadeInUp" style={{ animationDelay: '0.10s' }}>
                   <h3 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2 sm:mb-3 flex items-center gap-2">
                     <ProjetsIcon className="w-4 h-4 text-slate-500" />
                     {t("dash.chart.avancement")}
@@ -708,7 +613,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Graphique en donut */}
-                <div className="bg-white border border-slate-200 p-3 sm:p-4 shadow-sm">
+                <div className="bg-white border border-slate-200 p-3 sm:p-4 shadow-sm  animate__animated animate__fadeInUp" style={{ animationDelay: '0.20s' }}>
                   <h3 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2 sm:mb-3 flex items-center gap-2">
                     <DashboardIcon className="w-4 h-4 text-slate-500" />
                     {t("dash.chart.repartition")}
@@ -725,7 +630,7 @@ export default function Dashboard() {
               </div>
 
               {/* Graphique linéaire */}
-              <div className="bg-white border border-slate-200 p-3 sm:p-4 shadow-sm mb-4 sm:mb-6">
+              <div className="bg-white border border-slate-200 p-3 sm:p-4 shadow-sm  mb-4 sm:mb-6 animate__animated animate__fadeInUp" style={{ animationDelay: '0.30s' }}>
                 <h3 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2 sm:mb-3 flex items-center gap-2">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -757,16 +662,22 @@ export default function Dashboard() {
                   </h3>
                 </div>
                 <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {projets.map((p) => (
-                    <ProjectCard key={p.id} projet={p} />
+                  {projets.map((p, index) => (
+                    <div 
+                      key={p.id} 
+                      className="animate__animated animate__fadeInUp" 
+                      style={{ animationDelay: `${0.05 + (index * 0.05)}s` }}
+                    >
+                      <ProjectCard projet={p} />
+                    </div>
                   ))}
                 </div>
               </div>
             </>
           ) : (
-            <div className="text-center py-8 sm:py-12 bg-slate-50 border border-slate-200">
+            <div className="text-center py-8 sm:py-12 bg-slate-50 border border-slate-200  animate__animated animate__fadeInUp">
               <p className="text-slate-500">{t("dash.aucun")}</p>
-              <button className="mt-4 px-4 py-2 bg-[#63B23E] text-white hover:bg-[#3F894E] transition-colors">
+              <button className="mt-4 px-4 py-2 bg-[#63B23E] text-white  hover:bg-[#3F894E] transition-colors">
                 + Créer un projet
               </button>
             </div>
@@ -777,10 +688,10 @@ export default function Dashboard() {
   );
 }
 
-// Composant StatCard avec icône SVG
+// Composant StatCard avec icône SVG et animation au survol
 function StatCard({ title, value, color, icon }) {
   return (
-    <div className="bg-white border border-slate-200 p-2 sm:p-3 md:p-4 shadow-sm">
+    <div className="bg-white border border-slate-200 p-2 sm:p-3 md:p-4 shadow-sm  hover:shadow-md transition-all duration-300 hover:border-[#63B23E] hover:scale-105">
       <div className="flex items-center gap-1.5 sm:gap-2">
         <div className="flex-shrink-0">{icon}</div>
         <div className="min-w-0">
@@ -824,7 +735,7 @@ function ProjectCard({ projet }) {
 
   return (
     <div
-      className="group border border-slate-200 bg-white p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
+      className="group border border-slate-200 bg-white p-3 sm:p-4 shadow-sm hover:shadow-md hover:border-[#63B23E] transition-all duration-300  cursor-pointer hover:-translate-y-1"
       onClick={() => (window.location.href = `/projets/${projet.id}`)}
     >
       <div className="mb-2 flex items-start justify-between gap-2">
@@ -832,7 +743,7 @@ function ProjectCard({ projet }) {
           {projet.nom || "Sans nom"}
         </h2>
         <span
-          className={`flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2.5 py-0.5 text-[10px] sm:text-xs font-medium whitespace-nowrap flex-shrink-0 ${
+          className={`flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2.5 py-0.5 text-[10px] sm:text-xs font-medium whitespace-nowrap flex-shrink-0 rounded-full ${
             couleurStatut[projet.statut_sante] || "bg-slate-100 text-slate-700"
           }`}
         >
@@ -865,9 +776,9 @@ function ProjectCard({ projet }) {
         </div>
       )}
 
-      <div className="mb-1 h-1.5 w-full overflow-hidden bg-slate-100">
+      <div className="mb-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
         <div
-          className={`h-full transition-all duration-500 ${
+          className={`h-full rounded-full transition-all duration-500 ${
             (projet.avancement_pct || 0) >= 80
               ? "bg-green-500"
               : (projet.avancement_pct || 0) >= 40
