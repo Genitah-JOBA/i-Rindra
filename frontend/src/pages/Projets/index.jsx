@@ -33,6 +33,18 @@ const CloseIcon = ({ className = "w-6 h-6" }) => (
   </svg>
 );
 
+const ArchiveIcon = ({ className = "w-4 h-4" }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+  </svg>
+);
+
+const RestoreIcon = ({ className = "w-4 h-4" }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+  </svg>
+);
+
 const UserIcon = ({ className = "w-4 h-4" }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
@@ -89,6 +101,7 @@ export default function Projets() {
   const [loading, setLoading] = useState(true);
   const [erreur, setErreur] = useState("");
   const [filtreStatut, setFiltreStatut] = useState("tous");
+  const [filtreArchive, setFiltreArchive] = useState("actifs");
   const [recherche, setRecherche] = useState("");
 
   const [modalOuvert, setModalOuvert] = useState(false);
@@ -100,14 +113,18 @@ export default function Projets() {
 
   useEffect(() => {
     charger();
-  }, []);
+  }, [filtreArchive]);
 
   const charger = async () => {
     setLoading(true);
     setErreur("");
     try {
       const [projetsData, clientsData, usersData] = await Promise.all([
-        projetsService.list(),
+        projetsService.list(
+          filtreArchive === "tous"
+            ? {}
+            : { archive: filtreArchive === "archives" }
+        ),
         clientsService.list().catch(() => []),
         utilisateursService.list().catch(() => []),
       ]);
@@ -342,6 +359,31 @@ export default function Projets() {
     }
   };
 
+  const archiver = async (projet, e) => {
+    e.stopPropagation();
+    if (!window.confirm(`Archiver le projet « ${projet.nom} » ?`)) return;
+    try {
+      await projetsService.archiver(projet.id);
+      showSuccess(`Le projet "${projet.nom}" a été archivé.`);
+      await charger();
+    } catch (err) {
+      const msg = err.response?.data?.detail || "Erreur lors de l'archivage du projet.";
+      showError(msg);
+    }
+  };
+
+  const restaurer = async (projet, e) => {
+    e.stopPropagation();
+    try {
+      await projetsService.desarchiver(projet.id);
+      showSuccess(`Le projet "${projet.nom}" a été restauré.`);
+      await charger();
+    } catch (err) {
+      const msg = err.response?.data?.detail || "Erreur lors de la restauration du projet.";
+      showError(msg);
+    }
+  };
+
   const nomClient = (id) => clients.find((c) => c.id === id)?.nom || "—";
   const nomResponsable = (id) => responsables.find((r) => r.id === id)?.prenom + " " + responsables.find((r) => r.id === id)?.nom || "—";
 
@@ -405,6 +447,25 @@ export default function Projets() {
             </button>
           ))}
         </div>
+        <div className="flex flex-wrap gap-1.5">
+          {[
+            { id: "actifs", label: "Actifs" },
+            { id: "archives", label: "Archivés" },
+            { id: "tous", label: "Tous" },
+          ].map((a) => (
+            <button
+              key={a.id}
+              onClick={() => setFiltreArchive(a.id)}
+              className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
+                filtreArchive === a.id
+                  ? "bg-slate-800 text-white ring-2 ring-offset-1 ring-slate-400"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              {a.label}
+            </button>
+          ))}
+        </div>
         <div className="flex-1 min-w-[150px]">
           <input
             type="text"
@@ -429,11 +490,11 @@ export default function Projets() {
 
       {!loading && !erreur && projetsFiltres.length === 0 && (
         <div className="border border-dashed border-slate-300 p-10 text-center text-slate-500 rounded-lg">
-          {recherche || filtreStatut !== "tous" ? (
+          {recherche || filtreStatut !== "tous" || filtreArchive !== "actifs" ? (
             <>
               <p>Aucun projet ne correspond à vos filtres.</p>
               <button
-                onClick={() => { setFiltreStatut("tous"); setRecherche(""); }}
+                onClick={() => { setFiltreStatut("tous"); setRecherche(""); setFiltreArchive("actifs"); }}
                 className="mt-2 text-[#63B23E] hover:underline"
               >
                 Réinitialiser les filtres
@@ -456,17 +517,28 @@ export default function Projets() {
           >
             {/* En-tête avec nom et statut */}
             <div className="mb-2 flex items-start justify-between gap-2">
-              <h2 className="font-semibold text-slate-900 truncate text-sm md:text-base flex-1">
-                {p.nom}
-              </h2>
-              <span
-                className={`flex items-center gap-2 shrink-0 px-2 py-0.5 text-xs font-medium rounded-full ${
-                  couleurStatut[p.statut_sante] || "bg-slate-100 text-slate-700"
+              <h2
+                className={`truncate text-sm md:text-base flex-1 ${
+                  p.archive ? "font-semibold text-slate-400 line-through" : "font-semibold text-slate-900"
                 }`}
               >
-                <span className="text-xs">{statutIcone[p.statut_sante] || "⚪"}</span>
-                <span className="hidden sm:inline">{getStatutLabel(p.statut_sante)}</span>
-              </span>
+                {p.nom}
+              </h2>
+              {p.archive ? (
+                <span className="flex items-center gap-1 shrink-0 px-2 py-0.5 text-xs font-medium rounded-full bg-slate-200 text-slate-600">
+                  <ArchiveIcon className="w-3 h-3" />
+                  <span className="hidden sm:inline">Archivé</span>
+                </span>
+              ) : (
+                <span
+                  className={`flex items-center gap-2 shrink-0 px-2 py-0.5 text-xs font-medium rounded-full ${
+                    couleurStatut[p.statut_sante] || "bg-slate-100 text-slate-700"
+                  }`}
+                >
+                  <span className="text-xs">{statutIcone[p.statut_sante] || "⚪"}</span>
+                  <span className="hidden sm:inline">{getStatutLabel(p.statut_sante)}</span>
+                </span>
+              )}
             </div>
 
             {/* Informations du projet */}
@@ -521,20 +593,48 @@ export default function Projets() {
 
             {/* Boutons actions en bas à droite - toujours visibles sur desktop */}
             <div className="mt-3 pt-2 border-t border-slate-100 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <button
-                onClick={(e) => ouvrirEdition(p, e)}
-                title="Modifier le projet"
-                className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-              >
-                <EditIcon className="w-4 h-4" />
-              </button>
-              <button
-                onClick={(e) => supprimer(p, e)}
-                title="Supprimer le projet"
-                className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-              >
-                <TrashIcon className="w-4 h-4" />
-              </button>
+              {p.archive ? (
+                <>
+                  <button
+                    onClick={(e) => restaurer(p, e)}
+                    title="Restaurer le projet"
+                    className="p-1.5 text-slate-500 hover:text-[#63B23E] hover:bg-green-50 rounded-md transition-colors"
+                  >
+                    <RestoreIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={(e) => supprimer(p, e)}
+                    title="Supprimer définitivement"
+                    className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                  >
+                    <TrashIcon className="w-4 h-4" />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={(e) => archiver(p, e)}
+                    title="Archiver le projet"
+                    className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-md transition-colors"
+                  >
+                    <ArchiveIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={(e) => ouvrirEdition(p, e)}
+                    title="Modifier le projet"
+                    className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                  >
+                    <EditIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={(e) => supprimer(p, e)}
+                    title="Supprimer le projet"
+                    className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                  >
+                    <TrashIcon className="w-4 h-4" />
+                  </button>
+                </>
+              )}
             </div>
           </div>
         ))}

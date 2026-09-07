@@ -26,9 +26,13 @@ export const projetsService = {
     return data;
   },
 
-  // Archiver / supprimer
+  // Archiver / désarchiver
   archiver: async (id) => {
     const { data } = await api.post(`/projets/${id}/archiver`);
+    return data;
+  },
+  desarchiver: async (id) => {
+    const { data } = await api.post(`/projets/${id}/desarchiver`);
     return data;
   },
   remove: async (id) => {

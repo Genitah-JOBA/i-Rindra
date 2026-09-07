@@ -99,6 +99,31 @@ export default function ProjetDetail() {
     }
   };
 
+  const basculerArchive = async () => {
+    const action = projet.archive
+      ? "restaurer"
+      : "archiver";
+    if (
+      !projet.archive &&
+      !window.confirm(`Archiver le projet « ${projet.nom} » ?`)
+    )
+      return;
+    try {
+      if (projet.archive) {
+        await projetsService.desarchiver(id);
+        alert("Le projet a été restauré.");
+      } else {
+        await projetsService.archiver(id);
+        alert("Le projet a été archivé.");
+        navigate("/projets");
+        return;
+      }
+      await charger();
+    } catch (err) {
+      alert(err.response?.data?.detail || `Erreur lors de l'${action}.`);
+    }
+  };
+
   if (loading) return <p className="text-slate-500">Chargement…</p>;
   if (erreur)
     return (
@@ -113,22 +138,48 @@ export default function ProjetDetail() {
   return (
     <div className="space-y-6">
       {/* Fil d'ariane + actions */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <Link to="/projets" className="text-sm text-[#00B2A0] hover:underline">
           ← Retour aux projets
         </Link>
-        <button
-          onClick={supprimerProjet}
-          className="border border-red-200 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50"
-        >
-          Supprimer le projet
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={basculerArchive}
+            className={`border px-3 py-1.5 text-sm ${
+              projet.archive
+                ? "border-green-200 text-green-600 hover:bg-green-50"
+                : "border-amber-200 text-amber-600 hover:bg-amber-50"
+            }`}
+          >
+            {projet.archive ? "Restaurer le projet" : "Archiver le projet"}
+          </button>
+          <button
+            onClick={supprimerProjet}
+            className="border border-red-200 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50"
+          >
+            Supprimer le projet
+          </button>
+        </div>
       </div>
+
+      {/* Bandeau archivé */}
+      {projet.archive && (
+        <div className="flex items-center gap-2 border bg-slate-100 px-4 py-2 text-sm font-medium text-slate-600">
+          📦 Ce projet est archivé. Il est masqué de la liste des projets actifs.
+        </div>
+      )}
 
       {/* En-tête projet */}
       <div className="border bg-white p-6 shadow-sm">
         <div className="mb-2 flex items-start justify-between gap-3">
-          <h1 className="text-2xl font-bold text-slate-900">{projet.nom}</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-2xl font-bold text-slate-900">{projet.nom}</h1>
+            {projet.archive && (
+              <span className="bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-600">
+                Archivé
+              </span>
+            )}
+          </div>
           <span
             className={`shrink-0 px-2 py-0.5 text-xs font-medium ${
               couleurStatut[projet.statut_sante] ||
