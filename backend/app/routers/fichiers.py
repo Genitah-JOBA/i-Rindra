@@ -35,23 +35,21 @@ UPLOAD_DIR.mkdir(exist_ok=True)  # Crée le dossier s'il n'existe pas
 # Taille maximale des fichiers (50 MB)
 MAX_FILE_SIZE = 50 * 1024 * 1024
 
-# Types MIME autorisés
+# Types MIME autorisés (images, PDF, Word, Excel)
 ALLOWED_MIME_TYPES = [
+    # Images
     "image/jpeg",
     "image/png",
     "image/gif",
     "image/webp",
+    # PDF
     "application/pdf",
+    # Word
     "application/msword",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    # Excel
     "application/vnd.ms-excel",
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "application/vnd.ms-powerpoint",
-    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-    "text/plain",
-    "text/csv",
-    "application/zip",
-    "application/x-rar-compressed",
 ]
 
 
@@ -82,8 +80,12 @@ async def get_projet_fichiers(
     """
     Récupère la liste des fichiers d'un projet (RF-08).
     """
-    # Construction de la requête
-    query = select(Fichier).where(Fichier.projet_id == projet_id)
+    # Construction de la requête (jointure sur l'auteur pour afficher son nom)
+    query = (
+        select(Fichier, Utilisateur)
+        .outerjoin(Utilisateur, Utilisateur.id == Fichier.televerse_par)
+        .where(Fichier.projet_id == projet_id)
+    )
     
     if search:
         query = query.where(Fichier.nom.ilike(f"%{search}%"))
@@ -91,9 +93,52 @@ async def get_projet_fichiers(
     query = query.order_by(Fichier.cree_le.desc())
     
     result = await db.execute(query)
+    rows = result.all()
+    
+    fichiers = []
+    for f, u in rows:
+        item = FichierListResponse.model_validate(f)
+        item.televerse_par_nom = f"{u.prenom} {u.nom}" if u else None
+        fichiers.append(item)
+    
+    return fichiers
+
+
+@router.get("/{projet_id}/fichiers/statistiques")
+async def get_fichier_statistiques(
+    projet_id: int,
+    projet: Projet = Depends(check_projet_access),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Statistiques des fichiers d'un projet.
+    """
+    # 1. Nombre total de fichiers
+    result = await db.execute(
+        select(Fichier).where(Fichier.projet_id == projet_id)
+    )
     fichiers = result.scalars().all()
     
-    return [FichierListResponse.model_validate(f) for f in fichiers]
+    total = len(fichiers)
+    
+    # 2. Taille totale
+    taille_totale = sum(f.taille_octets or 0 for f in fichiers)
+    
+    # 3. Répartition par type MIME
+    types = {}
+    for f in fichiers:
+        type_mime = f.type_mime or "unknown"
+        if type_mime in types:
+            types[type_mime] += 1
+        else:
+            types[type_mime] = 1
+    
+    return {
+        "total_fichiers": total,
+        "taille_totale_bytes": taille_totale,
+        "taille_totale_mb": round(taille_totale / (1024 * 1024), 2),
+        "types": types,
+    }
 
 
 @router.get("/{projet_id}/fichiers/{fichier_id}", response_model=FichierResponse)
@@ -124,9 +169,9 @@ async def get_fichier(
         )
     
     # Récupère le nom de l'utilisateur qui a uploadé
-    if fichier.televerse_par_id:
+    if fichier.televerse_par:
         result = await db.execute(
-            select(Utilisateur).where(Utilisateur.id == fichier.televerse_par_id)
+            select(Utilisateur).where(Utilisateur.id == fichier.televerse_par)
         )
         utilisateur = result.scalar_one_or_none()
         televerse_par_nom = f"{utilisateur.prenom} {utilisateur.nom}" if utilisateur else None
@@ -155,7 +200,7 @@ async def upload_fichier(
     
     **Limitations :**
     - Taille max : 50 MB
-    - Types autorisés : images, PDF, Word, Excel, PowerPoint, texte, ZIP, RAR
+    - Types autorisés : images, PDF, Word, Excel
     """
     # 1. Vérifie la taille du fichier
     file_size = 0
@@ -193,10 +238,10 @@ async def upload_fichier(
     fichier = Fichier(
         nom=file.filename,
         chemin_ou_url=str(file_path),
-        type=file.content_type,
-        taille=file_size,
+        type_mime=file.content_type,
+        taille_octets=file_size,
         projet_id=projet_id,
-        televerse_par_id=current_user_id,
+        televerse_par=current_user_id,
     )
     
     db.add(fichier)
@@ -256,7 +301,7 @@ async def telecharger_fichier(
     return FileResponse(
         path=file_path,
         filename=fichier.nom,
-        media_type=fichier.type or "application/octet-stream",
+        media_type=fichier.type_mime or "application/octet-stream",
     )
 
 
@@ -350,40 +395,3 @@ async def renommer_fichier(
     await db.refresh(fichier)
     
     return FichierResponse.model_validate(fichier)
-
-
-@router.get("/{projet_id}/fichiers/statistiques")
-async def get_fichier_statistiques(
-    projet_id: int,
-    projet: Projet = Depends(check_projet_access),
-    db: AsyncSession = Depends(get_db)
-):
-    """
-    Statistiques des fichiers d'un projet.
-    """
-    # 1. Nombre total de fichiers
-    result = await db.execute(
-        select(Fichier).where(Fichier.projet_id == projet_id)
-    )
-    fichiers = result.scalars().all()
-    
-    total = len(fichiers)
-    
-    # 2. Taille totale
-    taille_totale = sum(f.taille or 0 for f in fichiers)
-    
-    # 3. Répartition par type MIME
-    types = {}
-    for f in fichiers:
-        type_mime = f.type or "unknown"
-        if type_mime in types:
-            types[type_mime] += 1
-        else:
-            types[type_mime] = 1
-    
-    return {
-        "total_fichiers": total,
-        "taille_totale_bytes": taille_totale,
-        "taille_totale_mb": round(taille_totale / (1024 * 1024), 2),
-        "types": types,
-    }

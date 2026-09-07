@@ -1,7 +1,8 @@
-// src/pages/ProjetDetail/index.jsx — fiche d'un projet : infos + gestion des membres (RF-06, RF-13).
-import { useState, useEffect, useCallback } from "react";
+// src/pages/ProjetDetail/index.jsx — fiche d'un projet : infos + gestion des membres (RF-06, RF-13) + fichiers (RF-08).
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { projetsService } from "../../api/projets";
+import { fichiersService } from "../../api/fichiers";
 
 const couleurStatut = {
   vert: "bg-green-100 text-green-800",
@@ -14,6 +15,36 @@ const couleurRoleGlobal = {
   direction: "bg-purple-100 text-purple-700",
   equipe: "bg-blue-100 text-blue-700",
   client: "bg-amber-100 text-amber-700",
+};
+
+// Petit badge d'aperçu selon le type MIME
+const infoType = (mime) => {
+  if (!mime) return { label: "FIC", classe: "bg-slate-100 text-slate-600" };
+  const m = mime.toLowerCase();
+  if (m === "application/pdf")
+    return { label: "PDF", classe: "bg-red-100 text-red-700" };
+  if (m.startsWith("image/"))
+    return { label: "IMG", classe: "bg-purple-100 text-purple-700" };
+  if (m.includes("word"))
+    return { label: "DOC", classe: "bg-blue-100 text-blue-700" };
+  if (m.includes("excel") || m === "text/csv")
+    return { label: "XLS", classe: "bg-green-100 text-green-700" };
+  if (m.includes("powerpoint"))
+    return { label: "PPT", classe: "bg-orange-100 text-orange-700" };
+  if (m.includes("zip") || m.includes("rar"))
+    return { label: "ZIP", classe: "bg-amber-100 text-amber-700" };
+  if (m.startsWith("text/"))
+    return { label: "TXT", classe: "bg-slate-100 text-slate-600" };
+  return { label: "FIC", classe: "bg-slate-100 text-slate-600" };
+};
+
+const formatTaille = (octets) => {
+  if (octets == null) return "—";
+  if (octets < 1024) return `${octets} o`;
+  if (octets < 1024 * 1024) return `${(octets / 1024).toFixed(1)} Ko`;
+  if (octets < 1024 * 1024 * 1024)
+    return `${(octets / (1024 * 1024)).toFixed(1)} Mo`;
+  return `${(octets / (1024 * 1024 * 1024)).toFixed(2)} Go`;
 };
 
 export default function ProjetDetail() {
@@ -31,18 +62,27 @@ export default function ProjetDetail() {
   const [ajoutErreur, setAjoutErreur] = useState("");
   const [ajoutEnCours, setAjoutEnCours] = useState(false);
 
+  // Fichiers du projet (RF-08)
+  const [fichiers, setFichiers] = useState([]);
+  const [fichierSelectionne, setFichierSelectionne] = useState(null);
+  const [uploadEnCours, setUploadEnCours] = useState(false);
+  const [fichiersErreur, setFichiersErreur] = useState("");
+  const fichierInputRef = useRef(null);
+
   const charger = useCallback(async () => {
     setLoading(true);
     setErreur("");
     try {
-      const [p, m, dispo] = await Promise.all([
+      const [p, m, dispo, f] = await Promise.all([
         projetsService.get(id),
         projetsService.getMembres(id).catch(() => []),
         projetsService.getMembresDisponibles(id).catch(() => []),
+        fichiersService.listByProjet(id).catch(() => []),
       ]);
       setProjet(p);
       setMembres(m || []);
       setDisponibles(dispo || []);
+      setFichiers(f || []);
     } catch (err) {
       setErreur(err.response?.data?.detail || "Projet introuvable.");
     } finally {
@@ -53,6 +93,60 @@ export default function ProjetDetail() {
   useEffect(() => {
     charger();
   }, [charger]);
+
+  const declencherUpload = async (e) => {
+    e.preventDefault();
+    if (!fichierSelectionne) return;
+    setUploadEnCours(true);
+    setFichiersErreur("");
+    try {
+      await fichiersService.upload(id, fichierSelectionne);
+      setFichierSelectionne(null);
+      if (fichierInputRef.current) fichierInputRef.current.value = "";
+      await charger();
+    } catch (err) {
+      setFichiersErreur(err.response?.data?.detail || "Échec de l'upload.");
+    } finally {
+      setUploadEnCours(false);
+    }
+  };
+
+  const telecharger = async (f) => {
+    try {
+      await fichiersService.telecharger(id, f.id, f.nom);
+    } catch (err) {
+      alert(
+        err.response?.data?.detail || "Impossible de télécharger ce fichier.",
+      );
+    }
+  };
+
+  const renommerFichier = async (f) => {
+    const nouveauNom = window.prompt("Nouveau nom du fichier :", f.nom);
+    if (
+      nouveauNom == null ||
+      nouveauNom.trim() === "" ||
+      nouveauNom.trim() === f.nom
+    )
+      return;
+    try {
+      await fichiersService.renommer(id, f.id, nouveauNom.trim());
+      await charger();
+    } catch (err) {
+      alert(err.response?.data?.detail || "Impossible de renommer ce fichier.");
+    }
+  };
+
+  const supprimerFichier = async (f) => {
+    if (!window.confirm(`Supprimer définitivement le fichier « ${f.nom} » ?`))
+      return;
+    try {
+      await fichiersService.remove(id, f.id);
+      await charger();
+    } catch (err) {
+      alert(err.response?.data?.detail || "Impossible de supprimer ce fichier.");
+    }
+  };
 
   const ajouterMembre = async (e) => {
     e.preventDefault();
@@ -303,6 +397,114 @@ export default function ProjetDetail() {
           <p className="mt-2 text-xs text-slate-400">
             Tous les utilisateurs sont déjà membres de ce projet.
           </p>
+        )}
+      </div>
+
+      {/* Fichiers du projet */}
+      <div className="border bg-white p-6 shadow-sm">
+        <h2 className="mb-4 text-lg font-semibold text-slate-900">
+          Fichiers du projet ({fichiers.length})
+        </h2>
+        <p className="mb-4 text-xs text-slate-500">
+          Documents joints au projet, dont le cahier des charges. Formats
+          acceptés : images, PDF, Word, Excel. Taille max : 50 Mo.
+        </p>
+
+        {projet.archive && (
+          <p className="mb-4 bg-slate-50 px-4 py-2 text-sm text-slate-500">
+            Ce projet est archivé : l'ajout et la modification de fichiers sont
+            désactivés.
+          </p>
+        )}
+
+        {/* Upload */}
+        {!projet.archive && (
+          <form
+            onSubmit={declencherUpload}
+            className="mb-6 flex flex-col gap-3 bg-slate-50 p-4 sm:flex-row sm:items-center"
+          >
+<input
+            ref={fichierInputRef}
+            type="file"
+            accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx"
+            onChange={(e) =>
+              setFichierSelectionne(e.target.files[0] || null)
+            }
+              className="flex-1 text-sm text-slate-600 file:mr-3 file:border-0 file:bg-[#074E56] file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-[#00B2A0]"
+            />
+            <button
+              type="submit"
+              disabled={!fichierSelectionne || uploadEnCours}
+              className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#074E56] disabled:opacity-50"
+            >
+              {uploadEnCours ? "Envoi…" : "Envoyer le fichier"}
+            </button>
+          </form>
+        )}
+        {fichiersErreur && (
+          <p className="mb-3 text-sm text-red-600">{fichiersErreur}</p>
+        )}
+
+        {/* Liste */}
+        {fichiers.length === 0 ? (
+          <p className="text-sm text-slate-500">
+            Aucun fichier joint pour l'instant.
+          </p>
+        ) : (
+          <ul className="divide-y">
+            {fichiers.map((f) => {
+              const info = infoType(f.type_mime);
+              return (
+                <li
+                  key={f.id}
+                  className="flex items-center justify-between gap-3 py-3"
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span
+                      className={`shrink-0 px-2 py-1 text-[10px] font-bold ${info.classe}`}
+                    >
+                      {info.label}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-slate-800">
+                        {f.nom}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {formatTaille(f.taille_octets)}
+                        {f.cree_le &&
+                          ` · ${new Date(f.cree_le).toLocaleDateString("fr-FR")}`}
+                        {f.televerse_par_nom && ` · par ${f.televerse_par_nom}`}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <button
+                      onClick={() => telecharger(f)}
+                      className="border border-slate-200 px-2.5 py-1 text-xs text-slate-600 hover:bg-[#00B2A0]/10 hover:text-[#00B2A0]"
+                    >
+                      Télécharger
+                    </button>
+                    {!projet.archive && (
+                      <>
+                        <button
+                          onClick={() => renommerFichier(f)}
+                          className="border border-slate-200 px-2.5 py-1 text-xs text-slate-600 hover:bg-slate-50"
+                        >
+                          Renommer
+                        </button>
+                        <button
+                          onClick={() => supprimerFichier(f)}
+                          className="border border-slate-200 px-2.5 py-1 text-xs text-slate-600 hover:bg-red-50 hover:text-red-600"
+                        >
+                          Supprimer
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         )}
       </div>
     </div>
