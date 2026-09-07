@@ -66,6 +66,7 @@ class TacheListResponse(BaseModel):
     responsable_id: Optional[int]
     echeance: Optional[date]
     ordre: int
+    nombre_commentaires: int = 0
     
     model_config = ConfigDict(from_attributes=True)
 

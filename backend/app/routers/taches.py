@@ -49,9 +49,24 @@ async def get_taches_by_projet(
     """
     Récupère toutes les tâches d'un projet.
     Les tâches sont triées par ordre dans la colonne Kanban.
+    Inclut le nombre de commentaires par tâche (RF-14).
     """
+    # Sous-requête : nombre de commentaires par tâche
+    nb_commentaires_sq = (
+        select(
+            CommentaireTache.tache_id,
+            func.count(CommentaireTache.id).label("nb")
+        )
+        .group_by(CommentaireTache.tache_id)
+        .subquery()
+    )
+
     # Construction de la requête
-    query = select(Tache).where(Tache.projet_id == projet_id)
+    query = (
+        select(Tache, func.coalesce(nb_commentaires_sq.c.nb, 0).label("nombre_commentaires"))
+        .outerjoin(nb_commentaires_sq, Tache.id == nb_commentaires_sq.c.tache_id)
+        .where(Tache.projet_id == projet_id)
+    )
     
     # Filtres optionnels
     if statut:
@@ -65,9 +80,21 @@ async def get_taches_by_projet(
     
     # Exécution
     result = await db.execute(query)
-    taches = result.scalars().all()
+    rows = result.all()
     
-    return [TacheListResponse.model_validate(t) for t in taches]
+    return [
+        TacheListResponse(
+            id=tache.id,
+            titre=tache.titre,
+            statut=tache.statut,
+            priorite=tache.priorite,
+            responsable_id=tache.responsable_id,
+            echeance=tache.echeance,
+            ordre=tache.ordre,
+            nombre_commentaires=nb,
+        )
+        for tache, nb in rows
+    ]
 
 @router.get("/{tache_id}", response_model=TacheResponse)
 async def get_tache(

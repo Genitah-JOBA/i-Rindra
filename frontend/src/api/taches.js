@@ -49,4 +49,20 @@ export const tachesService = {
     });
     return data;
   },
+
+  // --- Commentaires (RF-14) ---
+
+  // Récupérer les commentaires d'une tâche
+  listCommentaires: async (tacheId) => {
+    const { data } = await api.get(`/taches/${tacheId}/commentaires`);
+    return data;
+  },
+
+  // Ajouter un commentaire à une tâche
+  ajouterCommentaire: async (tacheId, contenu) => {
+    const { data } = await api.post(`/taches/${tacheId}/commentaires`, {
+      contenu,
+    });
+    return data;
+  },
 };
