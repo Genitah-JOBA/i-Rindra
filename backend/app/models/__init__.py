@@ -9,6 +9,7 @@ from app.models.jalon import Jalon
 from app.models.fichier import Fichier
 from app.models.notification import Notification
 from app.models.facture import Facture, StatutFacture
+from app.models.analyse_ia import AnalyseIA, SuggestionTache, TypeAnalyseIA, StatutSuggestion
 
 __all__ = [
     "Utilisateur",
@@ -27,4 +28,8 @@ __all__ = [
     "Notification",
     "Facture",
     "StatutFacture",
+    "AnalyseIA",
+    "SuggestionTache",
+    "TypeAnalyseIA",
+    "StatutSuggestion",
 ]
