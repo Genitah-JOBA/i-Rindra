@@ -15,6 +15,9 @@ frontend/.env
 frontend/.env.local
 *.env.local
 
+# === Fichiers uploadés (ne jamais versionner) ===
+uploads/
+
 # === Doc de déploiement (contient la SECRET_KEY / hash admin) ===
 DEPLOIEMENT.md
 
