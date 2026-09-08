@@ -161,25 +161,26 @@ export default function Clients() {
         await clientsService.update(editionId, infoEntreprise);
         showSuccess("Client modifié avec succès !");
       } else {
-        const entreprise = await clientsService.create(infoEntreprise);
-        if (form.mot_de_passe) {
-          if (!form.email) {
-            setFormErreur("Un email est requis pour créer l'accès de connexion.");
-            setEnregistrement(false);
-            return;
-          }
-          await utilisateursService.create({
-            nom: form.nom,
-            prenom: form.contact || "Client",
-            email: form.email,
-            mot_de_passe: form.mot_de_passe,
-            role: "client",
-            client_id: entreprise.id,
-          });
-          showSuccess("Client créé avec son accès de connexion !");
-        } else {
-          showSuccess("Client créé avec succès !");
+        if (!form.email) {
+          setFormErreur("Un email est requis pour créer l'accès de connexion.");
+          setEnregistrement(false);
+          return;
         }
+        if (!form.mot_de_passe) {
+          setFormErreur("Un mot de passe est requis pour créer l'accès de connexion.");
+          setEnregistrement(false);
+          return;
+        }
+        const entreprise = await clientsService.create(infoEntreprise);
+        await utilisateursService.create({
+          nom: form.nom,
+          prenom: form.contact || "Client",
+          email: form.email,
+          mot_de_passe: form.mot_de_passe,
+          role: "client",
+          client_id: entreprise.id,
+        });
+        showSuccess("Client créé avec son accès de connexion !");
       }
       setModalOuvert(false);
       await chargerTout();
@@ -412,12 +413,16 @@ export default function Clients() {
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-600">
-                  {editionId ? t("clients.form.emailSimple") : t("clients.form.email")}
+                  {editionId
+                    ? t("clients.form.emailSimple")
+                    : t("clients.form.email")}
+                  {!editionId && <span className="text-red-500">*</span>}
                 </label>
                 <input
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  required={!editionId}
                   className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
                 />
               </div>
@@ -428,14 +433,14 @@ export default function Clients() {
                     {t("clients.acces.title")}
                   </p>
                   <label className="mb-1 block text-xs font-medium text-slate-600">
-                    {t("clients.acces.mdp")}
+                    {t("clients.acces.mdp")} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="password"
                     value={form.mot_de_passe}
                     onChange={(e) => setForm({ ...form, mot_de_passe: e.target.value })}
+                    required
                     minLength={4}
-                    placeholder={t("clients.acces.placeholder")}
                     className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
                   />
                   <p className="mt-1 text-[11px] text-slate-400">

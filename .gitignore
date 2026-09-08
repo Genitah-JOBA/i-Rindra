@@ -15,6 +15,7 @@ frontend/.env
 frontend/.env.local
 *.env.local
 
+
 # === Fichiers uploadés (ne jamais versionner) ===
 uploads/
 

@@ -130,11 +130,10 @@ export const translations = {
     "clients.form.tel": "Téléphone",
     "clients.form.email": "Email (sert aussi d'identifiant de connexion)",
     "clients.form.emailSimple": "Email",
-    "clients.acces.title": "Accès à l'espace client (optionnel)",
+    "clients.acces.title": "Accès à l'espace client",
     "clients.acces.mdp": "Mot de passe",
-    "clients.acces.placeholder": "Laisser vide pour ne pas créer d'accès",
     "clients.acces.hint":
-      "Si renseigné, un accès est créé avec l'email ci-dessus.",
+      "Un compte d'accès est créé avec l'email ci-dessus.",
 
     // Statut santé
     "statut.vert": "Bon",
@@ -332,10 +331,9 @@ export const translations = {
     "clients.form.tel": "Phone",
     "clients.form.email": "Email (also used as login)",
     "clients.form.emailSimple": "Email",
-    "clients.acces.title": "Client area access (optional)",
+    "clients.acces.title": "Client area access",
     "clients.acces.mdp": "Password",
-    "clients.acces.placeholder": "Leave empty to skip access",
-    "clients.acces.hint": "If set, an access is created with the email above.",
+    "clients.acces.hint": "An access account is created with the email above.",
 
     // Health status
     "statut.vert": "Good",
