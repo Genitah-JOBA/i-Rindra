@@ -1,19 +1,19 @@
 // App.jsx — définition des routes de l'application.
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useState } from "react";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import MonProjet from "./pages/MonProjet";
+import Documents from "./pages/Documents";
 import Projets from "./pages/Projets";
 import Taches from "./pages/Taches";
 import ProjetDetail from "./pages/ProjetDetail";
 import Membres from "./pages/Membres";
 import Clients from "./pages/Clients";
+import Absences from "./pages/Absences";
 import Facturation from "./pages/Facturation";
 import Parametres from "./pages/Parametres";
-import MessageBox from "./components/MessageBox";
 import { MessageProvider } from "./context/MessageContext";
 
 export default function App() {
@@ -37,6 +37,7 @@ export default function App() {
           <Route path="taches" element={<Taches />} />
           <Route path="membres" element={<Membres />} />
           <Route path="clients" element={<Clients />} />
+          <Route path="absences" element={<Absences />} />
         </Route>
 
         {/* Volet financier — ADMIN uniquement (la direction n'a pas accès à l'argent) */}
@@ -60,6 +61,7 @@ export default function App() {
           }
         >
           <Route index element={<MonProjet />} />
+          <Route path="documents" element={<Documents />} />
         </Route>
 
         {/* Paramètres — accessible à tous les rôles connectés */}

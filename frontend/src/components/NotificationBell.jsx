@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { notificationsService } from "../api/notifications";
+import { facturesService } from "../api/factures";
 
 const formatDate = (iso) => {
   if (!iso) return "";
@@ -73,6 +74,33 @@ export default function NotificationBell() {
       /* ignore */
     }
     setOpen(false);
+
+    // Facture payée -> télécharge le PDF directement.
+    if (n.type === "facture_payee") {
+      const m = /\/factures\/(\d+)\/pdf/.exec(n.lien || "");
+      if (m) {
+        try {
+          const res = await facturesService.telechargerPdf(Number(m[1]));
+          const nom =
+            (res.headers?.["content-disposition"] || "").match(
+              /filename="([^"]+)"/,
+            )?.[1] || "facture.pdf";
+          const blob = new Blob([res.data], { type: "application/pdf" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = nom;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+        } catch {
+          /* ignore */
+        }
+      }
+      return;
+    }
+
     if (n.lien) navigate(n.lien);
   };
 

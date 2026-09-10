@@ -21,11 +21,8 @@ from app.schemas.tache import TacheListResponse
 router = APIRouter(prefix="/client", tags=["Espace Client"])
 
 
-async def _get_projet_du_client(db: AsyncSession, token: str) -> Optional[Projet]:
-    """
-    Vérifie que l'appelant est un client valide et renvoie son projet actif
-    (le plus récent) ou None. Lève 403/400 si le compte n'est pas un client rattaché.
-    """
+async def _get_client_id(token: str) -> int:
+    """Vérifie que l'appelant est un client rattaché et renvoie son client_id."""
     payload = decode_access_token(token)
     role = payload.get("role")
     client_id = payload.get("client_id")
@@ -40,12 +37,39 @@ async def _get_projet_du_client(db: AsyncSession, token: str) -> Optional[Projet
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Votre compte client n'est pas associé à un client",
         )
+    return int(client_id)
 
+
+async def _liste_projets_du_client(
+    db: AsyncSession, token: str
+) -> Optional[list[Projet]]:
+    """Tous les projets actifs du client connecté (ou None si client invalide)."""
+    client_id = await _get_client_id(token)
     result = await db.execute(
         select(Projet)
         .where(and_(Projet.client_id == client_id, Projet.archive == False))  # noqa: E712
         .order_by(Projet.cree_le.desc())
     )
+    return result.scalars().all()
+
+
+async def _get_projet_du_client(
+    db: AsyncSession, token: str, projet_id: Optional[int] = None
+) -> Optional[Projet]:
+    """
+    Vérifie que l'appelant est un client valide et renvoie un de ses projets.
+    Si projet_id est fourni, il doit lui appartenir ; sinon renvoie le plus récent.
+    """
+    client_id = await _get_client_id(token)
+
+    query = select(Projet).where(
+        and_(Projet.client_id == client_id, Projet.archive == False)  # noqa: E712
+    )
+    if projet_id is not None:
+        query = query.where(Projet.id == projet_id)
+    query = query.order_by(Projet.cree_le.desc())
+
+    result = await db.execute(query)
     return result.scalars().first()
 
 
@@ -57,13 +81,24 @@ async def _compter_taches(db: AsyncSession, projet_id: int, statut: Optional[Sta
     return result.scalar() or 0
 
 
+@router.get("/projets", response_model=list[ProjetResponse])
+async def list_client_projets(
+    token: str = Depends(oauth2_scheme),
+    db: AsyncSession = Depends(get_db),
+):
+    """Tous les projets actifs du client connecté (RF-19)."""
+    projets = await _liste_projets_du_client(db, token)
+    return [ProjetResponse.model_validate(p) for p in projets or []]
+
+
 @router.get("/mon-projet", response_model=ProjetResponse)
 async def get_client_projet(
     token: str = Depends(oauth2_scheme),
     db: AsyncSession = Depends(get_db),
+    projet_id: Optional[int] = None,
 ):
-    """Récupère le projet du client connecté (RF-19, RF-22)."""
-    projet = await _get_projet_du_client(db, token)
+    """Récupère un projet du client connecté (RF-19, RF-22)."""
+    projet = await _get_projet_du_client(db, token, projet_id)
     if not projet:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -77,9 +112,10 @@ async def get_client_taches(
     token: str = Depends(oauth2_scheme),
     db: AsyncSession = Depends(get_db),
     statut: Optional[StatutTache] = None,
+    projet_id: Optional[int] = None,
 ):
-    """Récupère les tâches du projet du client (RF-19)."""
-    projet = await _get_projet_du_client(db, token)
+    """Récupère les tâches d'un projet du client (RF-19)."""
+    projet = await _get_projet_du_client(db, token, projet_id)
     if not projet:
         return []
 
@@ -96,9 +132,10 @@ async def get_client_taches(
 async def get_client_statut(
     token: str = Depends(oauth2_scheme),
     db: AsyncSession = Depends(get_db),
+    projet_id: Optional[int] = None,
 ):
-    """Résumé du projet pour le client (RF-20, RF-21)."""
-    projet = await _get_projet_du_client(db, token)
+    """Résumé d'un projet du client (RF-20, RF-21)."""
+    projet = await _get_projet_du_client(db, token, projet_id)
     if not projet:
         return {"message": "Aucun projet actif", "has_project": False}
 
@@ -124,9 +161,10 @@ async def get_client_statut(
 async def get_client_avancement(
     token: str = Depends(oauth2_scheme),
     db: AsyncSession = Depends(get_db),
+    projet_id: Optional[int] = None,
 ):
-    """Avancement détaillé du projet pour le client (RF-21)."""
-    projet = await _get_projet_du_client(db, token)
+    """Avancement détaillé d'un projet du client (RF-21)."""
+    projet = await _get_projet_du_client(db, token, projet_id)
     if not projet:
         return {"avancement": 0, "message": "Aucun projet actif"}
 

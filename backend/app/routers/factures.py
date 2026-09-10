@@ -1,5 +1,5 @@
 # app/routers/factures.py
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from typing import List, Optional
@@ -11,6 +11,7 @@ from app.routers.auth import get_current_user_id, get_current_user_role
 from app.models.facture import Facture, StatutFacture
 from app.models.client import Client
 from app.models.projet import Projet
+from app.models.utilisateur import Utilisateur
 from app.schemas.facture import (
     FactureCreate,
     FactureUpdate,
@@ -18,6 +19,8 @@ from app.schemas.facture import (
     FactureStats,
     StatutUpdate,
 )
+from app.services import notifications as notif_service
+from app.services.facture_pdf import generer_pdf_facture
 
 router = APIRouter(prefix="/factures", tags=["Facturation"])
 
@@ -94,6 +97,50 @@ async def _noms(db: AsyncSession, f: Facture):
         r = await db.execute(select(Projet.nom).where(Projet.id == f.projet_id))
         projet_nom = r.scalar_one_or_none()
     return client_nom, projet_nom
+
+
+async def _notifier_client(db: AsyncSession, f: Facture, ancien, nouveau):
+    """Notifie les comptes 'client' rattachés à la facture à chaque changement
+    de statut — JAMAIS pour un brouillon. Une facture payée déclenche une
+    notification avec lien de téléchargement du PDF."""
+    if hasattr(ancien, "value"):
+        ancien = ancien.value
+    if hasattr(nouveau, "value"):
+        nouveau = nouveau.value
+
+    if nouveau == StatutFacture.BROUILLON.value or nouveau == ancien:
+        return
+
+    destinataires = await notif_service.ids_clients_du_projet(db, f.client_id)
+    if not destinataires:
+        return
+
+    montant = f"{f.montant_ttc:.2f}"
+
+    if nouveau == StatutFacture.PAYEE.value:
+        await notif_service.notifier(
+            db,
+            destinataires,
+            "facture_payee",
+            f"Votre facture {f.numero} de {montant} EUR a été payée. "
+            "Téléchargez la facture en PDF.",
+            f"/factures/{f.id}/pdf",
+        )
+        return
+
+    messages = {
+        StatutFacture.ENVOYEE.value: "vous a été envoyée et est en attente de paiement.",
+        StatutFacture.EN_RETARD.value: "est en retard de paiement.",
+        StatutFacture.ANNULEE.value: "a été annulée.",
+    }
+    if nouveau in messages:
+        await notif_service.notifier(
+            db,
+            destinataires,
+            "facture_statut",
+            f"Votre facture {f.numero} de {montant} EUR {messages[nouveau]}",
+            None,
+        )
 
 
 # ------------------------------------------------------------
@@ -192,6 +239,43 @@ async def obtenir_facture(
 
 
 # ------------------------------------------------------------
+# PDF DE LA FACTURE (admin OU client concerné)
+# ------------------------------------------------------------
+
+@router.get("/{facture_id:int}/pdf")
+async def pdf_facture(
+    facture_id: int,
+    db: AsyncSession = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+    role: str = Depends(get_current_user_role),
+):
+    f = (await db.execute(select(Facture).where(Facture.id == facture_id))).scalar_one_or_none()
+    if not f:
+        raise HTTPException(status_code=404, detail="Facture non trouvée")
+
+    if role != "admin":
+        # Un compte client ne peut télécharger que les factures de son client.
+        if role != "client":
+            raise HTTPException(status_code=403, detail="Accès refusé.")
+        u = (
+            await db.execute(select(Utilisateur).where(Utilisateur.id == user_id))
+        ).scalar_one_or_none()
+        if not u or u.client_id != f.client_id:
+            raise HTTPException(
+                status_code=403, detail="Cette facture ne vous est pas destinée."
+            )
+
+    client_nom, projet_nom = await _noms(db, f)
+    pdf = generer_pdf_facture(f, client_nom, projet_nom)
+    filename = f"facture-{f.numero}.pdf"
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+# ------------------------------------------------------------
 # CRÉATION
 # ------------------------------------------------------------
 
@@ -274,8 +358,10 @@ async def modifier_facture(
         f.date_echeance = data.date_echeance
     if data.notes is not None:
         f.notes = data.notes
+    ancien_statut = f.statut
     if data.statut is not None:
         f.statut = StatutFacture(data.statut.value)
+        await _notifier_client(db, f, ancien_statut, f.statut)
 
     # Recalcule les montants si HT ou taux changent
     if data.montant_ht is not None or data.taux_tva is not None:
@@ -304,7 +390,9 @@ async def changer_statut(
     f = (await db.execute(select(Facture).where(Facture.id == facture_id))).scalar_one_or_none()
     if not f:
         raise HTTPException(status_code=404, detail="Facture non trouvée")
+    ancien_statut = f.statut
     f.statut = StatutFacture(data.statut.value)
+    await _notifier_client(db, f, ancien_statut, f.statut)
     await db.commit()
     await db.refresh(f)
     client_nom, projet_nom = await _noms(db, f)

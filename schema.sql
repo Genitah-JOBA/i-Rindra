@@ -21,6 +21,8 @@ CREATE TYPE statut_tache       AS ENUM ('a_faire', 'en_cours', 'en_revue', 'term
 CREATE TYPE priorite_tache     AS ENUM ('basse', 'moyenne', 'haute');
 CREATE TYPE type_analyse_ia    AS ENUM ('analyse_cdc', 'extraction', 'resume', 'detection', 'statut', 'affectation', 'recherche');
 CREATE TYPE statut_suggestion  AS ENUM ('en_attente', 'validee', 'rejetee');
+CREATE TYPE type_absence       AS ENUM ('conge', 'maladie', 'permission', 'autre');
+CREATE TYPE statut_absence     AS ENUM ('en_attente', 'acceptee', 'refusee');
 
 -- ============================================================
 --  1. CLIENT  (l'entreprise / personne cliente — entité métier)
@@ -194,9 +196,29 @@ CREATE TABLE suggestion_tache (
 -- );
 
 -- ============================================================
+--  13. ABSENCE  (demande d'absence — équipe -> direction)
+-- ============================================================
+CREATE TABLE absence (
+    id                  BIGSERIAL PRIMARY KEY,
+    utilisateur_id      BIGINT NOT NULL REFERENCES utilisateur(id) ON DELETE CASCADE,
+    type                type_absence NOT NULL DEFAULT 'conge',
+    date_debut          DATE NOT NULL,
+    date_fin            DATE NOT NULL,
+    motif               VARCHAR(255),
+    statut              statut_absence NOT NULL DEFAULT 'en_attente',
+    decideur_id         BIGINT REFERENCES utilisateur(id) ON DELETE SET NULL,
+    commentaire         TEXT,
+    cree_le             TIMESTAMPTZ NOT NULL DEFAULT now(),
+    decide_le           TIMESTAMPTZ,
+    CONSTRAINT chk_absence_dates CHECK (date_fin >= date_debut)
+);
+
+-- ============================================================
 --  INDEX  (accès fréquents + recherche vectorielle)
 -- ============================================================
-CREATE INDEX idx_utilisateur_email      ON utilisateur (email);
+CREATE INDEX idx_absence_utilisateur ON absence (utilisateur_id);
+CREATE INDEX idx_absence_statut      ON absence (statut);
+CREATE INDEX idx_utilisateur_email   ON utilisateur (email);
 CREATE INDEX idx_projet_client          ON projet (client_id);
 CREATE INDEX idx_projet_responsable     ON projet (responsable_id);
 CREATE INDEX idx_tache_projet           ON tache (projet_id);

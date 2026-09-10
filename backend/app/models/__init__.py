@@ -10,6 +10,7 @@ from app.models.fichier import Fichier
 from app.models.notification import Notification
 from app.models.facture import Facture, StatutFacture
 from app.models.analyse_ia import AnalyseIA, SuggestionTache, TypeAnalyseIA, StatutSuggestion
+from app.models.absence import Absence, TypeAbsence, StatutAbsence
 
 __all__ = [
     "Utilisateur",
@@ -32,4 +33,7 @@ __all__ = [
     "SuggestionTache",
     "TypeAnalyseIA",
     "StatutSuggestion",
+    "Absence",
+    "TypeAbsence",
+    "StatutAbsence",
 ]

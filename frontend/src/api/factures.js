@@ -26,6 +26,9 @@ export const facturesService = {
     const { data } = await api.patch(`/factures/${id}/statut`, { statut });
     return data;
   },
+  telechargerPdf: async (id) => {
+    return api.get(`/factures/${id}/pdf`, { responseType: "blob" });
+  },
   remove: async (id) => {
     await api.delete(`/factures/${id}`);
   },
