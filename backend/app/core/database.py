@@ -7,7 +7,7 @@ from app.core.config import settings
 # Création du moteur de connexion asynchrone
 engine = create_async_engine(
     settings.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://"),
-    echo=True,  # Affiche les requêtes SQL dans la console (à désactiver en prod)
+    echo=settings.APP_ENV == "development",  # Logs SQL uniquement en dev
     future=True,
 )
 

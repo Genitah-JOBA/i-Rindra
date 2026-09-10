@@ -67,9 +67,8 @@ class ProjetMembre(Base):
         UniqueConstraint("projet_id", "utilisateur_id", name="uq_projet_membre"),
     )
 
-    id = Column(Integer, primary_key=True, index=True)
-    projet_id = Column(Integer, ForeignKey("projet.id", ondelete="CASCADE"), nullable=False, index=True)
-    utilisateur_id = Column(Integer, ForeignKey("utilisateur.id", ondelete="CASCADE"), nullable=False, index=True)
+    projet_id = Column(Integer, ForeignKey("projet.id", ondelete="CASCADE"), primary_key=True, index=True)
+    utilisateur_id = Column(Integer, ForeignKey("utilisateur.id", ondelete="CASCADE"), primary_key=True, index=True)
     role_dans_projet = Column(String(60), nullable=True)
 
     projet = relationship("Projet", back_populates="membres")

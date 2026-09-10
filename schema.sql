@@ -23,6 +23,7 @@ CREATE TYPE type_analyse_ia    AS ENUM ('analyse_cdc', 'extraction', 'resume', '
 CREATE TYPE statut_suggestion  AS ENUM ('en_attente', 'validee', 'rejetee');
 CREATE TYPE type_absence       AS ENUM ('conge', 'maladie', 'permission', 'autre');
 CREATE TYPE statut_absence     AS ENUM ('en_attente', 'acceptee', 'refusee');
+CREATE TYPE statut_facture     AS ENUM ('brouillon', 'envoyee', 'payee', 'en_retard', 'annulee');
 
 -- ============================================================
 --  1. CLIENT  (l'entreprise / personne cliente — entité métier)
@@ -121,8 +122,12 @@ CREATE TABLE jalon (
     id                  BIGSERIAL PRIMARY KEY,
     projet_id           BIGINT NOT NULL REFERENCES projet(id) ON DELETE CASCADE,
     titre               VARCHAR(200) NOT NULL,
+    description         TEXT,
     echeance            DATE,
-    atteint             BOOLEAN NOT NULL DEFAULT FALSE
+    atteint             BOOLEAN NOT NULL DEFAULT FALSE,
+    date_atteint        TIMESTAMPTZ,
+    cree_le             TIMESTAMPTZ NOT NULL DEFAULT now(),
+    modifie_le          TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- ============================================================
@@ -147,8 +152,10 @@ CREATE TABLE saisie_temps (
     tache_id            BIGINT NOT NULL REFERENCES tache(id) ON DELETE CASCADE,
     utilisateur_id      BIGINT NOT NULL REFERENCES utilisateur(id) ON DELETE CASCADE,
     duree_min           INTEGER NOT NULL CHECK (duree_min > 0),
-    date_saisie         DATE NOT NULL DEFAULT CURRENT_DATE,
-    note                TEXT
+    date                DATE NOT NULL DEFAULT CURRENT_DATE,
+    note                VARCHAR(500),
+    cree_le             TIMESTAMPTZ NOT NULL DEFAULT now(),
+    modifie_le          TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- ============================================================
@@ -214,6 +221,27 @@ CREATE TABLE absence (
 );
 
 -- ============================================================
+--  14. FACTURE  (volet financier — accès ADMIN uniquement)
+-- ============================================================
+CREATE TABLE facture (
+    id                  BIGSERIAL PRIMARY KEY,
+    numero              VARCHAR(30) NOT NULL UNIQUE,
+    client_id           BIGINT NOT NULL REFERENCES client(id) ON DELETE RESTRICT,
+    projet_id           BIGINT REFERENCES projet(id) ON DELETE SET NULL,
+    statut              statut_facture NOT NULL DEFAULT 'brouillon',
+    date_emission       DATE NOT NULL,
+    date_echeance       DATE,
+    montant_ht          NUMERIC(12, 2) NOT NULL DEFAULT 0,
+    taux_tva            NUMERIC(5, 2) NOT NULL DEFAULT 20,
+    montant_tva         NUMERIC(12, 2) NOT NULL DEFAULT 0,
+    montant_ttc         NUMERIC(12, 2) NOT NULL DEFAULT 0,
+    notes               TEXT,
+    cree_par            BIGINT REFERENCES utilisateur(id) ON DELETE SET NULL,
+    cree_le             TIMESTAMPTZ NOT NULL DEFAULT now(),
+    modifie_le          TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- ============================================================
 --  INDEX  (accès fréquents + recherche vectorielle)
 -- ============================================================
 CREATE INDEX idx_absence_utilisateur ON absence (utilisateur_id);
@@ -231,6 +259,10 @@ CREATE INDEX idx_temps_tache            ON saisie_temps (tache_id);
 CREATE INDEX idx_temps_utilisateur      ON saisie_temps (utilisateur_id);
 CREATE INDEX idx_analyse_projet         ON analyse_ia (projet_id);
 CREATE INDEX idx_suggestion_projet      ON suggestion_tache (projet_id, statut);
+CREATE INDEX idx_facture_client         ON facture (client_id);
+CREATE INDEX idx_facture_projet         ON facture (projet_id);
+CREATE INDEX idx_facture_statut         ON facture (statut);
+CREATE INDEX idx_facture_numero         ON facture (numero);
 
 -- Index vectoriel (similarité cosinus) — OPTIONNEL, décommente avec la table document_chunk :
 -- CREATE INDEX idx_chunk_embedding

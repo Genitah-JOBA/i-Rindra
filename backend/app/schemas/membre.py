@@ -49,6 +49,5 @@ class MembreListResponse(BaseModel):
     metier: Optional[str] = None
     role_dans_projet: Optional[str]
     est_responsable: bool = False
-    cree_le: Optional[datetime] = None
     
     model_config = ConfigDict(from_attributes=True)

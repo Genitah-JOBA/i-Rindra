@@ -262,7 +262,8 @@ async def update_tache(
 async def delete_tache(
     tache_id: int,
     db: AsyncSession = Depends(get_db),
-    _: str = Depends(check_direction_or_chef_projet)  # Vérifie les permissions
+    token: str = Depends(oauth2_scheme),
+    _: str = Depends(check_direction_or_chef_projet)
 ):
     """
     Supprime une tâche.
@@ -281,13 +282,16 @@ async def delete_tache(
             detail="Tâche non trouvée"
         )
     
+    # 2. Vérifie l'accès au projet
+    await check_projet_access(tache.projet_id, db=db, token=token)
+    
     projet_id = tache.projet_id
     
-    # 2. Supprime la tâche
+    # 3. Supprime la tâche
     await db.delete(tache)
     await db.commit()
     
-    # 3. Met à jour l'avancement du projet
+    # 4. Met à jour l'avancement du projet
     await update_projet_avancement(projet_id, db)
     
     return None
@@ -369,7 +373,8 @@ async def update_tache_affectation(
     tache_id: int,
     responsable_id: int,
     db: AsyncSession = Depends(get_db),
-    _: str = Depends(check_direction_or_chef_projet)  # Vérifie les permissions
+    token: str = Depends(oauth2_scheme),
+    _: str = Depends(check_direction_or_chef_projet)
 ):
     """
     Change le responsable d'une tâche (RF-13).
@@ -388,7 +393,10 @@ async def update_tache_affectation(
             detail="Tâche non trouvée"
         )
     
-    # 2. Vérifie que le responsable existe
+    # 2. Vérifie l'accès au projet
+    await check_projet_access(tache.projet_id, db=db, token=token)
+    
+    # 3. Vérifie que le responsable existe
     result = await db.execute(
         select(Utilisateur).where(Utilisateur.id == responsable_id)
     )

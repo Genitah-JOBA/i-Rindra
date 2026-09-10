@@ -352,7 +352,7 @@ async def get_projet_membres(
     # Formatage de la réponse
     return [
         MembreListResponse(
-            id=membre.ProjetMembre.id,
+            id=membre.Utilisateur.id,
             projet_id=membre.ProjetMembre.projet_id,
             utilisateur_id=membre.Utilisateur.id,
             nom=membre.Utilisateur.nom,
@@ -362,7 +362,6 @@ async def get_projet_membres(
             metier=membre.Utilisateur.metier,
             role_dans_projet=membre.ProjetMembre.role_dans_projet,
             est_responsable=(membre.ProjetMembre.utilisateur_id == projet.responsable_id),
-            cree_le=membre.ProjetMembre.cree_le if hasattr(membre.ProjetMembre, 'cree_le') else None,
         )
         for membre in membres
     ]

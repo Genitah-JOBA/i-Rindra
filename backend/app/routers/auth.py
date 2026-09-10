@@ -1,5 +1,7 @@
 # auth.py
 
+import time
+from collections import defaultdict
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,6 +14,21 @@ from app.models.client import Client
 from pydantic import BaseModel, EmailStr
 from datetime import timedelta
 from typing import Optional
+
+# --- Rate limiting simple en mémoire ---
+_rate_limits: dict[str, list[float]] = defaultdict(list)
+RATE_LIMIT_WINDOW = 60  # secondes
+RATE_LIMIT_MAX = 10     # requêtes max par fenêtre
+
+def _check_rate_limit(key: str):
+    now = time.time()
+    _rate_limits[key] = [t for t in _rate_limits[key] if now - t < RATE_LIMIT_WINDOW]
+    if len(_rate_limits[key]) >= RATE_LIMIT_MAX:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Trop de requêtes. Réessayez dans quelques secondes.",
+        )
+    _rate_limits[key].append(now)
 
 # On crée un routeur pour regrouper toutes les routes d'authentification
 router = APIRouter(prefix="/auth", tags=["Authentification"])
@@ -56,6 +73,8 @@ async def login(
        - username (on utilisera l'email ici)
        - password
     """
+    _check_rate_limit(f"login:{form_data.username}")
+
     # 1. Recherche d'utilisateur par email
     result = await db.execute(
         select(Utilisateur).where(Utilisateur.email == form_data.username)
@@ -185,10 +204,10 @@ async def update_me(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Le mot de passe actuel est incorrect.",
             )
-        if len(data.nouveau_mot_de_passe) < 4:
+        if len(data.nouveau_mot_de_passe) < 8:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Le nouveau mot de passe est trop court (4 caractères minimum).",
+                detail="Le nouveau mot de passe est trop court (8 caractères minimum).",
             )
         user.mot_de_passe_hash = hash_password(data.nouveau_mot_de_passe)
 
@@ -260,6 +279,8 @@ async def register(
     L'inscription publique est réservée aux rôles 'equipe' et 'client' —
     les comptes 'admin'/'direction' doivent être créés par un administrateur.
     """
+    _check_rate_limit(f"register:{user_data.email}")
+
     # 1. Vérifie que l'email n'est pas déjà utilisé
     result = await db.execute(
         select(Utilisateur).where(Utilisateur.email == user_data.email)
@@ -270,6 +291,13 @@ async def register(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Cet email est déjà utilisé"
+        )
+
+    # 1.bis Vérifie la longueur du mot de passe
+    if len(user_data.mot_de_passe) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Le mot de passe doit faire au moins 8 caractères.",
         )
     
     # 2. Valide le rôle
