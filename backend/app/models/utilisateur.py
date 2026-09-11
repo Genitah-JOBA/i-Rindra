@@ -9,10 +9,11 @@ from app.models._enum import pg_enum
 
 # L'enum des rôles
 class RoleUtilisateur(str, enum.Enum):
-    ADMIN = "admin"          # accès complet, Y COMPRIS le volet financier
-    DIRECTION = "direction"  # comme admin, MAIS sans accès à l'argent
-    EQUIPE = "equipe"        # membre affecté (dev, graphiste…)
-    CLIENT = "client"        # entreprise cliente (accès à son seul projet)
+    DIRECTION = "direction"          # accès complet, Y COMPRIS le volet financier
+    DRH = "drh"                      # accès complet, Y COMPRIS le volet financier
+    CHEF_DE_PROJET = "chef_de_projet"  # pilotage opérationnel (sans facturation ni absences)
+    EQUIPE = "equipe"                # membre affecté (dev, graphiste…)
+    CLIENT = "client"                # entreprise cliente (accès à son seul projet)
 
 class Utilisateur(Base):
     """

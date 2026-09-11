@@ -44,15 +44,15 @@ const UserIcon = ({ className = "w-5 h-5" }) => (
 );
 
 const couleurRole = {
-  admin: "bg-rose-100 text-rose-700",
   direction: "bg-purple-100 text-purple-700",
+  drh: "bg-rose-100 text-rose-700",
   equipe: "bg-blue-100 text-blue-700",
   client: "bg-amber-100 text-amber-700",
 };
 
 const labelRole = {
-  admin: "Admin",
   direction: "Direction",
+  drh: "DRH",
   equipe: "Équipe",
   client: "Client",
 };
@@ -410,8 +410,8 @@ export default function Membres() {
                     onChange={(e) => setForm({ ...form, role: e.target.value })}
                     className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent appearance-none bg-white"
                   >
-                    <option value="admin">Admin</option>
                     <option value="direction">Direction</option>
+                    <option value="admin">DRH</option>
                     <option value="equipe">Équipe</option>
                   </select>
                 </div>
