@@ -1,5 +1,5 @@
-// src/pages/Absences.jsx — gestion des absences
-// Équipe : dépose une demande d'absence. Direction/DRH : l'accepte ou la refuse.
+// src/pages/Absences.jsx — Disponibilités (absences, permissions, congés)
+// Équipe / chef de projet : dépose une demande. Direction/DRH : l'accepte ou la refuse.
 import { useEffect, useState } from "react";
 import { absencesService } from "../api/absences";
 import { useAuth } from "../auth/AuthContext";
@@ -50,6 +50,12 @@ const couleurStatut = {
   refusee: "bg-red-100 text-red-700",
 };
 
+const SECTIONS = [
+  { id: "absence", label: "Absence", types: ["maladie", "autre"] },
+  { id: "permission", label: "Permission", types: ["permission"] },
+  { id: "conge", label: "Congé", types: ["conge"] },
+];
+
 export default function Absences() {
   const { user } = useAuth();
   const { showSuccess, showError } = useMessage();
@@ -64,6 +70,7 @@ export default function Absences() {
   const [form, setForm] = useState(FORM_VIDE);
   const [formErreur, setFormErreur] = useState("");
   const [enregistrement, setEnregistrement] = useState(false);
+  const [sectionActive, setSectionActive] = useState("absence");
 
   // Décision en cours (direction)
   const [demandeEnCours, setDemandeEnCours] = useState(null);
@@ -186,15 +193,21 @@ export default function Absences() {
       ]
     : [];
 
+  const sectionCourante = SECTIONS.find((s) => s.id === sectionActive);
+  const absencesDeSection = absences.filter((a) =>
+    sectionCourante?.types.includes(a.type)
+  );
+  const afficherDemandeur = estDirection || user?.role === "chef_de_projet";
+
   return (
     <div className="animate__animated animate__fadeIn w-full px-4 sm:px-6 lg:px-8">
       {/* En-tête */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 animate__animated animate__fadeInDown">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
-            {"Absences"}
+            {"Disponibilités"}
           </h1>
-          <p className="text-sm text-slate-500">{"Demandes d'absence et validation."}</p>
+          <p className="text-sm text-slate-500">{"Absences, permissions et congés."}</p>
         </div>
         {!estDirection && (
           <button
@@ -239,9 +252,33 @@ export default function Absences() {
 
       {!loading && !erreur && (
         <>
-          {absences.length > 0 ? (
+          {/* Barre des sections */}
+          <div className="mb-4 flex flex-wrap gap-1.5">
+            {SECTIONS.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => setSectionActive(s.id)}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                  sectionActive === s.id
+                    ? "bg-slate-800 text-white ring-2 ring-offset-1 ring-slate-400"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                {s.label}
+                <span
+                  className={`ml-1.5 px-1.5 py-0.5 text-[10px] rounded-full ${
+                    sectionActive === s.id ? "bg-white/20" : "bg-slate-200 text-slate-500"
+                  }`}
+                >
+                  {absences.filter((a) => s.types.includes(a.type)).length}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {absencesDeSection.length > 0 ? (
             <div className="space-y-3">
-              {absences.map((a, index) => (
+              {absencesDeSection.map((a, index) => (
                 <div
                   key={a.id}
                   className="border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md transition-all duration-300  animate__animated animate__fadeInUp"
@@ -250,16 +287,13 @@ export default function Absences() {
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
                       {/* Demandeur (visible direction) */}
-                      {estDirection && (
+                      {afficherDemandeur && (
                         <p className="flex items-center gap-1.5 text-sm font-medium text-slate-800">
                           <span className="bg-[#63B23E]/10 px-2 py-0.5 text-xs font-semibold text-[#63B23E] ">
                             {a.utilisateur_prenom?.charAt(0)}
                             {a.utilisateur_nom?.charAt(0)}
                           </span>
                           {a.utilisateur_prenom} {a.utilisateur_nom}
-                          <span className="text-xs font-normal text-slate-400">
-                            {"demandée par"}
-                          </span>
                         </p>
                       )}
 
@@ -335,7 +369,7 @@ export default function Absences() {
                         </>
                       )}
 
-                      {!estDirection && a.statut === "en_attente" && (
+                      {!estDirection && a.statut === "en_attente" && a.utilisateur_id === user?.id && (
                         <button
                           onClick={() => annuler(a)}
                           className="px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50  transition-colors"
@@ -353,8 +387,12 @@ export default function Absences() {
               <CalendarIcon className="w-12 h-12 text-slate-300 mx-auto mb-3" />
               <p className="text-sm text-slate-500">
                 {estDirection
-                  ? "Aucune demande d'absence pour le moment."
-                  : "Vous n'avez aucune demande d'absence."}
+                  ? sectionActive === "absence"
+                    ? "Aucune demande d'absence pour le moment."
+                    : `Aucune demande de ${sectionCourante?.label} pour le moment.`
+                  : sectionActive === "absence"
+                    ? "Vous n'avez aucune demande d'absence."
+                    : `Vous n'avez aucune demande de ${sectionCourante?.label}.`}
               </p>
               {!estDirection && (
                 <button

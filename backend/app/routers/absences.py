@@ -1,9 +1,9 @@
 # app/routers/absences.py
 """
 Gestion des absences.
-- Équipe (et direction/DRH) : dépose une demande d'absence.
-- Direction/DRH : accepte ou refuse la demande.
-Toute la logique de pilotage (liste globale, décision) est réservée à la direction.
+- Équipe, chef de projet, direction/DRH : dépose une demande d'absence.
+- Direction/DRH : accepte ou refuse la demande (décision, statistiques réservées).
+- La liste globale est accessible au chef de projet, à la direction et au DRH.
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -117,11 +117,10 @@ async def lister_absences(
     user_id: int = Depends(get_current_user_id),
     role: str = Depends(get_current_user_role),
 ):
-    if role in ("direction", "drh"):
+    if role in ("direction", "drh", "chef_de_projet"):
         return await _charger_avec_infos(db)
 
-    if role not in ("equipe",):
-        # chef_de_projet et client n'ont aucune vue sur les absences
+    if role != "equipe":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Vous n'avez pas accès aux absences",
@@ -152,11 +151,11 @@ async def creer_absence(
     user_id: int = Depends(get_current_user_id),
     role: str = Depends(get_current_user_role),
 ):
-    # Le chef de projet et le client ne déposent pas de demandes d'absence
-    if role not in ("equipe", "direction", "drh"):
+    # Le client ne dépose pas de demandes d'absence
+    if role not in ("equipe", "direction", "drh", "chef_de_projet"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Seuls les membres de l'équipe, la direction et le DRH peuvent déposer une demande d'absence",
+            detail="Seuls les membres de l'équipe, le chef de projet, la direction et le DRH peuvent déposer une demande d'absence",
         )
 
     if data.date_fin < data.date_debut:
