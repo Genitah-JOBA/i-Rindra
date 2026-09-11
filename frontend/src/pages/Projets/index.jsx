@@ -1,4 +1,4 @@
-// src/pages/Projets/index.jsx — liste + création de projets (RF-05, RF-06).
+// src/pages/Projets/index.jsx — liste des projets (RF-05, RF-06).
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { projetsService } from "../../api/projets";
@@ -9,27 +9,9 @@ import { useMessage } from "../../context/MessageContext";
 import 'animate.css';
 
 // Icônes SVG
-const PlusIcon = ({ className = "w-5 h-5" }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-  </svg>
-);
-
 const TrashIcon = ({ className = "w-4 h-4" }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-  </svg>
-);
-
-const EditIcon = ({ className = "w-4 h-4" }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-  </svg>
-);
-
-const CloseIcon = ({ className = "w-6 h-6" }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
   </svg>
 );
 
@@ -42,6 +24,12 @@ const ArchiveIcon = ({ className = "w-4 h-4" }) => (
 const RestoreIcon = ({ className = "w-4 h-4" }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+  </svg>
+);
+
+const ChatIcon = ({ className = "w-4 h-4" }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
   </svg>
 );
 
@@ -81,15 +69,6 @@ const getStatutLabel = (statut) => {
   return labels[statut] || statut;
 };
 
-const FORM_VIDE = {
-  nom: "",
-  description: "",
-  client_id: "",
-  responsable_id: "",
-  date_debut: "",
-  date_fin_prevue: "",
-};
-
 export default function Projets() {
   const navigate = useNavigate();
   const { t } = useLang();
@@ -103,13 +82,6 @@ export default function Projets() {
   const [filtreStatut, setFiltreStatut] = useState("tous");
   const [filtreArchive, setFiltreArchive] = useState("actifs");
   const [recherche, setRecherche] = useState("");
-
-  const [modalOuvert, setModalOuvert] = useState(false);
-  const [modalEditionOuvert, setModalEditionOuvert] = useState(false);
-  const [projetEdition, setProjetEdition] = useState(null);
-  const [form, setForm] = useState(FORM_VIDE);
-  const [formErreur, setFormErreur] = useState("");
-  const [enCours, setEnCours] = useState(false);
 
   useEffect(() => {
     charger();
@@ -141,141 +113,6 @@ export default function Projets() {
       showError(msg);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setFormErreur("");
-    
-    if (!form.nom.trim()) {
-      const msg = "Le nom du projet est requis.";
-      setFormErreur(msg);
-      showError(msg);
-      return;
-    }
-    if (!form.client_id) {
-      const msg = "Veuillez choisir un client.";
-      setFormErreur(msg);
-      showError(msg);
-      return;
-    }
-    if (!form.responsable_id) {
-      const msg = "Veuillez choisir un responsable.";
-      setFormErreur(msg);
-      showError(msg);
-      return;
-    }
-    if (!form.date_debut) {
-      const msg = "La date de début est requise.";
-      setFormErreur(msg);
-      showError(msg);
-      return;
-    }
-    if (!form.date_fin_prevue) {
-      const msg = "La date de fin prévue est requise.";
-      setFormErreur(msg);
-      showError(msg);
-      return;
-    }
-
-    setEnCours(true);
-    try {
-      await projetsService.create({
-        nom: form.nom,
-        description: form.description || null,
-        client_id: parseInt(form.client_id, 10),
-        responsable_id: parseInt(form.responsable_id, 10),
-        date_debut: form.date_debut || null,
-        date_fin_prevue: form.date_fin_prevue || null,
-      });
-      showSuccess("Le projet a été créé avec succès !");
-      setModalOuvert(false);
-      setForm(FORM_VIDE);
-      await charger();
-    } catch (err) {
-      const msg = err.response?.data?.detail || "Erreur lors de la création du projet.";
-      setFormErreur(msg);
-      showError(msg);
-    } finally {
-      setEnCours(false);
-    }
-  };
-
-  const ouvrirEdition = (projet, e) => {
-    e.stopPropagation();
-    setProjetEdition(projet);
-    setForm({
-      nom: projet.nom || "",
-      description: projet.description || "",
-      client_id: String(projet.client_id || ""),
-      responsable_id: String(projet.responsable_id || ""),
-      date_debut: projet.date_debut || "",
-      date_fin_prevue: projet.date_fin_prevue || "",
-    });
-    setFormErreur("");
-    setModalEditionOuvert(true);
-  };
-
-  const handleEditionSubmit = async (e) => {
-    e.preventDefault();
-    setFormErreur("");
-    
-    if (!form.nom.trim()) {
-      const msg = "Le nom du projet est requis.";
-      setFormErreur(msg);
-      showError(msg);
-      return;
-    }
-    if (!form.client_id) {
-      const msg = "Veuillez choisir un client.";
-      setFormErreur(msg);
-      showError(msg);
-      return;
-    }
-    if (!form.responsable_id) {
-      const msg = "Veuillez choisir un responsable.";
-      setFormErreur(msg);
-      showError(msg);
-      return;
-    }
-    if (!form.date_debut) {
-      const msg = "La date de début est requise.";
-      setFormErreur(msg);
-      showError(msg);
-      return;
-    }
-    if (!form.date_fin_prevue) {
-      const msg = "La date de fin prévue est requise.";
-      setFormErreur(msg);
-      showError(msg);
-      return;
-    }
-
-    setEnCours(true);
-    try {
-      await projetsService.update(projetEdition.id, {
-        nom: form.nom,
-        description: form.description || null,
-        client_id: parseInt(form.client_id, 10),
-        responsable_id: parseInt(form.responsable_id, 10),
-        date_debut: form.date_debut || null,
-        date_fin_prevue: form.date_fin_prevue || null,
-      });
-      showSuccess("Le projet a été modifié avec succès !");
-      setModalEditionOuvert(false);
-      setProjetEdition(null);
-      setForm(FORM_VIDE);
-      await charger();
-    } catch (err) {
-      const msg = err.response?.data?.detail || "Erreur lors de la modification du projet.";
-      setFormErreur(msg);
-      showError(msg);
-    } finally {
-      setEnCours(false);
     }
   };
 
@@ -372,6 +209,14 @@ export default function Projets() {
     }
   };
 
+  // ---------- CHAT (redirection e-resaka) ----------
+  const chat = (projet, e) => {
+    e?.stopPropagation();
+    // Ouvrir le chat du projet dans e-resaka
+    const url = `https://e-resaka.example.com/chat?projet=${projet.id}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   const nomClient = (id) => clients.find((c) => c.id === id)?.nom || "—";
   const nomResponsable = (id) => responsables.find((r) => r.id === id)?.prenom + " " + responsables.find((r) => r.id === id)?.nom || "—";
 
@@ -405,17 +250,6 @@ export default function Projets() {
             {projets.length} projet{projets.length > 1 ? "s" : ""}
           </p>
         </div>
-        <button
-          onClick={() => {
-            setForm(FORM_VIDE);
-            setFormErreur("");
-            setModalOuvert(true);
-          }}
-          className="flex items-center gap-2 bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white  transition hover:bg-[#4a8f2e]"
-        >
-          <PlusIcon className="w-4 h-4" />
-          {t("projets.nouveau")}
-        </button>
       </div>
 
       {/* Filtres */}
@@ -603,18 +437,18 @@ export default function Projets() {
               ) : (
                 <>
                   <button
+                    onClick={(e) => chat(p, e)}
+                    title="Accéder au chat du projet"
+                    className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50  transition-colors"
+                  >
+                    <ChatIcon className="w-4 h-4" />
+                  </button>
+                  <button
                     onClick={(e) => archiver(p, e)}
                     title="Archiver le projet"
                     className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50  transition-colors"
                   >
                     <ArchiveIcon className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={(e) => ouvrirEdition(p, e)}
-                    title="Modifier le projet"
-                    className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50  transition-colors"
-                  >
-                    <EditIcon className="w-4 h-4" />
                   </button>
                   <button
                     onClick={(e) => supprimer(p, e)}
@@ -629,298 +463,6 @@ export default function Projets() {
           </div>
         ))}
       </div>
-
-      {/* Modal création */}
-      {modalOuvert && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate__animated animate__fadeIn">
-          <div className="w-full max-w-lg bg-white p-6 shadow-xl  animate__animated animate__zoomIn">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-slate-900">
-                {t("projets.modal.titre")}
-              </h2>
-              <button
-                onClick={() => setModalOuvert(false)}
-                className="text-slate-400 hover:text-slate-700 transition-colors"
-              >
-                <CloseIcon className="w-5 h-5" />
-              </button>
-            </div>
-
-            {formErreur && (
-              <div className="mb-3 bg-red-50 px-3 py-2 text-sm text-red-700 border border-red-200 ">
-                ⚠️ {formErreur}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
-                  {t("projets.form.nom")} <span className="text-red-500">*</span>
-                </label>
-                <input
-                  name="nom"
-                  value={form.nom}
-                  onChange={handleChange}
-                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
-                  placeholder="Site vitrine…"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
-                  {t("projets.form.description")}
-                </label>
-                <textarea
-                  name="description"
-                  value={form.description}
-                  onChange={handleChange}
-                  rows={2}
-                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent resize-none"
-                  placeholder="Description optionnelle..."
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-slate-700">
-                    {t("projets.form.client")} <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    name="client_id"
-                    value={form.client_id}
-                    onChange={handleChange}
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent appearance-none bg-white"
-                  >
-                    <option value="">— Choisir —</option>
-                    {clients.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.nom}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-slate-700">
-                    {t("projets.form.responsable")} <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    name="responsable_id"
-                    value={form.responsable_id}
-                    onChange={handleChange}
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent appearance-none bg-white"
-                  >
-                    <option value="">— Choisir —</option>
-                    {responsables.map((r) => (
-                      <option key={r.id} value={r.id}>
-                        {r.prenom} {r.nom} ({r.role})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-slate-700">
-                    {t("projets.form.dateDebut")} <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    name="date_debut"
-                    value={form.date_debut}
-                    onChange={handleChange}
-                    required
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-slate-700">
-                    {t("projets.form.dateFin")} <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    name="date_fin_prevue"
-                    value={form.date_fin_prevue}
-                    onChange={handleChange}
-                    required
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              {clients.length === 0 && (
-                <p className="text-xs text-amber-600">
-                  ⚠️ Aucun client disponible — créez d'abord un client.
-                </p>
-              )}
-
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
-                <button
-                  type="button"
-                  onClick={() => setModalOuvert(false)}
-                  className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100  transition-colors"
-                >
-                  {t("common.annuler")}
-                </button>
-                <button
-                  type="submit"
-                  disabled={enCours}
-                  className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white  transition hover:bg-[#4a8f2e] disabled:opacity-50"
-                >
-                  {enCours ? t("common.enregistrement") : t("projets.form.creer")}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Édition */}
-      {modalEditionOuvert && projetEdition && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate__animated animate__fadeIn">
-          <div className="w-full max-w-lg bg-white p-6 shadow-xl  animate__animated animate__zoomIn">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-slate-900">
-                Modifier le projet
-              </h2>
-              <button
-                onClick={() => {
-                  setModalEditionOuvert(false);
-                  setProjetEdition(null);
-                }}
-                className="text-slate-400 hover:text-slate-700 transition-colors"
-              >
-                <CloseIcon className="w-5 h-5" />
-              </button>
-            </div>
-
-            {formErreur && (
-              <div className="mb-3 bg-red-50 px-3 py-2 text-sm text-red-700 border border-red-200 ">
-                ⚠️ {formErreur}
-              </div>
-            )}
-
-            <form onSubmit={handleEditionSubmit} className="space-y-3">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
-                  {t("projets.form.nom")} <span className="text-red-500">*</span>
-                </label>
-                <input
-                  name="nom"
-                  value={form.nom}
-                  onChange={handleChange}
-                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
-                  placeholder="Site vitrine…"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
-                  {t("projets.form.description")}
-                </label>
-                <textarea
-                  name="description"
-                  value={form.description}
-                  onChange={handleChange}
-                  rows={2}
-                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent resize-none"
-                  placeholder="Description optionnelle..."
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-slate-700">
-                    {t("projets.form.client")} <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    name="client_id"
-                    value={form.client_id}
-                    onChange={handleChange}
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent appearance-none bg-white"
-                  >
-                    <option value="">— Choisir —</option>
-                    {clients.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.nom}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-slate-700">
-                    {t("projets.form.responsable")} <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    name="responsable_id"
-                    value={form.responsable_id}
-                    onChange={handleChange}
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent appearance-none bg-white"
-                  >
-                    <option value="">— Choisir —</option>
-                    {responsables.map((r) => (
-                      <option key={r.id} value={r.id}>
-                        {r.prenom} {r.nom} ({r.role})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-slate-700">
-                    {t("projets.form.dateDebut")} <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    name="date_debut"
-                    value={form.date_debut}
-                    onChange={handleChange}
-                    required
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-slate-700">
-                    {t("projets.form.dateFin")} <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    name="date_fin_prevue"
-                    value={form.date_fin_prevue}
-                    onChange={handleChange}
-                    required
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setModalEditionOuvert(false);
-                    setProjetEdition(null);
-                  }}
-                  className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100  transition-colors"
-                >
-                  {t("common.annuler")}
-                </button>
-                <button
-                  type="submit"
-                  disabled={enCours}
-                  className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white  transition hover:bg-[#4a8f2e] disabled:opacity-50"
-                >
-                  {enCours ? t("common.enregistrement") : "Modifier"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
