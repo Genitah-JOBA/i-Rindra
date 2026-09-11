@@ -1,4 +1,4 @@
-// src/pages/Clients.jsx — gestion des clients (= entreprises), avec leur accès de connexion.
+// src/pages/Clients.jsx — affichage des clients (= entreprises), avec leur accès de connexion.
 import { useEffect, useState } from "react";
 import { clientsService } from "../api/client";
 import { utilisateursService } from "../api/utilisateurs";
@@ -8,12 +8,6 @@ import { useMessage } from "../context/MessageContext";
 import 'animate.css';
 
 // Icônes SVG
-const PlusIcon = ({ className = "w-5 h-5" }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-  </svg>
-);
-
 const TrashIcon = ({ className = "w-4 h-4" }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
@@ -74,14 +68,6 @@ const XIcon = ({ className = "w-4 h-4" }) => (
   </svg>
 );
 
-const FORM_VIDE = {
-  nom: "",
-  contact: "",
-  telephone: "",
-  email: "",
-  mot_de_passe: "",
-};
-
 export default function Clients() {
   const { user } = useAuth();
   const { t } = useLang();
@@ -93,12 +79,6 @@ export default function Clients() {
   const [loading, setLoading] = useState(true);
   const [erreur, setErreur] = useState("");
   const [recherche, setRecherche] = useState("");
-
-  const [modalOuvert, setModalOuvert] = useState(false);
-  const [editionId, setEditionId] = useState(null);
-  const [form, setForm] = useState(FORM_VIDE);
-  const [formErreur, setFormErreur] = useState("");
-  const [enregistrement, setEnregistrement] = useState(false);
 
   const chargerTout = async () => {
     setLoading(true);
@@ -125,88 +105,6 @@ export default function Clients() {
 
   const compteDe = (clientId) => comptes.find((c) => c.client_id === clientId);
 
-  const ouvrirAjout = () => {
-    setEditionId(null);
-    setForm(FORM_VIDE);
-    setFormErreur("");
-    setModalOuvert(true);
-  };
-
-  const ouvrirEdition = (e) => {
-    setEditionId(e.id);
-    setForm({
-      nom: e.nom,
-      contact: e.contact || "",
-      telephone: e.telephone || "",
-      email: e.email || "",
-      mot_de_passe: "",
-    });
-    setFormErreur("");
-    setModalOuvert(true);
-  };
-
-  const enregistrer = async (ev) => {
-    ev.preventDefault();
-    setFormErreur("");
-    setEnregistrement(true);
-    try {
-      const infoEntreprise = {
-        nom: form.nom,
-        contact: form.contact || null,
-        telephone: form.telephone || null,
-        email: form.email || null,
-      };
-
-      if (editionId) {
-        await clientsService.update(editionId, infoEntreprise);
-        showSuccess("Client modifié avec succès !");
-      } else {
-        if (!form.email) {
-          setFormErreur("Un email est requis pour créer l'accès de connexion.");
-          setEnregistrement(false);
-          return;
-        }
-        if (!form.mot_de_passe) {
-          setFormErreur("Un mot de passe est requis pour créer l'accès de connexion.");
-          setEnregistrement(false);
-          return;
-        }
-        const entreprise = await clientsService.create(infoEntreprise);
-        await utilisateursService.create({
-          nom: form.nom,
-          prenom: form.contact || "Client",
-          email: form.email,
-          mot_de_passe: form.mot_de_passe,
-          role: "client",
-          client_id: entreprise.id,
-        });
-        showSuccess("Client créé avec son accès de connexion !");
-      }
-      setModalOuvert(false);
-      await chargerTout();
-    } catch (err) {
-      const msg = err.response?.data?.detail || "Erreur lors de l'enregistrement.";
-      setFormErreur(msg);
-      showError(msg);
-    } finally {
-      setEnregistrement(false);
-    }
-  };
-
-  const supprimer = async (e) => {
-    if (!window.confirm(`Supprimer le client « ${e.nom} » ?\nSon accès de connexion sera aussi supprimé.`)) return;
-    try {
-      const compte = compteDe(e.id);
-      if (compte) await utilisateursService.delete(compte.id);
-      await clientsService.delete(e.id);
-      showSuccess(`Client "${e.nom}" supprimé.`);
-      await chargerTout();
-    } catch (err) {
-      const msg = err.response?.data?.detail || "Impossible de supprimer (des projets y sont peut-être encore rattachés).";
-      showError(msg);
-    }
-  };
-
   const filtres = entreprises.filter((e) => {
     if (!recherche) return true;
     const q = recherche.toLowerCase();
@@ -229,37 +127,26 @@ export default function Clients() {
             {entreprises.length} {t("clients.sousTitre")}
           </p>
         </div>
-        <div className="flex gap-2">
-          <div className="relative">
-            <input
-              type="text"
-              value={recherche}
-              onChange={(e) => setRecherche(e.target.value)}
-              placeholder={t("common.rechercher")}
-              className="w-48 sm:w-56 pl-8 pr-3 py-2 text-sm border border-slate-300  outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
-            />
-            <SearchIcon className="w-4 h-4 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-          </div>
-          {estGestion && (
-            <button
-              onClick={ouvrirAjout}
-              className="flex items-center gap-2 bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white  transition hover:bg-[#4a8f2e]"
-            >
-              <PlusIcon className="w-4 h-4" />
-              {t("clients.nouveau")}
-            </button>
-          )}
+        <div className="relative">
+          <input
+            type="text"
+            value={recherche}
+            onChange={(e) => setRecherche(e.target.value)}
+            placeholder={t("common.rechercher")}
+            className="w-48 sm:w-56 pl-8 pr-3 py-2 text-sm border border-slate-300 rounded-md outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+          />
+          <SearchIcon className="w-4 h-4 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
         </div>
       </div>
 
       {loading && (
         <div className="flex justify-center items-center py-12 animate__animated animate__pulse">
-          <div className="animate-spin  h-8 w-8 border-b-2 border-[#63B23E]"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#63B23E]"></div>
           <span className="ml-3 text-slate-500">{t("common.chargement")}</span>
         </div>
       )}
       {erreur && (
-        <div className="mb-4  bg-red-50 px-4 py-3 text-sm text-red-700 border border-red-200 animate__animated animate__shakeX">
+        <div className="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-700 border border-red-200 animate__animated animate__shakeX">
           ⚠️ {erreur}
         </div>
       )}
@@ -273,11 +160,11 @@ export default function Clients() {
                 return (
                   <div
                     key={e.id}
-                    className="border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md hover:border-[#63B23E] transition-all duration-300  animate__animated animate__fadeInUp"
+                    className="border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md hover:border-[#63B23E] transition-all duration-300 rounded-lg animate__animated animate__fadeInUp"
                     style={{ animationDelay: `${index * 0.05}s` }}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center bg-amber-100 text-amber-700 ">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center bg-amber-100 text-amber-700 rounded-full">
                         <BuildingIcon className="w-5 h-5" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -318,166 +205,17 @@ export default function Clients() {
                         )}
                       </div>
                     </div>
-
-                    {estGestion && (
-                      <div className="mt-3 flex justify-end gap-3 border-t border-slate-100 pt-2">
-                        <button
-                          onClick={() => ouvrirEdition(e)}
-                          className="flex items-center gap-1 text-xs text-slate-500 hover:text-[#63B23E] transition-colors"
-                        >
-                          <EditIcon className="w-3.5 h-3.5" />
-                          {t("common.modifier")}
-                        </button>
-                        <button
-                          onClick={() => supprimer(e)}
-                          className="flex items-center gap-1 text-xs text-slate-500 hover:text-red-600 transition-colors"
-                        >
-                          <TrashIcon className="w-3.5 h-3.5" />
-                          {t("common.supprimer")}
-                        </button>
-                      </div>
-                    )}
                   </div>
                 );
               })}
             </div>
           ) : (
-            <div className="text-center py-12 bg-slate-50 border border-dashed border-slate-300 ">
+            <div className="text-center py-12 bg-slate-50 border border-dashed border-slate-300 rounded-lg">
               <BuildingIcon className="w-12 h-12 text-slate-300 mx-auto mb-3" />
               <p className="text-sm text-slate-500">{t("clients.vide")}</p>
-              {estGestion && (
-                <button
-                  onClick={ouvrirAjout}
-                  className="mt-4 px-4 py-2 bg-[#63B23E] text-white  hover:bg-[#4a8f2e] transition-colors"
-                >
-                  + {t("clients.nouveau")}
-                </button>
-              )}
             </div>
           )}
         </>
-      )}
-
-      {/* MODAL AJOUT / ÉDITION */}
-      {modalOuvert && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate__animated animate__fadeIn">
-          <div className="w-full max-w-md bg-white p-6 shadow-xl  animate__animated animate__zoomIn">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-900">
-                {editionId ? t("clients.modal.edition") : t("clients.modal.ajout")}
-              </h2>
-              <button
-                onClick={() => setModalOuvert(false)}
-                className="text-slate-400 hover:text-slate-700 transition-colors"
-              >
-                <CloseIcon className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={enregistrer} className="space-y-3">
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-600">
-                  {t("clients.form.nom")} <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={form.nom}
-                  onChange={(e) => setForm({ ...form, nom: e.target.value })}
-                  required
-                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-slate-600">
-                    {t("clients.form.contact")}
-                  </label>
-                  <input
-                    type="text"
-                    value={form.contact}
-                    onChange={(e) => setForm({ ...form, contact: e.target.value })}
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-slate-600">
-                    {t("clients.form.tel")}
-                  </label>
-                  <input
-                    type="text"
-                    value={form.telephone}
-                    onChange={(e) => setForm({ ...form, telephone: e.target.value })}
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-600">
-                  {editionId
-                    ? t("clients.form.emailSimple")
-                    : t("clients.form.email")}
-                  {!editionId && <span className="text-red-500">*</span>}
-                </label>
-                <input
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  required={!editionId}
-                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
-                />
-              </div>
-
-              {!editionId && (
-                <div className=" bg-slate-50 p-3 border border-slate-200">
-                  <p className="mb-2 text-xs font-medium text-slate-600">
-                    {t("clients.acces.title")}
-                  </p>
-                  <label className="mb-1 block text-xs font-medium text-slate-600">
-                    {t("clients.acces.mdp")} <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="password"
-                    value={form.mot_de_passe}
-                    onChange={(e) => setForm({ ...form, mot_de_passe: e.target.value })}
-                    required
-                    minLength={4}
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
-                  />
-                  <p className="mt-1 text-[11px] text-slate-400">
-                    {t("clients.acces.hint")}
-                  </p>
-                </div>
-              )}
-
-              {formErreur && (
-                <div className=" bg-red-50 px-3 py-2 text-sm text-red-700 border border-red-200">
-                  ⚠️ {formErreur}
-                </div>
-              )}
-
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
-                <button
-                  type="button"
-                  onClick={() => setModalOuvert(false)}
-                  className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100  transition-colors"
-                >
-                  {t("common.annuler")}
-                </button>
-                <button
-                  type="submit"
-                  disabled={enregistrement}
-                  className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white  transition hover:bg-[#4a8f2e] disabled:opacity-50"
-                >
-                  {enregistrement
-                    ? t("common.enregistrement")
-                    : editionId
-                      ? t("common.enregistrer")
-                      : t("clients.nouveau")}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
       )}
     </div>
   );
