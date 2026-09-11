@@ -541,12 +541,14 @@ export default function Projets() {
                   <span>Responsable : {nomResponsable(p.responsable_id)}</span>
                 </div>
               )}
-              {p.date_debut && (
-                <div className="flex items-center gap-1">
-                  <CalendarIcon className="w-3.5 h-3.5" />
-                  <span>Début : {new Date(p.date_debut).toLocaleDateString("fr-FR")}</span>
-                </div>
-              )}
+              <div className="flex items-center gap-1">
+                <CalendarIcon className="w-3.5 h-3.5" />
+                <span>
+                  Début : {p.date_debut
+                    ? new Date(p.date_debut).toLocaleDateString("fr-FR")
+                    : "—"}
+                </span>
+              </div>
               {p.date_fin_prevue && (
                 <div className="flex items-center gap-1">
                   <CalendarIcon className="w-3.5 h-3.5" />

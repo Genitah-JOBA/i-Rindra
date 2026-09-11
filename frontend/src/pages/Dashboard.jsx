@@ -294,11 +294,11 @@ export default function Dashboard() {
         projetsParMois[moisIndex] = (projetsParMois[moisIndex] || 0) + 1;
       }
       if (
-        projet.date_fin &&
+        projet.date_fin_prevue &&
         projet.statut_sante === "vert" &&
         projet.avancement_pct === 100
       ) {
-        const date = new Date(projet.date_fin);
+        const date = new Date(projet.date_fin_prevue);
         const moisIndex = date.getMonth();
         projetsTerminesParMois[moisIndex] =
           (projetsTerminesParMois[moisIndex] || 0) + 1;
@@ -812,7 +812,7 @@ function ProjectCard({ projet }) {
         </span>
       </div>
 
-      {projet.date_fin && (
+      {projet.date_fin_prevue && (
         <div className="flex items-center gap-1 text-[10px] sm:text-xs text-slate-400 mt-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -828,7 +828,7 @@ function ProjectCard({ projet }) {
               d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
             />
           </svg>
-          {new Date(projet.date_fin).toLocaleDateString("fr-FR")}
+          {new Date(projet.date_fin_prevue).toLocaleDateString("fr-FR")}
         </div>
       )}
     </div>

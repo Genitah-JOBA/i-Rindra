@@ -13,6 +13,7 @@ from app.models.projet import Projet, StatutSante
 from app.models.client import Client
 from app.models.utilisateur import Utilisateur, RoleUtilisateur
 from app.models.projet import ProjetMembre
+from app.models.tache import Tache, StatutTache
 from app.services import notifications as notif_service
 from app.schemas.projet import ProjetCreate, ProjetUpdate, ProjetResponse, ProjetListResponse
 from app.schemas.membre import (
@@ -174,10 +175,46 @@ async def get_projets(
             )
         )
     
-    result = await db.execute(query)
-    projets = result.scalars().all()
+    # Compte les tâches (total et terminées) pour chaque projet
+    taches_total_sq = (
+        select(func.count(Tache.id))
+        .where(Tache.projet_id == Projet.id)
+        .scalar_subquery()
+    )
+    taches_terminees_sq = (
+        select(func.count(Tache.id))
+        .where(
+            and_(
+                Tache.projet_id == Projet.id,
+                Tache.statut == StatutTache.TERMINE
+            )
+        )
+        .scalar_subquery()
+    )
+    query = query.add_columns(
+        taches_terminees_sq.label("taches_terminees"),
+        taches_total_sq.label("taches_total"),
+    )
     
-    return [ProjetListResponse.model_validate(p) for p in projets]
+    result = await db.execute(query)
+    rows = result.all()
+    
+    return [
+        ProjetListResponse(
+            id=projet.id,
+            nom=projet.nom,
+            client_id=projet.client_id,
+            responsable_id=projet.responsable_id,
+            statut_sante=projet.statut_sante,
+            avancement_pct=projet.avancement_pct,
+            archive=projet.archive,
+            date_debut=projet.date_debut,
+            date_fin_prevue=projet.date_fin_prevue,
+            taches_total=taches_total or 0,
+            taches_terminees=taches_terminees or 0,
+        )
+        for projet, taches_terminees, taches_total in rows
+    ]
 
 @router.get("/{projet_id}", response_model=ProjetResponse)
 async def get_projet(

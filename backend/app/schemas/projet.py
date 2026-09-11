@@ -57,6 +57,10 @@ class ProjetListResponse(BaseModel):
     statut_sante: StatutSanteEnum
     avancement_pct: float
     archive: bool
+    date_debut: Optional[date] = None
+    date_fin_prevue: Optional[date] = None
+    taches_total: int = 0
+    taches_terminees: int = 0
     
     class Config:
         from_attributes = True

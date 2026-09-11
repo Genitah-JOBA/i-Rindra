@@ -26,7 +26,7 @@ export default function CreateProjetModal({ isOpen, onClose, onProjetCree }) {
     description: "",
     client: "",
     date_debut: "",
-    date_fin: "",
+    date_fin_prevue: "",
   });
   const [loading, setLoading] = useState(false);
   const [erreur, setErreur] = useState("");
@@ -52,7 +52,7 @@ export default function CreateProjetModal({ isOpen, onClose, onProjetCree }) {
         description: "",
         client: "",
         date_debut: "",
-        date_fin: "",
+        date_fin_prevue: "",
       });
     } catch (err) {
       setErreur(
@@ -149,8 +149,8 @@ export default function CreateProjetModal({ isOpen, onClose, onProjetCree }) {
               </label>
               <input
                 type="date"
-                name="date_fin"
-                value={formData.date_fin}
+                name="date_fin_prevue"
+                value={formData.date_fin_prevue}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent text-sm"
               />
