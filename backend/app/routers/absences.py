@@ -1,8 +1,8 @@
 # app/routers/absences.py
 """
 Gestion des absences.
-- Équipe (et direction/admin) : dépose une demande d'absence.
-- Direction/admin : accepte ou refuse la demande.
+- Équipe (et direction/DRH) : dépose une demande d'absence.
+- Direction/DRH : accepte ou refuse la demande.
 Toute la logique de pilotage (liste globale, décision) est réservée à la direction.
 """
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -27,7 +27,7 @@ router = APIRouter(prefix="/absences", tags=["Absences"])
 
 
 async def _direction_seulement(role: str = Depends(get_current_user_role)):
-    if role not in ("direction", "admin"):
+    if role not in ("direction", "drh"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Action réservée à la direction",
@@ -117,8 +117,15 @@ async def lister_absences(
     user_id: int = Depends(get_current_user_id),
     role: str = Depends(get_current_user_role),
 ):
-    if role in ("direction", "admin"):
+    if role in ("direction", "drh"):
         return await _charger_avec_infos(db)
+
+    if role not in ("equipe",):
+        # chef_de_projet et client n'ont aucune vue sur les absences
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Vous n'avez pas accès aux absences",
+        )
 
     rows = (
         await db.execute(
@@ -143,7 +150,15 @@ async def creer_absence(
     data: AbsenceCreate,
     db: AsyncSession = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
+    role: str = Depends(get_current_user_role),
 ):
+    # Le chef de projet et le client ne déposent pas de demandes d'absence
+    if role not in ("equipe", "direction", "drh"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Seuls les membres de l'équipe, la direction et le DRH peuvent déposer une demande d'absence",
+        )
+
     if data.date_fin < data.date_debut:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -161,8 +176,8 @@ async def creer_absence(
     db.add(absence)
     await db.flush()
 
-    # Notification à la direction
-    uid_direction = await notif_service.ids_direction(db)
+    # Notification à la direction / DRH
+    uid_direction = await notif_service.ids_pilotage(db)
     uid_direction = [uid for uid in uid_direction if uid != user_id]
     await notif_service.notifier(
         db,
@@ -255,7 +270,7 @@ async def annuler_absence(
         raise HTTPException(status_code=404, detail="Demande d'absence non trouvée")
 
     # La direction peut supprimer n'importe quelle demande ; un membre seulement la sienne
-    if role not in ("direction", "admin") and a.utilisateur_id != user_id:
+    if role not in ("direction", "drh") and a.utilisateur_id != user_id:
         raise HTTPException(status_code=403, detail="Vous ne pouvez pas supprimer cette demande")
 
     await db.delete(a)

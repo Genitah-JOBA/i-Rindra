@@ -17,10 +17,10 @@ router = APIRouter(prefix="/clients", tags=["Clients"])
 
 
 async def _interne_seulement(role: str = Depends(get_current_user_role)):
-    if role not in ("admin", "direction", "equipe"):
+    if role not in ("direction", "drh", "chef_de_projet", "equipe"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Action réservée à la direction ou au chef de projet",
+            detail="Action réservée aux comptes internes",
         )
     return role
 

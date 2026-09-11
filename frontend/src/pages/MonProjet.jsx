@@ -1,7 +1,6 @@
 // MonProjet.jsx — dashboard client : le client voit uniquement son projet (RF-19 à RF-22).
 import { useEffect, useState } from "react";
 import api from "../api/client";
-import { useLang } from "../i18n/LangContext";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 import "animate.css";
@@ -39,8 +38,11 @@ const ALERTE_ICONE = {
   basse: "🟡",
 };
 
+const STATUT_MAP = { vert: "Bon", orange: "Attention", rouge: "Critique" };
+const KANBAN_MAP = { a_faire: "À faire", en_cours: "En cours", en_revue: "En revue", termine: "Terminé" };
+const PRIORITE_MAP = { basse: "Basse", moyenne: "Moyenne", haute: "Haute" };
+
 export default function MonProjet() {
-  const { t } = useLang();
   const [projets, setProjets] = useState([]);
   const [projetId, setProjetId] = useState(null);
   const [projet, setProjet] = useState(null);
@@ -65,7 +67,7 @@ export default function MonProjet() {
         setAlertes([]);
       }
     } catch (err) {
-      setErreur(err.response?.data?.detail || t("mp.aucun"));
+      setErreur(err.response?.data?.detail || "Aucun projet trouvé pour votre compte.");
     } finally {
       setLoading(false);
     }
@@ -92,7 +94,7 @@ export default function MonProjet() {
     try {
       await chargerProjets();
     } catch (err) {
-      setErreur(err.response?.data?.detail || t("mp.aucun"));
+      setErreur(err.response?.data?.detail || "Aucun projet trouvé pour votre compte.");
     } finally {
       setLoading(false);
     }
@@ -103,7 +105,7 @@ export default function MonProjet() {
     try {
       await chargerDetailActif(id);
     } catch (err) {
-      setErreur(err.response?.data?.detail || t("mp.aucun"));
+      setErreur(err.response?.data?.detail || "Aucun projet trouvé pour votre compte.");
     }
   };
 
@@ -135,10 +137,10 @@ export default function MonProjet() {
 
   const doughnutData = {
     labels: [
-      t("kanban.a_faire"),
-      t("kanban.en_cours"),
-      t("kanban.en_revue"),
-      t("kanban.termine"),
+      "À faire",
+      "En cours",
+      "En revue",
+      "Terminé",
     ],
     datasets: [
       {
@@ -174,13 +176,13 @@ export default function MonProjet() {
         )
       : "—";
 
-  const fmtPriorite = (p) => t(`priorite.${p}`) || p;
+  const fmtPriorite = (p) => PRIORITE_MAP[p] || p;
 
   if (loading)
     return (
       <div className="flex justify-center items-center py-16">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#63B23E]"></div>
-        <span className="ml-3 text-slate-500">{t("common.chargement")}</span>
+        <span className="ml-3 text-slate-500">{"Chargement…"}</span>
       </div>
     );
 
@@ -205,13 +207,13 @@ export default function MonProjet() {
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900">
               {projet.nom}
             </h1>
-            <p className="text-sm text-slate-500">{t("mp.sousTitre")}</p>
+            <p className="text-sm text-slate-500">{"Voici l'avancement de votre projet."}</p>
           </div>
           <div className="flex items-center gap-2">
             <span
               className={`rounded-full px-3 py-1 text-xs sm:text-sm font-medium ${couleurStatut.badge}`}
             >
-              {t(`statut.${projet.statut_sante}`)}
+              {STATUT_MAP[projet.statut_sante] || projet.statut_sante}
             </span>
             <button
               onClick={chargerDonnees}
@@ -232,7 +234,7 @@ export default function MonProjet() {
                 d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
               />
             </svg>
-            {t("dash.refresh")}
+            {"Rafraîchir"}
           </button>
         </div>
       </div>
@@ -241,7 +243,7 @@ export default function MonProjet() {
       {projets.length > 1 && (
         <div className="mb-6">
           <p className="mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-            {t("mp.tousProjets")}
+            {"Mes projets"}
           </p>
           <div className="flex flex-wrap gap-2">
             {projets.map((p) => {
@@ -257,7 +259,7 @@ export default function MonProjet() {
                   }`}
                 >
                   <span className={actif ? "" : "text-slate-400"}>
-                    {t(`statut.${p.statut_sante}`)}
+                    {STATUT_MAP[p.statut_sante] || p.statut_sante}
                   </span>
                   <span className="max-w-[200px] truncate">{p.nom}</span>
                   <span
@@ -283,7 +285,7 @@ export default function MonProjet() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
         <div className="bg-white border border-slate-200 p-4 shadow-sm hover:border-[#63B23E] transition-colors">
           <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-wider">
-            {t("mp.avancement")}
+            {"Avancement"}
           </p>
           <p className="text-xl sm:text-2xl font-bold text-[#63B23E]">
             {projet.avancement_pct || 0}%
@@ -292,19 +294,19 @@ export default function MonProjet() {
 
         <div className="bg-white border border-slate-200 p-4 shadow-sm hover:border-[#63B23E] transition-colors">
           <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-wider">
-            {t("mp.taches")}
+            {"Tâches"}
           </p>
           <p className="text-xl sm:text-2xl font-bold text-slate-900">
             {totalTaches}
           </p>
           <p className="text-[10px] text-slate-400">
-            {details.termine} {t("mp.tachesTerminees")}
+            {details.termine} {"Terminées"}
           </p>
         </div>
 
         <div className="bg-white border border-slate-200 p-4 shadow-sm hover:border-[#63B23E] transition-colors">
           <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-wider">
-            {estTermine ? t("mp.tachesTerminees") : t("mp.tachesRestantes")}
+            {estTermine ? "Terminées" : "Restantes"}
           </p>
           <p
             className={`text-xl sm:text-2xl font-bold ${
@@ -314,13 +316,13 @@ export default function MonProjet() {
             {estTermine ? "100% ✓" : `${totalTaches - details.termine}`}
           </p>
           <p className="text-[10px] text-slate-400">
-            {t("statut." + projet.statut_sante)}
+            {STATUT_MAP[projet.statut_sante] || projet.statut_sante}
           </p>
         </div>
 
         <div className="bg-white border border-slate-200 p-4 shadow-sm hover:border-[#63B23E] transition-colors">
           <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-wider">
-            {enRetard ? t("mp.enRetard") : t("mp.statut")}
+            {enRetard ? "En retard" : "Statut"}
           </p>
           <p
             className={`text-xl sm:text-2xl font-bold truncate ${
@@ -332,9 +334,9 @@ export default function MonProjet() {
           <p className="text-[10px] text-slate-400">
             {joursEcheance !== null
               ? enRetard
-                ? `${Math.abs(joursEcheance)} ${t("mp.joursRetard")}`
-                : `${joursEcheance} ${t("mp.joursRestants")}`
-              : t("mp.fin")}
+                ? `${Math.abs(joursEcheance)} ${"jours de retard"}`
+                : `${joursEcheance} ${"jours restants"}`
+              : "Fin prévue"}
           </p>
         </div>
       </div>
@@ -343,14 +345,14 @@ export default function MonProjet() {
         {/* Avancement détaillé */}
         <div className="lg:col-span-2 bg-white border border-slate-200 p-4 sm:p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">
-            {projet.description || t("mp.rapport")}
+            {projet.description || "Rapport d'activité"}
           </h3>
 
           {/* Barre de progression */}
           <div className="mb-1 flex justify-between text-xs text-slate-500">
             <span>
               {projet.avancement_pct || 0}%{" "}
-              {estTermine ? "✓" : t("dash.termine")}
+              {estTermine ? "✓" : "terminé"}
             </span>
             <span>
               {fmtDate(projet.date_debut)} → {fmtDate(projet.date_fin_prevue)}
@@ -379,7 +381,7 @@ export default function MonProjet() {
                   {valeur}
                 </p>
                 <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-wider">
-                  {t(`kanban.${cle}`)}
+                  {KANBAN_MAP[cle]}
                 </p>
               </div>
             ))}
@@ -389,7 +391,7 @@ export default function MonProjet() {
         {/* Graphique répartition */}
         <div className="bg-white border border-slate-200 p-4 sm:p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">
-            {t("mp.repartition")}
+            {"Répartition des tâches"}
           </h3>
           <div className="h-56 flex items-center justify-center">
             {totalTaches > 0 ? (
@@ -397,7 +399,7 @@ export default function MonProjet() {
                 <Doughnut data={doughnutData} options={doughnutOptions} />
               </div>
             ) : (
-              <p className="text-sm text-slate-500">{t("mp.pasDeTache")}</p>
+              <p className="text-sm text-slate-500">{"Aucune tâche pour le moment."}</p>
             )}
           </div>
         </div>
@@ -407,7 +409,7 @@ export default function MonProjet() {
       {alertes.length > 0 && (
         <div className="mb-6">
           <h3 className="text-sm font-semibold text-slate-700 mb-2">
-            {t("mp.alertes")} ({alertes.length})
+            {"Alertes"} ({alertes.length})
           </h3>
           <div className="space-y-2">
             {alertes.map((alerte, idx) => (
@@ -429,7 +431,7 @@ export default function MonProjet() {
       )}
       {alertes.length === 0 && (
         <div className="mb-6 rounded border-l-4 border-l-green-500 bg-green-50 px-3 py-2 text-sm text-green-700">
-          ✓ {t("mp.aucuneAlerte")}
+          ✓ {"Aucune alerte. Tout va bien."}
         </div>
       )}
 
@@ -437,12 +439,12 @@ export default function MonProjet() {
       <div className="bg-white border border-slate-200 shadow-sm">
         <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
           <h3 className="text-sm font-semibold text-slate-700">
-            {t("mp.taches")} ({taches.length})
+            {"Tâches"} ({taches.length})
           </h3>
         </div>
         {taches.length === 0 ? (
           <div className="px-4 py-8 text-center text-sm text-slate-500">
-            {t("mp.pasDeTache")}
+            {"Aucune tâche pour le moment."}
           </div>
         ) : (
           <div className="divide-y divide-slate-100">
@@ -459,7 +461,7 @@ export default function MonProjet() {
                     <span
                       className={`rounded-full px-2 py-0.5 font-medium ${STATUT_STYLE[tache.statut]}`}
                     >
-                      {t(`kanban.${tache.statut}`)}
+                      {KANBAN_MAP[tache.statut]}
                     </span>
                     <span
                       className={`rounded-full px-2 py-0.5 font-medium ${PRIORITE_STYLE[tache.priorite]}`}
@@ -485,7 +487,7 @@ export default function MonProjet() {
                       />
                     </svg>
                     <span>
-                      {t("mp.echeance")}: {fmtDate(tache.echeance)}
+                      {"Échéance"}: {fmtDate(tache.echeance)}
                     </span>
                   </div>
                 )}

@@ -15,7 +15,7 @@
 -- ------------------------------------------------------------
 --  TYPES ÉNUMÉRÉS
 -- ------------------------------------------------------------
-CREATE TYPE role_utilisateur   AS ENUM ('admin', 'direction', 'equipe', 'client');
+CREATE TYPE role_utilisateur   AS ENUM ('direction', 'drh', 'chef_de_projet', 'equipe', 'client');
 CREATE TYPE statut_sante       AS ENUM ('vert', 'orange', 'rouge');
 CREATE TYPE statut_tache       AS ENUM ('a_faire', 'en_cours', 'en_revue', 'termine');
 CREATE TYPE priorite_tache     AS ENUM ('basse', 'moyenne', 'haute');

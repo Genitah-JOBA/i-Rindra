@@ -24,10 +24,10 @@ export default function App() {
         {/* Page publique */}
         <Route path="/login" element={<Login />} />
 
-        {/* Espace interne (admin + direction + équipe) */}
+        {/* Espace interne (direction + DRH + chef de projet + équipe) */}
         <Route
           element={
-            <ProtectedRoute roles={["admin", "direction", "equipe"]}>
+            <ProtectedRoute roles={["direction", "drh", "chef_de_projet", "equipe"]}>
               <Layout />
             </ProtectedRoute>
           }
@@ -42,10 +42,10 @@ export default function App() {
           <Route path="assistant-ia" element={<AssistantIA />} />
         </Route>
 
-        {/* Volet financier — ADMIN uniquement (la direction n'a pas accès à l'argent) */}
+        {/* Volet financier — Direction / DRH uniquement */}
         <Route
           element={
-            <ProtectedRoute roles={["admin"]}>
+            <ProtectedRoute roles={["direction", "drh"]}>
               <Layout />
             </ProtectedRoute>
           }
@@ -69,7 +69,7 @@ export default function App() {
         {/* Paramètres — accessible à tous les rôles connectés */}
         <Route
           element={
-            <ProtectedRoute roles={["admin", "direction", "equipe", "client"]}>
+            <ProtectedRoute roles={["direction", "drh", "chef_de_projet", "equipe", "client"]}>
               <Layout />
             </ProtectedRoute>
           }

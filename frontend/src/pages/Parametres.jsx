@@ -1,15 +1,8 @@
-// src/pages/Parametres.jsx — préférences de l'application (langue, compte).
+// src/pages/Parametres.jsx — préférences de l'application (compte).
 import { useState, useEffect } from "react";
-import { useLang } from "../i18n/LangContext";
 import { useAuth } from "../auth/AuthContext";
 
-const LANGUES = [
-  { code: "fr", drapeau: "/france.png", nom: "Français" },
-  { code: "en", drapeau: "/RU.png", nom: "English" },
-];
-
 export default function Parametres() {
-  const { lang, setLang, t } = useLang();
   const { user, updateMe } = useAuth();
 
   const [form, setForm] = useState({
@@ -75,63 +68,17 @@ export default function Parametres() {
   return (
     <div className="max-w-2xl">
       <h1 className="mb-1 text-2xl font-bold text-slate-900">
-        {t("settings.title")}
+        Paramètres
       </h1>
-      <p className="mb-6 text-sm text-slate-500">{t("settings.subtitle")}</p>
-
-      {/* Langue */}
-      <section className="mb-6 rounded-lg border bg-white p-5 shadow-sm">
-        <h2 className="text-base font-semibold text-slate-800">
-          {t("settings.langue.title")}
-        </h2>
-        <p className="mb-4 text-sm text-slate-500">
-          {t("settings.langue.desc")}
-        </p>
-
-        <div className="flex flex-wrap gap-3">
-          {LANGUES.map((l) => (
-            <button
-              key={l.code}
-              onClick={() => setLang(l.code)}
-              className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm transition ${
-                lang === l.code
-                  ? "border-[#00B2A0] bg-[#00B2A0]/5 font-medium text-[#00B2A0]"
-                  : "border-slate-300 text-slate-600 hover:bg-slate-50"
-              }`}
-            >
-              <img
-                src={l.drapeau}
-                alt={l.nom}
-                className="h-5 w-5 rounded object-cover"
-              />
-              {l.nom}
-              {lang === l.code && (
-                <svg
-                  className="h-4 w-4 text-[#00B2A0]"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              )}
-            </button>
-          ))}
-        </div>
-      </section>
+      <p className="mb-6 text-sm text-slate-500">Préférences de l'application.</p>
 
       {/* Compte — modifiable */}
       <section className="rounded-lg border bg-white p-5 shadow-sm">
         <h2 className="mb-1 text-base font-semibold text-slate-800">
-          {t("settings.compte.title")}
+          Mon compte
         </h2>
         <p className="mb-4 text-sm text-slate-500">
-          {t("settings.compte.modifier")} ·{" "}
+          Modifier mes informations ·{" "}
           <span className="capitalize text-slate-600">{user?.role}</span>
         </p>
 
@@ -139,7 +86,7 @@ export default function Parametres() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm text-slate-500">
-                {t("common.prenom")}
+                Prénom
               </label>
               <input
                 name="prenom"
@@ -150,7 +97,7 @@ export default function Parametres() {
             </div>
             <div>
               <label className="mb-1 block text-sm text-slate-500">
-                {t("common.nom")}
+                Nom
               </label>
               <input
                 name="nom"
@@ -163,7 +110,7 @@ export default function Parametres() {
 
           <div>
             <label className="mb-1 block text-sm text-slate-500">
-              {t("common.email")}
+              Email
             </label>
             <input
               type="email"
@@ -176,12 +123,12 @@ export default function Parametres() {
 
           <div className="border-t border-slate-100 pt-4">
             <p className="mb-3 text-xs text-slate-400">
-              {t("settings.compte.mdpHint")}
+              Laissez vide pour ne pas changer le mot de passe.
             </p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-sm text-slate-500">
-                  {t("settings.compte.mdpActuel")}
+                  Mot de passe actuel
                 </label>
                 <input
                   type="password"
@@ -194,7 +141,7 @@ export default function Parametres() {
               </div>
               <div>
                 <label className="mb-1 block text-sm text-slate-500">
-                  {t("settings.compte.nouveauMdp")}
+                  Nouveau mot de passe
                 </label>
                 <input
                   type="password"
@@ -215,7 +162,7 @@ export default function Parametres() {
           )}
           {succes && (
             <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-600">
-              {t("settings.compte.succes")}
+              Informations mises à jour.
             </p>
           )}
 
@@ -225,7 +172,7 @@ export default function Parametres() {
               disabled={saving}
               className="rounded-lg bg-[#00B2A0] px-5 py-2 text-sm font-medium text-white transition hover:bg-[#009b8b] disabled:opacity-60"
             >
-              {saving ? "…" : t("common.enregistrer")}
+              {saving ? "…" : "Enregistrer"}
             </button>
           </div>
         </form>

@@ -1,7 +1,7 @@
 -- Schema i-Rindra pour o2switch (PostgreSQL) -- genere depuis les modeles SQLAlchemy
 -- A importer dans phpPgAdmin (base sc3hara3701_i_rindra)
 
-CREATE TYPE role_utilisateur AS ENUM ('admin', 'direction', 'equipe', 'client');
+CREATE TYPE role_utilisateur AS ENUM ('direction', 'drh', 'chef_de_projet', 'equipe', 'client');
 CREATE TYPE statut_sante AS ENUM ('vert', 'orange', 'rouge');
 CREATE TYPE statut_tache AS ENUM ('a_faire', 'en_cours', 'en_revue', 'termine');
 CREATE TYPE priorite_tache AS ENUM ('basse', 'moyenne', 'haute');

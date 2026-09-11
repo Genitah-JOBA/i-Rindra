@@ -1,8 +1,9 @@
 // src/pages/ProjetDetail/index.jsx — fiche d'un projet : infos + gestion des membres (RF-06, RF-13) + fichiers (RF-08).
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { projetsService } from "../../api/projets";
 import { fichiersService } from "../../api/fichiers";
+import { useAuth } from "../../auth/AuthContext";
 
 const couleurStatut = {
   vert: "bg-green-100 text-green-800",
@@ -11,8 +12,9 @@ const couleurStatut = {
 };
 
 const couleurRoleGlobal = {
-  admin: "bg-rose-100 text-rose-700",
   direction: "bg-purple-100 text-purple-700",
+  drh: "bg-rose-100 text-rose-700",
+  chef_de_projet: "bg-indigo-100 text-indigo-700",
   equipe: "bg-blue-100 text-blue-700",
   client: "bg-amber-100 text-amber-700",
 };
@@ -48,8 +50,9 @@ const formatTaille = (octets) => {
 };
 
 export default function ProjetDetail() {
+  const { user } = useAuth();
   const { id } = useParams();
-  const navigate = useNavigate();
+  const estGestion = ["direction", "drh", "chef_de_projet"].includes(user?.role);
 
   const [projet, setProjet] = useState(null);
   const [membres, setMembres] = useState([]);
@@ -180,44 +183,6 @@ export default function ProjetDetail() {
     }
   };
 
-  const supprimerProjet = async () => {
-    if (
-      !window.confirm(`Supprimer définitivement le projet « ${projet.nom} » ?`)
-    )
-      return;
-    try {
-      await projetsService.remove(id);
-      navigate("/projets");
-    } catch (err) {
-      alert(err.response?.data?.detail || "Erreur lors de la suppression.");
-    }
-  };
-
-  const basculerArchive = async () => {
-    const action = projet.archive
-      ? "restaurer"
-      : "archiver";
-    if (
-      !projet.archive &&
-      !window.confirm(`Archiver le projet « ${projet.nom} » ?`)
-    )
-      return;
-    try {
-      if (projet.archive) {
-        await projetsService.desarchiver(id);
-        alert("Le projet a été restauré.");
-      } else {
-        await projetsService.archiver(id);
-        alert("Le projet a été archivé.");
-        navigate("/projets");
-        return;
-      }
-      await charger();
-    } catch (err) {
-      alert(err.response?.data?.detail || `Erreur lors de l'${action}.`);
-    }
-  };
-
   if (loading) return <p className="text-slate-500">Chargement…</p>;
   if (erreur)
     return (
@@ -236,24 +201,6 @@ export default function ProjetDetail() {
         <Link to="/projets" className="text-sm text-[#00B2A0] hover:underline">
           ← Retour aux projets
         </Link>
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={basculerArchive}
-            className={`border px-3 py-1.5 text-sm ${
-              projet.archive
-                ? "border-green-200 text-green-600 hover:bg-green-50"
-                : "border-amber-200 text-amber-600 hover:bg-amber-50"
-            }`}
-          >
-            {projet.archive ? "Restaurer le projet" : "Archiver le projet"}
-          </button>
-          <button
-            onClick={supprimerProjet}
-            className="border border-red-200 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50"
-          >
-            Supprimer le projet
-          </button>
-        </div>
       </div>
 
       {/* Bandeau archivé */}
@@ -347,7 +294,7 @@ export default function ProjetDetail() {
                   {m.metier && ` · ${m.metier}`}
                 </p>
               </div>
-              {!m.est_responsable && (
+              {estGestion && !m.est_responsable && (
                 <button
                   onClick={() => retirerMembre(m)}
                   className="border border-slate-200 px-2.5 py-1 text-xs text-slate-600 hover:bg-red-50 hover:text-red-600"
@@ -359,37 +306,39 @@ export default function ProjetDetail() {
           ))}
         </ul>
 
-        {/* Ajouter un membre */}
-        <form
-          onSubmit={ajouterMembre}
-          className="flex flex-col gap-3 bg-slate-50 p-4 sm:flex-row sm:items-end"
-        >
-          <div className="flex-1">
-            <label className="mb-1 block text-xs font-medium text-slate-600">
-              Ajouter un membre
-            </label>
-            <select
-              value={nouvelUtilisateurId}
-              onChange={(e) => setNouvelUtilisateurId(e.target.value)}
-              className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
-            >
-              <option value="">— Choisir un utilisateur —</option>
-              {disponibles.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.prenom} {u.nom}
-                  {u.metier ? ` — ${u.metier}` : ` (${u.role})`}
-                </option>
-              ))}
-            </select>
-          </div>
-          <button
-            type="submit"
-            disabled={ajoutEnCours || disponibles.length === 0}
-            className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#074E56] disabled:opacity-50"
+        {/* Ajouter un membre — réservé à la gestion */}
+        {estGestion && (
+          <form
+            onSubmit={ajouterMembre}
+            className="flex flex-col gap-3 bg-slate-50 p-4 sm:flex-row sm:items-end"
           >
-            {ajoutEnCours ? "Ajout…" : " + Ajouter"}
-          </button>
-        </form>
+            <div className="flex-1">
+              <label className="mb-1 block text-xs font-medium text-slate-600">
+                Ajouter un membre
+              </label>
+              <select
+                value={nouvelUtilisateurId}
+                onChange={(e) => setNouvelUtilisateurId(e.target.value)}
+                className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
+              >
+                <option value="">— Choisir un utilisateur —</option>
+                {disponibles.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.prenom} {u.nom}
+                    {u.metier ? ` — ${u.metier}` : ` (${u.role})`}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              type="submit"
+              disabled={ajoutEnCours || disponibles.length === 0}
+              className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#074E56] disabled:opacity-50"
+            >
+              {ajoutEnCours ? "Ajout…" : " + Ajouter"}
+            </button>
+          </form>
+        )}
         {ajoutErreur && (
           <p className="mt-2 text-sm text-red-600">{ajoutErreur}</p>
         )}
@@ -417,8 +366,8 @@ export default function ProjetDetail() {
           </p>
         )}
 
-        {/* Upload */}
-        {!projet.archive && (
+        {/* Upload — réservé à la gestion */}
+        {!projet.archive && estGestion && (
           <form
             onSubmit={declencherUpload}
             className="mb-6 flex flex-col gap-3 bg-slate-50 p-4 sm:flex-row sm:items-center"
@@ -484,7 +433,7 @@ export default function ProjetDetail() {
                     >
                       Télécharger
                     </button>
-                    {!projet.archive && (
+                    {estGestion && !projet.archive && (
                       <>
                         <button
                           onClick={() => renommerFichier(f)}

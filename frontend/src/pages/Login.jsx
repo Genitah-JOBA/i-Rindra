@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
-import { useLang } from "../i18n/LangContext";
+
 
 export default function Login() {
   const { login } = useAuth();
-  const { t } = useLang();
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -87,11 +87,11 @@ export default function Login() {
     } catch (err) {
       if (!err.response) {
         // Pas de réponse = serveur injoignable ou CORS (souvent : backend éteint)
-        setErreur(t("login.errServeur"));
+        setErreur("Impossible de joindre le serveur. Vérifiez que le backend est démarré (http://localhost:8000).");
       } else if (err.response.status === 401) {
-        setErreur(t("login.errIdentifiants"));
+        setErreur("Email ou mot de passe incorrect.");
       } else {
-        setErreur(err.response.data?.detail || t("login.errGeneric"));
+        setErreur(err.response.data?.detail || "Une erreur est survenue.");
       }
     } finally {
       setEnCours(false);
@@ -116,10 +116,10 @@ export default function Login() {
           />
 
           <h1 className="mb-1 text-4xl font-bold text-slate-900 text-center py-2">
-            {t("login.titre")}
+            {"Connexion"}
           </h1>
           <p className="mb-6 text-sm text-slate-500 text-center">
-            {t("login.sousTitre")}
+            {"Accédez à votre espace i-Rindra."}
           </p>
 
           {erreur && (
@@ -284,7 +284,7 @@ export default function Login() {
             </div>
 
             <div className="block mx-auto text-right transition hover:text-[#ff0040] cursor-pointer text-[12px]">
-              {t("login.oubli")}
+              {"Mot de passe oublié"}
             </div>
 
             <button
@@ -296,7 +296,7 @@ export default function Login() {
                   : "bg-gray-400 cursor-not-allowed"
               }`}
             >
-              {enCours ? t("login.connexion") : t("login.seConnecter")}
+              {enCours ? "Connexion…" : "Se connecter"}
             </button>
           </form>
         </div>
@@ -309,10 +309,10 @@ export default function Login() {
             className="mb-6 w-56 max-w-full text-white"
           />
           <h2 className="text-xl font-semibold text-white">
-            {t("login.brandTitre")}
+            {"Gestion de projets assistée par l'IA"}
           </h2>
           <p className="mt-2 max-w-xs text-sm text-teal-100/80">
-            {t("login.brandDesc")}
+            {"Centralisez vos projets, suivez l'avancement et laissez l'assistant IA vous épauler."}
           </p>
         </div>
       </div>

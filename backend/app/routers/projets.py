@@ -37,14 +37,24 @@ router = APIRouter(prefix="/projets", tags=["Projets"])
 
 async def check_direction_or_chef_projet(role: str = Depends(get_current_user_role)):
     """
-    Vérifie que l'utilisateur est direction ou admin.
+    Vérifie que l'utilisateur est de la direction, DRH ou chef de projet.
     """
-    if role not in ["admin", "direction"]:
+    if role not in ["direction", "drh", "chef_de_projet"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Seul la direction ou l'administrateur peut effectuer cette action"
+            detail="Seul la direction, le DRH ou le chef de projet peut effectuer cette action"
         )
     return role
+
+async def _projets_b_estimation(role: str = Depends(get_current_user_role)):
+    """
+    Garde-fou : la création d'entités « projet » est gérée depuis B-estimation.
+    Ce garde refuse toujours ; il protège les endpoints en profondeur.
+    """
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Les projets sont gérés depuis B-estimation.",
+    )
 
 async def check_projet_access(
     projet_id: int,
@@ -82,7 +92,7 @@ async def check_projet_access(
     client_id = payload.get("client_id")
 
     # 3. Vérifie les permissions selon le rôle
-    if role in ("direction", "admin"):
+    if role in ("direction", "drh", "chef_de_projet"):
         return projet
     
     elif role == "equipe":
@@ -143,7 +153,7 @@ async def get_projets(
     
     query = select(Projet)
     
-    if role in ("direction", "admin"):
+    if role in ("direction", "drh", "chef_de_projet"):
         pass
     elif role == "equipe":
         subquery_membre = select(ProjetMembre.projet_id).where(
@@ -229,7 +239,7 @@ async def create_projet(
     projet_data: ProjetCreate,
     token: str = Depends(oauth2_scheme),
     db: AsyncSession = Depends(get_db),
-    _: str = Depends(check_direction_or_chef_projet)
+    _: str = Depends(_projets_b_estimation)
 ):
     """Crée un nouveau projet"""
     # Vérifie que le client existe
@@ -256,10 +266,10 @@ async def create_projet(
             detail="Responsable non trouvé"
         )
     
-    if responsable.role not in (RoleUtilisateur.DIRECTION, RoleUtilisateur.ADMIN):
+    if responsable.role not in (RoleUtilisateur.DIRECTION, RoleUtilisateur.DRH, RoleUtilisateur.CHEF_DE_PROJET):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Le responsable d'un projet doit être un membre de la direction."
+            detail="Le responsable d'un projet doit être un chef de projet ou de la direction."
         )
     
     # Crée le projet
@@ -288,8 +298,8 @@ async def create_projet(
     db.add(membre)
     await db.commit()
 
-    # Notifications : direction (admin) + client du projet
-    destinataires = await notif_service.ids_direction(db)
+    # Notifications : gestion (direction, DRH, chefs de projet) + client du projet
+    destinataires = await notif_service.ids_gestion(db)
     destinataires += await notif_service.ids_clients_du_projet(db, new_projet.client_id)
     await notif_service.notifier(
         db,
@@ -308,7 +318,7 @@ async def update_projet(
     projet_data: ProjetUpdate,
     projet: Projet = Depends(check_projet_access),
     db: AsyncSession = Depends(get_db),
-    _: str = Depends(check_direction_or_chef_projet)
+    _: str = Depends(_projets_b_estimation)
 ):
     """Met à jour un projet"""
     update_data = projet_data.model_dump(exclude_unset=True)
@@ -326,7 +336,7 @@ async def delete_projet(
     projet_id: int,
     projet: Projet = Depends(check_projet_access),
     db: AsyncSession = Depends(get_db),
-    _: str = Depends(check_direction_or_chef_projet)
+    _: str = Depends(_projets_b_estimation)
 ):
     """Supprime un projet (suppression définitive)"""
     await db.delete(projet)
@@ -339,7 +349,7 @@ async def archiver_projet(
     projet_id: int,
     projet: Projet = Depends(check_projet_access),
     db: AsyncSession = Depends(get_db),
-    _: str = Depends(check_direction_or_chef_projet)
+    _: str = Depends(_projets_b_estimation)
 ):
     """Archive un projet (soft delete)"""
     projet.archive = True
@@ -353,7 +363,7 @@ async def desarchiver_projet(
     projet_id: int,
     projet: Projet = Depends(check_projet_access),
     db: AsyncSession = Depends(get_db),
-    _: str = Depends(check_direction_or_chef_projet)
+    _: str = Depends(_projets_b_estimation)
 ):
     """Désarchive un projet"""
     projet.archive = False
@@ -600,8 +610,8 @@ async def retirer_membre(
             detail="Impossible de retirer le responsable du projet. Transférez d'abord la responsabilité à un autre membre."
         )
     
-    # 3. Empêche de se retirer soi-même (sauf si direction)
-    if utilisateur_id == current_user_id and role not in ("direction", "admin"):
+    # 3. Empêche de se retirer soi-même (sauf si direction / DRH / chef de projet)
+    if utilisateur_id == current_user_id and role not in ("direction", "drh", "chef_de_projet"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Vous ne pouvez pas vous retirer vous-même du projet. Contactez un chef de projet."

@@ -14,11 +14,27 @@ from app.models.projet import ProjetMembre
 
 # ---------- Récupération des destinataires ----------
 
-async def ids_direction(db: AsyncSession):
-    """Tous les comptes de pilotage : admin ET direction."""
+async def ids_pilotage(db: AsyncSession):
+    """Tous les comptes de pilotage : direction ET DRH."""
     res = await db.execute(
         select(Utilisateur.id).where(
-            Utilisateur.role.in_([RoleUtilisateur.ADMIN, RoleUtilisateur.DIRECTION])
+            Utilisateur.role.in_([RoleUtilisateur.DIRECTION, RoleUtilisateur.DRH])
+        )
+    )
+    return [r[0] for r in res.all()]
+
+
+async def ids_gestion(db: AsyncSession):
+    """Comptes de gestion : direction, DRH et chef de projet."""
+    res = await db.execute(
+        select(Utilisateur.id).where(
+            Utilisateur.role.in_(
+                [
+                    RoleUtilisateur.DIRECTION,
+                    RoleUtilisateur.DRH,
+                    RoleUtilisateur.CHEF_DE_PROJET,
+                ]
+            )
         )
     )
     return [r[0] for r in res.all()]

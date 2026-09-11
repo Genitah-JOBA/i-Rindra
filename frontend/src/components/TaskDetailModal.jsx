@@ -1,7 +1,6 @@
 // src/components/TaskDetailModal.jsx — Détail d'une tâche + commentaires (RF-14).
 import { useState, useEffect } from "react";
 import { tachesService } from "../api/taches";
-import { useLang } from "../i18n/LangContext";
 import { useAuth } from "../auth/AuthContext";
 
 const couleurPriorite = {
@@ -52,7 +51,7 @@ export default function TaskDetailModal({
   onCommentaireAjoute,
   utilisateurs = [] 
 }) {
-  const { t: tr } = useLang();
+  
   const { user } = useAuth();
 
   const [commentaires, setCommentaires] = useState([]);
@@ -259,7 +258,7 @@ export default function TaskDetailModal({
           {description && (
             <div className="mb-5">
               <h3 className="mb-1 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                {tr("taches.detail.description")}
+                {"Description"}
               </h3>
               <p className="whitespace-pre-wrap text-sm text-slate-700 bg-slate-50 p-3 ">
                 {description}
@@ -270,17 +269,17 @@ export default function TaskDetailModal({
           {/* Commentaires */}
           <div>
             <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-              {tr("taches.detail.commentaires")} ({commentaires.length})
+              {"Commentaires"} ({commentaires.length})
             </h3>
 
             {loadingComments ? (
               <div className="flex justify-center items-center py-4">
                 <div className="animate-spin  h-5 w-5 border-b-2 border-[#63B23E]"></div>
-                <span className="ml-2 text-sm text-slate-400">{tr("common.chargement")}</span>
+                <span className="ml-2 text-sm text-slate-400">{"Chargement…"}</span>
               </div>
             ) : commentaires.length === 0 ? (
               <p className="text-sm text-slate-400 text-center py-4">
-                {tr("taches.detail.aucunCommentaire")}
+                {"Aucun commentaire pour le moment."}
               </p>
             ) : (
               <ul className="space-y-3">
@@ -325,7 +324,7 @@ export default function TaskDetailModal({
                   <textarea
                     value={nouveau}
                     onChange={(e) => setNouveau(e.target.value)}
-                    placeholder={tr("taches.detail.placeholder")}
+                    placeholder={"Écrire un commentaire…"}
                     rows={2}
                     className="w-full resize-none border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#63B23E]  focus:ring-1 focus:ring-[#63B23E]"
                   />
@@ -335,7 +334,7 @@ export default function TaskDetailModal({
                       disabled={envoi || !nouveau.trim()}
                       className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white  transition hover:bg-[#4a8f2e] disabled:opacity-50"
                     >
-                      {envoi ? tr("common.enregistrement") : tr("taches.detail.envoyer")}
+                      {envoi ? "Enregistrement…" : "Envoyer"}
                     </button>
                   </div>
                 </div>

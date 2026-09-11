@@ -26,15 +26,15 @@ router = APIRouter(prefix="/factures", tags=["Facturation"])
 
 
 # ============================================================
-# PERMISSION — volet financier = ADMIN uniquement (la direction
-# n'a AUCUN accès à l'argent, cf. cahier des charges).
+# PERMISSION — volet financier = direction ou DRH uniquement
+# (les autres rôles n'ont AUCUN accès à l'argent).
 # ============================================================
 
-async def _admin_seulement(role: str = Depends(get_current_user_role)):
-    if role != "admin":
+async def _finance_seulement(role: str = Depends(get_current_user_role)):
+    if role not in ("direction", "drh"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Accès réservé à l'administrateur (volet financier).",
+            detail="Accès réservé à la direction ou au DRH (volet financier).",
         )
     return role
 
@@ -150,7 +150,7 @@ async def _notifier_client(db: AsyncSession, f: Facture, ancien, nouveau):
 @router.get("/statistiques", response_model=FactureStats)
 async def statistiques(
     db: AsyncSession = Depends(get_db),
-    _: str = Depends(_admin_seulement),
+    _: str = Depends(_finance_seulement),
 ):
     total = (await db.execute(select(func.count(Facture.id)))).scalar() or 0
 
@@ -204,7 +204,7 @@ async def lister_factures(
     statut: Optional[str] = Query(None),
     client_id: Optional[int] = Query(None),
     db: AsyncSession = Depends(get_db),
-    _: str = Depends(_admin_seulement),
+    _: str = Depends(_finance_seulement),
 ):
     q = (
         select(Facture, Client.nom, Projet.nom)
@@ -229,7 +229,7 @@ async def lister_factures(
 async def obtenir_facture(
     facture_id: int,
     db: AsyncSession = Depends(get_db),
-    _: str = Depends(_admin_seulement),
+    _: str = Depends(_finance_seulement),
 ):
     f = (await db.execute(select(Facture).where(Facture.id == facture_id))).scalar_one_or_none()
     if not f:
@@ -239,7 +239,7 @@ async def obtenir_facture(
 
 
 # ------------------------------------------------------------
-# PDF DE LA FACTURE (admin OU client concerné)
+# PDF DE LA FACTURE (direction / DRH OU client concerné)
 # ------------------------------------------------------------
 
 @router.get("/{facture_id:int}/pdf")
@@ -253,7 +253,7 @@ async def pdf_facture(
     if not f:
         raise HTTPException(status_code=404, detail="Facture non trouvée")
 
-    if role != "admin":
+    if role not in ("direction", "drh"):
         # Un compte client ne peut télécharger que les factures de son client.
         if role != "client":
             raise HTTPException(status_code=403, detail="Accès refusé.")
@@ -284,7 +284,7 @@ async def creer_facture(
     data: FactureCreate,
     db: AsyncSession = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
-    _: str = Depends(_admin_seulement),
+    _: str = Depends(_finance_seulement),
 ):
     # Client obligatoire et existant
     client = (await db.execute(select(Client).where(Client.id == data.client_id))).scalar_one_or_none()
@@ -330,7 +330,7 @@ async def modifier_facture(
     facture_id: int,
     data: FactureUpdate,
     db: AsyncSession = Depends(get_db),
-    _: str = Depends(_admin_seulement),
+    _: str = Depends(_finance_seulement),
 ):
     f = (await db.execute(select(Facture).where(Facture.id == facture_id))).scalar_one_or_none()
     if not f:
@@ -385,7 +385,7 @@ async def changer_statut(
     facture_id: int,
     data: StatutUpdate,
     db: AsyncSession = Depends(get_db),
-    _: str = Depends(_admin_seulement),
+    _: str = Depends(_finance_seulement),
 ):
     f = (await db.execute(select(Facture).where(Facture.id == facture_id))).scalar_one_or_none()
     if not f:
@@ -407,7 +407,7 @@ async def changer_statut(
 async def supprimer_facture(
     facture_id: int,
     db: AsyncSession = Depends(get_db),
-    _: str = Depends(_admin_seulement),
+    _: str = Depends(_finance_seulement),
 ):
     f = (await db.execute(select(Facture).where(Facture.id == facture_id))).scalar_one_or_none()
     if not f:

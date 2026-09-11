@@ -4,26 +4,13 @@ import { useNavigate } from "react-router-dom";
 import { projetsService } from "../../api/projets";
 import { clientsService } from "../../api/client";
 import { utilisateursService } from "../../api/utilisateurs";
-import { useLang } from "../../i18n/LangContext";
 import { useMessage } from "../../context/MessageContext";
 import 'animate.css';
 
 // Icônes SVG
-const TrashIcon = ({ className = "w-4 h-4" }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-  </svg>
-);
-
 const ArchiveIcon = ({ className = "w-4 h-4" }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-  </svg>
-);
-
-const RestoreIcon = ({ className = "w-4 h-4" }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
   </svg>
 );
 
@@ -71,8 +58,7 @@ const getStatutLabel = (statut) => {
 
 export default function Projets() {
   const navigate = useNavigate();
-  const { t } = useLang();
-  const { showSuccess, showError, showConfirm } = useMessage();
+  const { showError } = useMessage();
 
   const [projets, setProjets] = useState([]);
   const [clients, setClients] = useState([]);
@@ -104,7 +90,10 @@ export default function Projets() {
       setClients(clientsData || []);
       setResponsables(
         (usersData || []).filter(
-          (u) => u.role === "direction" || u.role === "admin"
+          (u) =>
+            u.role === "direction" ||
+            u.role === "drh" ||
+            u.role === "chef_de_projet"
         )
       );
     } catch (err) {
@@ -113,99 +102,6 @@ export default function Projets() {
       showError(msg);
     } finally {
       setLoading(false);
-    }
-  };
-
-  // ---------- SUPPRIMER ----------
-  const supprimer = async (projet, e) => {
-    e?.stopPropagation();
-
-    const ok = await showConfirm({
-      type: 'error',
-      title: 'Confirmation de suppression',
-      message: (
-        <>
-          <p>Supprimer définitivement le projet :</p>
-          <p className="font-medium text-slate-800 bg-slate-50 p-2 rounded my-2">
-            « {projet.nom} »
-          </p>
-          <p className="text-sm text-slate-500">
-            Ses tâches, jalons et membres seront aussi supprimés.
-          </p>
-        </>
-      ),
-      confirmLabel: 'Supprimer',
-      cancelLabel: 'Annuler',
-    });
-
-    if (!ok) return;
-
-    try {
-      await projetsService.remove(projet.id);
-      setProjets((prev) => prev.filter((p) => p.id !== projet.id));
-      showSuccess(`Le projet "${projet.nom}" a été supprimé.`);
-    } catch (err) {
-      showError(err.response?.data?.detail || "Erreur lors de la suppression.");
-    }
-  };
-
-  // ---------- ARCHIVER ----------
-  const archiver = async (projet, e) => {
-    e?.stopPropagation();
-
-    const ok = await showConfirm({
-      type: 'warning',
-      title: "Confirmation d'archivage",
-      message: (
-        <>
-          <p>Archiver le projet :</p>
-          <p className="font-medium text-slate-800 bg-slate-50 p-2 rounded my-2">
-            « {projet.nom} »
-          </p>
-        </>
-      ),
-      confirmLabel: 'Archiver',
-      cancelLabel: 'Annuler',
-    });
-
-    if (!ok) return;
-
-    try {
-      await projetsService.archiver(projet.id);
-      showSuccess(`Le projet "${projet.nom}" a été archivé.`);
-      await charger();
-    } catch (err) {
-      showError(err.response?.data?.detail || "Erreur lors de l'archivage.");
-    }
-  };
-
-  // ---------- RESTAURER ----------
-  const restaurer = async (projet, e) => {
-    e?.stopPropagation();
-
-    const ok = await showConfirm({
-      type: 'info',
-      title: 'Confirmation de restauration',
-      message: (
-        <>
-          <p>Restaurer le projet :</p>
-          <p className="font-medium text-slate-800 bg-slate-50 p-2 rounded my-2">
-            « {projet.nom} »
-          </p>
-        </>
-      ),
-      confirmLabel: 'Restaurer',
-      cancelLabel: 'Annuler',
-    });
-
-    if (!ok) return;
-
-    try {
-      await projetsService.desarchiver(projet.id);
-      showSuccess(`Le projet "${projet.nom}" a été restauré.`);
-      await charger();
-    } catch (err) {
-      showError(err.response?.data?.detail || "Erreur lors de la restauration.");
     }
   };
 
@@ -244,7 +140,7 @@ export default function Projets() {
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
-            {t("projets.titre")}
+            {"Projets"}
           </h1>
           <p className="text-sm text-slate-500">
             {projets.length} projet{projets.length > 1 ? "s" : ""}
@@ -305,7 +201,7 @@ export default function Projets() {
       {loading && (
         <div className="flex justify-center items-center py-12">
           <div className="animate-spin  h-8 w-8 border-b-2 border-[#63B23E]"></div>
-          <span className="ml-3 text-slate-500">{t("common.chargement")}</span>
+          <span className="ml-3 text-slate-500">{"Chargement…"}</span>
         </div>
       )}
       {erreur && <p className="text-red-600">{erreur}</p>}
@@ -323,7 +219,7 @@ export default function Projets() {
               </button>
             </>
           ) : (
-            <p>{t("projets.vide")}</p>
+            <p>{"Aucun projet. Cliquez sur « Nouveau projet » pour commencer."}</p>
           )}
         </div>
       )}
@@ -367,7 +263,7 @@ export default function Projets() {
             <div className="space-y-1.5 text-xs text-slate-500">
               <div className="flex items-center gap-1">
                 <BuildingIcon className="w-3.5 h-3.5" />
-                <span>{t("projets.client")} : {nomClient(p.client_id)}</span>
+                <span>Client : {nomClient(p.client_id)}</span>
               </div>
               {p.responsable_id && (
                 <div className="flex items-center gap-1">
@@ -407,7 +303,7 @@ export default function Projets() {
               </div>
               <div className="flex justify-between items-center">
                 <p className="text-xs text-slate-500">
-                  {p.avancement_pct || 0}% {t("dash.termine")}
+                  {p.avancement_pct || 0}% {"terminé"}
                 </p>
                 <span className="text-xs text-slate-400">
                   {p.taches_terminees || 0}/{p.taches_total || 0} tâches
@@ -415,49 +311,17 @@ export default function Projets() {
               </div>
             </div>
 
-            {/* Boutons actions en bas à droite - toujours visibles sur desktop */}
+            {/* Bouton actions en bas à droite - visible sur desktop (chat uniquement :
+                la gestion du cycle de vie du projet est gérée depuis B-estimation) */}
             <div className="mt-3 pt-2 border-t border-slate-100 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              {p.archive ? (
-                <>
-                  <button
-                    onClick={(e) => restaurer(p, e)}
-                    title="Restaurer le projet"
-                    className="p-1.5 text-slate-500 hover:text-[#63B23E] hover:bg-green-50  transition-colors"
-                  >
-                    <RestoreIcon className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={(e) => supprimer(p, e)}
-                    title="Supprimer définitivement"
-                    className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50  transition-colors"
-                  >
-                    <TrashIcon className="w-4 h-4" />
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={(e) => chat(p, e)}
-                    title="Accéder au chat du projet"
-                    className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50  transition-colors"
-                  >
-                    <ChatIcon className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={(e) => archiver(p, e)}
-                    title="Archiver le projet"
-                    className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50  transition-colors"
-                  >
-                    <ArchiveIcon className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={(e) => supprimer(p, e)}
-                    title="Supprimer le projet"
-                    className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50  transition-colors"
-                  >
-                    <TrashIcon className="w-4 h-4" />
-                  </button>
-                </>
+              {!p.archive && (
+                <button
+                  onClick={(e) => chat(p, e)}
+                  title="Accéder au chat du projet"
+                  className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50  transition-colors"
+                >
+                  <ChatIcon className="w-4 h-4" />
+                </button>
               )}
             </div>
           </div>

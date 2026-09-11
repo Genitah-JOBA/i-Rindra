@@ -11,7 +11,7 @@ class UtilisateurBase(BaseModel):
     nom: str = Field(..., min_length=1, max_length=100)
     prenom: str = Field(..., min_length=1, max_length=100)
     email: EmailStr
-    role: str = Field("equipe", description="direction | equipe | client")
+    role: str = Field("equipe", description="direction | drh | chef_de_projet | equipe | client")
     metier: Optional[str] = Field(None, description="développeur, graphiste, intégrateur…")
     client_id: Optional[int] = None
 

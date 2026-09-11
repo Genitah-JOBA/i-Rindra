@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { tachesService } from "../../api/taches";
 import { projetsService } from "../../api/projets";
-import { useLang } from "../../i18n/LangContext";
+import { useAuth } from "../../auth/AuthContext";
 import { useMessage } from "../../context/MessageContext";
 import TaskDetailModal from "../../components/TaskDetailModal";
 import 'animate.css';
@@ -29,10 +29,11 @@ const labelPriorite = {
 };
 
 export default function Taches() {
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const projetParam = searchParams.get("projet");
-  const { t: tr } = useLang();
   const { showSuccess, showError } = useMessage();
+  const estGestion = ["direction", "drh", "chef_de_projet"].includes(user?.role);
 
   const [projets, setProjets] = useState([]);
   const [projetId, setProjetId] = useState("");
@@ -176,7 +177,9 @@ export default function Taches() {
   const deplacer = async (tache, nouveauStatut) => {
     try {
       await tachesService.changeStatut(tache.id, nouveauStatut);
-      showSuccess(`Tâche déplacée vers "${tr("kanban." + nouveauStatut)}"`);
+      showSuccess(
+        `Tâche déplacée vers "${COLONNES.find((c) => c.statut === nouveauStatut)?.label}"`,
+      );
       await chargerTaches();
     } catch (err) {
       const msg = err.response?.data?.detail || "Impossible de déplacer la tâche.";
@@ -215,9 +218,9 @@ export default function Taches() {
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 animate__animated animate__fadeInDown">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
-            {tr("taches.titre")}
+            {"Tâches — Kanban"}
           </h1>
-          <p className="text-sm text-slate-500">{tr("taches.sousTitre")}</p>
+          <p className="text-sm text-slate-500">{"Organisez les tâches du projet par statut."}</p>
         </div>
         <select
           value={projetId}
@@ -225,7 +228,7 @@ export default function Taches() {
           className="border border-slate-300  px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
         >
           {projets.length === 0 && (
-            <option value="">{tr("taches.aucunProjet")}</option>
+            <option value="">{"Aucun projet"}</option>
           )}
           {projets.map((p) => (
             <option key={p.id} value={p.id}>
@@ -237,41 +240,41 @@ export default function Taches() {
 
       {erreur && <p className="mb-4 text-red-600 animate__animated animate__shakeX">{erreur}</p>}
 
-      {/* Formulaire de création avec animation */}
-      {projetId && (
+      {/* Formulaire de création — réservé à la gestion (direction/DRH/chef de projet) */}
+      {projetId && estGestion && (
         <form
           onSubmit={creerTache}
           className="mb-6 flex flex-col gap-3 border border-slate-200 bg-white p-4 shadow-sm  md:flex-row md:items-end animate__animated animate__fadeInUp"
         >
           <div className="flex-1">
             <label className="mb-1 block text-xs font-medium text-slate-600">
-              {tr("taches.form.titre")}
+              {"Titre"}
             </label>
             <input
               type="text"
               value={form.titre}
               onChange={(e) => setForm({ ...form, titre: e.target.value })}
-              placeholder={tr("taches.form.placeholder")}
+              placeholder={"Nouvelle tâche…"}
               className="w-full border border-slate-300  px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
             />
           </div>
           <div>
             <label className="mb-1 block text-xs font-medium text-slate-600">
-              {tr("taches.form.priorite")}
+              {"Priorité"}
             </label>
             <select
               value={form.priorite}
               onChange={(e) => setForm({ ...form, priorite: e.target.value })}
               className="border border-slate-300  px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
             >
-              <option value="basse">{tr("priorite.basse")}</option>
-              <option value="moyenne">{tr("priorite.moyenne")}</option>
-              <option value="haute">{tr("priorite.haute")}</option>
+              <option value="basse">{"Basse"}</option>
+              <option value="moyenne">{"Moyenne"}</option>
+              <option value="haute">{"Haute"}</option>
             </select>
           </div>
           <div>
             <label className="mb-1 block text-xs font-medium text-slate-600">
-              {tr("taches.form.responsable")}
+              {"Responsable"}
             </label>
             <select
               value={form.responsable_id}
@@ -280,7 +283,7 @@ export default function Taches() {
               }
               className="border border-slate-300  px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
             >
-              <option value="">{tr("common.aucun")}</option>
+              <option value="">{"— Aucun —"}</option>
               {membres.map((m) => (
                 <option key={m.id} value={m.utilisateur_id}>
                   {m.prenom} {m.nom}
@@ -291,7 +294,7 @@ export default function Taches() {
           </div>
           <div>
             <label className="mb-1 block text-xs font-medium text-slate-600">
-              {tr("taches.form.echeance")}
+              {"Échéance"}
             </label>
             <input
               type="date"
@@ -305,9 +308,7 @@ export default function Taches() {
             disabled={creation}
             className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white  transition hover:bg-[#4a8f2e] disabled:opacity-50"
           >
-            {creation
-              ? tr("common.enregistrement")
-              : "+ " + tr("common.ajouter")}
+            {creation ? "Enregistrement…" : "+ " + "Ajouter"}
           </button>
         </form>
       )}
@@ -316,7 +317,7 @@ export default function Taches() {
       {loading ? (
         <div className="flex justify-center items-center py-12 animate__animated animate__pulse">
           <div className="animate-spin  h-8 w-8 border-b-2 border-[#63B23E]"></div>
-          <span className="ml-3 text-slate-500">{tr("common.chargement")}</span>
+          <span className="ml-3 text-slate-500">{"Chargement…"}</span>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -329,7 +330,7 @@ export default function Taches() {
                 style={{ animationDelay: `${0.1 + (colIndex * 0.1)}s` }}
               >
                 <h2 className="mb-3 flex items-center justify-between text-sm font-semibold text-slate-700">
-                  {tr("kanban." + col.statut)}
+                  {col.label}
                   <span className="bg-white px-2 py-0.5 text-xs text-slate-500 ">
                     {tachesCol.length}
                   </span>
@@ -344,7 +345,7 @@ export default function Taches() {
                         className="cursor-pointer border border-slate-200 bg-white p-3 shadow-sm hover:shadow-md hover:border-[#63B23E]  transition-all duration-200 hover:-translate-y-1 animate__animated animate__fadeInUp"
                         style={{ animationDelay: `${0.1 + (index * 0.05)}s` }}
                         onClick={() => setTacheActive(t)}
-                        title={tr("taches.ouvrirDetail")}
+                        title={"Ouvrir le détail"}
                       >
                         <div className="mb-1 flex items-start justify-between gap-2">
                           <p className="text-sm font-medium text-slate-800">
@@ -361,7 +362,7 @@ export default function Taches() {
                         </div>
                         <p className="mb-2 text-xs text-slate-500">
                           {nomResponsable(t.responsable_id) ||
-                            tr("taches.nonAssignee")}
+                            "Non assignée"}
                           {t.echeance && ` · ${t.echeance}`}
                         </p>
                         <div className="flex items-center justify-between">
@@ -394,7 +395,7 @@ export default function Taches() {
                                 setTacheActive(t);
                               }}
                               className="flex items-center gap-1 px-2 text-[11px] text-slate-500 hover:text-[#63B23E] transition-colors"
-                              title={tr("taches.ouvrirDetail")}
+title={"Ouvrir le détail"}
                             >
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -413,16 +414,18 @@ export default function Taches() {
                               {t.nombre_commentaires || 0}
                             </button>
                           </div>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              supprimer(t);
-                            }}
-                            className="text-xs text-slate-400 hover:text-red-600 transition-colors"
-                            title="Supprimer"
-                          >
-                            {tr("common.supprimer")}
-                          </button>
+                          {estGestion && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                supprimer(t);
+                              }}
+                              className="text-xs text-slate-400 hover:text-red-600 transition-colors"
+                              title="Supprimer"
+                            >
+                              {"Supprimer"}
+                            </button>
+                          )}
                         </div>
                       </div>
                     );

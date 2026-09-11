@@ -214,20 +214,24 @@ async def update_tache(
     await check_projet_access(tache.projet_id, db=db, token=token)
     
     # 3. Vérifie les permissions
-    if role not in ["admin", "direction", "equipe"]:
+    GESTION = ("direction", "drh", "chef_de_projet")
+    if role in GESTION:
+        # la gestion peut tout modifier
+        pass
+    elif role == "equipe":
         # Les membres de l'équipe peuvent seulement modifier le statut et le responsable
-        if tache_data.statut is None and tache_data.responsable_id is None:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Vous ne pouvez modifier que le statut ou l'affectation de cette tâche"
-            )
-        # Limite les champs modifiables pour les non-chefs
         allowed_fields = {"statut", "responsable_id"}
         if any(f not in allowed_fields for f in tache_data.model_dump(exclude_unset=True).keys()):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Vous ne pouvez modifier que le statut ou l'affectation de cette tâche"
             )
+    else:
+        # Le client ne peut pas modifier les tâches des autres
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Vous n'avez pas le droit de modifier cette tâche"
+        )
     
     # 4. Met à jour les champs
     old_statut = tache.statut
@@ -347,10 +351,10 @@ async def update_tache_statut(
     # 6. Met à jour l'avancement du projet
     await update_projet_avancement(tache.projet_id, db)
 
-    # 7. Notifications d'avancement : direction + client + membres (sauf l'auteur)
+    # 7. Notifications d'avancement : gestion + client + membres (sauf l'auteur)
     res_p = await db.execute(select(Projet).where(Projet.id == tache.projet_id))
     projet = res_p.scalar_one_or_none()
-    destinataires = await notif_service.ids_direction(db)
+    destinataires = await notif_service.ids_gestion(db)
     destinataires += await notif_service.ids_membres_projet(db, tache.projet_id)
     if projet:
         destinataires += await notif_service.ids_clients_du_projet(db, projet.client_id)

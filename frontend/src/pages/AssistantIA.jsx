@@ -1,7 +1,6 @@
 // src/pages/AssistantIA.jsx — Interface de chat avec l'assistant IA.
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../auth/AuthContext";
-import { useLang } from "../i18n/LangContext";
 import { useMessage } from "../context/MessageContext";
 import { iaService } from "../api/ia";
 
@@ -41,7 +40,6 @@ const SUGGESTIONS = [
 
 export default function AssistantIA() {
   const { user } = useAuth();
-  const { t } = useLang();
   const { showError } = useMessage();
 
   const [messages, setMessages] = useState([]);
@@ -49,16 +47,19 @@ export default function AssistantIA() {
   const [loading, setLoading] = useState(false);
   const [config, setConfig] = useState(null);
   const messagesEndRef = useRef(null);
+  const scrollContainerRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Scroll automatique vers le bas
+  // Scroll automatique vers le bas (dans la zone scrollable uniquement)
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
   };
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, loading]);
 
   // Vérifier la config IA au chargement
   useEffect(() => {
@@ -85,7 +86,6 @@ export default function AssistantIA() {
     setLoading(true);
 
     try {
-      // Envoie l'historique (sans le system prompt, c'est géré côté backend)
       const historique = newMessages.map((m) => ({
         role: m.role,
         content: m.content,
@@ -101,7 +101,6 @@ export default function AssistantIA() {
       const detail =
         err.response?.data?.detail || "Erreur de connexion à l'assistant IA.";
       showError(detail);
-      // Retire le message utilisateur en cas d'erreur
       setMessages((prev) => prev.slice(0, -1));
     } finally {
       setLoading(false);
@@ -125,127 +124,138 @@ export default function AssistantIA() {
   const estConfigure = config?.configuree === true;
 
   return (
-    <div className="animate__animated animate__fadeIn w-full flex flex-col h-[calc(100vh-4rem)]">
-      {/* En-tête */}
-      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 border-b border-slate-200 bg-white">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <IconBolt className="w-6 h-6 text-purple-600" />
-            {t("ia.titre")}
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">{t("ia.sousTitre")}</p>
-        </div>
-        <div className="flex items-center gap-3">
-          {config && (
-            <span
-              className={`text-xs px-2 py-1 ${
-                estConfigure
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
-              }`}
-            >
-              {estConfigure ? config.modele : "Non configuré"}
-            </span>
-          )}
-          {messages.length > 0 && (
-            <button
-              onClick={handleClear}
-              className="p-2 text-slate-400 hover:text-red-500 transition-colors"
-              title={t("ia.effacer")}
-            >
-              <IconTrash className="w-5 h-5" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Zone de messages */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
-        {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full text-center animate__animated animate__fadeInUp">
-            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
-              <IconBolt className="w-8 h-8 text-purple-600" />
-            </div>
-            <h2 className="text-lg font-semibold text-slate-800 mb-2">
-              {t("ia.bienvenue")}
-            </h2>
-            <p className="text-sm text-slate-500 max-w-md mb-6">
-              {t("ia.bienvenueDesc")}
+    // Conteneur principal : plein écran, pas de scroll extérieur
+    <div className="flex flex-col h-[calc(100vh-8rem)] overflow-hidden bg-slate-50 -m-4 sm:-m-6 md:-m-8">
+      
+      {/* ZONE SCROLLABLE : contient le header + les messages */}
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto min-h-0"
+      >
+        {/* En-tête - SCROLLABLE (défile avec les messages) */}
+        <header className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-slate-200 bg-white sticky top-0 z-10">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+              <IconBolt className="w-6 h-6 text-purple-600" />
+              {"Assistant IA"}
+            </h1>
+            <p className="text-sm text-slate-500 mt-1">
+              {"Posez vos questions sur vos projets et l'organisation."}
             </p>
+          </div>
+          <div className="flex items-center gap-3">
+            {config && (
+              <span
+                className={`text-xs px-2 py-1 rounded-full ${
+                  estConfigure
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
+                }`}
+              >
+                {estConfigure ? config.modele : "Non configuré"}
+              </span>
+            )}
+            {messages.length > 0 && (
+              <button
+                onClick={handleClear}
+                className="p-2 text-slate-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"
+                title={"Effacer la conversation"}
+              >
+                <IconTrash className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+        </header>
 
-            {!estConfigure && (
-              <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 max-w-md text-sm mb-6">
-                {t("ia.nonConfigure")}
+        {/* Zone de messages */}
+        <div className="px-4 sm:px-6 py-6">
+          <div className="max-w-3xl mx-auto space-y-4">
+            {messages.length === 0 && (
+              <div className="flex flex-col items-center justify-center text-center py-12 animate__animated animate__fadeInUp">
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
+                  <IconBolt className="w-8 h-8 text-purple-600" />
+                </div>
+                <h2 className="text-lg font-semibold text-slate-800 mb-2">
+                  {"Bonjour ! Je suis votre assistant IA."}
+                </h2>
+                <p className="text-sm text-slate-500 max-w-md mb-6">
+                  {"Je peux vous aider avec vos projets, tâches, délais et organisation. Posez-moi une question ou choisissez une suggestion ci-dessous."}
+                </p>
+
+                {!estConfigure && (
+                  <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 max-w-md text-sm mb-6 rounded-lg">
+                    {"L'assistant IA n'est pas configuré. Demandez à un administrateur de définir la clé API OpenAI dans le fichier .env du backend."}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-lg w-full">
+                  {SUGGESTIONS.map((s, i) => (
+                    <button
+                      key={i}
+                      onClick={() => handleSend(s)}
+                      disabled={!estConfigure || loading}
+                      className="text-left text-sm px-4 py-3 bg-white hover:bg-purple-50 hover:text-purple-700 border border-slate-200 hover:border-purple-300 transition-colors text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
-            {/* Suggestions */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-lg w-full">
-              {SUGGESTIONS.map((s, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleSend(s)}
-                  disabled={!estConfigure || loading}
-                  className="text-left text-sm px-4 py-3 bg-slate-50 hover:bg-purple-50 hover:text-purple-700 border border-slate-200 hover:border-purple-300 transition-colors text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed"
+            {messages.map((msg, i) => (
+              <div
+                key={i}
+                className={`flex ${
+                  msg.role === "user" ? "justify-end" : "justify-start"
+                } animate__animated animate__fadeIn`}
+              >
+                <div
+                  className={`max-w-[75%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap rounded-lg ${
+                    msg.role === "user"
+                      ? "bg-[#63B23E] text-white"
+                      : "bg-white text-slate-800 border border-slate-200"
+                  }`}
                 >
-                  {s}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+                  {msg.role === "assistant" && (
+                    <span className="block text-[10px] font-semibold text-purple-600 uppercase mb-1">
+                      IA
+                    </span>
+                  )}
+                  {msg.content}
+                </div>
+              </div>
+            ))}
 
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex ${
-              msg.role === "user" ? "justify-end" : "justify-start"
-            } animate__animated animate__fadeIn`}
-          >
-            <div
-              className={`max-w-[75%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
-                msg.role === "user"
-                  ? "bg-[#63B23E] text-white"
-                  : "bg-slate-100 text-slate-800 border border-slate-200"
-              }`}
-            >
-              {msg.role === "assistant" && (
-                <span className="block text-[10px] font-semibold text-purple-600 uppercase mb-1">
-                  IA
-                </span>
-              )}
-              {msg.content}
-            </div>
-          </div>
-        ))}
+            {loading && (
+              <div className="flex justify-start animate__animated animate__fadeIn">
+                <div className="bg-white border border-slate-200 px-4 py-3 text-sm text-slate-500 rounded-lg">
+                  <span className="inline-flex gap-1">
+                    <span className="animate-bounce" style={{ animationDelay: "0ms" }}>●</span>
+                    <span className="animate-bounce" style={{ animationDelay: "150ms" }}>●</span>
+                    <span className="animate-bounce" style={{ animationDelay: "300ms" }}>●</span>
+                  </span>
+                </div>
+              </div>
+            )}
 
-        {loading && (
-          <div className="flex justify-start animate__animated animate__fadeIn">
-            <div className="bg-slate-100 border border-slate-200 px-4 py-3 text-sm text-slate-500">
-              <span className="inline-flex gap-1">
-                <span className="animate-bounce" style={{ animationDelay: "0ms" }}>●</span>
-                <span className="animate-bounce" style={{ animationDelay: "150ms" }}>●</span>
-                <span className="animate-bounce" style={{ animationDelay: "300ms" }}>●</span>
-              </span>
-            </div>
+            <div ref={messagesEndRef} />
           </div>
-        )}
-
-        <div ref={messagesEndRef} />
+        </div>
       </div>
 
-      {/* Zone de saisie */}
-      <div className="border-t border-slate-200 bg-white px-4 sm:px-6 lg:px-8 py-4">
+      {/* Zone de saisie - FIXE (ne défile pas) */}
+      <footer className="border-t border-slate-200 bg-white px-4 sm:px-6 py-4 flex-shrink-0">
         <div className="flex items-end gap-3 max-w-3xl mx-auto">
           <textarea
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={t("ia.placeholder")}
+            placeholder={"Écrivez votre message…"}
             disabled={!estConfigure || loading}
             rows={1}
-            className="flex-1 resize-none border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:bg-slate-50 disabled:cursor-not-allowed"
+            className="flex-1 resize-none border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:bg-slate-50 disabled:cursor-not-allowed rounded-lg"
             style={{ minHeight: "44px", maxHeight: "120px" }}
             onInput={(e) => {
               e.target.style.height = "auto";
@@ -255,15 +265,15 @@ export default function AssistantIA() {
           <button
             onClick={() => handleSend()}
             disabled={!input.trim() || !estConfigure || loading}
-            className="p-3 bg-purple-600 text-white hover:bg-purple-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors flex-shrink-0"
+            className="p-3 bg-purple-600 text-white hover:bg-purple-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors flex-shrink-0 rounded-lg"
           >
             <IconSend className="w-5 h-5" />
           </button>
         </div>
         <p className="text-[11px] text-slate-400 text-center mt-2">
-          {t("ia.avertissement")}
+          {"Les réponses sont générées par une IA et peuvent contenir des erreurs. Vérifiez les informations importantes."}
         </p>
-      </div>
+      </footer>
     </div>
   );
 }

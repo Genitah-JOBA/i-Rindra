@@ -22,7 +22,8 @@ router = APIRouter(prefix="/ia", tags=["IA"])
 
 SYSTEM_PROMPT = (
     "Tu es l'assistant IA de la plateforme i-Rindra, un outil de gestion de projets "
-    "pour l'agence Bienfe. Tu aides les utilisateurs (direction, admin, équipe) avec :\n"
+    "pour l'agence Bienfe. Tu aides les utilisateurs (direction, DRH, chefs de "
+    "projet, équipe) avec :\n"
     "- La planification et le suivi de projets\n"
     "- La gestion de tâches et le Kanban\n"
     "- L'analyse de deadlines et les risques de retard\n"
@@ -34,11 +35,11 @@ SYSTEM_PROMPT = (
 
 
 async def _pilote_ou_plus(role: str = Depends(get_current_user_role)):
-    """L'IA consomme des crédits : réservée aux comptes admin / direction."""
-    if role not in ("admin", "direction"):
+    """L'IA consomme des crédits : réservée aux comptes internes."""
+    if role not in ("direction", "drh", "chef_de_projet", "equipe"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Accès réservé à la direction ou à l'administrateur.",
+            detail="Accès réservé aux comptes internes.",
         )
     return role
 

@@ -2,8 +2,6 @@
 import { useEffect, useState } from "react";
 import { clientsService } from "../api/client";
 import { utilisateursService } from "../api/utilisateurs";
-import { useAuth } from "../auth/AuthContext";
-import { useLang } from "../i18n/LangContext";
 import { useMessage } from "../context/MessageContext";
 import 'animate.css';
 
@@ -69,10 +67,7 @@ const XIcon = ({ className = "w-4 h-4" }) => (
 );
 
 export default function Clients() {
-  const { user } = useAuth();
-  const { t } = useLang();
   const { showSuccess, showError } = useMessage();
-  const estGestion = user?.role === "admin" || user?.role === "direction";
 
   const [entreprises, setEntreprises] = useState([]);
   const [comptes, setComptes] = useState([]);
@@ -121,10 +116,10 @@ export default function Clients() {
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 animate__animated animate__fadeInDown">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
-            {t("clients.titre")}
+            {"Clients"}
           </h1>
           <p className="text-sm text-slate-500">
-            {entreprises.length} {t("clients.sousTitre")}
+            {entreprises.length} {"Les entreprises clientes et leur accès à l'espace client."}
           </p>
         </div>
         <div className="relative">
@@ -132,7 +127,7 @@ export default function Clients() {
             type="text"
             value={recherche}
             onChange={(e) => setRecherche(e.target.value)}
-            placeholder={t("common.rechercher")}
+            placeholder={"Rechercher…"}
             className="w-48 sm:w-56 pl-8 pr-3 py-2 text-sm border border-slate-300 rounded-md outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
           />
           <SearchIcon className="w-4 h-4 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
@@ -142,7 +137,7 @@ export default function Clients() {
       {loading && (
         <div className="flex justify-center items-center py-12 animate__animated animate__pulse">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#63B23E]"></div>
-          <span className="ml-3 text-slate-500">{t("common.chargement")}</span>
+          <span className="ml-3 text-slate-500">{"Chargement…"}</span>
         </div>
       )}
       {erreur && (
@@ -200,7 +195,7 @@ export default function Clients() {
                         ) : (
                           <>
                             <XIcon className="w-3.5 h-3.5 text-slate-400" />
-                            <span className="text-slate-400">{t("clients.aucunAcces")}</span>
+                            <span className="text-slate-400">{"aucun"}</span>
                           </>
                         )}
                       </div>
@@ -212,7 +207,7 @@ export default function Clients() {
           ) : (
             <div className="text-center py-12 bg-slate-50 border border-dashed border-slate-300 rounded-lg">
               <BuildingIcon className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-              <p className="text-sm text-slate-500">{t("clients.vide")}</p>
+              <p className="text-sm text-slate-500">{"Aucun client."}</p>
             </div>
           )}
         </>

@@ -3,7 +3,6 @@ import { useEffect, useState, useRef } from "react";
 import { facturesService } from "../api/factures";
 import { clientsService } from "../api/client";
 import { projetsService } from "../api/projets";
-import { useLang } from "../i18n/LangContext";
 import { useMessage } from "../context/MessageContext";
 
 // Devise d'affichage — modifiable en un seul endroit.
@@ -18,6 +17,14 @@ const STATUT_STYLE = {
   payee: "bg-emerald-100 text-emerald-700 border-emerald-200",
   en_retard: "bg-red-100 text-red-700 border-red-200",
   annulee: "bg-slate-100 text-slate-400 border-slate-200 line-through",
+};
+
+const STATUT_LABELS = {
+  brouillon: "Brouillon",
+  envoyee: "Envoyée",
+  payee: "Payée",
+  en_retard: "En retard",
+  annulee: "Annulée",
 };
 
 const FORM_VIDE = {
@@ -62,7 +69,6 @@ function addDays(date, days) {
 }
 
 export default function Facturation() {
-  const { t } = useLang();
   const { showSuccess, showError, showWarning, showInfo } = useMessage();
   const tableRef = useRef(null);
 
@@ -275,7 +281,7 @@ export default function Facturation() {
     try {
       await facturesService.setStatut(f.id, statut);
       showSuccess(
-        `Statut de la facture ${f.numero} mis à jour : ${t(`fact.statut.${statut}`)}`
+        `Statut de la facture ${f.numero} mis à jour : ${STATUT_LABELS[statut] || statut}`
       );
       await charger();
     } catch (err) {
@@ -338,7 +344,7 @@ export default function Facturation() {
               </svg>
               <h3 className="text-lg font-semibold">Confirmation de suppression</h3>
             </div>
-            <p className="text-slate-600 mb-2">{t("fact.suppr")}</p>
+            <p className="text-slate-600 mb-2">{"Supprimer cette facture ?"}</p>
             <p className="font-mono text-sm text-slate-800 bg-slate-50 p-2 rounded mb-4">
               {f.numero} - {f.client_nom}
             </p>
@@ -418,19 +424,19 @@ export default function Facturation() {
         f.date_emission || "",
         f.date_echeance || "—",
         formatMontantSimple(f.montant_ttc),
-        t(`fact.statut.${f.statut}`) || f.statut,
+        STATUT_LABELS[f.statut] || f.statut,
       ]);
 
       autoTable(doc, {
         head: [
           [
-            t("fact.col.numero"),
-            t("fact.col.client"),
-            t("fact.col.projet"),
-            t("fact.col.emission"),
-            t("fact.col.echeance"),
-            `${t("fact.col.ttc")} (${DEVISE})`,
-            t("fact.col.statut"),
+            "N°",
+            "Client",
+            "Projet",
+            "Émission",
+            "Échéance",
+            `${"Total TTC"} (${DEVISE})`,
+            "Statut",
           ],
         ],
         body: tableData,
@@ -484,13 +490,13 @@ export default function Facturation() {
   const exportExcel = () => {
     try {
       const headers = [
-        t("fact.col.numero"),
-        t("fact.col.client"),
-        t("fact.col.projet"),
-        t("fact.col.emission"),
-        t("fact.col.echeance"),
-        `${t("fact.col.ttc")} (${DEVISE})`,
-        t("fact.col.statut"),
+        "N°",
+        "Client",
+        "Projet",
+        "Émission",
+        "Échéance",
+        `${"Total TTC"} (${DEVISE})`,
+        "Statut",
       ];
 
       const rows = factures.map((f) => [
@@ -500,7 +506,7 @@ export default function Facturation() {
         f.date_emission || "",
         f.date_echeance || "—",
         formatMontantSimple(f.montant_ttc),
-        t(`fact.statut.${f.statut}`) || f.statut,
+        STATUT_LABELS[f.statut] || f.statut,
       ]);
 
       let csvContent = "\uFEFF";
@@ -589,13 +595,13 @@ export default function Facturation() {
           <table>
             <thead>
               <tr>
-                <th>${t("fact.col.numero")}</th>
-                <th>${t("fact.col.client")}</th>
-                <th>${t("fact.col.projet")}</th>
-                <th>${t("fact.col.emission")}</th>
-                <th>${t("fact.col.echeance")}</th>
-                <th class="text-right">${t("fact.col.ttc")} (${DEVISE})</th>
-                <th>${t("fact.col.statut")}</th>
+                <th>${"N°"}</th>
+                <th>${"Client"}</th>
+                <th>${"Projet"}</th>
+                <th>${"Émission"}</th>
+                <th>${"Échéance"}</th>
+                <th class="text-right">${"Total TTC"} (${DEVISE})</th>
+                <th>${"Statut"}</th>
               </tr>
             </thead>
             <tbody>
@@ -610,7 +616,7 @@ export default function Facturation() {
             <td>${f.date_emission || ""}</td>
             <td>${f.date_echeance || "—"}</td>
             <td class="text-right">${formatMontantSimple(f.montant_ttc)}</td>
-            <td>${t(`fact.statut.${f.statut}`) || f.statut}</td>
+            <td>${STATUT_LABELS[f.statut] || f.statut}</td>
           </tr>
         `;
       });
@@ -664,9 +670,9 @@ export default function Facturation() {
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
-            {t("fact.titre")}
+            {"Facturation"}
           </h1>
-          <p className="text-sm text-slate-500">{t("fact.sousTitre")}</p>
+          <p className="text-sm text-slate-500">{"Factures clients et suivi des paiements."}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <div className="flex gap-1">
@@ -746,7 +752,7 @@ export default function Facturation() {
             onClick={ouvrirAjout}
             className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#4a8f2e]"
           >
-            + {t("fact.nouvelle")}
+            + {"Nouvelle facture"}
           </button>
         </div>
       </div>
@@ -755,17 +761,17 @@ export default function Facturation() {
       {stats && (
         <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {carte(
-            t("fact.stats.ca"),
+            "CA encaissé",
             formatMontant(stats.ca_encaisse),
             "text-emerald-600"
           )}
           {carte(
-            t("fact.stats.attente"),
+            "En attente",
             formatMontant(stats.en_attente),
             "text-blue-600"
           )}
-          {carte(t("fact.stats.total"), stats.total_factures, "text-slate-800")}
-          {carte(t("fact.stats.impayees"), stats.impayees, "text-red-600")}
+          {carte("Factures", stats.total_factures, "text-slate-800")}
+          {carte("Impayées", stats.impayees, "text-red-600")}
         </div>
       )}
 
@@ -776,10 +782,10 @@ export default function Facturation() {
           onChange={(e) => setFiltreStatut(e.target.value)}
           className="border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#63B23E]"
         >
-          <option value="">{t("fact.filtre.tous")}</option>
+          <option value="">{"Tous les statuts"}</option>
           {STATUTS.map((s) => (
             <option key={s} value={s}>
-              {t(`fact.statut.${s}`)}
+              {STATUT_LABELS[s]}
             </option>
           ))}
         </select>
@@ -788,7 +794,7 @@ export default function Facturation() {
         </span>
       </div>
 
-      {loading && <p className="text-slate-500">{t("common.chargement")}</p>}
+      {loading && <p className="text-slate-500">{"Chargement…"}</p>}
       {erreur && <p className="text-red-600">{erreur}</p>}
 
       {!loading && !erreur && (
@@ -796,13 +802,13 @@ export default function Facturation() {
           <table className="w-full text-left text-sm">
             <thead className="border-b bg-slate-50 text-xs uppercase text-slate-500">
               <tr>
-                <th className="px-4 py-3">{t("fact.col.numero")}</th>
-                <th className="px-4 py-3">{t("fact.col.client")}</th>
-                <th className="px-4 py-3">{t("fact.col.projet")}</th>
-                <th className="px-4 py-3">{t("fact.col.emission")}</th>
-                <th className="px-4 py-3">{t("fact.col.echeance")}</th>
-                <th className="px-4 py-3 text-right">{t("fact.col.ttc")}</th>
-                <th className="px-4 py-3">{t("fact.col.statut")}</th>
+                <th className="px-4 py-3">{"N°"}</th>
+                <th className="px-4 py-3">{"Client"}</th>
+                <th className="px-4 py-3">{"Projet"}</th>
+                <th className="px-4 py-3">{"Émission"}</th>
+                <th className="px-4 py-3">{"Échéance"}</th>
+                <th className="px-4 py-3 text-right">{"Total TTC"}</th>
+                <th className="px-4 py-3">{"Statut"}</th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
@@ -835,7 +841,7 @@ export default function Facturation() {
                     >
                       {STATUTS.map((s) => (
                         <option key={s} value={s}>
-                          {t(`fact.statut.${s}`)}
+                          {STATUT_LABELS[s]}
                         </option>
                       ))}
                     </select>
@@ -846,13 +852,13 @@ export default function Facturation() {
                         onClick={() => ouvrirEdition(f)}
                         className="text-slate-500 hover:text-[#63B23E]"
                       >
-                        {t("common.modifier")}
+                        {"Modifier"}
                       </button>
                       <button
                         onClick={() => supprimer(f)}
                         className="text-slate-500 hover:text-red-600"
                       >
-                        {t("common.supprimer")}
+                        {"Supprimer"}
                       </button>
                     </div>
                   </td>
@@ -861,7 +867,7 @@ export default function Facturation() {
               {factures.length === 0 && (
                 <tr>
                   <td colSpan={8} className="px-4 py-8 text-center text-slate-400">
-                    {t("fact.vide")}
+                    {"Aucune facture pour l'instant."}
                   </td>
                 </tr>
               )}
@@ -875,7 +881,7 @@ export default function Facturation() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate__animated animate__fadeIn">
           <div className="w-full max-w-lg bg-white p-6 shadow-xl animate__animated animate__zoomIn">
             <h2 className="mb-4 text-lg font-semibold text-slate-900">
-              {editionId ? t("fact.modal.edition") : t("fact.modal.ajout")}
+              {editionId ? "Modifier la facture" : "Nouvelle facture"}
             </h2>
             <form onSubmit={enregistrer} className="space-y-3">
               {(formErreur || dateEmissionError || dateEcheanceError) && (
@@ -889,7 +895,7 @@ export default function Facturation() {
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <label className="mb-1 block text-xs font-medium text-slate-600">
-                    Entreprise {t("fact.form.client")}{" "}
+                    Entreprise {"Client"}{" "}
                     <span className="text-red-500">*</span>
                   </label>
                   <select
@@ -915,7 +921,7 @@ export default function Facturation() {
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-slate-600">
-                    {t("fact.form.projet")} <span className="text-red-500">*</span>
+                    {"Projet (optionnel)"} <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={form.projet_id}
@@ -956,7 +962,7 @@ export default function Facturation() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-xs font-medium text-slate-600">
-                    {t("fact.form.emission")}{" "}
+                    {"Date d'émission"}{" "}
                     <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -978,7 +984,7 @@ export default function Facturation() {
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-slate-600">
-                    {t("fact.form.echeance")}{" "}
+                    {"Date d'échéance"}{" "}
                     <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -1003,7 +1009,7 @@ export default function Facturation() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-xs font-medium text-slate-600">
-                    {t("fact.form.ht")} ({DEVISE}){" "}
+                    {"Montant HT"} ({DEVISE}){" "}
                     <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -1021,7 +1027,7 @@ export default function Facturation() {
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-slate-600">
-                    {t("fact.form.tva")} (%){" "}
+                    {"TVA (%)"} (%){" "}
                     <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -1041,7 +1047,7 @@ export default function Facturation() {
               </div>
 
               <div className="bg-slate-50 px-3 py-2 text-right text-sm">
-                <span className="text-slate-500">{t("fact.form.ttc")} : </span>
+                <span className="text-slate-500">{"Total TTC"} : </span>
                 <span className="font-semibold text-slate-800">
                   {formatMontant(ttcApercu())}
                 </span>
@@ -1049,7 +1055,7 @@ export default function Facturation() {
 
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-600">
-                  {t("fact.form.notes")}
+                  {"Notes"}
                 </label>
                 <textarea
                   rows={2}
@@ -1066,7 +1072,7 @@ export default function Facturation() {
                   onClick={() => setModalOuvert(false)}
                   className="border border-slate-300 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
                 >
-                  {t("common.annuler")}
+                  {"Annuler"}
                 </button>
                 <button
                   type="submit"
@@ -1074,8 +1080,8 @@ export default function Facturation() {
                   className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#4a8f2e] disabled:opacity-50"
                 >
                   {enregistrement
-                    ? t("common.enregistrement")
-                    : t("common.enregistrer")}
+                    ? "Enregistrement…"
+                    : "Enregistrer"}
                 </button>
               </div>
             </form>

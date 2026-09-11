@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/client";
 import { fichiersService } from "../api/fichiers";
-import { useLang } from "../i18n/LangContext";
 import "animate.css";
 
 const infoType = (mime) => {
@@ -35,7 +34,6 @@ const formatTaille = (octets) => {
 };
 
 export default function Documents() {
-  const { t } = useLang();
   const [projets, setProjets] = useState([]);
   const [fichiersParProjet, setFichiersParProjet] = useState({});
   const [loading, setLoading] = useState(true);
@@ -57,7 +55,7 @@ export default function Documents() {
       );
       setFichiersParProjet(Object.fromEntries(decharges));
     } catch (err) {
-      setErreur(err.response?.data?.detail || t("mp.aucun"));
+      setErreur(err.response?.data?.detail || "Aucun projet trouvé pour votre compte.");
     } finally {
       setLoading(false);
     }
@@ -90,7 +88,7 @@ export default function Documents() {
     return (
       <div className="flex items-center justify-center py-16">
         <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-[#63B23E]"></div>
-        <span className="ml-3 text-slate-500">{t("common.chargement")}</span>
+        <span className="ml-3 text-slate-500">{"Chargement…"}</span>
       </div>
     );
 
@@ -112,9 +110,9 @@ export default function Documents() {
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900">
-            {t("nav.documents")}
+            {"Documents"}
           </h1>
-          <p className="text-sm text-slate-500">{t("docs.sousTitre")}</p>
+          <p className="text-sm text-slate-500">{"Retrouvez les documents partagés sur vos projets."}</p>
         </div>
         <button
           onClick={chargerDonnees}
@@ -135,13 +133,13 @@ export default function Documents() {
               d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
             />
           </svg>
-          {t("dash.refresh")}
+          {"Rafraîchir"}
         </button>
       </div>
 
       {projets.length === 0 ? (
         <div className="rounded-lg border bg-white p-8 text-center shadow-sm">
-          <p className="text-sm text-slate-500">{t("mp.aucun")}</p>
+          <p className="text-sm text-slate-500">{"Aucun projet trouvé pour votre compte."}</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -174,13 +172,13 @@ export default function Documents() {
                     </h3>
                   </div>
                   <span className="text-xs text-slate-400">
-                    {fichiers.length} {t("docs.fichiers")}
+                    {fichiers.length} {"document(s)"}
                   </span>
                 </div>
 
                 {fichiers.length === 0 ? (
                   <div className="px-4 py-8 text-center text-sm text-slate-500">
-                    {t("docs.vide")}
+                    {"Aucun document partagé pour ce projet pour l'instant."}
                   </div>
                 ) : (
                   <div className="divide-y divide-slate-100">
@@ -227,7 +225,7 @@ export default function Documents() {
                                 d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
                               />
                             </svg>
-                            {t("docs.telecharger")}
+                            {"Télécharger"}
                           </button>
                         </div>
                       );
@@ -242,7 +240,7 @@ export default function Documents() {
 
       {projets.length > 0 && nbFichiers === 0 && (
         <div className="mt-6 rounded border-l-4 border-l-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-600">
-          {t("docs.aucunDocument")}
+          {"Aucun document partagé pour le moment. Les documents seront disponibles dès que votre équipe en publiera."}
         </div>
       )}
     </div>

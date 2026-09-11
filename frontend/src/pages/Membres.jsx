@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { utilisateursService } from "../api/utilisateurs";
 import { useAuth } from "../auth/AuthContext";
-import { useLang } from "../i18n/LangContext";
 import { useMessage } from "../context/MessageContext";
 import 'animate.css';
 
@@ -46,6 +45,7 @@ const UserIcon = ({ className = "w-5 h-5" }) => (
 const couleurRole = {
   direction: "bg-purple-100 text-purple-700",
   drh: "bg-rose-100 text-rose-700",
+  chef_de_projet: "bg-indigo-100 text-indigo-700",
   equipe: "bg-blue-100 text-blue-700",
   client: "bg-amber-100 text-amber-700",
 };
@@ -53,6 +53,7 @@ const couleurRole = {
 const labelRole = {
   direction: "Direction",
   drh: "DRH",
+  chef_de_projet: "Chef de projet",
   equipe: "Équipe",
   client: "Client",
 };
@@ -69,9 +70,8 @@ const FORM_VIDE = {
 
 export default function Membres() {
   const { user } = useAuth();
-  const { t } = useLang();
   const { showSuccess, showError } = useMessage();
-  const estGestion = user?.role === "admin" || user?.role === "direction";
+  const estGestion = ["direction", "drh", "chef_de_projet"].includes(user?.role);
 
   const [utilisateurs, setUtilisateurs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -202,10 +202,10 @@ export default function Membres() {
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 animate__animated animate__fadeInDown">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
-            {t("membres.titre")}
+            Membres
           </h1>
           <p className="text-sm text-slate-500">
-            {utilisateurs.length} {t("membres.sousTitre")}
+            {utilisateurs.length} Annuaire de l'équipe et de leurs métiers.
           </p>
         </div>
         <div className="flex gap-2">
@@ -214,7 +214,7 @@ export default function Membres() {
               type="text"
               value={recherche}
               onChange={(e) => setRecherche(e.target.value)}
-              placeholder={t("common.rechercher")}
+              placeholder={"Rechercher…"}
               className="w-48 sm:w-56 pl-8 pr-3 py-2 text-sm border border-slate-300  outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
             />
             <SearchIcon className="w-4 h-4 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
@@ -225,7 +225,7 @@ export default function Membres() {
               className="flex items-center gap-2 bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white  transition hover:bg-[#4a8f2e]"
             >
               <PlusIcon className="w-4 h-4" />
-              {t("common.ajouter")}
+              Ajouter
             </button>
           )}
         </div>
@@ -234,7 +234,7 @@ export default function Membres() {
       {loading && (
         <div className="flex justify-center items-center py-12 animate__animated animate__pulse">
           <div className="animate-spin  h-8 w-8 border-b-2 border-[#63B23E]"></div>
-          <span className="ml-3 text-slate-500">{t("common.chargement")}</span>
+          <span className="ml-3 text-slate-500">{"Chargement…"}</span>
         </div>
       )}
       {erreur && (
@@ -279,7 +279,7 @@ export default function Membres() {
                     )}
                     {!u.actif && (
                       <span className="bg-red-100 px-2 py-0.5 text-[10px] text-red-600 ">
-                        {t("common.inactif")}
+                        inactif
                       </span>
                     )}
                   </div>
@@ -290,14 +290,14 @@ export default function Membres() {
                         className="flex items-center gap-1 text-xs text-slate-500 hover:text-[#63B23E] transition-colors"
                       >
                         <EditIcon className="w-3.5 h-3.5" />
-                        {t("common.modifier")}
+                        Modifier
                       </button>
                       <button
                         onClick={() => demanderSuppression(u)}
                         className="flex items-center gap-1 text-xs text-slate-500 hover:text-red-600 transition-colors"
                       >
                         <TrashIcon className="w-3.5 h-3.5" />
-                        {t("common.supprimer")}
+                        Supprimer
                       </button>
                     </div>
                   )}
@@ -307,13 +307,13 @@ export default function Membres() {
           ) : (
             <div className="text-center py-12 bg-slate-50 border border-dashed border-slate-300 ">
               <UserIcon className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-              <p className="text-sm text-slate-500">{t("membres.vide")}</p>
+              <p className="text-sm text-slate-500">Aucun membre trouvé.</p>
               {estGestion && (
                 <button
                   onClick={ouvrirAjout}
                   className="mt-4 px-4 py-2 bg-[#63B23E] text-white  hover:bg-[#4a8f2e] transition-colors"
                 >
-                  + {t("common.ajouter")}
+                  + Ajouter
                 </button>
               )}
             </div>
@@ -327,9 +327,7 @@ export default function Membres() {
           <div className="w-full max-w-md bg-white p-6 shadow-xl  animate__animated animate__zoomIn">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-slate-900">
-                {editionId
-                  ? t("membres.modal.edition")
-                  : t("membres.modal.ajout")}
+                {editionId ? "Modifier le membre" : "Ajouter un membre"}
               </h2>
               <button
                 onClick={() => setModalOuvert(false)}
@@ -343,7 +341,7 @@ export default function Membres() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-xs font-medium text-slate-600">
-                    {t("common.prenom")} <span className="text-red-500">*</span>
+                    Prénom <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -357,7 +355,7 @@ export default function Membres() {
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-slate-600">
-                    {t("common.nom")} <span className="text-red-500">*</span>
+                    Nom <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -371,7 +369,7 @@ export default function Membres() {
 
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-600">
-                  {t("common.email")} <span className="text-red-500">*</span>
+                  Email <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="email"
@@ -403,7 +401,7 @@ export default function Membres() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-xs font-medium text-slate-600">
-                    {t("common.role")} <span className="text-red-500">*</span>
+                    Rôle <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={form.role}
@@ -411,13 +409,14 @@ export default function Membres() {
                     className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent appearance-none bg-white"
                   >
                     <option value="direction">Direction</option>
-                    <option value="admin">DRH</option>
+                    <option value="drh">DRH</option>
+                    <option value="chef_de_projet">Chef de projet</option>
                     <option value="equipe">Équipe</option>
                   </select>
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-slate-600">
-                    {t("common.metier")}
+                    Métier
                   </label>
                   <input
                     type="text"
@@ -441,7 +440,7 @@ export default function Membres() {
                     }
                     className="accent-[#63B23E]"
                   />
-                  {t("common.actif")}
+                  Compte actif
                 </label>
               )}
 
@@ -457,7 +456,7 @@ export default function Membres() {
                   onClick={() => setModalOuvert(false)}
                   className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100  transition-colors"
                 >
-                  {t("common.annuler")}
+                  Annuler
                 </button>
                 <button
                   type="submit"
@@ -465,10 +464,10 @@ export default function Membres() {
                   className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white  transition hover:bg-[#4a8f2e] disabled:opacity-50"
                 >
                   {enregistrement
-                    ? t("common.enregistrement")
+                    ? "Enregistrement…"
                     : editionId
-                      ? t("common.enregistrer")
-                      : t("common.ajouter")}
+                      ? "Enregistrer"
+                      : "Ajouter"}
                 </button>
               </div>
             </form>
@@ -504,14 +503,14 @@ export default function Membres() {
                 onClick={() => setConfirmSuppression(null)}
                 className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 transition-colors"
               >
-                {t("common.annuler")}
+                Annuler
               </button>
               <button
                 type="button"
                 onClick={confirmerSuppression}
                 className="bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
               >
-                {t("common.supprimer")}
+                Supprimer
               </button>
             </div>
           </div>

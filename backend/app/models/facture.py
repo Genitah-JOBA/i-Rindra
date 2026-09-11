@@ -20,8 +20,7 @@ class StatutFacture(str, enum.Enum):
 
 class Facture(Base):
     """
-    Table 'facture' — volet financier (accès ADMIN uniquement, cf. CDC :
-    la direction n'a AUCUN accès à l'argent).
+    Table 'facture' — volet financier (accès direction/DRH uniquement, cf. CDC).
     Émise pour un Client, optionnellement rattachée à un Projet.
     Les montants TVA et TTC sont calculés côté serveur à partir du HT et du taux.
     """

@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { projetsService } from "../api/projets";
 import { useAuth } from "../auth/AuthContext";
-import { useLang } from "../i18n/LangContext";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -186,24 +185,7 @@ const CritiqueIcon = ({ className = "w-5 h-5" }) => (
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { t, lang } = useLang();
-  const MOIS =
-    lang === "en"
-      ? [
-          "Jan",
-          "Feb",
-          "Mar",
-          "Apr",
-          "May",
-          "Jun",
-          "Jul",
-          "Aug",
-          "Sep",
-          "Oct",
-          "Nov",
-          "Dec",
-        ]
-      : [
+  const MOIS = [
           "Jan",
           "Fév",
           "Mar",
@@ -446,7 +428,7 @@ export default function Dashboard() {
   };
 
   const doughnutChartData = {
-    labels: [t("statut.vert"), t("statut.orange"), t("statut.rouge")],
+    labels: ["Bon", "Attention", "Critique"],
     datasets: [
       {
         data: [stats.vert, stats.orange, stats.rouge],
@@ -465,7 +447,7 @@ export default function Dashboard() {
     labels: evolutionData.mois || MOIS,
     datasets: [
       {
-        label: t("dash.chart.enCours"),
+        label: "Projets en cours",
         data: evolutionData.actifs || Array(12).fill(0),
         borderColor: CHART_COLORS.bleu,
         backgroundColor: "rgba(59, 130, 246, 0.1)",
@@ -475,7 +457,7 @@ export default function Dashboard() {
         pointRadius: window.innerWidth < 640 ? 2 : 4,
       },
       {
-        label: t("dash.chart.termines"),
+        label: "Projets terminés",
         data: evolutionData.termines || Array(12).fill(0),
         borderColor: CHART_COLORS.vert,
         backgroundColor: "rgba(34, 197, 94, 0.1)",
@@ -506,9 +488,9 @@ export default function Dashboard() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 animate__animated animate__fadeInDown">
         <div>
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900">
-            {t("dash.bonjour")} {user?.prenom || ""} {user?.nom || ""} !
+            Bonjour {user?.prenom || ""} {user?.nom || ""} !
           </h1>
-          <p className="text-sm text-slate-500">{t("dash.sousTitre")}</p>
+          <p className="text-sm text-slate-500">Voici l'ensemble des projets.</p>
         </div>
         <button
           onClick={handleRefresh}
@@ -516,7 +498,7 @@ export default function Dashboard() {
           className="mt-2 sm:mt-0 flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-[#63B23E] text-white text-sm sm:text-base  hover:bg-[#3F894E] transition-colors disabled:opacity-50"
         >
           <RefreshIcon spinning={loading} className="w-4 h-4" />
-          {loading ? t("common.chargement") : t("dash.refresh")}
+          {loading ? "Chargement…" : "Rafraîchir"}
         </button>
       </div>
 
@@ -524,7 +506,7 @@ export default function Dashboard() {
       {loading && (
         <div className="flex justify-center items-center py-12 animate__animated animate__pulse">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#63B23E]"></div>
-          <span className="ml-3 text-slate-500">{t("common.chargement")}</span>
+          <span className="ml-3 text-slate-500">{"Chargement…"}</span>
         </div>
       )}
 
@@ -549,7 +531,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
             <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.05s' }}>
               <StatCard
-                title={t("dash.total")}
+                title={"Total"}
                 value={stats.total}
                 color="text-slate-900"
                 icon={<DashboardIcon className="w-5 h-5 text-slate-600" />}
@@ -557,7 +539,7 @@ export default function Dashboard() {
             </div>
             <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.10s' }}>
               <StatCard
-                title={t("statut.vert")}
+                title={"Bon"}
                 value={stats.vert}
                 color="text-green-600"
                 icon={<BonIcon className="w-5 h-5 text-green-600" />}
@@ -565,7 +547,7 @@ export default function Dashboard() {
             </div>
             <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.15s' }}>
               <StatCard
-                title={t("statut.orange")}
+                title={"Attention"}
                 value={stats.orange}
                 color="text-orange-600"
                 icon={<AttentionIcon className="w-5 h-5 text-orange-600" />}
@@ -573,7 +555,7 @@ export default function Dashboard() {
             </div>
             <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.20s' }}>
               <StatCard
-                title={t("statut.rouge")}
+                title={"Critique"}
                 value={stats.rouge}
                 color="text-red-600"
                 icon={<CritiqueIcon className="w-5 h-5 text-red-600" />}
@@ -581,7 +563,7 @@ export default function Dashboard() {
             </div>
             <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.25s' }}>
               <StatCard
-                title={t("dash.moyenne")}
+                title={"Moyenne"}
                 value={`${stats.avancementMoyen}%`}
                 color="text-blue-600"
                 icon={<TachesIcon className="w-5 h-5 text-blue-600" />}
@@ -589,7 +571,7 @@ export default function Dashboard() {
             </div>
             <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.30s' }}>
               <StatCard
-                title={t("dash.taches")}
+                title={"Tâches"}
                 value={`${stats.tachesTerminees}/${stats.tachesTotales}`}
                 color="text-purple-600"
                 icon={<TachesIcon className="w-5 h-5 text-purple-600" />}
@@ -605,7 +587,7 @@ export default function Dashboard() {
                 <div className="bg-white border border-slate-200 p-3 sm:p-4 shadow-sm  animate__animated animate__fadeInUp" style={{ animationDelay: '0.10s' }}>
                   <h3 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2 sm:mb-3 flex items-center gap-2">
                     <ProjetsIcon className="w-4 h-4 text-slate-500" />
-                    {t("dash.chart.avancement")}
+                    Avancement des projets
                   </h3>
                   <div className="h-48 sm:h-56 md:h-64">
                     <Bar data={barChartData} options={barOptions} />
@@ -616,7 +598,7 @@ export default function Dashboard() {
                 <div className="bg-white border border-slate-200 p-3 sm:p-4 shadow-sm  animate__animated animate__fadeInUp" style={{ animationDelay: '0.20s' }}>
                   <h3 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2 sm:mb-3 flex items-center gap-2">
                     <DashboardIcon className="w-4 h-4 text-slate-500" />
-                    {t("dash.chart.repartition")}
+                    Répartition des statuts
                   </h3>
                   <div className="h-48 sm:h-56 md:h-64 flex items-center justify-center">
                     <div className="w-40 sm:w-52 md:w-64 h-40 sm:h-52 md:h-64">
@@ -646,7 +628,7 @@ export default function Dashboard() {
                       d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1.5-1.5m0 0l-1.5 1.5m1.5-1.5V3.75m-7.5 0h16.5"
                     />
                   </svg>
-                  {t("dash.chart.evolution")}
+                  Évolution des projets
                 </h3>
                 <div className="h-48 sm:h-56 md:h-64">
                   <Line data={lineChartData} options={lineOptions} />
@@ -658,7 +640,7 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between mb-2 sm:mb-3">
                   <h3 className="text-xs sm:text-sm font-semibold text-slate-700 flex items-center gap-2">
                     <ProjetsIcon className="w-4 h-4 text-slate-500" />
-                    {t("dash.liste")} ({projets.length})
+                    Liste des projets ({projets.length})
                   </h3>
                 </div>
                 <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -676,10 +658,7 @@ export default function Dashboard() {
             </>
           ) : (
             <div className="text-center py-8 sm:py-12 bg-slate-50 border border-slate-200  animate__animated animate__fadeInUp">
-              <p className="text-slate-500">{t("dash.aucun")}</p>
-              <button className="mt-4 px-4 py-2 bg-[#63B23E] text-white  hover:bg-[#3F894E] transition-colors">
-                + Créer un projet
-              </button>
+              <p className="text-slate-500">Aucun projet pour le moment.</p>
             </div>
           )}
         </>
@@ -711,12 +690,11 @@ function StatCard({ title, value, color, icon }) {
 
 // Composant ProjectCard avec icônes SVG
 function ProjectCard({ projet }) {
-  const { t } = useLang();
   const getStatutLabel = (statut) => {
     const labels = {
-      vert: t("statut.vert"),
-      orange: t("statut.orange"),
-      rouge: t("statut.rouge"),
+      vert: "Bon",
+      orange: "Attention",
+      rouge: "Critique",
     };
     return labels[statut] || statut;
   };
@@ -791,7 +769,7 @@ function ProjectCard({ projet }) {
 
       <div className="flex justify-between items-center mt-1">
         <p className="text-[10px] sm:text-xs text-slate-500">
-          {projet.avancement_pct || 0}% {t("dash.termine")}
+          {projet.avancement_pct || 0}% terminé
         </p>
         <span className="text-[10px] sm:text-xs text-slate-400 flex items-center gap-1">
           <svg

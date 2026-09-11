@@ -42,7 +42,7 @@ class Absence(Base):
         nullable=False,
         default=StatutAbsence.EN_ATTENTE,
     )
-    # Qui a pris la décision (admin/direction), rempli si traité
+    # Qui a pris la décision (pilotage : direction/DRH), rempli si traité
     decideur_id = Column(
         Integer, ForeignKey("utilisateur.id", ondelete="SET NULL"), nullable=True
     )

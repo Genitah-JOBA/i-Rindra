@@ -277,7 +277,7 @@ async def register(
     Le mot de passe est hashé automatiquement.
     
     L'inscription publique est réservée aux rôles 'equipe' et 'client' —
-    les comptes 'admin'/'direction' doivent être créés par un administrateur.
+    les comptes 'direction'/'drh'/'chef_de_projet' doivent être créés par la direction.
     """
     _check_rate_limit(f"register:{user_data.email}")
 
@@ -310,15 +310,15 @@ async def register(
         )
 
     # 2.bis Empêche l'escalade de privilèges via auto-inscription
-    if role_enum in (RoleUtilisateur.ADMIN, RoleUtilisateur.DIRECTION):
+    if role_enum in (RoleUtilisateur.DIRECTION, RoleUtilisateur.DRH, RoleUtilisateur.CHEF_DE_PROJET):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Les comptes 'admin' et 'direction' ne peuvent pas être créés par inscription publique"
+            detail="Les comptes 'direction', 'drh' et 'chef_de_projet' ne peuvent pas être créés par inscription publique"
         )
 
     # 3. Règle métier (CDC) : cohérence rôle / client_id
     #    - un compte 'client' DOIT être rattaché à un client existant
-    #    - un compte interne (direction/equipe) N'est rattaché à aucun client
+    #    - un compte interne (direction/drh/chef_de_projet/equipe) n'est rattaché à aucun client
     if role_enum == RoleUtilisateur.CLIENT:
         if user_data.client_id is None:
             raise HTTPException(
