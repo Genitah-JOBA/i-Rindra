@@ -17,10 +17,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     # Dev : tout port localhost/127.0.0.1  |  Prod : les (sous-)domaines bef4prod.com en HTTPS
-    allow_origin_regex=(
-        r"https?://(localhost|127\.0\.0\.1)(:\d+)?"
-        r"|https://([a-z0-9-]+\.)?bef4prod\.com"
-    ),
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

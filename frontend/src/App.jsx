@@ -13,6 +13,7 @@ import Membres from "./pages/Membres";
 import Clients from "./pages/Clients";
 import Absences from "./pages/Absences";
 import Facturation from "./pages/Facturation";
+import AssistantIA from "./pages/AssistantIA";
 import Parametres from "./pages/Parametres";
 import { MessageProvider } from "./context/MessageContext";
 
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="membres" element={<Membres />} />
           <Route path="clients" element={<Clients />} />
           <Route path="absences" element={<Absences />} />
+          <Route path="assistant-ia" element={<AssistantIA />} />
         </Route>
 
         {/* Volet financier — ADMIN uniquement (la direction n'a pas accès à l'argent) */}

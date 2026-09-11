@@ -93,7 +93,7 @@ const FORM_VIDE = {
 export default function Projets() {
   const navigate = useNavigate();
   const { t } = useLang();
-  const { showSuccess, showError, showWarning } = useMessage();
+  const { showSuccess, showError, showConfirm } = useMessage();
 
   const [projets, setProjets] = useState([]);
   const [clients, setClients] = useState([]);
@@ -279,108 +279,96 @@ export default function Projets() {
     }
   };
 
+  // ---------- SUPPRIMER ----------
   const supprimer = async (projet, e) => {
-    e.stopPropagation();
-    
-    const confirmed = await new Promise((resolve) => {
-      const container = document.createElement("div");
-      container.className = "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate__animated animate__fadeIn";
-      document.body.appendChild(container);
+    e?.stopPropagation();
 
-      const ConfirmationDialog = () => {
-        const [visible, setVisible] = useState(true);
-
-        const handleConfirm = () => {
-          setVisible(false);
-          setTimeout(() => {
-            if (container.parentNode) container.parentNode.removeChild(container);
-            resolve(true);
-          }, 300);
-        };
-
-        const handleCancel = () => {
-          setVisible(false);
-          setTimeout(() => {
-            if (container.parentNode) container.parentNode.removeChild(container);
-            resolve(false);
-          }, 300);
-        };
-
-        return (
-          <div className={`bg-white shadow-xl max-w-md w-full p-6 animate__animated animate__zoomIn ${!visible ? "animate__animated animate__zoomOut" : ""}`}>
-            <div className="flex items-center gap-3 text-red-600 mb-4">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              <h3 className="text-lg font-semibold">Confirmation de suppression</h3>
-            </div>
-            <p className="text-slate-600 mb-2">
-              Supprimer définitivement le projet :
-            </p>
-            <p className="font-medium text-slate-800 bg-slate-50 p-2 rounded mb-4">
-              « {projet.nom} »
-            </p>
-            <p className="text-sm text-slate-500 mb-4">
-              Ses tâches, jalons et membres seront aussi supprimés.
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={handleCancel}
-                className="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 transition-colors"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={handleConfirm}
-                className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 transition-colors"
-              >
-                Supprimer
-              </button>
-            </div>
-          </div>
-        );
-      };
-
-      import("react-dom/client").then(({ createRoot }) => {
-        const root = createRoot(container);
-        root.render(<ConfirmationDialog />);
-      });
+    const ok = await showConfirm({
+      type: 'error',
+      title: 'Confirmation de suppression',
+      message: (
+        <>
+          <p>Supprimer définitivement le projet :</p>
+          <p className="font-medium text-slate-800 bg-slate-50 p-2 rounded my-2">
+            « {projet.nom} »
+          </p>
+          <p className="text-sm text-slate-500">
+            Ses tâches, jalons et membres seront aussi supprimés.
+          </p>
+        </>
+      ),
+      confirmLabel: 'Supprimer',
+      cancelLabel: 'Annuler',
     });
 
-    if (!confirmed) return;
+    if (!ok) return;
 
     try {
       await projetsService.remove(projet.id);
       setProjets((prev) => prev.filter((p) => p.id !== projet.id));
       showSuccess(`Le projet "${projet.nom}" a été supprimé.`);
     } catch (err) {
-      const msg = err.response?.data?.detail || "Erreur lors de la suppression du projet.";
-      showError(msg);
+      showError(err.response?.data?.detail || "Erreur lors de la suppression.");
     }
   };
 
+  // ---------- ARCHIVER ----------
   const archiver = async (projet, e) => {
-    e.stopPropagation();
-    if (!window.confirm(`Archiver le projet « ${projet.nom} » ?`)) return;
+    e?.stopPropagation();
+
+    const ok = await showConfirm({
+      type: 'warning',
+      title: "Confirmation d'archivage",
+      message: (
+        <>
+          <p>Archiver le projet :</p>
+          <p className="font-medium text-slate-800 bg-slate-50 p-2 rounded my-2">
+            « {projet.nom} »
+          </p>
+        </>
+      ),
+      confirmLabel: 'Archiver',
+      cancelLabel: 'Annuler',
+    });
+
+    if (!ok) return;
+
     try {
       await projetsService.archiver(projet.id);
       showSuccess(`Le projet "${projet.nom}" a été archivé.`);
       await charger();
     } catch (err) {
-      const msg = err.response?.data?.detail || "Erreur lors de l'archivage du projet.";
-      showError(msg);
+      showError(err.response?.data?.detail || "Erreur lors de l'archivage.");
     }
   };
 
+  // ---------- RESTAURER ----------
   const restaurer = async (projet, e) => {
-    e.stopPropagation();
+    e?.stopPropagation();
+
+    const ok = await showConfirm({
+      type: 'info',
+      title: 'Confirmation de restauration',
+      message: (
+        <>
+          <p>Restaurer le projet :</p>
+          <p className="font-medium text-slate-800 bg-slate-50 p-2 rounded my-2">
+            « {projet.nom} »
+          </p>
+        </>
+      ),
+      confirmLabel: 'Restaurer',
+      cancelLabel: 'Annuler',
+    });
+
+    if (!ok) return;
+
     try {
       await projetsService.desarchiver(projet.id);
       showSuccess(`Le projet "${projet.nom}" a été restauré.`);
       await charger();
     } catch (err) {
-      const msg = err.response?.data?.detail || "Erreur lors de la restauration du projet.";
-      showError(msg);
+      showError(err.response?.data?.detail || "Erreur lors de la restauration.");
     }
   };
 

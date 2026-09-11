@@ -46,6 +46,22 @@ export function MessageProvider({ children }) {
     removeMessage,
   };
 
+  const showConfirm = useCallback((opts) => {
+    return new Promise((resolve) => {
+      resolverRef.current = resolve;
+      setConfirmState({
+        type: 'warning',
+        ...opts,
+      });
+    });
+  }, []);
+
+  const closeConfirm = (result) => {
+    setConfirmState(null);
+    resolverRef.current?.(result);
+    resolverRef.current = null;
+  };
+
   return (
     <MessageContext.Provider value={value}>
       {children}

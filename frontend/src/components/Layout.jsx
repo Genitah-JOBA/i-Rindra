@@ -304,9 +304,13 @@ export default function Layout() {
                     </p>
                   </div>
 
-                  <LienPlaceholder
-                    className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-white hover:bg-slate-600 opacity-75 `}
-                    titre="Assistant IA"
+                  <NavLink
+                    to="/assistant-ia"
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-white hover:bg-slate-600 ${
+                        isActive ? "bg-[#63B23E] text-white" : ""
+                      }`
+                    }
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -326,7 +330,7 @@ export default function Layout() {
                     <span className="ml-auto text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5  flex-shrink-0">
                       IA
                     </span>
-                  </LienPlaceholder>
+                  </NavLink>
                 </>
               )}
 

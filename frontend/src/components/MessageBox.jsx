@@ -75,6 +75,12 @@ export default function MessageBox({
   duration = 5000,
   className = '',
   dismissible = true,
+
+  mode = 'alert',
+  onConfirm,
+  onCancel,
+  confirmLabel = 'Confirmer',
+  cancelLabel = 'Annuler',
 }) {
   const [visible, setVisible] = useState(true);
   const [closing, setClosing] = useState(false);
@@ -128,7 +134,27 @@ export default function MessageBox({
           </div>
         </div>
 
-        {dismissible && (
+        {mode === 'confirm' ? (
+          <div className="ml-auto flex gap-2 mt-4">
+            <button
+              onClick={() => { setClosing(true); setTimeout(() => { setVisible(false); onCancel?.(); }, 300); }}
+              className={`px-3 py-1.5 text-sm border border-slate-300 rounded text-slate-600 hover:bg-slate-50`}
+            >
+              {cancelLabel}
+            </button>
+            <button
+              onClick={() => { setClosing(true); setTimeout(() => { setVisible(false); onConfirm?.(); }, 300); }}
+              className={`px-3 py-1.5 text-sm rounded text-white ${
+                type === 'error' ? 'bg-red-600 hover:bg-red-700' :
+                type === 'warning' ? 'bg-amber-600 hover:bg-amber-700' :
+                type === 'success' ? 'bg-green-600 hover:bg-green-700' :
+                'bg-blue-600 hover:bg-blue-700'
+              }`}
+            >
+              {confirmLabel}
+            </button>
+          </div>
+        ) : dismissible && (
           <button
             type="button"
             onClick={handleClose}

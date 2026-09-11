@@ -89,7 +89,7 @@ def _normaliser_erreur(exc: OpenAIError) -> LLMProviderError:
 
 async def chat_completion(
     *,
-    user: str,
+    user: str = "",
     system: str = "",
     messages: Optional[List[dict]] = None,
     model: Optional[str] = None,
