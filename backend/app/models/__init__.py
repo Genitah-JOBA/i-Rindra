@@ -11,7 +11,7 @@ from app.models.notification import Notification
 from app.models.facture import Facture, StatutFacture
 from app.models.analyse_ia import AnalyseIA, SuggestionTache, TypeAnalyseIA, StatutSuggestion
 from app.models.absence import Absence, TypeAbsence, StatutAbsence
-from app.models.suggestion_devis import SuggestionDevis
+from app.models.suggestion_devis import SuggestionDevis, StatutSuggestionDevis
 
 __all__ = [
     "Utilisateur",
@@ -38,4 +38,5 @@ __all__ = [
     "TypeAbsence",
     "StatutAbsence",
     "SuggestionDevis",
+    "StatutSuggestionDevis",
 ]

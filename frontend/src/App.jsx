@@ -15,6 +15,7 @@ import Absences from "./pages/Absences";
 import Facturation from "./pages/Facturation";
 import AssistantIA from "./pages/AssistantIA";
 import SuggestionDevis from "./pages/SuggestionDevis";
+import DevisEstimations from "./pages/DevisEstimations";
 import Parametres from "./pages/Parametres";
 import { MessageProvider } from "./context/MessageContext";
 
@@ -52,6 +53,7 @@ export default function App() {
           }
         >
           <Route path="facturation" element={<Facturation />} />
+          <Route path="devis-estimations" element={<DevisEstimations />} />
           <Route path="suggestion-devis" element={<SuggestionDevis />} />
         </Route>
 

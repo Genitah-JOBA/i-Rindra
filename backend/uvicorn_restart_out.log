@@ -1,671 +1,483 @@
-2026-09-14 04:48:43,336 INFO sqlalchemy.engine.Engine select pg_catalog.version()
-2026-09-14 04:48:43,336 INFO sqlalchemy.engine.Engine [raw sql] ()
-2026-09-14 04:48:43,336 INFO sqlalchemy.engine.Engine select current_schema()
-2026-09-14 04:48:43,336 INFO sqlalchemy.engine.Engine [raw sql] ()
-2026-09-14 04:48:43,336 INFO sqlalchemy.engine.Engine show standard_conforming_strings
-2026-09-14 04:48:43,336 INFO sqlalchemy.engine.Engine [raw sql] ()
-2026-09-14 04:48:43,336 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:48:43,348 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+2026-09-14 05:06:25,264 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2026-09-14 05:06:25,264 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-14 05:06:25,273 INFO sqlalchemy.engine.Engine select current_schema()
+2026-09-14 05:06:25,273 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-14 05:06:25,276 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2026-09-14 05:06:25,276 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-14 05:06:25,276 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:06:25,276 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
 FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
 WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
-2026-09-14 04:48:43,348 INFO sqlalchemy.engine.Engine [generated in 0.00066s] ('utilisateur', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
-2026-09-14 04:48:43,355 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+2026-09-14 05:06:25,289 INFO sqlalchemy.engine.Engine [generated in 0.00062s] ('utilisateur', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-14 05:06:25,296 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
 FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
 WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
-2026-09-14 04:48:43,356 INFO sqlalchemy.engine.Engine [cached since 0.004881s ago] ('client', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
-2026-09-14 04:48:43,356 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+2026-09-14 05:06:25,297 INFO sqlalchemy.engine.Engine [cached since 0.008638s ago] ('client', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-14 05:06:25,297 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
 FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
 WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
-2026-09-14 04:48:43,356 INFO sqlalchemy.engine.Engine [cached since 0.006232s ago] ('projet', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
-2026-09-14 04:48:43,358 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+2026-09-14 05:06:25,297 INFO sqlalchemy.engine.Engine [cached since 0.01066s ago] ('projet', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-14 05:06:25,300 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
 FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
 WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
-2026-09-14 04:48:43,358 INFO sqlalchemy.engine.Engine [cached since 0.007464s ago] ('projet_membre', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
-2026-09-14 04:48:43,359 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+2026-09-14 05:06:25,300 INFO sqlalchemy.engine.Engine [cached since 0.01243s ago] ('projet_membre', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-14 05:06:25,302 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
 FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
 WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
-2026-09-14 04:48:43,359 INFO sqlalchemy.engine.Engine [cached since 0.008661s ago] ('tache', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
-2026-09-14 04:48:43,360 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+2026-09-14 05:06:25,302 INFO sqlalchemy.engine.Engine [cached since 0.01418s ago] ('tache', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-14 05:06:25,302 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
 FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
 WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
-2026-09-14 04:48:43,360 INFO sqlalchemy.engine.Engine [cached since 0.009993s ago] ('commentaire_tache', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
-2026-09-14 04:48:43,360 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+2026-09-14 05:06:25,302 INFO sqlalchemy.engine.Engine [cached since 0.016s ago] ('commentaire_tache', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-14 05:06:25,306 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
 FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
 WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
-2026-09-14 04:48:43,360 INFO sqlalchemy.engine.Engine [cached since 0.01137s ago] ('saisie_temps', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
-2026-09-14 04:48:43,360 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+2026-09-14 05:06:25,307 INFO sqlalchemy.engine.Engine [cached since 0.01882s ago] ('saisie_temps', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-14 05:06:25,310 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
 FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
 WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
-2026-09-14 04:48:43,360 INFO sqlalchemy.engine.Engine [cached since 0.01259s ago] ('jalon', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
-2026-09-14 04:48:43,360 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+2026-09-14 05:06:25,310 INFO sqlalchemy.engine.Engine [cached since 0.02165s ago] ('jalon', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-14 05:06:25,310 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
 FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
 WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
-2026-09-14 04:48:43,360 INFO sqlalchemy.engine.Engine [cached since 0.01393s ago] ('fichier', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
-2026-09-14 04:48:43,360 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+2026-09-14 05:06:25,310 INFO sqlalchemy.engine.Engine [cached since 0.02327s ago] ('fichier', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-14 05:06:25,310 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
 FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
 WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
-2026-09-14 04:48:43,360 INFO sqlalchemy.engine.Engine [cached since 0.01536s ago] ('notification', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
-2026-09-14 04:48:43,360 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+2026-09-14 05:06:25,310 INFO sqlalchemy.engine.Engine [cached since 0.02443s ago] ('notification', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-14 05:06:25,310 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
 FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
 WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
-2026-09-14 04:48:43,360 INFO sqlalchemy.engine.Engine [cached since 0.01676s ago] ('facture', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
-2026-09-14 04:48:43,368 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+2026-09-14 05:06:25,310 INFO sqlalchemy.engine.Engine [cached since 0.02548s ago] ('facture', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-14 05:06:25,310 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
 FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
 WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
-2026-09-14 04:48:43,368 INFO sqlalchemy.engine.Engine [cached since 0.01793s ago] ('analyse_ia', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
-2026-09-14 04:48:43,368 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+2026-09-14 05:06:25,310 INFO sqlalchemy.engine.Engine [cached since 0.02667s ago] ('analyse_ia', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-14 05:06:25,310 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
 FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
 WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
-2026-09-14 04:48:43,368 INFO sqlalchemy.engine.Engine [cached since 0.01902s ago] ('suggestion_tache', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
-2026-09-14 04:48:43,368 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+2026-09-14 05:06:25,316 INFO sqlalchemy.engine.Engine [cached since 0.02777s ago] ('suggestion_tache', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-14 05:06:25,316 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
 FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
 WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
-2026-09-14 04:48:43,368 INFO sqlalchemy.engine.Engine [cached since 0.02003s ago] ('absence', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
-2026-09-14 04:48:43,368 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+2026-09-14 05:06:25,316 INFO sqlalchemy.engine.Engine [cached since 0.02876s ago] ('absence', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-14 05:06:25,316 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
 FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
 WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
-2026-09-14 04:48:43,368 INFO sqlalchemy.engine.Engine [cached since 0.02118s ago] ('suggestion_devis', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
-2026-09-14 04:48:43,368 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+2026-09-14 05:06:25,318 INFO sqlalchemy.engine.Engine [cached since 0.02975s ago] ('suggestion_devis', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-14 05:06:25,320 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
 FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
 WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
-2026-09-14 04:48:43,368 INFO sqlalchemy.engine.Engine [generated in 0.00042s] ('role_utilisateur', 'pg_catalog')
-2026-09-14 04:48:43,368 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+2026-09-14 05:06:25,320 INFO sqlalchemy.engine.Engine [generated in 0.00039s] ('role_utilisateur', 'pg_catalog')
+2026-09-14 05:06:25,323 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
 FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
 WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
-2026-09-14 04:48:43,368 INFO sqlalchemy.engine.Engine [cached since 0.002245s ago] ('statut_sante', 'pg_catalog')
-2026-09-14 04:48:43,377 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+2026-09-14 05:06:25,324 INFO sqlalchemy.engine.Engine [cached since 0.003714s ago] ('statut_sante', 'pg_catalog')
+2026-09-14 05:06:25,327 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
 FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
 WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
-2026-09-14 04:48:43,377 INFO sqlalchemy.engine.Engine [cached since 0.00389s ago] ('statut_tache', 'pg_catalog')
-2026-09-14 04:48:43,379 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+2026-09-14 05:06:25,327 INFO sqlalchemy.engine.Engine [cached since 0.007456s ago] ('statut_tache', 'pg_catalog')
+2026-09-14 05:06:25,329 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
 FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
 WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
-2026-09-14 04:48:43,379 INFO sqlalchemy.engine.Engine [cached since 0.006033s ago] ('priorite_tache', 'pg_catalog')
-2026-09-14 04:48:43,379 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+2026-09-14 05:06:25,329 INFO sqlalchemy.engine.Engine [cached since 0.009708s ago] ('priorite_tache', 'pg_catalog')
+2026-09-14 05:06:25,329 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
 FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
 WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
-2026-09-14 04:48:43,379 INFO sqlalchemy.engine.Engine [cached since 0.008041s ago] ('statut_facture', 'pg_catalog')
-2026-09-14 04:48:43,379 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+2026-09-14 05:06:25,329 INFO sqlalchemy.engine.Engine [cached since 0.01163s ago] ('statut_facture', 'pg_catalog')
+2026-09-14 05:06:25,329 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
 FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
 WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
-2026-09-14 04:48:43,379 INFO sqlalchemy.engine.Engine [cached since 0.009567s ago] ('type_analyse_ia', 'pg_catalog')
-2026-09-14 04:48:43,379 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+2026-09-14 05:06:25,329 INFO sqlalchemy.engine.Engine [cached since 0.01317s ago] ('type_analyse_ia', 'pg_catalog')
+2026-09-14 05:06:25,329 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
 FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
 WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
-2026-09-14 04:48:43,379 INFO sqlalchemy.engine.Engine [cached since 0.01098s ago] ('statut_suggestion', 'pg_catalog')
-2026-09-14 04:48:43,385 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+2026-09-14 05:06:25,329 INFO sqlalchemy.engine.Engine [cached since 0.01476s ago] ('statut_suggestion', 'pg_catalog')
+2026-09-14 05:06:25,329 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
 FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
 WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
-2026-09-14 04:48:43,385 INFO sqlalchemy.engine.Engine [cached since 0.01263s ago] ('type_absence', 'pg_catalog')
-2026-09-14 04:48:43,385 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+2026-09-14 05:06:25,329 INFO sqlalchemy.engine.Engine [cached since 0.0161s ago] ('type_absence', 'pg_catalog')
+2026-09-14 05:06:25,329 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
 FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
 WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
-2026-09-14 04:48:43,385 INFO sqlalchemy.engine.Engine [cached since 0.01401s ago] ('statut_absence', 'pg_catalog')
-2026-09-14 04:48:43,389 INFO sqlalchemy.engine.Engine COMMIT
-INFO:     127.0.0.1:6715 - "GET /health HTTP/1.1" 200 OK
-2026-09-14 04:48:52,033 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:48:52,055 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
-FROM notification 
-WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
-2026-09-14 04:48:52,063 INFO sqlalchemy.engine.Engine [generated in 0.00065s] (66,)
-2026-09-14 04:48:52,063 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:6448 - "GET /notifications/count HTTP/1.1" 200 OK
-2026-09-14 04:49:21,673 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:49:21,680 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
-FROM notification 
-WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
-2026-09-14 04:49:21,680 INFO sqlalchemy.engine.Engine [cached since 29.62s ago] (66,)
-2026-09-14 04:49:21,684 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:8211 - "GET /notifications/count HTTP/1.1" 200 OK
-2026-09-14 04:49:52,050 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:49:52,052 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
-FROM notification 
-WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
-2026-09-14 04:49:52,052 INFO sqlalchemy.engine.Engine [cached since 59.99s ago] (66,)
-2026-09-14 04:49:52,055 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:10937 - "GET /notifications/count HTTP/1.1" 200 OK
-INFO:     127.0.0.1:1222 - "OPTIONS /projets/?archive=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:1222 - "OPTIONS /utilisateurs HTTP/1.1" 200 OK
-INFO:     127.0.0.1:1222 - "OPTIONS /projets/?archive=false HTTP/1.1" 200 OK
-2026-09-14 04:50:04,244 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:04,246 INFO sqlalchemy.engine.Engine SELECT client.id, client.nom, client.contact, client.email, client.telephone, client.cree_le 
-FROM client ORDER BY client.nom
-2026-09-14 04:50:04,246 INFO sqlalchemy.engine.Engine [generated in 0.00116s] ()
-2026-09-14 04:50:04,256 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:1222 - "GET /clients/ HTTP/1.1" 200 OK
-2026-09-14 04:50:04,262 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:04,278 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le, (SELECT count(tache.id) AS count_1 
-FROM tache 
-WHERE tache.projet_id = projet.id AND tache.statut = $1::statut_tache) AS taches_terminees, (SELECT count(tache.id) AS count_2 
-FROM tache 
-WHERE tache.projet_id = projet.id) AS taches_total 
-FROM projet 
-WHERE projet.archive = false
-2026-09-14 04:50:04,278 INFO sqlalchemy.engine.Engine [generated in 0.00126s] ('termine',)
-2026-09-14 04:50:04,288 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:1222 - "GET /projets/?archive=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:1222 - "OPTIONS /utilisateurs HTTP/1.1" 200 OK
-INFO:     127.0.0.1:1222 - "GET /utilisateurs HTTP/1.1" 307 Temporary Redirect
-2026-09-14 04:50:04,312 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:04,312 INFO sqlalchemy.engine.Engine SELECT client.id, client.nom, client.contact, client.email, client.telephone, client.cree_le 
-FROM client ORDER BY client.nom
-2026-09-14 04:50:04,318 INFO sqlalchemy.engine.Engine [cached since 0.06959s ago] ()
-2026-09-14 04:50:04,321 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:1222 - "GET /clients/ HTTP/1.1" 200 OK
-2026-09-14 04:50:04,326 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:04,326 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le, (SELECT count(tache.id) AS count_1 
-FROM tache 
-WHERE tache.projet_id = projet.id AND tache.statut = $1::statut_tache) AS taches_terminees, (SELECT count(tache.id) AS count_2 
-FROM tache 
-WHERE tache.projet_id = projet.id) AS taches_total 
-FROM projet 
-WHERE projet.archive = false
-2026-09-14 04:50:04,326 INFO sqlalchemy.engine.Engine [cached since 0.04874s ago] ('termine',)
-2026-09-14 04:50:04,326 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:1222 - "GET /projets/?archive=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:1222 - "GET /utilisateurs HTTP/1.1" 307 Temporary Redirect
-INFO:     127.0.0.1:1222 - "OPTIONS /utilisateurs/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:1222 - "OPTIONS /utilisateurs/ HTTP/1.1" 200 OK
-2026-09-14 04:50:04,343 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:04,351 INFO sqlalchemy.engine.Engine SELECT utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le 
-FROM utilisateur
-2026-09-14 04:50:04,351 INFO sqlalchemy.engine.Engine [generated in 0.00142s] ()
-2026-09-14 04:50:04,355 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:1222 - "GET /utilisateurs/ HTTP/1.1" 200 OK
-2026-09-14 04:50:04,374 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:04,374 INFO sqlalchemy.engine.Engine SELECT utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le 
-FROM utilisateur
-2026-09-14 04:50:04,376 INFO sqlalchemy.engine.Engine [cached since 0.0246s ago] ()
-2026-09-14 04:50:04,380 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:1222 - "GET /utilisateurs/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:1222 - "OPTIONS /projets/15 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:6220 - "OPTIONS /projets/15/membres HTTP/1.1" 200 OK
-INFO:     127.0.0.1:5268 - "OPTIONS /projets/15/membres/disponibles HTTP/1.1" 200 OK
-INFO:     127.0.0.1:12548 - "OPTIONS /projets/15/fichiers HTTP/1.1" 200 OK
-2026-09-14 04:50:09,169 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:09,176 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
-FROM projet 
-WHERE projet.id = $1::INTEGER
-2026-09-14 04:50:09,176 INFO sqlalchemy.engine.Engine [generated in 0.00114s] (15,)
-INFO:     127.0.0.1:10502 - "OPTIONS /projets/15/membres HTTP/1.1" 200 OK
-INFO:     127.0.0.1:14122 - "OPTIONS /projets/15/membres/disponibles HTTP/1.1" 200 OK
-INFO:     127.0.0.1:6220 - "OPTIONS /projets/15/fichiers HTTP/1.1" 200 OK
-2026-09-14 04:50:09,216 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:1222 - "GET /projets/15 HTTP/1.1" 200 OK
-2026-09-14 04:50:09,224 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:09,224 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
-FROM projet 
-WHERE projet.id = $1::INTEGER
-2026-09-14 04:50:09,225 INFO sqlalchemy.engine.Engine [cached since 0.04911s ago] (15,)
-2026-09-14 04:50:09,225 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:1222 - "GET /projets/15 HTTP/1.1" 200 OK
-2026-09-14 04:50:09,521 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:09,521 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
-FROM projet 
-WHERE projet.id = $1::INTEGER
-2026-09-14 04:50:09,521 INFO sqlalchemy.engine.Engine [cached since 0.3574s ago] (15,)
-2026-09-14 04:50:09,536 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:09,536 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
-FROM projet 
-WHERE projet.id = $1::INTEGER
-2026-09-14 04:50:09,539 INFO sqlalchemy.engine.Engine [cached since 0.3633s ago] (15,)
-2026-09-14 04:50:09,539 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:09,539 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
-FROM projet 
-WHERE projet.id = $1::INTEGER
-2026-09-14 04:50:09,539 INFO sqlalchemy.engine.Engine [cached since 0.371s ago] (15,)
-2026-09-14 04:50:09,666 INFO sqlalchemy.engine.Engine SELECT projet_membre.projet_id, projet_membre.utilisateur_id, projet_membre.role_dans_projet, utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le 
-FROM projet_membre JOIN utilisateur ON projet_membre.utilisateur_id = utilisateur.id 
-WHERE projet_membre.projet_id = $1::INTEGER ORDER BY utilisateur.nom, utilisateur.prenom
-2026-09-14 04:50:09,666 INFO sqlalchemy.engine.Engine [generated in 0.00127s] (15,)
-2026-09-14 04:50:09,674 INFO sqlalchemy.engine.Engine SELECT fichier.id, fichier.projet_id, fichier.nom, fichier.chemin_ou_url, fichier.type_mime, fichier.taille_octets, fichier.televerse_par, fichier.cree_le, utilisateur.id AS id_1, utilisateur.nom AS nom_1, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le AS cree_le_1 
-FROM fichier LEFT OUTER JOIN utilisateur ON utilisateur.id = fichier.televerse_par 
-WHERE fichier.projet_id = $1::INTEGER ORDER BY fichier.cree_le DESC
-2026-09-14 04:50:09,683 INFO sqlalchemy.engine.Engine [generated in 0.00133s] (15,)
-2026-09-14 04:50:09,683 INFO sqlalchemy.engine.Engine SELECT projet_membre.utilisateur_id 
-FROM projet_membre 
-WHERE projet_membre.projet_id = $1::INTEGER
-2026-09-14 04:50:09,688 INFO sqlalchemy.engine.Engine [generated in 0.00128s] (15,)
-2026-09-14 04:50:09,699 INFO sqlalchemy.engine.Engine SELECT utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le 
-FROM utilisateur 
-WHERE (utilisateur.id NOT IN ($2::INTEGER, $3::INTEGER, $4::INTEGER)) AND utilisateur.actif = true AND utilisateur.role != $1::role_utilisateur ORDER BY utilisateur.nom, utilisateur.prenom
-2026-09-14 04:50:09,699 INFO sqlalchemy.engine.Engine [generated in 0.00170s] ('client', 2, 39, 6)
-2026-09-14 04:50:09,704 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:5268 - "GET /projets/15/membres HTTP/1.1" 200 OK
-2026-09-14 04:50:09,707 INFO sqlalchemy.engine.Engine ROLLBACK
-2026-09-14 04:50:09,707 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:09,707 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
-FROM projet 
-WHERE projet.id = $1::INTEGER
-2026-09-14 04:50:09,715 INFO sqlalchemy.engine.Engine [cached since 0.5396s ago] (15,)
-INFO:     127.0.0.1:10502 - "GET /projets/15/fichiers HTTP/1.1" 200 OK
-2026-09-14 04:50:09,722 INFO sqlalchemy.engine.Engine SELECT projet_membre.projet_id, projet_membre.utilisateur_id, projet_membre.role_dans_projet, utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le 
-FROM projet_membre JOIN utilisateur ON projet_membre.utilisateur_id = utilisateur.id 
-WHERE projet_membre.projet_id = $1::INTEGER ORDER BY utilisateur.nom, utilisateur.prenom
-2026-09-14 04:50:09,722 INFO sqlalchemy.engine.Engine [cached since 0.05575s ago] (15,)
-2026-09-14 04:50:09,724 INFO sqlalchemy.engine.Engine ROLLBACK
-2026-09-14 04:50:09,724 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:09,724 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
-FROM projet 
-WHERE projet.id = $1::INTEGER
-2026-09-14 04:50:09,732 INFO sqlalchemy.engine.Engine [cached since 0.5564s ago] (15,)
-2026-09-14 04:50:09,736 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:12548 - "GET /projets/15/membres/disponibles HTTP/1.1" 200 OK
-2026-09-14 04:50:09,740 INFO sqlalchemy.engine.Engine SELECT fichier.id, fichier.projet_id, fichier.nom, fichier.chemin_ou_url, fichier.type_mime, fichier.taille_octets, fichier.televerse_par, fichier.cree_le, utilisateur.id AS id_1, utilisateur.nom AS nom_1, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le AS cree_le_1 
-FROM fichier LEFT OUTER JOIN utilisateur ON utilisateur.id = fichier.televerse_par 
-WHERE fichier.projet_id = $1::INTEGER ORDER BY fichier.cree_le DESC
-2026-09-14 04:50:09,740 INFO sqlalchemy.engine.Engine [cached since 0.06096s ago] (15,)
-2026-09-14 04:50:09,740 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:09,740 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
-FROM projet 
-WHERE projet.id = $1::INTEGER
-2026-09-14 04:50:09,740 INFO sqlalchemy.engine.Engine [cached since 0.5707s ago] (15,)
-INFO:     127.0.0.1:5268 - "GET /projets/15/membres HTTP/1.1" 200 OK
-2026-09-14 04:50:09,748 INFO sqlalchemy.engine.Engine ROLLBACK
-2026-09-14 04:50:09,753 INFO sqlalchemy.engine.Engine SELECT projet_membre.utilisateur_id 
-FROM projet_membre 
-WHERE projet_membre.projet_id = $1::INTEGER
-2026-09-14 04:50:09,753 INFO sqlalchemy.engine.Engine [cached since 0.06607s ago] (15,)
-INFO:     127.0.0.1:1222 - "GET /projets/15/fichiers HTTP/1.1" 200 OK
-2026-09-14 04:50:09,759 INFO sqlalchemy.engine.Engine SELECT utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le 
-FROM utilisateur 
-WHERE (utilisateur.id NOT IN ($2::INTEGER, $3::INTEGER, $4::INTEGER)) AND utilisateur.actif = true AND utilisateur.role != $1::role_utilisateur ORDER BY utilisateur.nom, utilisateur.prenom
-2026-09-14 04:50:09,761 INFO sqlalchemy.engine.Engine [cached since 0.06103s ago] ('client', 2, 39, 6)
-2026-09-14 04:50:09,765 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:10502 - "GET /projets/15/membres/disponibles HTTP/1.1" 200 OK
-2026-09-14 04:50:15,561 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:15,561 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le, (SELECT count(tache.id) AS count_1 
-FROM tache 
-WHERE tache.projet_id = projet.id AND tache.statut = $1::statut_tache) AS taches_terminees, (SELECT count(tache.id) AS count_2 
-FROM tache 
-WHERE tache.projet_id = projet.id) AS taches_total 
-FROM projet 
-WHERE projet.archive = false
-2026-09-14 04:50:15,561 INFO sqlalchemy.engine.Engine [cached since 11.28s ago] ('termine',)
-2026-09-14 04:50:15,568 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:15,570 INFO sqlalchemy.engine.Engine SELECT client.id, client.nom, client.contact, client.email, client.telephone, client.cree_le 
-FROM client ORDER BY client.nom
-2026-09-14 04:50:15,571 INFO sqlalchemy.engine.Engine [cached since 11.32s ago] ()
-INFO:     127.0.0.1:11640 - "GET /utilisateurs HTTP/1.1" 307 Temporary Redirect
-2026-09-14 04:50:15,580 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:11640 - "GET /utilisateurs HTTP/1.1" 307 Temporary Redirect
-2026-09-14 04:50:15,585 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:15,588 INFO sqlalchemy.engine.Engine SELECT utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le 
-FROM utilisateur
-2026-09-14 04:50:15,588 INFO sqlalchemy.engine.Engine [cached since 11.24s ago] ()
-INFO:     127.0.0.1:3399 - "GET /clients/ HTTP/1.1" 200 OK
-2026-09-14 04:50:15,595 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:15,595 INFO sqlalchemy.engine.Engine SELECT client.id, client.nom, client.contact, client.email, client.telephone, client.cree_le 
-FROM client ORDER BY client.nom
-2026-09-14 04:50:15,595 INFO sqlalchemy.engine.Engine [cached since 11.35s ago] ()
-2026-09-14 04:50:15,601 INFO sqlalchemy.engine.Engine ROLLBACK
-2026-09-14 04:50:15,604 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:1485 - "GET /projets/?archive=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:11640 - "GET /utilisateurs/ HTTP/1.1" 200 OK
-2026-09-14 04:50:15,613 INFO sqlalchemy.engine.Engine ROLLBACK
-2026-09-14 04:50:15,613 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:15,613 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le, (SELECT count(tache.id) AS count_1 
-FROM tache 
-WHERE tache.projet_id = projet.id AND tache.statut = $1::statut_tache) AS taches_terminees, (SELECT count(tache.id) AS count_2 
-FROM tache 
-WHERE tache.projet_id = projet.id) AS taches_total 
-FROM projet 
-WHERE projet.archive = false
-2026-09-14 04:50:15,617 INFO sqlalchemy.engine.Engine [cached since 11.34s ago] ('termine',)
-2026-09-14 04:50:15,619 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:15,621 INFO sqlalchemy.engine.Engine SELECT utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le 
-FROM utilisateur
-2026-09-14 04:50:15,621 INFO sqlalchemy.engine.Engine [cached since 11.27s ago] ()
-INFO:     127.0.0.1:3399 - "GET /clients/ HTTP/1.1" 200 OK
-2026-09-14 04:50:15,627 INFO sqlalchemy.engine.Engine ROLLBACK
-2026-09-14 04:50:15,629 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:1485 - "GET /projets/?archive=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:11640 - "GET /utilisateurs/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:11640 - "OPTIONS /projets/1 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:1485 - "OPTIONS /projets/1/membres HTTP/1.1" 200 OK
-INFO:     127.0.0.1:3399 - "OPTIONS /projets/1/membres/disponibles HTTP/1.1" 200 OK
-INFO:     127.0.0.1:10553 - "OPTIONS /projets/1/fichiers HTTP/1.1" 200 OK
-INFO:     127.0.0.1:5385 - "OPTIONS /projets/1 HTTP/1.1" 200 OK
-2026-09-14 04:50:17,213 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:17,216 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
-FROM projet 
-WHERE projet.id = $1::INTEGER
-2026-09-14 04:50:17,216 INFO sqlalchemy.engine.Engine [cached since 8.041s ago] (1,)
-2026-09-14 04:50:17,219 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:17,221 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
-FROM projet 
-WHERE projet.id = $1::INTEGER
-2026-09-14 04:50:17,221 INFO sqlalchemy.engine.Engine [cached since 8.047s ago] (1,)
-2026-09-14 04:50:17,225 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:17,227 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
-FROM projet 
-WHERE projet.id = $1::INTEGER
-2026-09-14 04:50:17,227 INFO sqlalchemy.engine.Engine [cached since 8.053s ago] (1,)
-2026-09-14 04:50:17,227 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:17,227 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
-FROM projet 
-WHERE projet.id = $1::INTEGER
-2026-09-14 04:50:17,236 INFO sqlalchemy.engine.Engine [cached since 8.061s ago] (1,)
-2026-09-14 04:50:17,238 INFO sqlalchemy.engine.Engine ROLLBACK
-2026-09-14 04:50:17,244 INFO sqlalchemy.engine.Engine SELECT projet_membre.projet_id, projet_membre.utilisateur_id, projet_membre.role_dans_projet, utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le 
-FROM projet_membre JOIN utilisateur ON projet_membre.utilisateur_id = utilisateur.id 
-WHERE projet_membre.projet_id = $1::INTEGER ORDER BY utilisateur.nom, utilisateur.prenom
-2026-09-14 04:50:17,244 INFO sqlalchemy.engine.Engine [cached since 7.578s ago] (1,)
-2026-09-14 04:50:17,248 INFO sqlalchemy.engine.Engine SELECT projet_membre.utilisateur_id 
-FROM projet_membre 
-WHERE projet_membre.projet_id = $1::INTEGER
-2026-09-14 04:50:17,248 INFO sqlalchemy.engine.Engine [cached since 7.563s ago] (1,)
-2026-09-14 04:50:17,252 INFO sqlalchemy.engine.Engine SELECT fichier.id, fichier.projet_id, fichier.nom, fichier.chemin_ou_url, fichier.type_mime, fichier.taille_octets, fichier.televerse_par, fichier.cree_le, utilisateur.id AS id_1, utilisateur.nom AS nom_1, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le AS cree_le_1 
-FROM fichier LEFT OUTER JOIN utilisateur ON utilisateur.id = fichier.televerse_par 
-WHERE fichier.projet_id = $1::INTEGER ORDER BY fichier.cree_le DESC
-2026-09-14 04:50:17,252 INFO sqlalchemy.engine.Engine [cached since 7.575s ago] (1,)
-INFO:     127.0.0.1:3399 - "GET /projets/1 HTTP/1.1" 200 OK
-2026-09-14 04:50:17,262 INFO sqlalchemy.engine.Engine SELECT utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le 
-FROM utilisateur 
-WHERE (utilisateur.id NOT IN ($2::INTEGER, $3::INTEGER, $4::INTEGER)) AND utilisateur.actif = true AND utilisateur.role != $1::role_utilisateur ORDER BY utilisateur.nom, utilisateur.prenom
-2026-09-14 04:50:17,264 INFO sqlalchemy.engine.Engine [cached since 7.566s ago] ('client', 6, 39, 2)
-2026-09-14 04:50:17,266 INFO sqlalchemy.engine.Engine ROLLBACK
-2026-09-14 04:50:17,271 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:17,271 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
-FROM projet 
-WHERE projet.id = $1::INTEGER
-2026-09-14 04:50:17,271 INFO sqlalchemy.engine.Engine [cached since 8.098s ago] (1,)
-2026-09-14 04:50:17,271 INFO sqlalchemy.engine.Engine ROLLBACK
-2026-09-14 04:50:17,281 INFO sqlalchemy.engine.Engine ROLLBACK
-2026-09-14 04:50:17,285 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:1485 - "GET /projets/1/membres HTTP/1.1" 200 OK
-INFO:     127.0.0.1:10553 - "GET /projets/1/fichiers HTTP/1.1" 200 OK
-2026-09-14 04:50:17,291 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:17,294 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
-FROM projet 
-WHERE projet.id = $1::INTEGER
-2026-09-14 04:50:17,295 INFO sqlalchemy.engine.Engine [cached since 8.12s ago] (1,)
-INFO:     127.0.0.1:11640 - "GET /projets/1/membres/disponibles HTTP/1.1" 200 OK
-INFO:     127.0.0.1:5385 - "GET /projets/1 HTTP/1.1" 200 OK
-2026-09-14 04:50:17,299 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:17,303 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
-FROM projet 
-WHERE projet.id = $1::INTEGER
-2026-09-14 04:50:17,304 INFO sqlalchemy.engine.Engine [cached since 8.129s ago] (1,)
-2026-09-14 04:50:17,305 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:17,305 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
-FROM projet 
-WHERE projet.id = $1::INTEGER
-2026-09-14 04:50:17,305 INFO sqlalchemy.engine.Engine [cached since 8.133s ago] (1,)
-2026-09-14 04:50:17,312 INFO sqlalchemy.engine.Engine SELECT projet_membre.projet_id, projet_membre.utilisateur_id, projet_membre.role_dans_projet, utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le 
-FROM projet_membre JOIN utilisateur ON projet_membre.utilisateur_id = utilisateur.id 
-WHERE projet_membre.projet_id = $1::INTEGER ORDER BY utilisateur.nom, utilisateur.prenom
-2026-09-14 04:50:17,312 INFO sqlalchemy.engine.Engine [cached since 7.646s ago] (1,)
-2026-09-14 04:50:17,312 INFO sqlalchemy.engine.Engine SELECT fichier.id, fichier.projet_id, fichier.nom, fichier.chemin_ou_url, fichier.type_mime, fichier.taille_octets, fichier.televerse_par, fichier.cree_le, utilisateur.id AS id_1, utilisateur.nom AS nom_1, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le AS cree_le_1 
-FROM fichier LEFT OUTER JOIN utilisateur ON utilisateur.id = fichier.televerse_par 
-WHERE fichier.projet_id = $1::INTEGER ORDER BY fichier.cree_le DESC
-2026-09-14 04:50:17,312 INFO sqlalchemy.engine.Engine [cached since 7.636s ago] (1,)
-2026-09-14 04:50:17,320 INFO sqlalchemy.engine.Engine ROLLBACK
-2026-09-14 04:50:17,324 INFO sqlalchemy.engine.Engine SELECT projet_membre.utilisateur_id 
-FROM projet_membre 
-WHERE projet_membre.projet_id = $1::INTEGER
-2026-09-14 04:50:17,324 INFO sqlalchemy.engine.Engine [cached since 7.639s ago] (1,)
-2026-09-14 04:50:17,328 INFO sqlalchemy.engine.Engine ROLLBACK
-2026-09-14 04:50:17,328 INFO sqlalchemy.engine.Engine SELECT utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le 
-FROM utilisateur 
-WHERE (utilisateur.id NOT IN ($2::INTEGER, $3::INTEGER, $4::INTEGER)) AND utilisateur.actif = true AND utilisateur.role != $1::role_utilisateur ORDER BY utilisateur.nom, utilisateur.prenom
-2026-09-14 04:50:17,328 INFO sqlalchemy.engine.Engine [cached since 7.635s ago] ('client', 6, 39, 2)
-INFO:     127.0.0.1:3399 - "GET /projets/1/membres HTTP/1.1" 200 OK
-2026-09-14 04:50:17,338 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:10553 - "GET /projets/1/fichiers HTTP/1.1" 200 OK
-INFO:     127.0.0.1:1485 - "GET /projets/1/membres/disponibles HTTP/1.1" 200 OK
-2026-09-14 04:50:21,666 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:21,670 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
-FROM notification 
-WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
-2026-09-14 04:50:21,670 INFO sqlalchemy.engine.Engine [cached since 89.61s ago] (66,)
-2026-09-14 04:50:21,671 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:1485 - "GET /notifications/count HTTP/1.1" 200 OK
-2026-09-14 04:50:30,054 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:30,055 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
-FROM projet 
-WHERE projet.id = $1::INTEGER
-2026-09-14 04:50:30,055 INFO sqlalchemy.engine.Engine [cached since 20.88s ago] (1,)
-2026-09-14 04:50:30,078 INFO sqlalchemy.engine.Engine INSERT INTO fichier (projet_id, nom, chemin_ou_url, type_mime, taille_octets, televerse_par) VALUES ($1::INTEGER, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::BIGINT, $6::INTEGER) RETURNING fichier.id, fichier.cree_le
-2026-09-14 04:50:30,078 INFO sqlalchemy.engine.Engine [generated in 0.00297s] (1, 'Cahier des Charges Détaillé.docx', 'uploads\\20260914_045030_5287b7bc456b.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 20199, 66)
-2026-09-14 04:50:30,078 INFO sqlalchemy.engine.Engine COMMIT
-2026-09-14 04:50:30,088 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:30,100 INFO sqlalchemy.engine.Engine SELECT fichier.id, fichier.projet_id, fichier.nom, fichier.chemin_ou_url, fichier.type_mime, fichier.taille_octets, fichier.televerse_par, fichier.cree_le 
-FROM fichier 
-WHERE fichier.id = $1::INTEGER
-2026-09-14 04:50:30,104 INFO sqlalchemy.engine.Engine [generated in 0.00166s] (2,)
-2026-09-14 04:50:30,112 INFO sqlalchemy.engine.Engine SELECT utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le 
-FROM utilisateur 
-WHERE utilisateur.id = $1::INTEGER
-2026-09-14 04:50:30,113 INFO sqlalchemy.engine.Engine [generated in 0.00168s] (66,)
-2026-09-14 04:50:30,120 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:6851 - "POST /projets/1/fichiers HTTP/1.1" 201 Created
-2026-09-14 04:50:30,133 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:30,136 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
-FROM projet 
-WHERE projet.id = $1::INTEGER
-2026-09-14 04:50:30,136 INFO sqlalchemy.engine.Engine [cached since 20.96s ago] (1,)
-2026-09-14 04:50:30,140 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:6851 - "GET /projets/1 HTTP/1.1" 200 OK
-2026-09-14 04:50:30,150 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:30,152 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
-FROM projet 
-WHERE projet.id = $1::INTEGER
-2026-09-14 04:50:30,153 INFO sqlalchemy.engine.Engine [cached since 20.98s ago] (1,)
-2026-09-14 04:50:30,159 INFO sqlalchemy.engine.Engine SELECT projet_membre.projet_id, projet_membre.utilisateur_id, projet_membre.role_dans_projet, utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le 
-FROM projet_membre JOIN utilisateur ON projet_membre.utilisateur_id = utilisateur.id 
-WHERE projet_membre.projet_id = $1::INTEGER ORDER BY utilisateur.nom, utilisateur.prenom
-2026-09-14 04:50:30,160 INFO sqlalchemy.engine.Engine [cached since 20.49s ago] (1,)
-2026-09-14 04:50:30,163 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:6851 - "GET /projets/1/membres HTTP/1.1" 200 OK
-2026-09-14 04:50:30,171 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:30,171 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
-FROM projet 
-WHERE projet.id = $1::INTEGER
-2026-09-14 04:50:30,171 INFO sqlalchemy.engine.Engine [cached since 21s ago] (1,)
-2026-09-14 04:50:30,179 INFO sqlalchemy.engine.Engine SELECT projet_membre.utilisateur_id 
-FROM projet_membre 
-WHERE projet_membre.projet_id = $1::INTEGER
-2026-09-14 04:50:30,179 INFO sqlalchemy.engine.Engine [cached since 20.49s ago] (1,)
-2026-09-14 04:50:30,185 INFO sqlalchemy.engine.Engine SELECT utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le 
-FROM utilisateur 
-WHERE (utilisateur.id NOT IN ($2::INTEGER, $3::INTEGER, $4::INTEGER)) AND utilisateur.actif = true AND utilisateur.role != $1::role_utilisateur ORDER BY utilisateur.nom, utilisateur.prenom
-2026-09-14 04:50:30,185 INFO sqlalchemy.engine.Engine [cached since 20.49s ago] ('client', 6, 39, 2)
-2026-09-14 04:50:30,185 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:6851 - "GET /projets/1/membres/disponibles HTTP/1.1" 200 OK
-2026-09-14 04:50:30,199 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:30,199 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
-FROM projet 
-WHERE projet.id = $1::INTEGER
-2026-09-14 04:50:30,199 INFO sqlalchemy.engine.Engine [cached since 21.03s ago] (1,)
-2026-09-14 04:50:30,206 INFO sqlalchemy.engine.Engine SELECT fichier.id, fichier.projet_id, fichier.nom, fichier.chemin_ou_url, fichier.type_mime, fichier.taille_octets, fichier.televerse_par, fichier.cree_le, utilisateur.id AS id_1, utilisateur.nom AS nom_1, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le AS cree_le_1 
-FROM fichier LEFT OUTER JOIN utilisateur ON utilisateur.id = fichier.televerse_par 
-WHERE fichier.projet_id = $1::INTEGER ORDER BY fichier.cree_le DESC
-2026-09-14 04:50:30,208 INFO sqlalchemy.engine.Engine [cached since 20.53s ago] (1,)
-2026-09-14 04:50:30,210 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:6851 - "GET /projets/1/fichiers HTTP/1.1" 200 OK
-2026-09-14 04:50:36,757 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:36,763 INFO sqlalchemy.engine.Engine SELECT suggestion_devis.id, suggestion_devis.client_id, suggestion_devis.projet_id, suggestion_devis.titre, suggestion_devis.demande, suggestion_devis.contenu_devis, suggestion_devis.modele, suggestion_devis.cree_par, suggestion_devis.cree_le, client.nom, projet.nom AS nom_1 
+2026-09-14 05:06:25,329 INFO sqlalchemy.engine.Engine [cached since 0.01766s ago] ('statut_absence', 'pg_catalog')
+2026-09-14 05:06:25,329 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+2026-09-14 05:06:25,329 INFO sqlalchemy.engine.Engine [cached since 0.019s ago] ('statut_suggestion_devis', 'pg_catalog')
+2026-09-14 05:06:25,340 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     127.0.0.1:1795 - "GET /health HTTP/1.1" 200 OK
+2026-09-14 05:06:29,607 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:06:29,648 INFO sqlalchemy.engine.Engine SELECT suggestion_devis.id, suggestion_devis.client_id, suggestion_devis.projet_id, suggestion_devis.titre, suggestion_devis.demande, suggestion_devis.contenu_devis, suggestion_devis.statut, suggestion_devis.modele, suggestion_devis.cree_par, suggestion_devis.cree_le, client.nom, projet.nom AS nom_1 
 FROM suggestion_devis JOIN client ON suggestion_devis.client_id = client.id JOIN projet ON suggestion_devis.projet_id = projet.id ORDER BY suggestion_devis.cree_le DESC, suggestion_devis.id DESC
-2026-09-14 04:50:36,764 INFO sqlalchemy.engine.Engine [generated in 0.00131s] ()
-2026-09-14 04:50:36,764 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:36,772 INFO sqlalchemy.engine.Engine SELECT client.id, client.nom, client.contact, client.email, client.telephone, client.cree_le 
+2026-09-14 05:06:29,648 INFO sqlalchemy.engine.Engine [generated in 0.00079s] ()
+2026-09-14 05:06:29,678 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:11822 - "GET /suggestion-devis/ HTTP/1.1" 200 OK
+2026-09-14 05:06:29,685 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:06:29,685 INFO sqlalchemy.engine.Engine SELECT suggestion_devis.id, suggestion_devis.client_id, suggestion_devis.projet_id, suggestion_devis.titre, suggestion_devis.demande, suggestion_devis.contenu_devis, suggestion_devis.statut, suggestion_devis.modele, suggestion_devis.cree_par, suggestion_devis.cree_le, client.nom, projet.nom AS nom_1 
+FROM suggestion_devis JOIN client ON suggestion_devis.client_id = client.id JOIN projet ON suggestion_devis.projet_id = projet.id ORDER BY suggestion_devis.cree_le DESC, suggestion_devis.id DESC
+2026-09-14 05:06:29,685 INFO sqlalchemy.engine.Engine [cached since 0.0366s ago] ()
+2026-09-14 05:06:29,691 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:11822 - "GET /suggestion-devis/ HTTP/1.1" 200 OK
+2026-09-14 05:06:29,773 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:06:29,775 INFO sqlalchemy.engine.Engine SELECT client.id, client.nom, client.contact, client.email, client.telephone, client.cree_le 
 FROM client ORDER BY client.nom
-2026-09-14 04:50:36,772 INFO sqlalchemy.engine.Engine [cached since 32.52s ago] ()
-2026-09-14 04:50:36,774 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:36,783 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le, (SELECT count(tache.id) AS count_1 
+2026-09-14 05:06:29,775 INFO sqlalchemy.engine.Engine [generated in 0.00046s] ()
+2026-09-14 05:06:29,775 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:06:29,844 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le, (SELECT count(tache.id) AS count_1 
 FROM tache 
 WHERE tache.projet_id = projet.id AND tache.statut = $1::statut_tache) AS taches_terminees, (SELECT count(tache.id) AS count_2 
 FROM tache 
 WHERE tache.projet_id = projet.id) AS taches_total 
 FROM projet
-2026-09-14 04:50:36,783 INFO sqlalchemy.engine.Engine [generated in 0.00115s] ('termine',)
-2026-09-14 04:50:36,790 INFO sqlalchemy.engine.Engine ROLLBACK
-2026-09-14 04:50:36,794 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:12167 - "GET /clients/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:4969 - "GET /suggestion-devis/ HTTP/1.1" 200 OK
-2026-09-14 04:50:36,805 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:36,805 INFO sqlalchemy.engine.Engine SELECT client.id, client.nom, client.contact, client.email, client.telephone, client.cree_le 
+2026-09-14 05:06:29,844 INFO sqlalchemy.engine.Engine [generated in 0.00097s] ('termine',)
+2026-09-14 05:06:29,844 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:4309 - "GET /clients/ HTTP/1.1" 200 OK
+2026-09-14 05:06:29,844 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:06:29,852 INFO sqlalchemy.engine.Engine SELECT client.id, client.nom, client.contact, client.email, client.telephone, client.cree_le 
 FROM client ORDER BY client.nom
-2026-09-14 04:50:36,805 INFO sqlalchemy.engine.Engine [cached since 32.56s ago] ()
-2026-09-14 04:50:36,811 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:36,811 INFO sqlalchemy.engine.Engine SELECT suggestion_devis.id, suggestion_devis.client_id, suggestion_devis.projet_id, suggestion_devis.titre, suggestion_devis.demande, suggestion_devis.contenu_devis, suggestion_devis.modele, suggestion_devis.cree_par, suggestion_devis.cree_le, client.nom, projet.nom AS nom_1 
-FROM suggestion_devis JOIN client ON suggestion_devis.client_id = client.id JOIN projet ON suggestion_devis.projet_id = projet.id ORDER BY suggestion_devis.cree_le DESC, suggestion_devis.id DESC
-2026-09-14 04:50:36,811 INFO sqlalchemy.engine.Engine [cached since 0.05076s ago] ()
-2026-09-14 04:50:36,816 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:11446 - "GET /projets/ HTTP/1.1" 200 OK
-2026-09-14 04:50:36,822 INFO sqlalchemy.engine.Engine ROLLBACK
-2026-09-14 04:50:36,825 INFO sqlalchemy.engine.Engine ROLLBACK
-2026-09-14 04:50:36,825 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:36,825 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le, (SELECT count(tache.id) AS count_1 
+2026-09-14 05:06:29,852 INFO sqlalchemy.engine.Engine [cached since 0.07749s ago] ()
+2026-09-14 05:06:29,855 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:4309 - "GET /clients/ HTTP/1.1" 200 OK
+2026-09-14 05:06:29,860 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:4402 - "GET /projets/ HTTP/1.1" 200 OK
+2026-09-14 05:06:29,868 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:06:29,868 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le, (SELECT count(tache.id) AS count_1 
 FROM tache 
 WHERE tache.projet_id = projet.id AND tache.statut = $1::statut_tache) AS taches_terminees, (SELECT count(tache.id) AS count_2 
 FROM tache 
 WHERE tache.projet_id = projet.id) AS taches_total 
 FROM projet
-2026-09-14 04:50:36,825 INFO sqlalchemy.engine.Engine [cached since 0.04821s ago] ('termine',)
-INFO:     127.0.0.1:12167 - "GET /clients/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:4969 - "GET /suggestion-devis/ HTTP/1.1" 200 OK
-2026-09-14 04:50:36,837 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:11446 - "GET /projets/ HTTP/1.1" 200 OK
-2026-09-14 04:50:51,661 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:50:51,661 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+2026-09-14 05:06:29,868 INFO sqlalchemy.engine.Engine [cached since 0.0269s ago] ('termine',)
+2026-09-14 05:06:29,885 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:4402 - "GET /projets/ HTTP/1.1" 200 OK
+2026-09-14 05:06:32,431 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:06:32,431 INFO sqlalchemy.engine.Engine SELECT suggestion_devis.id, suggestion_devis.client_id, suggestion_devis.projet_id, suggestion_devis.titre, suggestion_devis.demande, suggestion_devis.contenu_devis, suggestion_devis.statut, suggestion_devis.modele, suggestion_devis.cree_par, suggestion_devis.cree_le, client.nom, projet.nom AS nom_1 
+FROM suggestion_devis JOIN client ON suggestion_devis.client_id = client.id JOIN projet ON suggestion_devis.projet_id = projet.id 
+WHERE suggestion_devis.statut = $1::statut_suggestion_devis ORDER BY suggestion_devis.cree_le DESC, suggestion_devis.id DESC
+2026-09-14 05:06:32,431 INFO sqlalchemy.engine.Engine [generated in 0.00048s] ('validee',)
+2026-09-14 05:06:32,431 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:4402 - "GET /suggestion-devis/?statut=validee HTTP/1.1" 200 OK
+2026-09-14 05:06:32,441 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:06:32,444 INFO sqlalchemy.engine.Engine SELECT suggestion_devis.id, suggestion_devis.client_id, suggestion_devis.projet_id, suggestion_devis.titre, suggestion_devis.demande, suggestion_devis.contenu_devis, suggestion_devis.statut, suggestion_devis.modele, suggestion_devis.cree_par, suggestion_devis.cree_le, client.nom, projet.nom AS nom_1 
+FROM suggestion_devis JOIN client ON suggestion_devis.client_id = client.id JOIN projet ON suggestion_devis.projet_id = projet.id 
+WHERE suggestion_devis.statut = $1::statut_suggestion_devis ORDER BY suggestion_devis.cree_le DESC, suggestion_devis.id DESC
+2026-09-14 05:06:32,444 INFO sqlalchemy.engine.Engine [cached since 0.01038s ago] ('validee',)
+2026-09-14 05:06:32,455 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:4402 - "GET /suggestion-devis/?statut=validee HTTP/1.1" 200 OK
+2026-09-14 05:06:34,711 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:06:34,713 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
 FROM notification 
 WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
-2026-09-14 04:50:51,670 INFO sqlalchemy.engine.Engine [cached since 119.6s ago] (66,)
-2026-09-14 04:50:51,675 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:3828 - "GET /notifications/count HTTP/1.1" 200 OK
-INFO:     127.0.0.1:9865 - "OPTIONS /suggestion-devis/ia HTTP/1.1" 200 OK
-2026-09-14 04:51:07,760 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:51:07,760 INFO sqlalchemy.engine.Engine SELECT client.id, client.nom, client.contact, client.email, client.telephone, client.cree_le 
-FROM client 
-WHERE client.id = $1::INTEGER
-2026-09-14 04:51:07,760 INFO sqlalchemy.engine.Engine [generated in 0.00105s] (1,)
-2026-09-14 04:51:07,769 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
-FROM projet 
-WHERE projet.id = $1::INTEGER
-2026-09-14 04:51:07,769 INFO sqlalchemy.engine.Engine [cached since 58.59s ago] (1,)
-2026-09-14 04:51:15,689 INFO sqlalchemy.engine.Engine INSERT INTO suggestion_devis (client_id, projet_id, titre, demande, contenu_devis, modele, cree_par) VALUES ($1::INTEGER, $2::INTEGER, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::INTEGER) RETURNING suggestion_devis.id, suggestion_devis.cree_le
-2026-09-14 04:51:15,690 INFO sqlalchemy.engine.Engine [generated in 0.00097s] (1, 1, 'Devis site vitrine KANTO', 'Je veux tout savoir', '**AGENCE BIENFE**  \n**Numéro de devis : 2023-001**  \n**Date : 1er octobre 2023**  \n**Validité : 30 jours**  \n\n**Client :**  \nEntreprise Lucia   ... (1551 characters truncated) ... mations et peuvent être ajustés en fonction des besoins spécifiques du projet. \n\n**Merci de votre confiance.**  \n**L\'équipe de l\'agence Bienfe**', 'gpt-4o-mini-2024-07-18', 66)
-2026-09-14 04:51:15,695 INFO sqlalchemy.engine.Engine COMMIT
-2026-09-14 04:51:15,698 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:51:15,701 INFO sqlalchemy.engine.Engine SELECT suggestion_devis.id, suggestion_devis.client_id, suggestion_devis.projet_id, suggestion_devis.titre, suggestion_devis.demande, suggestion_devis.contenu_devis, suggestion_devis.modele, suggestion_devis.cree_par, suggestion_devis.cree_le 
-FROM suggestion_devis 
-WHERE suggestion_devis.id = $1::INTEGER
-2026-09-14 04:51:15,701 INFO sqlalchemy.engine.Engine [generated in 0.00104s] (1,)
-2026-09-14 04:51:15,706 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:9865 - "POST /suggestion-devis/ia HTTP/1.1" 200 OK
-2026-09-14 04:51:21,670 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:51:21,670 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+2026-09-14 05:06:34,713 INFO sqlalchemy.engine.Engine [generated in 0.00078s] (66,)
+2026-09-14 05:06:34,713 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:4402 - "GET /notifications/count HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1905 - "GET /health HTTP/1.1" 200 OK
+2026-09-14 05:07:05,658 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:07:05,658 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
 FROM notification 
 WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
-2026-09-14 04:51:21,670 INFO sqlalchemy.engine.Engine [cached since 149.6s ago] (66,)
-2026-09-14 04:51:21,674 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:11169 - "GET /notifications/count HTTP/1.1" 200 OK
-2026-09-14 04:51:51,671 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:51:51,671 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+2026-09-14 05:07:05,658 INFO sqlalchemy.engine.Engine [cached since 30.95s ago] (66,)
+2026-09-14 05:07:05,658 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:5974 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-14 05:07:36,009 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:07:36,012 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
 FROM notification 
 WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
-2026-09-14 04:51:51,671 INFO sqlalchemy.engine.Engine [cached since 179.6s ago] (66,)
-2026-09-14 04:51:51,674 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:9514 - "GET /notifications/count HTTP/1.1" 200 OK
-2026-09-14 04:52:23,032 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:52:23,032 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
-FROM notification 
-WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
-2026-09-14 04:52:23,032 INFO sqlalchemy.engine.Engine [cached since 211s ago] (66,)
-2026-09-14 04:52:23,032 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:3402 - "GET /notifications/count HTTP/1.1" 200 OK
-2026-09-14 04:52:51,661 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:52:51,661 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
-FROM notification 
-WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
-2026-09-14 04:52:51,661 INFO sqlalchemy.engine.Engine [cached since 239.6s ago] (66,)
-2026-09-14 04:52:51,661 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:13701 - "GET /notifications/count HTTP/1.1" 200 OK
-2026-09-14 04:53:23,015 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:53:23,017 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
-FROM notification 
-WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
-2026-09-14 04:53:23,017 INFO sqlalchemy.engine.Engine [cached since 271s ago] (66,)
-2026-09-14 04:53:23,021 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:7116 - "GET /notifications/count HTTP/1.1" 200 OK
-2026-09-14 04:53:31,209 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:53:31,209 INFO sqlalchemy.engine.Engine SELECT utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le 
-FROM utilisateur 
-WHERE utilisateur.id = $1::INTEGER
-2026-09-14 04:53:31,209 INFO sqlalchemy.engine.Engine [cached since 181.1s ago] (66,)
-2026-09-14 04:53:31,215 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:13465 - "GET /auth/me HTTP/1.1" 200 OK
-2026-09-14 04:53:31,222 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:53:31,223 INFO sqlalchemy.engine.Engine SELECT utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le 
-FROM utilisateur 
-WHERE utilisateur.id = $1::INTEGER
-2026-09-14 04:53:31,223 INFO sqlalchemy.engine.Engine [cached since 181.1s ago] (66,)
-2026-09-14 04:53:31,226 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:13465 - "GET /auth/me HTTP/1.1" 200 OK
-2026-09-14 04:53:31,253 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:53:31,253 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
-FROM notification 
-WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
-2026-09-14 04:53:31,253 INFO sqlalchemy.engine.Engine [cached since 279.2s ago] (66,)
-2026-09-14 04:53:31,257 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:13465 - "GET /notifications/count HTTP/1.1" 200 OK
-2026-09-14 04:53:31,264 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:53:31,266 INFO sqlalchemy.engine.Engine SELECT suggestion_devis.id, suggestion_devis.client_id, suggestion_devis.projet_id, suggestion_devis.titre, suggestion_devis.demande, suggestion_devis.contenu_devis, suggestion_devis.modele, suggestion_devis.cree_par, suggestion_devis.cree_le, client.nom, projet.nom AS nom_1 
+2026-09-14 05:07:36,012 INFO sqlalchemy.engine.Engine [cached since 61.3s ago] (66,)
+2026-09-14 05:07:36,015 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:5338 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-14 05:07:49,138 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:07:49,140 INFO sqlalchemy.engine.Engine SELECT suggestion_devis.id, suggestion_devis.client_id, suggestion_devis.projet_id, suggestion_devis.titre, suggestion_devis.demande, suggestion_devis.contenu_devis, suggestion_devis.statut, suggestion_devis.modele, suggestion_devis.cree_par, suggestion_devis.cree_le, client.nom, projet.nom AS nom_1 
 FROM suggestion_devis JOIN client ON suggestion_devis.client_id = client.id JOIN projet ON suggestion_devis.projet_id = projet.id ORDER BY suggestion_devis.cree_le DESC, suggestion_devis.id DESC
-2026-09-14 04:53:31,268 INFO sqlalchemy.engine.Engine [cached since 174.5s ago] ()
-2026-09-14 04:53:31,268 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:13465 - "GET /suggestion-devis/ HTTP/1.1" 200 OK
-2026-09-14 04:53:31,275 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:53:31,278 INFO sqlalchemy.engine.Engine SELECT client.id, client.nom, client.contact, client.email, client.telephone, client.cree_le 
+2026-09-14 05:07:49,142 INFO sqlalchemy.engine.Engine [cached since 79.49s ago] ()
+2026-09-14 05:07:49,157 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:14267 - "GET /suggestion-devis/ HTTP/1.1" 200 OK
+2026-09-14 05:07:49,164 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:07:49,166 INFO sqlalchemy.engine.Engine SELECT client.id, client.nom, client.contact, client.email, client.telephone, client.cree_le 
 FROM client ORDER BY client.nom
-2026-09-14 04:53:31,278 INFO sqlalchemy.engine.Engine [cached since 207s ago] ()
-2026-09-14 04:53:31,284 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:13465 - "GET /clients/ HTTP/1.1" 200 OK
-2026-09-14 04:53:31,292 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:53:31,292 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le, (SELECT count(tache.id) AS count_1 
+2026-09-14 05:07:49,166 INFO sqlalchemy.engine.Engine [cached since 79.39s ago] ()
+2026-09-14 05:07:49,171 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:14267 - "GET /clients/ HTTP/1.1" 200 OK
+2026-09-14 05:07:49,177 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:07:49,177 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le, (SELECT count(tache.id) AS count_1 
 FROM tache 
 WHERE tache.projet_id = projet.id AND tache.statut = $1::statut_tache) AS taches_terminees, (SELECT count(tache.id) AS count_2 
 FROM tache 
 WHERE tache.projet_id = projet.id) AS taches_total 
 FROM projet
-2026-09-14 04:53:31,292 INFO sqlalchemy.engine.Engine [cached since 174.5s ago] ('termine',)
-2026-09-14 04:53:31,299 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:13465 - "GET /projets/ HTTP/1.1" 200 OK
-2026-09-14 04:53:31,312 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:53:31,315 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
-FROM notification 
-WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
-2026-09-14 04:53:31,316 INFO sqlalchemy.engine.Engine [cached since 279.3s ago] (66,)
-2026-09-14 04:53:31,319 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:13465 - "GET /notifications/count HTTP/1.1" 200 OK
-2026-09-14 04:53:31,326 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:53:31,332 INFO sqlalchemy.engine.Engine SELECT suggestion_devis.id, suggestion_devis.client_id, suggestion_devis.projet_id, suggestion_devis.titre, suggestion_devis.demande, suggestion_devis.contenu_devis, suggestion_devis.modele, suggestion_devis.cree_par, suggestion_devis.cree_le, client.nom, projet.nom AS nom_1 
+2026-09-14 05:07:49,177 INFO sqlalchemy.engine.Engine [cached since 79.34s ago] ('termine',)
+2026-09-14 05:07:49,188 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:14267 - "GET /projets/ HTTP/1.1" 200 OK
+2026-09-14 05:07:49,196 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:07:49,198 INFO sqlalchemy.engine.Engine SELECT suggestion_devis.id, suggestion_devis.client_id, suggestion_devis.projet_id, suggestion_devis.titre, suggestion_devis.demande, suggestion_devis.contenu_devis, suggestion_devis.statut, suggestion_devis.modele, suggestion_devis.cree_par, suggestion_devis.cree_le, client.nom, projet.nom AS nom_1 
 FROM suggestion_devis JOIN client ON suggestion_devis.client_id = client.id JOIN projet ON suggestion_devis.projet_id = projet.id ORDER BY suggestion_devis.cree_le DESC, suggestion_devis.id DESC
-2026-09-14 04:53:31,333 INFO sqlalchemy.engine.Engine [cached since 174.6s ago] ()
-2026-09-14 04:53:31,333 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:13465 - "GET /suggestion-devis/ HTTP/1.1" 200 OK
-2026-09-14 04:53:31,338 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:53:31,338 INFO sqlalchemy.engine.Engine SELECT client.id, client.nom, client.contact, client.email, client.telephone, client.cree_le 
+2026-09-14 05:07:49,198 INFO sqlalchemy.engine.Engine [cached since 79.55s ago] ()
+2026-09-14 05:07:49,202 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:14267 - "GET /suggestion-devis/ HTTP/1.1" 200 OK
+2026-09-14 05:07:49,210 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:07:49,210 INFO sqlalchemy.engine.Engine SELECT client.id, client.nom, client.contact, client.email, client.telephone, client.cree_le 
 FROM client ORDER BY client.nom
-2026-09-14 04:53:31,338 INFO sqlalchemy.engine.Engine [cached since 207.1s ago] ()
-2026-09-14 04:53:31,351 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:13465 - "GET /clients/ HTTP/1.1" 200 OK
-2026-09-14 04:53:31,351 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:53:31,364 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le, (SELECT count(tache.id) AS count_1 
+2026-09-14 05:07:49,214 INFO sqlalchemy.engine.Engine [cached since 79.44s ago] ()
+2026-09-14 05:07:49,214 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:14267 - "GET /clients/ HTTP/1.1" 200 OK
+2026-09-14 05:07:49,224 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:07:49,224 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le, (SELECT count(tache.id) AS count_1 
 FROM tache 
 WHERE tache.projet_id = projet.id AND tache.statut = $1::statut_tache) AS taches_terminees, (SELECT count(tache.id) AS count_2 
 FROM tache 
 WHERE tache.projet_id = projet.id) AS taches_total 
 FROM projet
-2026-09-14 04:53:31,365 INFO sqlalchemy.engine.Engine [cached since 174.6s ago] ('termine',)
-2026-09-14 04:53:31,370 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:13465 - "GET /projets/ HTTP/1.1" 200 OK
-2026-09-14 04:54:01,259 INFO sqlalchemy.engine.Engine BEGIN (implicit)
-2026-09-14 04:54:01,261 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+2026-09-14 05:07:49,224 INFO sqlalchemy.engine.Engine [cached since 79.38s ago] ('termine',)
+2026-09-14 05:07:49,231 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:14267 - "GET /projets/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1697 - "GET /health HTTP/1.1" 200 OK
+2026-09-14 05:08:05,651 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:08:05,651 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
 FROM notification 
 WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
-2026-09-14 04:54:01,261 INFO sqlalchemy.engine.Engine [cached since 309.2s ago] (66,)
-2026-09-14 04:54:01,266 INFO sqlalchemy.engine.Engine ROLLBACK
-INFO:     127.0.0.1:11827 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-14 05:08:05,651 INFO sqlalchemy.engine.Engine [cached since 90.94s ago] (66,)
+2026-09-14 05:08:05,651 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:7209 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-14 05:08:26,284 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:08:26,286 INFO sqlalchemy.engine.Engine SELECT suggestion_devis.id, suggestion_devis.client_id, suggestion_devis.projet_id, suggestion_devis.titre, suggestion_devis.demande, suggestion_devis.contenu_devis, suggestion_devis.statut, suggestion_devis.modele, suggestion_devis.cree_par, suggestion_devis.cree_le, client.nom, projet.nom AS nom_1 
+FROM suggestion_devis JOIN client ON suggestion_devis.client_id = client.id JOIN projet ON suggestion_devis.projet_id = projet.id 
+WHERE suggestion_devis.statut = $1::statut_suggestion_devis ORDER BY suggestion_devis.cree_le DESC, suggestion_devis.id DESC
+2026-09-14 05:08:26,287 INFO sqlalchemy.engine.Engine [cached since 113.9s ago] ('validee',)
+2026-09-14 05:08:26,289 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:2512 - "GET /suggestion-devis/?statut=validee HTTP/1.1" 200 OK
+2026-09-14 05:08:26,290 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:08:26,290 INFO sqlalchemy.engine.Engine SELECT suggestion_devis.id, suggestion_devis.client_id, suggestion_devis.projet_id, suggestion_devis.titre, suggestion_devis.demande, suggestion_devis.contenu_devis, suggestion_devis.statut, suggestion_devis.modele, suggestion_devis.cree_par, suggestion_devis.cree_le, client.nom, projet.nom AS nom_1 
+FROM suggestion_devis JOIN client ON suggestion_devis.client_id = client.id JOIN projet ON suggestion_devis.projet_id = projet.id 
+WHERE suggestion_devis.statut = $1::statut_suggestion_devis ORDER BY suggestion_devis.cree_le DESC, suggestion_devis.id DESC
+2026-09-14 05:08:26,290 INFO sqlalchemy.engine.Engine [cached since 113.9s ago] ('validee',)
+2026-09-14 05:08:26,300 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:2512 - "GET /suggestion-devis/?statut=validee HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2512 - "OPTIONS /suggestion-devis/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1636 - "OPTIONS /clients/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10169 - "OPTIONS /projets/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1678 - "OPTIONS /suggestion-devis/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2512 - "OPTIONS /clients/ HTTP/1.1" 200 OK
+2026-09-14 05:08:30,199 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:08:30,199 INFO sqlalchemy.engine.Engine SELECT suggestion_devis.id, suggestion_devis.client_id, suggestion_devis.projet_id, suggestion_devis.titre, suggestion_devis.demande, suggestion_devis.contenu_devis, suggestion_devis.statut, suggestion_devis.modele, suggestion_devis.cree_par, suggestion_devis.cree_le, client.nom, projet.nom AS nom_1 
+FROM suggestion_devis JOIN client ON suggestion_devis.client_id = client.id JOIN projet ON suggestion_devis.projet_id = projet.id ORDER BY suggestion_devis.cree_le DESC, suggestion_devis.id DESC
+2026-09-14 05:08:30,203 INFO sqlalchemy.engine.Engine [cached since 120.6s ago] ()
+2026-09-14 05:08:30,203 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:08:30,206 INFO sqlalchemy.engine.Engine SELECT client.id, client.nom, client.contact, client.email, client.telephone, client.cree_le 
+FROM client ORDER BY client.nom
+2026-09-14 05:08:30,206 INFO sqlalchemy.engine.Engine [cached since 120.4s ago] ()
+2026-09-14 05:08:30,206 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:08:30,215 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le, (SELECT count(tache.id) AS count_1 
+FROM tache 
+WHERE tache.projet_id = projet.id AND tache.statut = $1::statut_tache) AS taches_terminees, (SELECT count(tache.id) AS count_2 
+FROM tache 
+WHERE tache.projet_id = projet.id) AS taches_total 
+FROM projet
+2026-09-14 05:08:30,215 INFO sqlalchemy.engine.Engine [cached since 120.4s ago] ('termine',)
+2026-09-14 05:08:30,218 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-09-14 05:08:30,223 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-09-14 05:08:30,226 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:1636 - "GET /suggestion-devis/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10169 - "GET /clients/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1678 - "GET /projets/ HTTP/1.1" 200 OK
+2026-09-14 05:08:30,236 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:08:30,238 INFO sqlalchemy.engine.Engine SELECT suggestion_devis.id, suggestion_devis.client_id, suggestion_devis.projet_id, suggestion_devis.titre, suggestion_devis.demande, suggestion_devis.contenu_devis, suggestion_devis.statut, suggestion_devis.modele, suggestion_devis.cree_par, suggestion_devis.cree_le, client.nom, projet.nom AS nom_1 
+FROM suggestion_devis JOIN client ON suggestion_devis.client_id = client.id JOIN projet ON suggestion_devis.projet_id = projet.id ORDER BY suggestion_devis.cree_le DESC, suggestion_devis.id DESC
+2026-09-14 05:08:30,238 INFO sqlalchemy.engine.Engine [cached since 120.6s ago] ()
+2026-09-14 05:08:30,240 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:08:30,243 INFO sqlalchemy.engine.Engine SELECT client.id, client.nom, client.contact, client.email, client.telephone, client.cree_le 
+FROM client ORDER BY client.nom
+2026-09-14 05:08:30,243 INFO sqlalchemy.engine.Engine [cached since 120.5s ago] ()
+2026-09-14 05:08:30,249 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:08:30,249 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le, (SELECT count(tache.id) AS count_1 
+FROM tache 
+WHERE tache.projet_id = projet.id AND tache.statut = $1::statut_tache) AS taches_terminees, (SELECT count(tache.id) AS count_2 
+FROM tache 
+WHERE tache.projet_id = projet.id) AS taches_total 
+FROM projet
+2026-09-14 05:08:30,249 INFO sqlalchemy.engine.Engine [cached since 120.4s ago] ('termine',)
+2026-09-14 05:08:30,258 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-09-14 05:08:30,260 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-09-14 05:08:30,265 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:1636 - "GET /suggestion-devis/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2512 - "GET /clients/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1678 - "GET /projets/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1894 - "OPTIONS /notifications/count HTTP/1.1" 200 OK
+2026-09-14 05:08:35,667 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:08:35,672 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-14 05:08:35,672 INFO sqlalchemy.engine.Engine [cached since 121s ago] (66,)
+2026-09-14 05:08:35,673 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:1894 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-14 05:08:49,677 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:08:49,681 INFO sqlalchemy.engine.Engine SELECT suggestion_devis.id, suggestion_devis.client_id, suggestion_devis.projet_id, suggestion_devis.titre, suggestion_devis.demande, suggestion_devis.contenu_devis, suggestion_devis.statut, suggestion_devis.modele, suggestion_devis.cree_par, suggestion_devis.cree_le, client.nom, projet.nom AS nom_1 
+FROM suggestion_devis JOIN client ON suggestion_devis.client_id = client.id JOIN projet ON suggestion_devis.projet_id = projet.id ORDER BY suggestion_devis.cree_le DESC, suggestion_devis.id DESC
+2026-09-14 05:08:49,681 INFO sqlalchemy.engine.Engine [cached since 140s ago] ()
+2026-09-14 05:08:49,683 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:8325 - "GET /suggestion-devis/ HTTP/1.1" 200 OK
+2026-09-14 05:08:49,688 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:08:49,688 INFO sqlalchemy.engine.Engine SELECT client.id, client.nom, client.contact, client.email, client.telephone, client.cree_le 
+FROM client ORDER BY client.nom
+2026-09-14 05:08:49,691 INFO sqlalchemy.engine.Engine [cached since 139.9s ago] ()
+2026-09-14 05:08:49,693 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:8325 - "GET /clients/ HTTP/1.1" 200 OK
+2026-09-14 05:08:49,699 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:08:49,699 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le, (SELECT count(tache.id) AS count_1 
+FROM tache 
+WHERE tache.projet_id = projet.id AND tache.statut = $1::statut_tache) AS taches_terminees, (SELECT count(tache.id) AS count_2 
+FROM tache 
+WHERE tache.projet_id = projet.id) AS taches_total 
+FROM projet
+2026-09-14 05:08:49,699 INFO sqlalchemy.engine.Engine [cached since 139.9s ago] ('termine',)
+2026-09-14 05:08:49,699 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:8325 - "GET /projets/ HTTP/1.1" 200 OK
+2026-09-14 05:09:05,676 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:09:05,676 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-14 05:09:05,676 INFO sqlalchemy.engine.Engine [cached since 151s ago] (66,)
+2026-09-14 05:09:05,682 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:3498 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-14 05:09:35,653 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:09:35,656 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-14 05:09:35,656 INFO sqlalchemy.engine.Engine [cached since 180.9s ago] (66,)
+2026-09-14 05:09:35,656 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:10685 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-14 05:10:05,051 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:10:05,057 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-14 05:10:05,057 INFO sqlalchemy.engine.Engine [cached since 210.3s ago] (66,)
+2026-09-14 05:10:05,060 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:3856 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-14 05:10:35,663 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:10:35,663 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-14 05:10:35,663 INFO sqlalchemy.engine.Engine [cached since 241s ago] (66,)
+2026-09-14 05:10:35,663 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:11327 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-14 05:11:06,018 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:11:06,018 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-14 05:11:06,018 INFO sqlalchemy.engine.Engine [cached since 271.3s ago] (66,)
+2026-09-14 05:11:06,018 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:11132 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-14 05:11:35,656 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:11:35,658 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-14 05:11:35,659 INFO sqlalchemy.engine.Engine [cached since 300.9s ago] (66,)
+2026-09-14 05:11:35,661 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:8046 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-14 05:12:05,054 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:12:05,054 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-14 05:12:05,060 INFO sqlalchemy.engine.Engine [cached since 330.3s ago] (66,)
+2026-09-14 05:12:05,060 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:14315 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-14 05:12:35,661 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:12:35,661 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-14 05:12:35,661 INFO sqlalchemy.engine.Engine [cached since 360.9s ago] (66,)
+2026-09-14 05:12:35,665 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:1787 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-14 05:13:03,514 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:13:03,514 INFO sqlalchemy.engine.Engine SELECT suggestion_devis.id, suggestion_devis.client_id, suggestion_devis.projet_id, suggestion_devis.titre, suggestion_devis.demande, suggestion_devis.contenu_devis, suggestion_devis.statut, suggestion_devis.modele, suggestion_devis.cree_par, suggestion_devis.cree_le, client.nom, projet.nom AS nom_1 
+FROM suggestion_devis JOIN client ON suggestion_devis.client_id = client.id JOIN projet ON suggestion_devis.projet_id = projet.id 
+WHERE suggestion_devis.statut = $1::statut_suggestion_devis ORDER BY suggestion_devis.cree_le DESC, suggestion_devis.id DESC
+2026-09-14 05:13:03,522 INFO sqlalchemy.engine.Engine [cached since 391.1s ago] ('validee',)
+2026-09-14 05:13:03,531 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:7419 - "GET /suggestion-devis/?statut=validee HTTP/1.1" 200 OK
+2026-09-14 05:13:03,539 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:13:03,541 INFO sqlalchemy.engine.Engine SELECT suggestion_devis.id, suggestion_devis.client_id, suggestion_devis.projet_id, suggestion_devis.titre, suggestion_devis.demande, suggestion_devis.contenu_devis, suggestion_devis.statut, suggestion_devis.modele, suggestion_devis.cree_par, suggestion_devis.cree_le, client.nom, projet.nom AS nom_1 
+FROM suggestion_devis JOIN client ON suggestion_devis.client_id = client.id JOIN projet ON suggestion_devis.projet_id = projet.id 
+WHERE suggestion_devis.statut = $1::statut_suggestion_devis ORDER BY suggestion_devis.cree_le DESC, suggestion_devis.id DESC
+2026-09-14 05:13:03,541 INFO sqlalchemy.engine.Engine [cached since 391.1s ago] ('validee',)
+2026-09-14 05:13:03,543 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:7419 - "GET /suggestion-devis/?statut=validee HTTP/1.1" 200 OK
+2026-09-14 05:13:04,711 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:13:04,711 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-14 05:13:04,711 INFO sqlalchemy.engine.Engine [cached since 390s ago] (66,)
+2026-09-14 05:13:04,711 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:7419 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-14 05:13:13,201 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:13:13,203 INFO sqlalchemy.engine.Engine SELECT suggestion_devis.id, suggestion_devis.client_id, suggestion_devis.projet_id, suggestion_devis.titre, suggestion_devis.demande, suggestion_devis.contenu_devis, suggestion_devis.statut, suggestion_devis.modele, suggestion_devis.cree_par, suggestion_devis.cree_le, client.nom, projet.nom AS nom_1 
+FROM suggestion_devis JOIN client ON suggestion_devis.client_id = client.id JOIN projet ON suggestion_devis.projet_id = projet.id ORDER BY suggestion_devis.cree_le DESC, suggestion_devis.id DESC
+2026-09-14 05:13:13,205 INFO sqlalchemy.engine.Engine [cached since 403.6s ago] ()
+2026-09-14 05:13:13,207 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:14622 - "GET /suggestion-devis/ HTTP/1.1" 200 OK
+2026-09-14 05:13:13,215 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:13:13,215 INFO sqlalchemy.engine.Engine SELECT client.id, client.nom, client.contact, client.email, client.telephone, client.cree_le 
+FROM client ORDER BY client.nom
+2026-09-14 05:13:13,217 INFO sqlalchemy.engine.Engine [cached since 403.4s ago] ()
+2026-09-14 05:13:13,224 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:14622 - "GET /clients/ HTTP/1.1" 200 OK
+2026-09-14 05:13:13,233 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:13:13,233 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le, (SELECT count(tache.id) AS count_1 
+FROM tache 
+WHERE tache.projet_id = projet.id AND tache.statut = $1::statut_tache) AS taches_terminees, (SELECT count(tache.id) AS count_2 
+FROM tache 
+WHERE tache.projet_id = projet.id) AS taches_total 
+FROM projet
+2026-09-14 05:13:13,233 INFO sqlalchemy.engine.Engine [cached since 403.4s ago] ('termine',)
+2026-09-14 05:13:13,241 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:14622 - "GET /projets/ HTTP/1.1" 200 OK
+2026-09-14 05:13:13,249 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:13:13,251 INFO sqlalchemy.engine.Engine SELECT suggestion_devis.id, suggestion_devis.client_id, suggestion_devis.projet_id, suggestion_devis.titre, suggestion_devis.demande, suggestion_devis.contenu_devis, suggestion_devis.statut, suggestion_devis.modele, suggestion_devis.cree_par, suggestion_devis.cree_le, client.nom, projet.nom AS nom_1 
+FROM suggestion_devis JOIN client ON suggestion_devis.client_id = client.id JOIN projet ON suggestion_devis.projet_id = projet.id ORDER BY suggestion_devis.cree_le DESC, suggestion_devis.id DESC
+2026-09-14 05:13:13,251 INFO sqlalchemy.engine.Engine [cached since 403.6s ago] ()
+2026-09-14 05:13:13,257 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:14622 - "GET /suggestion-devis/ HTTP/1.1" 200 OK
+2026-09-14 05:13:13,264 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:13:13,264 INFO sqlalchemy.engine.Engine SELECT client.id, client.nom, client.contact, client.email, client.telephone, client.cree_le 
+FROM client ORDER BY client.nom
+2026-09-14 05:13:13,264 INFO sqlalchemy.engine.Engine [cached since 403.5s ago] ()
+2026-09-14 05:13:13,264 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:14622 - "GET /clients/ HTTP/1.1" 200 OK
+2026-09-14 05:13:13,277 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:13:13,277 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le, (SELECT count(tache.id) AS count_1 
+FROM tache 
+WHERE tache.projet_id = projet.id AND tache.statut = $1::statut_tache) AS taches_terminees, (SELECT count(tache.id) AS count_2 
+FROM tache 
+WHERE tache.projet_id = projet.id) AS taches_total 
+FROM projet
+2026-09-14 05:13:13,277 INFO sqlalchemy.engine.Engine [cached since 403.4s ago] ('termine',)
+2026-09-14 05:13:13,277 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:14622 - "GET /projets/ HTTP/1.1" 200 OK
+2026-09-14 05:13:35,655 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:13:35,655 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-14 05:13:35,655 INFO sqlalchemy.engine.Engine [cached since 420.9s ago] (66,)
+2026-09-14 05:13:35,655 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:8693 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-14 05:14:05,666 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:14:05,666 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-14 05:14:05,666 INFO sqlalchemy.engine.Engine [cached since 451s ago] (66,)
+2026-09-14 05:14:05,666 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:5540 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-14 05:14:36,014 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:14:36,014 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-14 05:14:36,014 INFO sqlalchemy.engine.Engine [cached since 481.3s ago] (66,)
+2026-09-14 05:14:36,023 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:8253 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-14 05:15:05,650 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:15:05,653 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-14 05:15:05,653 INFO sqlalchemy.engine.Engine [cached since 510.9s ago] (66,)
+2026-09-14 05:15:05,655 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:8662 - "GET /notifications/count HTTP/1.1" 200 OK

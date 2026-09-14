@@ -7,6 +7,13 @@ Schémas Pydantic pour les suggestions de devis générées par l'IA.
 from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional
+from enum import Enum
+
+
+class StatutSuggestionDevisEnum(str, Enum):
+    EN_ATTENTE = "en_attente"
+    VALIDEE = "validee"
+    REFUSEE = "refusee"
 
 
 class SuggestionDevisIARequest(BaseModel):
@@ -27,6 +34,11 @@ class SuggestionDevisCreate(BaseModel):
     modele: Optional[str] = None
 
 
+class SuggestionDevisStatutUpdate(BaseModel):
+    """Changement de statut (valider / refuser)."""
+    statut: StatutSuggestionDevisEnum
+
+
 class SuggestionDevisResponse(BaseModel):
     """Réponse de lecture d'une suggestion de devis."""
     id: int
@@ -37,6 +49,7 @@ class SuggestionDevisResponse(BaseModel):
     titre: Optional[str] = None
     demande: Optional[str] = None
     contenu_devis: str
+    statut: StatutSuggestionDevisEnum
     modele: Optional[str] = None
     cree_par: Optional[int] = None
     cree_le: datetime

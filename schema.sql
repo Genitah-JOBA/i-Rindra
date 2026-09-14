@@ -23,6 +23,7 @@ CREATE TYPE type_analyse_ia    AS ENUM ('analyse_cdc', 'extraction', 'resume', '
 CREATE TYPE statut_suggestion  AS ENUM ('en_attente', 'validee', 'rejetee');
 CREATE TYPE type_absence       AS ENUM ('conge', 'maladie', 'permission', 'autre');
 CREATE TYPE statut_absence     AS ENUM ('en_attente', 'acceptee', 'refusee');
+CREATE TYPE statut_suggestion_devis AS ENUM ('en_attente', 'validee', 'refusee');
 CREATE TYPE statut_facture     AS ENUM ('brouillon', 'envoyee', 'payee', 'en_retard', 'annulee');
 
 -- ============================================================
@@ -251,6 +252,7 @@ CREATE TABLE suggestion_devis (
     titre           VARCHAR(200),
     demande         TEXT,
     contenu_devis   TEXT NOT NULL,
+    statut          statut_suggestion_devis NOT NULL DEFAULT 'en_attente',
     modele          VARCHAR(80),
     cree_par        BIGINT REFERENCES utilisateur(id) ON DELETE SET NULL,
     cree_le         TIMESTAMPTZ NOT NULL DEFAULT now()

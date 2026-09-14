@@ -8,11 +8,12 @@ from app.core.database import get_db
 from app.routers.auth import get_current_user_id, get_current_user_role
 from app.models.client import Client
 from app.models.projet import Projet
-from app.models.suggestion_devis import SuggestionDevis
+from app.models.suggestion_devis import SuggestionDevis, StatutSuggestionDevis
 from app.schemas.suggestion_devis import (
     SuggestionDevisIARequest,
     SuggestionDevisCreate,
     SuggestionDevisResponse,
+    SuggestionDevisStatutUpdate,
 )
 from app.services.connectors.llm import (
     LLMConfigError,
@@ -120,6 +121,7 @@ def _to_response(
         titre=s.titre,
         demande=s.demande,
         contenu_devis=s.contenu_devis,
+        statut=s.statut.value if hasattr(s.statut, "value") else s.statut,
         modele=s.modele,
         cree_par=s.cree_par,
         cree_le=s.cree_le,
@@ -132,17 +134,24 @@ def _to_response(
 
 @router.get("/", response_model=List[SuggestionDevisResponse])
 async def lister_suggestions(
+    statut: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
     _: str = Depends(_finance_seulement),
 ):
-    rows = (
-        await db.execute(
-            select(SuggestionDevis, Client.nom, Projet.nom)
-            .join(Client, SuggestionDevis.client_id == Client.id)
-            .join(Projet, SuggestionDevis.projet_id == Projet.id)
-            .order_by(SuggestionDevis.cree_le.desc(), SuggestionDevis.id.desc())
-        )
-    ).all()
+    q = (
+        select(SuggestionDevis, Client.nom, Projet.nom)
+        .join(Client, SuggestionDevis.client_id == Client.id)
+        .join(Projet, SuggestionDevis.projet_id == Projet.id)
+    )
+    if statut:
+        try:
+            statut_enum = StatutSuggestionDevis(statut)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Statut invalide.")
+        q = q.where(SuggestionDevis.statut == statut_enum)
+    q = q.order_by(SuggestionDevis.cree_le.desc(), SuggestionDevis.id.desc())
+
+    rows = (await db.execute(q)).all()
     return [_to_response(s, client_nom, projet_nom) for (s, client_nom, projet_nom) in rows]
 
 
@@ -261,6 +270,34 @@ async def obtenir_suggestion(
     if not row:
         raise HTTPException(status_code=404, detail="Suggestion de devis non trouvée.")
     s, client_nom, projet_nom = row
+    return _to_response(s, client_nom, projet_nom)
+
+
+# ------------------------------------------------------------
+# CHANGEMENT DE STATUT (valider / refuser)
+# ------------------------------------------------------------
+
+@router.patch("/{suggestion_id:int}/statut", response_model=SuggestionDevisResponse)
+async def changer_statut_suggestion(
+    suggestion_id: int,
+    data: SuggestionDevisStatutUpdate,
+    db: AsyncSession = Depends(get_db),
+    _: str = Depends(_finance_seulement),
+):
+    row = (
+        await db.execute(
+            select(SuggestionDevis, Client.nom, Projet.nom)
+            .join(Client, SuggestionDevis.client_id == Client.id)
+            .join(Projet, SuggestionDevis.projet_id == Projet.id)
+            .where(SuggestionDevis.id == suggestion_id)
+        )
+    ).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Suggestion de devis non trouvée.")
+    s, client_nom, projet_nom = row
+    s.statut = StatutSuggestionDevis(data.statut.value)
+    await db.commit()
+    await db.refresh(s)
     return _to_response(s, client_nom, projet_nom)
 
 

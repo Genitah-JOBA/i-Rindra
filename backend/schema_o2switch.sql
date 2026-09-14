@@ -5,6 +5,7 @@ CREATE TYPE role_utilisateur AS ENUM ('direction', 'drh', 'chef_de_projet', 'equ
 CREATE TYPE statut_sante AS ENUM ('vert', 'orange', 'rouge');
 CREATE TYPE statut_tache AS ENUM ('a_faire', 'en_cours', 'en_revue', 'termine');
 CREATE TYPE priorite_tache AS ENUM ('basse', 'moyenne', 'haute');
+CREATE TYPE statut_suggestion_devis AS ENUM ('en_attente', 'validee', 'refusee');
 CREATE TYPE statut_facture AS ENUM ('brouillon', 'envoyee', 'payee', 'en_retard', 'annulee');
 CREATE TABLE client (
 	id SERIAL NOT NULL, 
@@ -189,6 +190,7 @@ CREATE TABLE suggestion_devis (
 	titre VARCHAR(200),
 	demande TEXT,
 	contenu_devis TEXT NOT NULL,
+	statut statut_suggestion_devis DEFAULT 'en_attente',
 	modele VARCHAR(80),
 	cree_par INTEGER,
 	cree_le TIMESTAMP WITH TIME ZONE DEFAULT now(),
