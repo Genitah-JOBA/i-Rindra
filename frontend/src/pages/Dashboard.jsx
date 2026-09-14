@@ -287,7 +287,7 @@ export default function Dashboard() {
         try {
           const argentData = await facturesService.stats();
           setArgent(argentData);
-        } catch (err) {
+        } catch {
           setArgent(null);
         }
       }
@@ -571,11 +571,49 @@ export default function Dashboard() {
 
       {!loading && !erreur && (
         <>
+          {/* Statistiques financières — premier rang (direction / DRH uniquement) */}
+          {estFinance && (
+            <div className="mb-4 sm:mb-6 grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+              <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.02s' }}>
+                <StatCard
+                  title={"CA encaissé"}
+                  value={argent ? formatMontant(argent.ca_encaisse) : "—"}
+                  color="text-emerald-600"
+                  icon={<MoneyIcon className="w-5 h-5 text-emerald-600" />}
+                />
+              </div>
+              <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.05s' }}>
+                <StatCard
+                  title={"En attente"}
+                  value={argent ? formatMontant(argent.en_attente) : "—"}
+                  color="text-blue-600"
+                  icon={<MoneyIcon className="w-5 h-5 text-blue-600" />}
+                />
+              </div>
+              <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.08s' }}>
+                <StatCard
+                  title={"Factures"}
+                  value={argent ? argent.total_factures : "—"}
+                  color="text-slate-800"
+                  icon={<MoneyIcon className="w-5 h-5 text-slate-600" />}
+                />
+              </div>
+              <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.11s' }}>
+                <StatCard
+                  title={"Impayées"}
+                  value={argent ? argent.impayees : "—"}
+                  color="text-red-600"
+                  icon={<MoneyIcon className="w-5 h-5 text-red-600" />}
+                />
+              </div>
+            </div>
+          )}
+
           {/* Cartes statistiques avec animation */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
             <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.05s' }}>
               <StatCard
-                title={"Total"}
+                title={"Total Projet"}
                 value={stats.total}
                 color="text-slate-900"
                 icon={<DashboardIcon className="w-5 h-5 text-slate-600" />}
