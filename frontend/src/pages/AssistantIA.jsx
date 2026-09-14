@@ -95,7 +95,11 @@ export default function AssistantIA() {
 
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: result.reponse },
+        {
+          role: "assistant",
+          content: result.reponse,
+          noteDevis: result.suggestion_devis_sauvee === true,
+        },
       ]);
     } catch (err) {
       const detail =
@@ -223,6 +227,14 @@ export default function AssistantIA() {
                     </span>
                   )}
                   {msg.content}
+                  {msg.noteDevis && (
+                    <a
+                      href="/suggestion-devis"
+                      className="mt-2 block text-[11px] font-medium text-purple-700 bg-purple-50 border border-purple-200 px-3 py-1.5 rounded-md hover:bg-purple-100 transition-colors"
+                    >
+                      ✓ Devis sauvegardé dans « Suggestion devis par IA » → voir
+                    </a>
+                  )}
                 </div>
               </div>
             ))}

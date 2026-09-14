@@ -182,3 +182,21 @@ CREATE UNIQUE INDEX ix_facture_numero ON facture (numero);
 CREATE INDEX ix_facture_id ON facture (id);
 CREATE INDEX ix_facture_client_id ON facture (client_id);
 CREATE INDEX ix_facture_projet_id ON facture (projet_id);
+CREATE TABLE suggestion_devis (
+	id SERIAL NOT NULL,
+	client_id INTEGER NOT NULL,
+	projet_id INTEGER NOT NULL,
+	titre VARCHAR(200),
+	demande TEXT,
+	contenu_devis TEXT NOT NULL,
+	modele VARCHAR(80),
+	cree_par INTEGER,
+	cree_le TIMESTAMP WITH TIME ZONE DEFAULT now(),
+	PRIMARY KEY (id),
+	FOREIGN KEY(client_id) REFERENCES client (id) ON DELETE SET NULL,
+	FOREIGN KEY(projet_id) REFERENCES projet (id) ON DELETE SET NULL,
+	FOREIGN KEY(cree_par) REFERENCES utilisateur (id) ON DELETE SET NULL
+);
+CREATE INDEX ix_suggestion_devis_id ON suggestion_devis (id);
+CREATE INDEX ix_suggestion_devis_client_id ON suggestion_devis (client_id);
+CREATE INDEX ix_suggestion_devis_projet_id ON suggestion_devis (projet_id);

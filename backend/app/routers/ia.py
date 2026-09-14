@@ -8,10 +8,13 @@ Endpoints :
   - POST /ia/chat   : conversation avec l'assistant IA.
 """
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.routers.auth import get_current_user_role
+from app.core.database import get_db
+from app.routers.auth import get_current_user_id, get_current_user_role
 from app.schemas.ia import IaPing, IaStatus, ChatRequest, ChatResponse
+from app.routers.suggestion_devis import _sauvegarder_suggestion
 from app.services.connectors.llm import (
     LLMConfigError,
     LLMProviderError,
@@ -42,6 +45,19 @@ async def _pilote_ou_plus(role: str = Depends(get_current_user_role)):
             detail="Accès réservé aux comptes internes.",
         )
     return role
+
+
+# Mots-clés indiquant une demande de devis (volet financier).
+_MOTS_DEVIS = [
+    "devis", "tarif", "tarifer", "estimation", "soumission",
+    "cotisation", "prix de", "coût de", "cout de", "combien ça coûte",
+]
+
+
+def _demande_de_devis(message: str) -> bool:
+    """Détecte si un message de l'assistant est une demande de devis."""
+    texte = message.lower().strip()
+    return any(mot in texte for mot in _MOTS_DEVIS)
 
 
 @router.get("/status", response_model=IaStatus)
@@ -92,13 +108,19 @@ async def ia_ping(_: str = Depends(_pilote_ou_plus)):
 @router.post("/chat", response_model=ChatResponse)
 async def ia_chat(
     data: ChatRequest,
-    _: str = Depends(_pilote_ou_plus),
+    db: AsyncSession = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+    role: str = Depends(_pilote_ou_plus),
 ):
     """
     Conversation avec l'assistant IA.
 
     Accepte un message + un historique optionnel (max 20 messages).
     Le system prompt contextualise l'assistant dans l'écosystème i-Rindra.
+
+    Spécialité volet financier : si la direction/DRH demande un devis
+    (mot-clé "devis", "tarif", "estimation"...), la réponse est automatiquement
+    sauvegardée dans "Suggestion devis par IA" (table suggestion_devis).
     """
     # Construit la liste des messages pour l'API OpenAI
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
@@ -126,8 +148,25 @@ async def ia_chat(
     except LLMProviderError as exc:
         raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
 
+    # Sauvegarde automatique si la direction/DRH demande un devis
+    suggestion_devis_sauvee = False
+    if role in ("direction", "drh") and _demande_de_devis(data.message):
+        try:
+            await _sauvegarder_suggestion(
+                db,
+                contenu_devis=resultat.content.strip(),
+                demande=data.message,
+                modele=resultat.modele,
+                cree_par=user_id,
+            )
+            suggestion_devis_sauvee = True
+        except Exception:
+            # La sauvegarde ne doit jamais bloquer la conversation.
+            suggestion_devis_sauvee = False
+
     return ChatResponse(
         reponse=resultat.content.strip(),
         modele=resultat.modele,
         tokens=resultat.tokens,
+        suggestion_devis_sauvee=suggestion_devis_sauvee,
     )

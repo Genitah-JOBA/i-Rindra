@@ -42,3 +42,4 @@ class ChatResponse(BaseModel):
     reponse: str
     modele: str
     tokens: Optional[int] = None
+    suggestion_devis_sauvee: bool = False  # devis enregistré dans "Suggestion devis par IA"

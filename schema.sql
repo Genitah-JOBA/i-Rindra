@@ -242,6 +242,21 @@ CREATE TABLE facture (
 );
 
 -- ============================================================
+--  15. SUGGESTION_DEVIS  (devis proposés par l'IA — direction/DRH)
+-- ============================================================
+CREATE TABLE suggestion_devis (
+    id              BIGSERIAL PRIMARY KEY,
+    client_id       BIGINT NOT NULL REFERENCES client(id) ON DELETE SET NULL,
+    projet_id       BIGINT NOT NULL REFERENCES projet(id) ON DELETE SET NULL,
+    titre           VARCHAR(200),
+    demande         TEXT,
+    contenu_devis   TEXT NOT NULL,
+    modele          VARCHAR(80),
+    cree_par        BIGINT REFERENCES utilisateur(id) ON DELETE SET NULL,
+    cree_le         TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- ============================================================
 --  INDEX  (accès fréquents + recherche vectorielle)
 -- ============================================================
 CREATE INDEX idx_absence_utilisateur ON absence (utilisateur_id);
@@ -263,6 +278,9 @@ CREATE INDEX idx_facture_client         ON facture (client_id);
 CREATE INDEX idx_facture_projet         ON facture (projet_id);
 CREATE INDEX idx_facture_statut         ON facture (statut);
 CREATE INDEX idx_facture_numero         ON facture (numero);
+CREATE INDEX idx_suggestion_devis_client ON suggestion_devis (client_id);
+CREATE INDEX idx_suggestion_devis_projet ON suggestion_devis (projet_id);
+CREATE INDEX idx_suggestion_devis_date   ON suggestion_devis (cree_le);
 
 -- Index vectoriel (similarité cosinus) — OPTIONNEL, décommente avec la table document_chunk :
 -- CREATE INDEX idx_chunk_embedding
