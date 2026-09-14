@@ -1,6 +1,7 @@
 // Dashboard.jsx — vue d'accueil interne (RF-16) avec données réelles et animations
 import { useEffect, useState } from "react";
 import { projetsService } from "../api/projets";
+import { facturesService } from "../api/factures";
 import { useAuth } from "../auth/AuthContext";
 import {
   Chart as ChartJS,
@@ -44,6 +45,19 @@ const statutIcone = {
   orange: "🟠",
   rouge: "🔴",
 };
+
+// Devise d'affichage des statistiques financières
+const DEVISE = "Ar";
+
+function formatMontant(n) {
+  const v = Number(n || 0);
+  return (
+    new Intl.NumberFormat("fr-FR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(v) + ` ${DEVISE}`
+  );
+}
 
 // Couleurs pour les graphiques
 const CHART_COLORS = {
@@ -183,8 +197,28 @@ const CritiqueIcon = ({ className = "w-5 h-5" }) => (
   </svg>
 );
 
+// Icône Argent (billet de banque)
+const MoneyIcon = ({ className = "w-5 h-5" }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className={className}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
+    />
+  </svg>
+);
+
 export default function Dashboard() {
   const { user } = useAuth();
+  const estFinance =
+    user?.role === "direction" || user?.role === "drh";
   const MOIS = [
           "Jan",
           "Fév",
@@ -211,6 +245,7 @@ export default function Dashboard() {
     tachesTotales: 0,
     tachesTerminees: 0,
   });
+  const [argent, setArgent] = useState(null);
   const [evolutionData, setEvolutionData] = useState([]);
 
   useEffect(() => {
@@ -247,6 +282,15 @@ export default function Dashboard() {
         ),
       };
       setStats(statsCalc);
+
+      if (estFinance) {
+        try {
+          const argentData = await facturesService.stats();
+          setArgent(argentData);
+        } catch (err) {
+          setArgent(null);
+        }
+      }
 
       try {
         const evolution = await projetsService.getEvolution();

@@ -110,7 +110,7 @@ export default function Login() {
         <div className="flex flex-col justify-center p-8 sm:p-12 border">
           {/* Logo visible surtout en mobile (le panneau de droite est masqué) */}
           <img
-            src="/logo2.png"
+            src="/.png"
             alt="i-Rindra"
             className="mb-6 h-16 w-auto self-center md:hidden"
           />
