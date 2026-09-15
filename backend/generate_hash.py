@@ -1,7 +1,7 @@
 from passlib.hash import bcrypt
 
 # Mot de passe à hasher
-password = "lucia123"
+password = "nomena123"
 
 # Générer le hash
 hash = bcrypt.hash(password)

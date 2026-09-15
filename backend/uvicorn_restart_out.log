@@ -488,3 +488,10 @@ WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
 2026-09-14 05:15:36,008 INFO sqlalchemy.engine.Engine [cached since 541.3s ago] (66,)
 2026-09-14 05:15:36,008 INFO sqlalchemy.engine.Engine ROLLBACK
 INFO:     127.0.0.1:2792 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-14 05:16:05,653 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-14 05:16:05,653 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-14 05:16:05,653 INFO sqlalchemy.engine.Engine [cached since 570.9s ago] (66,)
+2026-09-14 05:16:05,653 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:10209 - "GET /notifications/count HTTP/1.1" 200 OK
