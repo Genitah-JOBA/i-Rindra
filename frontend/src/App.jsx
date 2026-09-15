@@ -13,7 +13,7 @@ import Membres from "./pages/Membres";
 import Clients from "./pages/Clients";
 import Absences from "./pages/Absences";
 import Facturation from "./pages/Facturation";
-import AssistantIA from "./pages/AssistantIA";
+import AssistantIA from "./pages/AssistantIA/index.jsx";
 import SuggestionDevis from "./pages/SuggestionDevis";
 import DevisEstimations from "./pages/DevisEstimations";
 import Parametres from "./pages/Parametres";
