@@ -13,7 +13,7 @@ from typing import List, Optional
 
 from datetime import date, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -29,7 +29,6 @@ from app.schemas.ia import (
     IaStatus,
     ChatRequest,
     ChatResponse,
-    AnalyseCdcRequest,
     AnalyseCdcResponse,
     ExtractionRequest,
     ExtractionResponse,
@@ -49,6 +48,11 @@ from app.services.connectors.llm import (
     LLMConfigError,
     LLMProviderError,
     chat_completion,
+)
+from app.services.texte_documents import (
+    MAX_TEXTE_CARACTERES,
+    MIN_TEXTE_CARACTERES,
+    extraire_texte_fichier,
 )
 from app.services.ia import (
     ContenuIndisponibleError,
@@ -250,7 +254,11 @@ async def ia_chat(
 @router.post("/projets/{projet_id}/analyser-cdc", response_model=AnalyseCdcResponse)
 async def ia_analyser_cdc(
     projet_id: int,
-    data: AnalyseCdcRequest,
+    fichier: Optional[UploadFile] = File(
+        None,
+        description="Cahier des charges (.doc, .docx, .pdf, .png, .jpg).",
+    ),
+    texte: Optional[str] = Form(None),
     projet: object = Depends(check_projet_access),
     db: AsyncSession = Depends(get_db),
     _: str = Depends(check_direction_or_chef_projet),
@@ -259,14 +267,33 @@ async def ia_analyser_cdc(
     Analyse le cahier des charges d'un projet (RF-25).
 
     Source du texte, dans l'ordre :
-      1. le paramètre `texte` de la requête ;
-      2. le fichier CDC (txt/md/csv) joint au projet ;
-      3. la description du projet.
+      1. le fichier importé (.doc, .docx, .pdf ; .png/.jpg par OCR) ;
+      2. le champ `texte` de la requête ;
+      3. le fichier CDC (txt/md/csv) joint au projet ;
+      4. la description du projet.
 
     Réservé à la direction, au DRH et aux chefs de projet.
     """
+    if fichier and fichier.filename:
+        try:
+            contenu = await extraire_texte_fichier(fichier)
+        except Exception as exc:
+            _erreur_ia(exc)
+        if len(contenu.strip()) < MIN_TEXTE_CARACTERES:
+            raise HTTPException(
+                status_code=400,
+                detail="Aucun texte exploitable extrait de ce fichier.",
+            )
+        try:
+            return await analyser_cdc(
+                db,
+                projet_id,
+                texte=contenu[:MAX_TEXTE_CARACTERES],
+            )
+        except Exception as exc:
+            _erreur_ia(exc)
     try:
-        return await analyser_cdc(db, projet_id, texte=data.texte)
+        return await analyser_cdc(db, projet_id, texte=texte)
     except Exception as exc:
         _erreur_ia(exc)
 

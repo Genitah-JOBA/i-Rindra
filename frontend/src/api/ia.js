@@ -23,9 +23,20 @@ export const iaService = {
   },
 
   // --- RF-25 : analyse du cahier des charges ---
-  analyserCdc: async (projetId, texte = null) => {
+  // Options : { fichier: File } (import .doc/.docx/.pdf/.png/.jpg) ou { texte }
+  analyserCdc: async (projetId, options = {}) => {
+    if (options.fichier) {
+      const form = new FormData();
+      form.append("fichier", options.fichier);
+      if (options.texte) form.append("texte", options.texte);
+      const { data } = await api.post(
+        `/ia/projets/${projetId}/analyser-cdc`,
+        form,
+      );
+      return data;
+    }
     const { data } = await api.post(`/ia/projets/${projetId}/analyser-cdc`, {
-      texte,
+      texte: options.texte || null,
     });
     return data;
   },

@@ -152,3 +152,54 @@ async def chat_completion(
 
     logger.info("Appel OpenAI ok — modele=%s tokens=%s", reponse.model, tokens)
     return LLMResult(content=contenu, modele=reponse.model, tokens=tokens)
+
+
+async def transcrire_image(
+    *,
+    image_base64: str,
+    mime: str,
+    prompt: str,
+    model: Optional[str] = None,
+) -> LLMResult:
+    """
+    Lecture / transcription d'une image via le modèle vision d'OpenAI.
+
+    - `image_base64` : contenu de l'image encodé en base64 ;
+    - `mime` : type MIME (ex. "image/png", "image/jpeg") ;
+    - `prompt` : instruction de transcription.
+
+    Le modèle par défaut (`OPENAI_MODEL`) doit supporter la vision
+    (gpt-4o-mini et gpt-4o la prennent en charge).
+    """
+    data_url = f"data:{mime};base64,{image_base64}"
+    msgs = [
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": prompt},
+                {"type": "image_url", "image_url": {"url": data_url}},
+            ],
+        }
+    ]
+
+    client = get_openai_client()
+    try:
+        reponse = await client.chat.completions.create(
+            model=model or settings.OPENAI_MODEL,
+            messages=msgs,
+            temperature=0.2,
+        )
+    except LLMConfigError:
+        raise
+    except OpenAIError as exc:
+        erreur = _normaliser_erreur(exc)
+        logger.error("Échec transcription image [%s] : %s", erreur.status_code, erreur)
+        raise erreur from exc
+
+    contenu = reponse.choices[0].message.content or ""
+    tokens = None
+    if reponse.usage:
+        tokens = reponse.usage.total_tokens
+
+    logger.info("Transcription image ok — modele=%s tokens=%s", reponse.model, tokens)
+    return LLMResult(content=contenu, modele=reponse.model, tokens=tokens)
