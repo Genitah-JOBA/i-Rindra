@@ -4,7 +4,7 @@ import { useState } from "react";
 import { iaService } from "../../api/ia";
 import { tachesService } from "../../api/taches";
 import { useMessage } from "../../context/MessageContext";
-import { Carte, BtnIA, SelectProjet, SelectTache, AlertErreur, BadgeIA, Spin } from "./Shared";
+import { Carte, BtnIA, SelectProjet, SelectTache, AlertErreur, BadgeIA, Spin, IconChatBubble, IconInfo } from "./Shared";
 
 export default function AffectationTab({ projets }) {
   const { showSuccess, showError } = useMessage();
@@ -130,14 +130,22 @@ export default function AffectationTab({ projets }) {
                     </button>
                   </div>
                   {s.justification && (
-                    <p className="md:col-span-3 text-xs text-slate-500 italic">💬 {s.justification}</p>
+                    <p className="md:col-span-3 flex items-start gap-1.5 text-xs text-slate-500">
+                      <IconChatBubble className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+                      <span className="italic">{s.justification}</span>
+                    </p>
                   )}
                 </div>
               ))}
             </div>
           )}
 
-          {suggestions.note && <p className="mt-3 text-xs text-slate-500 italic">🛈 {suggestions.note}</p>}
+          {suggestions.note && (
+            <p className="mt-3 flex items-start gap-1.5 text-xs text-slate-500">
+              <IconInfo className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+              <span className="italic">{suggestions.note}</span>
+            </p>
+          )}
         </Carte>
       )}
     </div>

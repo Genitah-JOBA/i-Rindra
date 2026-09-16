@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { projetsService } from "../api/projets";
 import { facturesService } from "../api/factures";
+import { clientsService } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import {
   Chart as ChartJS,
@@ -49,14 +50,20 @@ const statutIcone = {
 // Devise d'affichage des statistiques financières
 const DEVISE = "Ar";
 
-function formatMontant(n) {
+function formatMontant(n, devise = DEVISE) {
   const v = Number(n || 0);
   return (
     new Intl.NumberFormat("fr-FR", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(v) + ` ${DEVISE}`
+    }).format(v) + ` ${devise}`
   );
+}
+
+// National = devise ariary ("Ar", "MGA"…). Tout le reste = International.
+function estDeviseNationale(devise) {
+  const d = String(devise || "").trim().toUpperCase();
+  return d === "" || d === "AR" || d === "MGA" || d === "ARIARY";
 }
 
 // Couleurs pour les graphiques
@@ -234,19 +241,12 @@ export default function Dashboard() {
           "Déc",
         ];
   const [projets, setProjets] = useState([]);
+  const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erreur, setErreur] = useState("");
-  const [stats, setStats] = useState({
-    total: 0,
-    vert: 0,
-    orange: 0,
-    rouge: 0,
-    avancementMoyen: 0,
-    tachesTotales: 0,
-    tachesTerminees: 0,
-  });
   const [argent, setArgent] = useState(null);
   const [evolutionData, setEvolutionData] = useState([]);
+  const [vueFinance, setVueFinance] = useState("tous");
 
   useEffect(() => {
     chargerDonnees();
@@ -258,30 +258,12 @@ export default function Dashboard() {
       const projetsData = await projetsService.list();
       setProjets(projetsData);
 
-      const statsCalc = {
-        total: projetsData.length,
-        vert: projetsData.filter((p) => p.statut_sante === "vert").length,
-        orange: projetsData.filter((p) => p.statut_sante === "orange").length,
-        rouge: projetsData.filter((p) => p.statut_sante === "rouge").length,
-        avancementMoyen:
-          projetsData.length > 0
-            ? Math.round(
-                projetsData.reduce(
-                  (acc, p) => acc + (p.avancement_pct || 0),
-                  0,
-                ) / projetsData.length,
-              )
-            : 0,
-        tachesTotales: projetsData.reduce(
-          (acc, p) => acc + (p.taches_total || 0),
-          0,
-        ),
-        tachesTerminees: projetsData.reduce(
-          (acc, p) => acc + (p.taches_terminees || 0),
-          0,
-        ),
-      };
-      setStats(statsCalc);
+      try {
+        const clientsData = await clientsService.list();
+        setClients(clientsData || []);
+      } catch {
+        setClients([]);
+      }
 
       if (estFinance) {
         try {
@@ -447,20 +429,82 @@ export default function Dashboard() {
     },
   };
 
+  // « Encaissé par mois » — ventillé par devise (National = Ar, sinon International)
+  const sections = argent?.par_devise || [];
+  const nationalSection =
+    sections.find((s) => estDeviseNationale(s.devise)) || null;
+  const sectionsInternationales = sections.filter(
+    (s) => !estDeviseNationale(s.devise),
+  );
+
+  // Section « Toutes devises » → stats combinées de l'ensemble (onglet Tous)
+  const sectionToutes =
+    argent &&
+    ({
+      ca_encaisse: argent.ca_encaisse,
+      reste_a_payer: argent.reste_a_payer,
+      en_attente: argent.en_attente,
+      total_factures: argent.total_factures,
+      impayees: argent.impayees,
+      encaisse_par_mois: argent.encaisse_par_mois || [],
+    });
+
+  // Projets filtrés selon l'onglet (via la devise du client).
+  const deviseParClient = (clients || []).reduce((acc, c) => {
+    acc[c.id] = c.devise || "Ar";
+    return acc;
+  }, {});
+  const estNationalProjet = (p) =>
+    estDeviseNationale(deviseParClient[p.client_id]);
+  const projetsAffiches =
+    vueFinance === "national"
+      ? projets.filter(estNationalProjet)
+      : vueFinance === "international"
+        ? projets.filter((p) => !estNationalProjet(p))
+        : projets;
+
+  // Stats recalculées sur les projets affichés (onglet courant).
+  const statsAffiches = {
+    total: projetsAffiches.length,
+    vert: projetsAffiches.filter((p) => p.statut_sante === "vert").length,
+    orange: projetsAffiches.filter((p) => p.statut_sante === "orange").length,
+    rouge: projetsAffiches.filter((p) => p.statut_sante === "rouge").length,
+    avancementMoyen:
+      projetsAffiches.length > 0
+        ? Math.round(
+            projetsAffiches.reduce(
+              (acc, p) => acc + (p.avancement_pct || 0),
+              0,
+            ) / projetsAffiches.length,
+          )
+        : 0,
+    tachesTotales: projetsAffiches.reduce(
+      (acc, p) => acc + (p.taches_total || 0),
+      0,
+    ),
+    tachesTerminees: projetsAffiches.reduce(
+      (acc, p) => acc + (p.taches_terminees || 0),
+      0,
+    ),
+  };
+
+  const evolutionAffiche =
+    vueFinance === "tous" ? evolutionData : genererEvolution(projetsAffiches);
+
   const barChartData = {
-    labels: projets.map((p) =>
+    labels: projetsAffiches.map((p) =>
       p.nom?.length > 15 ? p.nom.substring(0, 15) + "..." : p.nom || "Sans nom",
     ),
     datasets: [
       {
         label: "Avancement (%)",
-        data: projets.map((p) => p.avancement_pct || 0),
-        backgroundColor: projets.map((p) => {
+        data: projetsAffiches.map((p) => p.avancement_pct || 0),
+        backgroundColor: projetsAffiches.map((p) => {
           if (p.statut_sante === "vert") return CHART_COLORS.vert;
           if (p.statut_sante === "orange") return CHART_COLORS.orange;
           return CHART_COLORS.rouge;
         }),
-        borderColor: projets.map((p) => {
+        borderColor: projetsAffiches.map((p) => {
           if (p.statut_sante === "vert") return "#16a34a";
           if (p.statut_sante === "orange") return "#d97706";
           return "#dc2626";
@@ -475,7 +519,7 @@ export default function Dashboard() {
     labels: ["Bon", "Attention", "Critique"],
     datasets: [
       {
-        data: [stats.vert, stats.orange, stats.rouge],
+        data: [statsAffiches.vert, statsAffiches.orange, statsAffiches.rouge],
         backgroundColor: [
           CHART_COLORS.vert,
           CHART_COLORS.orange,
@@ -488,11 +532,11 @@ export default function Dashboard() {
   };
 
   const lineChartData = {
-    labels: evolutionData.mois || MOIS,
+    labels: evolutionAffiche.mois || MOIS,
     datasets: [
       {
         label: "Projets en cours",
-        data: evolutionData.actifs || Array(12).fill(0),
+        data: evolutionAffiche.actifs || Array(12).fill(0),
         borderColor: CHART_COLORS.bleu,
         backgroundColor: "rgba(59, 130, 246, 0.1)",
         fill: true,
@@ -502,7 +546,7 @@ export default function Dashboard() {
       },
       {
         label: "Projets terminés",
-        data: evolutionData.termines || Array(12).fill(0),
+        data: evolutionAffiche.termines || Array(12).fill(0),
         borderColor: CHART_COLORS.vert,
         backgroundColor: "rgba(34, 197, 94, 0.1)",
         fill: true,
@@ -571,41 +615,72 @@ export default function Dashboard() {
 
       {!loading && !erreur && (
         <>
-          {/* Statistiques financières — premier rang (direction / DRH uniquement) */}
+          {/* Sélecteur Tous / National / International */}
+          <div className="mb-4 sm:mb-6">
+            <div className="inline-flex items-center gap-1 border border-slate-200 bg-white p-1 shadow-sm animate__animated animate__fadeInUp">
+              {[
+                { id: "tous", label: "Tous" },
+                { id: "national", label: "National" },
+                { id: "international", label: "International" },
+              ].map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => setVueFinance(t.id)}
+                  className={`px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors ${
+                    vueFinance === t.id
+                      ? t.id === "national"
+                        ? "bg-green-600 text-white"
+                        : t.id === "international"
+                          ? "bg-blue-600 text-white"
+                          : "bg-[#63B23E] text-white"
+                      : "text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Statistiques financières (direction / DRH uniquement) — selon l'onglet */}
           {estFinance && (
-            <div className="mb-4 sm:mb-6 grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
-              <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.02s' }}>
-                <StatCard
-                  title={"CA encaissé"}
-                  value={argent ? formatMontant(argent.ca_encaisse) : "—"}
-                  color="text-emerald-600"
-                  icon={<MoneyIcon className="w-5 h-5 text-emerald-600" />}
+            <div className="mb-4 sm:mb-6 space-y-3 sm:space-y-4">
+              {vueFinance === "tous" && (
+                <BlocFinance
+                  titre="Statistiques financières"
+                  sousTitre="Ensemble · toutes devises"
+                  section={sectionToutes}
+                  devise="Ar"
+                  messageVide="Aucun encaissement pour le moment."
+                  accent={CHART_COLORS.bleu}
+                  animationDelay="0.02s"
                 />
-              </div>
-              <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.05s' }}>
-                <StatCard
-                  title={"En attente"}
-                  value={argent ? formatMontant(argent.en_attente) : "—"}
-                  color="text-blue-600"
-                  icon={<MoneyIcon className="w-5 h-5 text-blue-600" />}
+              )}
+
+              {vueFinance === "national" && (
+                <BlocFinance
+                  titre="National"
+                  sousTitre="Marché local · Devise Ar"
+                  section={nationalSection}
+                  devise="Ar"
+                  messageVide="Aucune facture nationale pour le moment."
+                  accent={CHART_COLORS.vert}
+                  animationDelay="0.02s"
                 />
-              </div>
-              <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.08s' }}>
-                <StatCard
-                  title={"Factures"}
-                  value={argent ? argent.total_factures : "—"}
-                  color="text-slate-800"
-                  icon={<MoneyIcon className="w-5 h-5 text-slate-600" />}
+              )}
+
+              {vueFinance === "international" && (
+                <BlocFinance
+                  titre="International"
+                  sousTitre="Clients étrangers · EUR / autres devises"
+                  section={null}
+                  devise={sectionsInternationales[0]?.devise || "EUR"}
+                  messageVide="Aucun client international pour le moment."
+                  accent={CHART_COLORS.bleu}
+                  animationDelay="0.02s"
+                  sections={sectionsInternationales}
                 />
-              </div>
-              <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.11s' }}>
-                <StatCard
-                  title={"Impayées"}
-                  value={argent ? argent.impayees : "—"}
-                  color="text-red-600"
-                  icon={<MoneyIcon className="w-5 h-5 text-red-600" />}
-                />
-              </div>
+              )}
             </div>
           )}
 
@@ -614,15 +689,15 @@ export default function Dashboard() {
             <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.05s' }}>
               <StatCard
                 title={"Total Projet"}
-                value={stats.total}
+                value={statsAffiches.total}
                 color="text-slate-900"
                 icon={<DashboardIcon className="w-5 h-5 text-slate-600" />}
               />
             </div>
             <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.10s' }}>
               <StatCard
-                title={"Bon"}
-                value={stats.vert}
+                title={"En bon état"}
+                value={statsAffiches.vert}
                 color="text-green-600"
                 icon={<BonIcon className="w-5 h-5 text-green-600" />}
               />
@@ -630,7 +705,7 @@ export default function Dashboard() {
             <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.15s' }}>
               <StatCard
                 title={"Attention"}
-                value={stats.orange}
+                value={statsAffiches.orange}
                 color="text-orange-600"
                 icon={<AttentionIcon className="w-5 h-5 text-orange-600" />}
               />
@@ -638,7 +713,7 @@ export default function Dashboard() {
             <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.20s' }}>
               <StatCard
                 title={"Critique"}
-                value={stats.rouge}
+                value={statsAffiches.rouge}
                 color="text-red-600"
                 icon={<CritiqueIcon className="w-5 h-5 text-red-600" />}
               />
@@ -646,7 +721,7 @@ export default function Dashboard() {
             <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.25s' }}>
               <StatCard
                 title={"Moyenne"}
-                value={`${stats.avancementMoyen}%`}
+                value={`${statsAffiches.avancementMoyen}%`}
                 color="text-blue-600"
                 icon={<TachesIcon className="w-5 h-5 text-blue-600" />}
               />
@@ -654,7 +729,7 @@ export default function Dashboard() {
             <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.30s' }}>
               <StatCard
                 title={"Tâches"}
-                value={`${stats.tachesTerminees}/${stats.tachesTotales}`}
+                value={`${statsAffiches.tachesTerminees}/${statsAffiches.tachesTotales}`}
                 color="text-purple-600"
                 icon={<TachesIcon className="w-5 h-5 text-purple-600" />}
               />
@@ -662,7 +737,7 @@ export default function Dashboard() {
           </div>
 
           {/* Graphiques avec animation */}
-          {projets.length > 0 ? (
+          {projetsAffiches.length > 0 ? (
             <>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
                 {/* Graphique en barres */}
@@ -722,11 +797,11 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between mb-2 sm:mb-3">
                   <h3 className="text-xs sm:text-sm font-semibold text-slate-700 flex items-center gap-2">
                     <ProjetsIcon className="w-4 h-4 text-slate-500" />
-                    Liste des projets ({projets.length})
+                    Liste des projets ({projetsAffiches.length})
                   </h3>
                 </div>
                 <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {projets.map((p, index) => (
+                  {projetsAffiches.map((p, index) => (
                     <div 
                       key={p.id} 
                       className="animate__animated animate__fadeInUp" 
@@ -740,11 +815,175 @@ export default function Dashboard() {
             </>
           ) : (
             <div className="text-center py-8 sm:py-12 bg-slate-50 border border-slate-200  animate__animated animate__fadeInUp">
-              <p className="text-slate-500">Aucun projet pour le moment.</p>
+              <p className="text-slate-500">
+                {vueFinance === "national"
+                  ? "Aucun projet national pour le moment."
+                  : vueFinance === "international"
+                    ? "Aucun projet international pour le moment."
+                    : "Aucun projet pour le moment."}
+              </p>
             </div>
           )}
         </>
       )}
+    </div>
+  );
+}
+
+// Bloc financier « National » ou « International » — cartes + encaissé par mois
+// `section` : stats d'une devise donnée (StatsParDevise) ; `sections` : plusieurs
+// devises internationales éventuelles (EUR, USD…) à afficher en sous-blocs.
+function BlocFinance({
+  titre,
+  sousTitre,
+  section,
+  devise,
+  messageVide,
+  accent,
+  animationDelay,
+  sections = null,
+}) {
+  const sousBlocs =
+    sections && sections.length > 0
+      ? sections.map((s, i) => (
+          <SousBlocFinance
+            key={s.devise}
+            section={s}
+            devise={s.devise}
+            accent={accent}
+            vide={i === 0 ? messageVide : "Aucun encaissement pour le moment."}
+          />
+        ))
+      : [
+          <SousBlocFinance
+            key="defaut"
+            section={section}
+            devise={devise}
+            accent={accent}
+            vide={messageVide || "Aucun encaissement pour le moment."}
+          />,
+        ];
+
+  return (
+    <div
+      className="bg-white border border-slate-200 p-3 sm:p-4 shadow-sm animate__animated animate__fadeInUp"
+      style={{ animationDelay }}
+    >
+      <div className="mb-2 sm:mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-xs sm:text-sm font-semibold text-slate-700 flex items-center gap-2">
+          <MoneyIcon className="w-4 h-4 text-slate-500" />
+          {titre}
+        </h3>
+        <span className="text-[10px] sm:text-xs text-slate-400">{sousTitre}</span>
+      </div>
+      <div className="space-y-3 sm:space-y-4">{sousBlocs}</div>
+    </div>
+  );
+}
+
+// Cartes + graphique « Encaissé par mois » pour une devise précise.
+function SousBlocFinance({ section, devise, accent, vide }) {
+  const items = section?.encaisse_par_mois || [];
+  const chartData = {
+    labels: items.map((e) => {
+      const d = new Date(`${e.mois}-01T00:00:00`);
+      return d.toLocaleDateString("fr-FR", { month: "short", year: "2-digit" });
+    }),
+    datasets: [
+      {
+        label: `Encaissé (${devise})`,
+        data: items.map((e) => e.montant),
+        backgroundColor: accent,
+        borderColor: accent,
+        borderWidth: 2,
+        borderRadius: 4,
+      },
+    ],
+  };
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            return `Encaissé : ${formatMontant(context.parsed.y, devise)}`;
+          },
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: (value) =>
+            new Intl.NumberFormat("fr-FR", { notation: "compact" }).format(value),
+          font: {
+            size: window.innerWidth < 640 ? 8 : 10,
+          },
+        },
+      },
+      x: {
+        grid: { display: false },
+        ticks: {
+          font: {
+            size: window.innerWidth < 640 ? 8 : 10,
+          },
+          maxRotation: window.innerWidth < 640 ? 45 : 0,
+          minRotation: window.innerWidth < 640 ? 45 : 0,
+        },
+      },
+    },
+  };
+
+  return (
+    <div>
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
+        <StatCard
+          title={"CA encaissé"}
+          value={formatMontant(section?.ca_encaisse, devise)}
+          color="text-emerald-600"
+          icon={<MoneyIcon className="w-5 h-5 text-emerald-600" />}
+        />
+        <StatCard
+          title={"Reste à payer"}
+          value={formatMontant(section?.reste_a_payer, devise)}
+          color="text-amber-600"
+          icon={<MoneyIcon className="w-5 h-5 text-amber-600" />}
+        />
+        <StatCard
+          title={"En attente"}
+          value={formatMontant(section?.en_attente, devise)}
+          color="text-blue-600"
+          icon={<MoneyIcon className="w-5 h-5 text-blue-600" />}
+        />
+        <StatCard
+          title={"Factures"}
+          value={section?.total_factures ?? 0}
+          color="text-slate-800"
+          icon={<MoneyIcon className="w-5 h-5 text-slate-600" />}
+        />
+        <StatCard
+          title={"Impayées"}
+          value={section?.impayees ?? 0}
+          color="text-red-600"
+          icon={<MoneyIcon className="w-5 h-5 text-red-600" />}
+        />
+      </div>
+
+      <div className="mt-2 sm:mt-3">
+        <h4 className="text-xs font-semibold text-slate-600 mb-1 sm:mb-2">
+          Encaissé par mois ({devise})
+        </h4>
+        {items.length > 0 ? (
+          <div className="h-44 sm:h-48">
+            <Bar data={chartData} options={options} />
+          </div>
+        ) : (
+          <p className="text-sm text-slate-500 py-6 text-center">{vide}</p>
+        )}
+      </div>
     </div>
   );
 }

@@ -2,13 +2,13 @@
 import { useState } from "react";
 import { iaService } from "../../api/ia";
 import { useMessage } from "../../context/MessageContext";
-import { Carte, SelectProjet, AlertErreur, TitreSection, Spin } from "./Shared";
+import { Carte, SelectProjet, AlertErreur, TitreSection, Spin, IconList, IconChatBubble, IconFlag, IconDocumentText } from "./Shared";
 
 const ICONE_TYPE = {
-  tache: "📋",
-  commentaire: "💬",
-  jalon: "🚩",
-  fichier: "📄",
+  tache: IconList,
+  commentaire: IconChatBubble,
+  jalon: IconFlag,
+  fichier: IconDocumentText,
 };
 
 const LIBELLE_TYPE = {
@@ -99,14 +99,18 @@ export default function RechercheTab({ projets }) {
             <div className="space-y-2">
               {resultat.resultats.map((r) => (
                 <div key={`${r.type}-${r.id}`} className="border border-slate-200 px-4 py-3 rounded-lg bg-slate-50/60">
-                  <span className="text-sm">
-                    <span className="mr-1.5">{ICONE_TYPE[r.type] || "📄"}</span>
-                    {r.titre}
+                  <span className="text-sm flex items-start gap-2">
+                    <span className="flex-shrink-0">
+                      {(ICONE_TYPE[r.type] || IconDocumentText)({ className: "w-4 h-4 text-purple-600 mt-0.5" })}
+                    </span>
+                    <span>
+                      <span className="font-semibold">{r.titre}</span>
+                      <span className="ml-2 text-[10px] font-semibold text-slate-400 uppercase">
+                        {LIBELLE_TYPE[r.type] || r.type} #{r.id}
+                      </span>
+                      {r.extrait && <p className="mt-1 text-xs text-slate-500 italic">{r.extrait}</p>}
+                    </span>
                   </span>
-                  <span className="ml-2 text-[10px] font-semibold text-slate-400 uppercase">
-                    {LIBELLE_TYPE[r.type] || r.type} #{r.id}
-                  </span>
-                  {r.extrait && <p className="mt-1 text-xs text-slate-500 italic">{r.extrait}</p>}
                 </div>
               ))}
             </div>

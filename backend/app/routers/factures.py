@@ -17,6 +17,8 @@ from app.schemas.facture import (
     FactureUpdate,
     FactureResponse,
     FactureStats,
+    EncaisseMensuel,
+    StatsParDevise,
     StatutUpdate,
 )
 from app.services import notifications as notif_service
@@ -152,6 +154,7 @@ async def statistiques(
     db: AsyncSession = Depends(get_db),
     _: str = Depends(_finance_seulement),
 ):
+    # Totaux toutes devises confondues (rétro-compatibilité)
     total = (await db.execute(select(func.count(Facture.id)))).scalar() or 0
 
     ca = (
@@ -186,12 +189,123 @@ async def statistiques(
         )
     ).scalar() or 0
 
+    # Tout ce qui reste à encaisser = toutes les factures ni payées ni annulées
+    reste_a_payer = (
+        await db.execute(
+            select(func.coalesce(func.sum(Facture.montant_ttc), 0)).where(
+                Facture.statut.in_(
+                    [
+                        StatutFacture.BROUILLON,
+                        StatutFacture.ENVOYEE,
+                        StatutFacture.EN_RETARD,
+                    ]
+                )
+            )
+        )
+    ).scalar() or 0
+
+    # ---- Statistiques PAR DEVISE du client (National = "Ar", sinon International) ----
+    _DEVISE_FALLBACK = "Ar"
+    _LITIGE = [StatutFacture.ENVOYEE, StatutFacture.EN_RETARD]
+    _NON_PAYEES = [
+        StatutFacture.BROUILLON,
+        StatutFacture.ENVOYEE,
+        StatutFacture.EN_RETARD,
+    ]
+
+    aggs = (
+        select(
+            func.coalesce(Client.devise, _DEVISE_FALLBACK).label("devise"),
+            func.count(Facture.id).label("total"),
+            func.coalesce(
+                func.sum(Facture.montant_ttc).filter(
+                    Facture.statut == StatutFacture.PAYEE
+                ),
+                0,
+            ).label("ca"),
+            func.coalesce(
+                func.sum(Facture.montant_ttc).filter(Facture.statut.in_(_LITIGE)),
+                0,
+            ).label("en_attente"),
+            func.coalesce(
+                func.sum(Facture.montant_ttc).filter(Facture.statut.in_(_NON_PAYEES)),
+                0,
+            ).label("reste_a_payer"),
+            func.count(Facture.id)
+            .filter(Facture.statut == StatutFacture.BROUILLON)
+            .label("brouillons"),
+            func.count(Facture.id)
+            .filter(Facture.statut.in_(_LITIGE))
+            .label("impayees"),
+        )
+        .join(Client, Facture.client_id == Client.id)
+        .group_by(Client.devise)
+        .order_by(Client.devise)
+    )
+    lignes = (await db.execute(aggs)).all()
+
+    # Encaissé par mois ET par devise (somme TTC des factures PAYÉES, groupée par YYYY-MM)
+    mois_expr = func.to_char(Facture.date_emission, "YYYY-MM").label("mois")
+    mens = (
+        await db.execute(
+            select(
+                Client.devise.label("devise"),
+                mois_expr,
+                func.coalesce(func.sum(Facture.montant_ttc), 0).label("montant"),
+            )
+            .join(Client, Facture.client_id == Client.id)
+            .where(Facture.statut == StatutFacture.PAYEE)
+            .group_by(Client.devise, mois_expr)
+            .order_by(Client.devise, mois_expr)
+        )
+    ).all()
+    encaisse_par_devise: dict[str, list[EncaisseMensuel]] = {}
+    for devise, mois, montant in mens:
+        cle = devise or _DEVISE_FALLBACK
+        encaisse_par_devise.setdefault(cle, []).append(
+            EncaisseMensuel(mois=mois, montant=float(montant))
+        )
+
+    par_devise = [
+        StatsParDevise(
+            devise=devise or _DEVISE_FALLBACK,
+            total_factures=total_d,
+            ca_encaisse=float(ca_d),
+            en_attente=float(att_d),
+            brouillons=brou_d,
+            impayees=imp_d,
+            reste_a_payer=float(reste_d),
+            encaisse_par_mois=encaisse_par_devise.get(devise or _DEVISE_FALLBACK, []),
+        )
+        for (devise, total_d, ca_d, att_d, reste_d, brou_d, imp_d) in lignes
+    ]
+
+    # Encaissé par mois toutes devises confondues (rétro-compatibilité)
+    mois_tous = func.to_char(Facture.date_emission, "YYYY-MM").label("mois")
+    lignes_mensuelles = (
+        await db.execute(
+            select(
+                mois_tous,
+                func.coalesce(func.sum(Facture.montant_ttc), 0),
+            )
+            .where(Facture.statut == StatutFacture.PAYEE)
+            .group_by(mois_tous)
+            .order_by(mois_tous)
+        )
+    ).all()
+
     return FactureStats(
         total_factures=total,
         ca_encaisse=float(ca),
         en_attente=float(en_attente),
         brouillons=brouillons,
         impayees=impayees,
+        reste_a_payer=float(reste_a_payer),
+        encaisse_par_mois=[
+            EncaisseMensuel(mois=mois, montant=float(montant))
+            for (mois, montant) in lignes_mensuelles
+        ],
+        par_devise=par_devise,
     )
 
 

@@ -2,6 +2,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
 from app.routers import auth, projets, taches, dashboard, client, fichiers, utilisateurs, notifications, clients, factures, ia, absences, suggestion_devis
 from app.core.database import engine, Base
@@ -42,6 +43,10 @@ app.include_router(suggestion_devis.router)
 async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        # Migration idempotente : devise du client (national = "Ar", sinon international)
+        await conn.execute(
+            text("ALTER TABLE client ADD COLUMN IF NOT EXISTS devise VARCHAR(10) NOT NULL DEFAULT 'Ar'")
+        )
 
 @app.get("/")
 async def root():

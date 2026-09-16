@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { clientsService } from "../api/client";
 import { utilisateursService } from "../api/utilisateurs";
 import { useMessage } from "../context/MessageContext";
+import { useAuth } from "../auth/AuthContext";
 import 'animate.css';
 
 // Icônes SVG
@@ -67,7 +68,9 @@ const XIcon = ({ className = "w-4 h-4" }) => (
 );
 
 export default function Clients() {
+  const { user } = useAuth();
   const { showSuccess, showError } = useMessage();
+  const estGestion = ["direction", "drh", "chef_de_projet", "equipe"].includes(user?.role);
 
   const [entreprises, setEntreprises] = useState([]);
   const [comptes, setComptes] = useState([]);
@@ -99,6 +102,29 @@ export default function Clients() {
   }, []);
 
   const compteDe = (clientId) => comptes.find((c) => c.client_id === clientId);
+
+  const estNationalDevise = (devise) => {
+    const d = String(devise || "").trim().toUpperCase();
+    return d === "" || d === "AR" || d === "MGA" || d === "ARIARY";
+  };
+
+  const changerDevise = async (ev, client) => {
+    const nouveau = ev.target.value;
+    const actuel = client.devise || "Ar";
+    if (nouveau === actuel) return;
+    try {
+      await clientsService.update(client.id, { devise: nouveau });
+      setEntreprises((prev) =>
+        prev.map((c) => (c.id === client.id ? { ...c, devise: nouveau } : c)),
+      );
+      showSuccess(`Devise de "${client.nom}" mise à jour : ${nouveau}`);
+    } catch (err) {
+      const msg = err.response?.data?.detail || "Impossible de modifier la devise.";
+      showError(msg);
+    }
+  };
+
+  const DEVISES = ["Ar", "EUR", "USD", "MGA", "XOF", "GBP", "AUD", "CAD"];
 
   const filtres = entreprises.filter((e) => {
     if (!recherche) return true;
@@ -197,6 +223,38 @@ export default function Clients() {
                             <XIcon className="w-3.5 h-3.5 text-slate-400" />
                             <span className="text-slate-400">{"aucun"}</span>
                           </>
+                        )}
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2 mt-1 pt-1 border-t border-slate-100">
+                        {estNationalDevise(e.devise) ? (
+                          <span className="px-2 py-0.5 text-[10px] font-medium bg-green-100 text-green-700">
+                            National
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 text-[10px] font-medium bg-blue-100 text-blue-700">
+                            International
+                          </span>
+                        )}
+                        {estGestion ? (
+                          <label className="flex items-center gap-1 text-[10px] text-slate-500">
+                            Devise :
+                            <select
+                              value={e.devise || "Ar"}
+                              onChange={(ev) => changerDevise(ev, e)}
+                              className="border border-slate-300 px-1 py-0.5 text-[10px] outline-none focus:border-[#63B23E]"
+                            >
+                              {[...new Set([...DEVISES, e.devise || "Ar"])].map((d) => (
+                                <option key={d} value={d}>
+                                  {d}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        ) : (
+                          <span className="text-[10px] text-slate-500">
+                            Devise : {e.devise || "Ar"}
+                          </span>
                         )}
                       </div>
                     </div>

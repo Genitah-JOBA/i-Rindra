@@ -13,6 +13,7 @@ CREATE TABLE client (
 	contact VARCHAR(150), 
 	email VARCHAR(150), 
 	telephone VARCHAR(30), 
+	devise VARCHAR(10) NOT NULL DEFAULT 'Ar', 
 	cree_le TIMESTAMP WITH TIME ZONE DEFAULT now(), 
 	PRIMARY KEY (id)
 );

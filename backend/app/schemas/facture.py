@@ -2,7 +2,7 @@
 
 from pydantic import BaseModel, Field
 from datetime import date, datetime
-from typing import Optional
+from typing import Optional, List
 from enum import Enum
 
 
@@ -69,9 +69,28 @@ class FactureResponse(BaseModel):
         from_attributes = True
 
 
+class EncaisseMensuel(BaseModel):
+    mois: str          # "YYYY-MM"
+    montant: float     # somme TTC des factures PAYÉES ce mois
+
+
+class StatsParDevise(BaseModel):
+    devise: str            # "Ar" = national ; sinon devise étrangère (EUR, USD…)
+    total_factures: int
+    ca_encaisse: float     # somme TTC des factures PAYÉES
+    en_attente: float      # somme TTC des factures ENVOYÉES + EN RETARD
+    brouillons: int        # nombre de brouillons
+    impayees: int          # nombre de factures envoyées + en retard
+    reste_a_payer: float   # somme TTC des factures non payées ni annulées
+    encaisse_par_mois: List[EncaisseMensuel]
+
+
 class FactureStats(BaseModel):
     total_factures: int
     ca_encaisse: float     # somme TTC des factures PAYÉES
     en_attente: float      # somme TTC des factures ENVOYÉES + EN RETARD
     brouillons: int        # nombre de brouillons
     impayees: int          # nombre de factures envoyées + en retard
+    reste_a_payer: float   # somme TTC des factures non payées ni annulées
+    encaisse_par_mois: List[EncaisseMensuel]
+    par_devise: List[StatsParDevise]

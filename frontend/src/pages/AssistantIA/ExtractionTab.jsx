@@ -5,7 +5,20 @@ import { useState } from "react";
 import { iaService } from "../../api/ia";
 import { projetsService } from "../../api/projets";
 import { useMessage } from "../../context/MessageContext";
-import { Carte, BtnIA, SelectProjet, AlertErreur, BadgeIA, Spin } from "./Shared";
+import {
+  Carte,
+  BtnIA,
+  SelectProjet,
+  AlertErreur,
+  BadgeIA,
+  Spin,
+  IconCheck,
+  IconX,
+  IconUsers,
+  IconCheckCircle,
+  IconRefresh,
+  IconArrowRight,
+} from "./Shared";
 
 const LIBELLE_STATUT = {
   en_attente: "À valider",
@@ -17,30 +30,6 @@ const STYLE_STATUT = {
   validee: "bg-green-100 text-green-700",
   rejetee: "bg-red-100 text-red-700",
 };
-
-function IconCheck({ className = "w-3.5 h-3.5" }) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-    </svg>
-  );
-}
-
-function IconX({ className = "w-3.5 h-3.5" }) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-    </svg>
-  );
-}
-
-function IconUsers({ className = "w-3.5 h-3.5" }) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-    </svg>
-  );
-}
 
 // Convertit YYYY-MM-DD ou objet date en string YYYY-MM-DD pour l'API
 function toISO(dateStr) {
@@ -261,17 +250,17 @@ export default function ExtractionTab({ projets }) {
 
       <div className="flex items-center justify-between">
         <h3 className="font-semibold text-slate-800">Suggestions de tâches</h3>
-        <button
-          onClick={async () => {
-            await chargerSuggestions(projetId);
-            const fresh = await iaService.listerSuggestions({ projet_id: projetId, statut: "en_attente" });
-            await chargerDisponibilites(fresh || [], projetId);
-          }}
-          disabled={!projetId}
-          className="text-xs font-medium text-purple-700 hover:text-purple-900 disabled:text-slate-300"
-        >
-          ↻ Actualiser
-        </button>
+<button
+            onClick={async () => {
+              await chargerSuggestions(projetId);
+              const fresh = await iaService.listerSuggestions({ projet_id: projetId, statut: "en_attente" });
+              await chargerDisponibilites(fresh || [], projetId);
+            }}
+            disabled={!projetId}
+            className="flex items-center gap-1 text-xs font-medium text-purple-700 hover:text-purple-900 disabled:text-slate-300"
+          >
+            <IconRefresh className="w-3.5 h-3.5" /> Actualiser
+          </button>
       </div>
 
       {chargement && <Spin label="Chargement des suggestions…" />}
@@ -327,13 +316,15 @@ export default function ExtractionTab({ projets }) {
                     onClick={() => valider(s)}
                     className="flex items-center gap-1 bg-[#63B23E] px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-[#4a8f2e] rounded-md ml-auto"
                   >
-                    <IconCheck /> Valider → Tâche
+                    <IconCheck /> Valider
+                    <IconArrowRight className="w-3 h-3" />
                   </button>
                 </div>
               )}
               {s.statut !== "en_attente" && s.tache_id && (
-                <p className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-2 rounded-md">
-                  ✓ Devenue la tâche #{s.tache_id} (Kanban).
+                <p className="flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-2 rounded-md">
+                  <IconCheckCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                  Devenue la tâche #{s.tache_id} (Kanban).
                 </p>
               )}
             </Carte>

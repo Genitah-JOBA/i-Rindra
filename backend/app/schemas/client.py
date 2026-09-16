@@ -15,6 +15,8 @@ class ClientBase(BaseModel):
     contact: Optional[str] = None
     email: Optional[EmailStr] = None
     telephone: Optional[str] = None
+    # "Ar" = national ; toute autre devise = international
+    devise: Optional[str] = "Ar"
 
 
 class ClientCreate(ClientBase):
@@ -26,6 +28,7 @@ class ClientUpdate(BaseModel):
     contact: Optional[str] = None
     email: Optional[EmailStr] = None
     telephone: Optional[str] = None
+    devise: Optional[str] = None
 
 
 class ClientResponse(ClientBase):

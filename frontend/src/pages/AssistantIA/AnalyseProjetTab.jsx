@@ -5,7 +5,7 @@
 import { useState } from "react";
 import { iaService } from "../../api/ia";
 import { useMessage } from "../../context/MessageContext";
-import { Carte, BtnIA, SelectProjet, AlertErreur, BadgeIA, TitreSection, PuceList, Spin } from "./Shared";
+import { Carte, BtnIA, SelectProjet, AlertErreur, BadgeIA, TitreSection, PuceList, Spin, IconCheckCircle, IconExclamationCircle, IconAlertTriangle } from "./Shared";
 
 const CONFIG = {
   resume: {
@@ -35,9 +35,21 @@ const NIVEAU_ALERTE = {
 };
 
 const STATUT_SANTE = {
-  vert: { texte: "🟢 En bonne santé", classe: "bg-green-100 text-green-800 border-green-200" },
-  orange: { texte: "🟠 À surveiller", classe: "bg-orange-100 text-orange-800 border-orange-200" },
-  rouge: { texte: "🔴 En danger", classe: "bg-red-100 text-red-800 border-red-200" },
+  vert: {
+    texte: "En bonne santé",
+    classe: "bg-green-100 text-green-800 border-green-200",
+    Icon: IconCheckCircle,
+  },
+  orange: {
+    texte: "À surveiller",
+    classe: "bg-orange-100 text-orange-800 border-orange-200",
+    Icon: IconExclamationCircle,
+  },
+  rouge: {
+    texte: "En danger",
+    classe: "bg-red-100 text-red-800 border-red-200",
+    Icon: IconAlertTriangle,
+  },
 };
 
 const LIBELLE_TYPE = {
@@ -135,8 +147,9 @@ export default function AnalyseProjetTab({ variante, projets }) {
           {variante === "detec" && (
             <>
               {resultat.alertes.length === 0 ? (
-                <p className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-100 px-4 py-3 rounded-lg">
-                  ✅ Aucune alerte détectée : le projet semble sain.
+                <p className="flex items-center gap-1.5 text-sm text-emerald-700 bg-emerald-50 border border-emerald-100 px-4 py-3 rounded-lg">
+                  <IconCheckCircle className="w-4 h-4 flex-shrink-0" />
+                  Aucune alerte détectée : le projet semble sain.
                 </p>
               ) : (
                 <div className="space-y-2">
@@ -156,14 +169,18 @@ export default function AnalyseProjetTab({ variante, projets }) {
             </>
           )}
 
-          {variante === "statut" && (
-            <>
-              <div className={`mb-4 inline-flex px-4 py-2 border rounded-lg text-sm font-bold ${STATUT_SANTE[resultat.statut_propose]?.classe}`}>
-                {STATUT_SANTE[resultat.statut_propose]?.texte || resultat.statut_propose}
-              </div>
-              <p className="text-sm text-slate-700 whitespace-pre-wrap">{resultat.justification}</p>
-            </>
-          )}
+          {variante === "statut" && (() => {
+                const sante = STATUT_SANTE[resultat.statut_propose];
+                return (
+                  <>
+                    <div className={`mb-4 inline-flex items-center gap-1.5 px-4 py-2 border rounded-lg text-sm font-bold ${sante?.classe}`}>
+                      {sante && <sante.Icon className="w-4 h-4 flex-shrink-0" />}
+                      {sante?.texte || resultat.statut_propose}
+                    </div>
+                    <p className="text-sm text-slate-700 whitespace-pre-wrap">{resultat.justification}</p>
+                  </>
+                );
+              })()}
         </Carte>
       )}
     </div>

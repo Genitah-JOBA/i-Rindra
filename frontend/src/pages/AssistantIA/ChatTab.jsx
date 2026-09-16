@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useMessage } from "../../context/MessageContext";
 import { iaService } from "../../api/ia";
-import { IconSparkles } from "./Shared";
+import { IconSparkles, IconCheck, IconArrowRight } from "./Shared";
 
 function IconSend({ className }) {
   return (
@@ -154,8 +154,10 @@ export default function ChatTab() {
                   )}
                   {msg.content}
                   {msg.noteDevis && (
-                    <a href="/suggestion-devis" className="mt-2 block text-[11px] font-medium text-purple-700 bg-purple-50 border border-purple-200 px-3 py-1.5 rounded-md hover:bg-purple-100 transition-colors">
-                      ✓ Devis sauvegardé dans « Suggestion devis par IA » → voir
+                    <a href="/suggestion-devis" className="mt-2 flex items-center gap-1 text-[11px] font-medium text-purple-700 bg-purple-50 border border-purple-200 px-3 py-1.5 rounded-md hover:bg-purple-100 transition-colors">
+                      <IconCheck className="w-3.5 h-3.5 flex-shrink-0" />
+                      Devis sauvegardé dans « Suggestion devis par IA »
+                      <IconArrowRight className="w-3.5 h-3.5 flex-shrink-0" />
                     </a>
                   )}
                 </div>
@@ -165,10 +167,10 @@ export default function ChatTab() {
             {loading && (
               <div className="flex justify-start animate__animated animate__fadeIn">
                 <div className="bg-white border border-slate-200 px-4 py-3 text-sm text-slate-500 rounded-lg">
-                  <span className="inline-flex gap-1">
-                    <span className="animate-bounce" style={{ animationDelay: "0ms" }}>●</span>
-                    <span className="animate-bounce" style={{ animationDelay: "150ms" }}>●</span>
-                    <span className="animate-bounce" style={{ animationDelay: "300ms" }}>●</span>
+                  <span className="inline-flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: "300ms" }} />
                   </span>
                 </div>
               </div>

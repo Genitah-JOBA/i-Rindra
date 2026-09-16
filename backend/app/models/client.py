@@ -19,6 +19,9 @@ class Client(Base):
     contact = Column(String(150), nullable=True)
     email = Column(String(150), nullable=True)
     telephone = Column(String(30), nullable=True)
+    # Devise du client : "Ar" = marché national, sinon devise étrangère
+    # (ex. "EUR", "USD"…) => client international.
+    devise = Column(String(10), nullable=False, default="Ar")
     cree_le = Column(DateTime(timezone=True), server_default=func.now())
 
     # 1 Client -> N Projets
