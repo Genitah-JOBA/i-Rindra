@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
-
 export default function Login() {
   const { login } = useAuth();
 
@@ -23,11 +22,9 @@ export default function Login() {
 
   // Fonction de validation de l'email
   const validerEmail = (email) => {
-    // Vérifier si l'email a au moins 5 caractères (4 + 1 pour @)
     if (email.length < 5) {
       return "L'email doit contenir au moins 5 caractères";
     }
-    // Vérifier le format email basique
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return "Veuillez entrer un email valide (ex: nom@domaine.com)";
@@ -63,7 +60,6 @@ export default function Login() {
     e.preventDefault();
     setErreur("");
 
-    // Valider tous les champs avant soumission
     setEmailTouche(true);
     setMotDePasseTouche(true);
 
@@ -78,7 +74,6 @@ export default function Login() {
     setEnCours(true);
     try {
       const { user } = await login(email, motDePasse);
-      // Cloisonnement : le client va sur son espace, les autres sur le tableau de bord.
       const destination =
         user.role === "client"
           ? "/mon-projet"
@@ -86,7 +81,6 @@ export default function Login() {
       navigate(destination, { replace: true });
     } catch (err) {
       if (!err.response) {
-        // Pas de réponse = serveur injoignable ou CORS (souvent : backend éteint)
         setErreur("Impossible de joindre le serveur. Vérifiez que le backend est démarré (http://localhost:8000).");
       } else if (err.response.status === 401) {
         setErreur("Email ou mot de passe incorrect.");
@@ -98,48 +92,48 @@ export default function Login() {
     }
   };
 
-  // Fonction pour basculer l'affichage du mot de passe
   const toggleAfficherMotDePasse = () => {
     setAfficherMotDePasse(!afficherMotDePasse);
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4 animate__animated animate__backInDown">
-      <div className="grid w-full max-w-5xl overflow-hidden bg-white shadow-xl md:grid-cols-2">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#0b2241] via-[#0b2241] to-[#1a3a5c] p-4 animate__animated animate__backInDown">
+      <div className="grid w-full max-w-5xl overflow-hidden bg-white shadow-2xl md:grid-cols-2 rounded-2xl">
         {/* COLONNE GAUCHE : formulaire */}
-        <div className="flex flex-col justify-center p-8 sm:p-12 border">
-          {/* Logo visible surtout en mobile (le panneau de droite est masqué) */}
+        <div className="flex flex-col justify-center p-8 sm:p-12 bg-white">
+          {/* Logo mobile */}
           <img
-            src="/.png"
+            src="/Logo-i-Rindra-couleur.png"
             alt="i-Rindra"
             className="mb-6 h-16 w-auto self-center md:hidden"
           />
 
-          <h1 className="mb-1 text-4xl font-bold text-slate-900 text-center py-2">
-            {"Connexion"}
+          <h1 className="mb-1 text-4xl font-bold text-center py-2 bg-gradient-to-r from-[#0b2241] to-[#4fb0f1] bg-clip-text text-transparent">
+            Connexion
           </h1>
           <p className="mb-6 text-sm text-slate-500 text-center">
-            {"Accédez à votre espace i-Rindra."}
+            Accédez à votre espace i-Rindra.
           </p>
 
           {erreur && (
-            <div className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+            <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">
               {erreur}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+            {/* Email */}
             <div>
               <label className="mb-1 text-sm font-medium text-slate-700">
                 Email <span className="text-red-500">*</span>
               </label>
               <div
-                className={`flex gap-1 block mb-2 w-full border px-3 py-2.5 text-sm transition focus:ring-2 ${
+                className={`flex gap-2 items-center w-full border-2 rounded-lg px-3 py-2.5 text-sm transition ${
                   emailTouche && erreurEmail
-                    ? "border-red-500 focus:border-red-500 focus:ring-red-500/30"
+                    ? "border-red-500 focus-within:ring-2 focus-within:ring-red-500/30"
                     : emailTouche && !erreurEmail
-                      ? "border-green-500 focus:border-green-500 focus:ring-green-500/30"
-                      : "border-slate-300 focus:border-[#00B2A0] focus:ring-[#00B2A0]/30"
+                      ? "border-[#7df979] focus-within:ring-2 focus-within:ring-[#7df979]/30"
+                      : "border-slate-300 focus-within:border-[#4fb0f1] focus-within:ring-2 focus-within:ring-[#4fb0f1]/30"
                 }`}
               >
                 <img src="/adresse.png" alt="email" className="w-5" />
@@ -153,13 +147,13 @@ export default function Login() {
                   onBlur={() => setEmailTouche(true)}
                   required
                   autoComplete="email"
-                  placeholder=" vous@exemple.com"
+                  placeholder="vous@exemple.com"
                   className="w-full bg-transparent outline-none"
                   minLength={5}
                 />
                 {emailTouche && !erreurEmail && email.length > 0 && (
                   <svg
-                    className="w-5 h-5 text-green-500"
+                    className="w-5 h-5 text-[#7df979]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -181,20 +175,21 @@ export default function Login() {
               </p>
             </div>
 
+            {/* Mot de passe */}
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700">
                 Mot de passe <span className="text-red-500">*</span>
               </label>
               <div
-                className={`flex items-center gap-1 w-full border px-3 py-2.5 text-sm outline-none transition focus:ring-2 ${
+                className={`flex items-center gap-2 w-full border-2 rounded-lg px-3 py-2.5 text-sm transition ${
                   motDePasseTouche && erreurMotDePasse
-                    ? "border-red-500 focus:border-red-500 focus:ring-red-500/30"
+                    ? "border-red-500 focus-within:ring-2 focus-within:ring-red-500/30"
                     : motDePasseTouche && !erreurMotDePasse
-                      ? "border-green-500 focus:border-green-500 focus:ring-green-500/30"
-                      : "border-slate-300 focus:border-[#00B2A0] focus:ring-[#00B2A0]/30"
+                      ? "border-[#7df979] focus-within:ring-2 focus-within:ring-[#7df979]/30"
+                      : "border-slate-300 focus-within:border-[#4fb0f1] focus-within:ring-2 focus-within:ring-[#4fb0f1]/30"
                 }`}
               >
-                <img src="/fermer-a-cle.png" alt="email" className="w-6" />
+                <img src="/fermer-a-cle.png" alt="password" className="w-6" />
                 <input
                   type={afficherMotDePasse ? "text" : "password"}
                   value={motDePasse}
@@ -205,7 +200,7 @@ export default function Login() {
                   onBlur={() => setMotDePasseTouche(true)}
                   required
                   autoComplete="current-password"
-                  placeholder=" ••••••••"
+                  placeholder="••••••••"
                   className="w-full bg-transparent outline-none"
                   minLength={5}
                 />
@@ -213,7 +208,7 @@ export default function Login() {
                   !erreurMotDePasse &&
                   motDePasse.length > 0 && (
                     <svg
-                      className="w-5 h-5 text-green-500"
+                      className="w-5 h-5 text-[#7df979]"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -230,7 +225,7 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={toggleAfficherMotDePasse}
-                  className="flex items-center justify-center p-1 text-slate-500 hover:text-slate-700 transition-colors"
+                  className="flex items-center justify-center p-1 text-slate-500 hover:text-[#4fb0f1] transition-colors"
                   aria-label={
                     afficherMotDePasse
                       ? "Masquer le mot de passe"
@@ -283,16 +278,17 @@ export default function Login() {
               </p>
             </div>
 
-            <div className="block mx-auto text-right transition hover:text-[#ff0040] cursor-pointer text-[12px]">
-              {"Mot de passe oublié"}
+            <div className="block mx-auto text-right transition hover:text-[#4fb0f1] cursor-pointer text-[12px] text-slate-500">
+              Mot de passe oublié ?
             </div>
 
+            {/* Bouton connexion avec gradient */}
             <button
               type="submit"
               disabled={enCours || !estFormulaireValide()}
-              className={`block mx-auto py-3 px-5 text-sm font-semibold text-white transition disabled:opacity-50 ${
+              className={`block w-full py-3 px-5 text-sm font-semibold text-white rounded-lg transition-all duration-200 disabled:opacity-50 ${
                 estFormulaireValide()
-                  ? "bg-[#63B23E] hover:bg-[#3F894E] cursor-pointer"
+                  ? "bg-gradient-to-r from-[#4fb0f1] to-[#7df979] hover:from-[#3a9fe0] hover:to-[#6de069] cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                   : "bg-gray-400 cursor-not-allowed"
               }`}
             >
@@ -302,18 +298,50 @@ export default function Login() {
         </div>
 
         {/* COLONNE DROITE : panneau de marque (masqué en mobile) */}
-        <div className="relative hidden flex-col items-center justify-center bg-[#3B3B3B] p-12 text-center md:flex border">
-          <img
-            src="/.png"
-            alt="Logo i-Rindra"
-            className="mb-6 w-56 max-w-full text-white"
-          />
-          <h2 className="text-xl font-semibold text-white">
-            {"Gestion de projets assistée par l'IA"}
-          </h2>
-          <p className="mt-2 max-w-xs text-sm text-teal-100/80">
-            {"Centralisez vos projets, suivez l'avancement et laissez l'assistant IA vous épauler."}
-          </p>
+        <div className="relative hidden flex-col items-center justify-center bg-gradient-to-br from-[#0b2241] via-[#0b2241] to-[#1a3a5c] p-12 text-center md:flex overflow-hidden">
+          {/* Motifs décoratifs */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#7afdf2] rounded-full filter blur-3xl opacity-10 -translate-y-1/2 translate-x-1/2"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#7df979] rounded-full filter blur-3xl opacity-10 translate-y-1/2 -translate-x-1/2"></div>
+          <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-[#4fb0f1] rounded-full filter blur-3xl opacity-10 -translate-x-1/2 -translate-y-1/2"></div>
+
+          {/* Contenu */}
+          <div className="relative z-10 flex flex-col items-center">
+            {/* Logo */}
+            <div className="mb-8 p-4 bg-white/5 rounded-2xl backdrop-blur-sm border border-white/10">
+              <img
+                src="/Logo-i-Rindra-couleur.png"
+                alt="Logo i-Rindra"
+                className="w-48 max-w-full"
+              />
+            </div>
+
+            <h2 className="text-2xl font-bold text-white mb-3">
+              Gestion de projets
+              <span className="block bg-gradient-to-r from-[#4fb0f1] to-[#7df979] bg-clip-text text-transparent">
+                assistée par l'IA
+              </span>
+            </h2>
+            <p className="mt-2 max-w-xs text-sm text-[#7afdf2]/80">
+              Centralisez vos projets, suivez l'avancement et laissez
+              l'assistant IA vous épauler.
+            </p>
+
+            {/* Points forts */}
+            <div className="mt-8 flex flex-col gap-2 w-full max-w-xs">
+              <div className="flex items-center gap-2 text-left text-xs text-white/80">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#7df979]"></div>
+                <span>Suivi en temps réel</span>
+              </div>
+              <div className="flex items-center gap-2 text-left text-xs text-white/80">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#4fb0f1]"></div>
+                <span>Assistant IA intégré</span>
+              </div>
+              <div className="flex items-center gap-2 text-left text-xs text-white/80">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#7afdf2]"></div>
+                <span>Espace client dédié</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

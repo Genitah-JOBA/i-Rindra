@@ -65,4 +65,11 @@ export const tachesService = {
     });
     return data;
   },
+
+  // --- Suivi du temps (chronomètre) ---
+  // Enregistrer une saisie de temps sur une tâche (RF-23 / RF-24)
+  ajouterTemps: async (tacheId, temps) => {
+    const { data } = await api.post(`/taches/${tacheId}/temps`, temps);
+    return data;
+  },
 };

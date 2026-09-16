@@ -59,6 +59,12 @@ export default function TaskDetailModal({
   const [nouveau, setNouveau] = useState("");
   const [envoi, setEnvoi] = useState(false);
 
+  // Chronomètre : seul le responsable de la tâche peut l'activer
+  const [chronoEnCours, setChronoEnCours] = useState(false);
+  const [secondesCourues, setSecondesCourues] = useState(0);
+  const [sauvegardeTemps, setSauvegardeTemps] = useState(false);
+  const [tempsEnregistre, setTempsEnregistre] = useState(false);
+
   const chargerCommentaires = async () => {
     if (!tache) return;
     try {
@@ -77,6 +83,57 @@ export default function TaskDetailModal({
     chargerCommentaires();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tache?.id]);
+
+  // Tic-tac du chronomètre (1 seconde)
+  useEffect(() => {
+    if (!chronoEnCours) return;
+    const interval = setInterval(() => {
+      setSecondesCourues((s) => s + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [chronoEnCours]);
+
+  const estResponsable =
+    user?.id != null && tache?.responsable_id != null && user.id === tache.responsable_id;
+
+  const formaterChrono = (totalSecondes) => {
+    const h = Math.floor(totalSecondes / 3600);
+    const m = Math.floor((totalSecondes % 3600) / 60);
+    const s = totalSecondes % 60;
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${pad(h)}:${pad(m)}:${pad(s)}`;
+  };
+
+  const arreterChrono = async () => {
+    if (secondesCourues === 0) return;
+    setSauvegardeTemps(true);
+    try {
+      // Durée arrondie à la minute (au minimum 1 minute si du temps a été compté)
+      const minutes = Math.max(1, Math.round(secondesCourues / 60));
+      const resultat = await tachesService.ajouterTemps(tache.id, {
+        duree_min: minutes,
+      });
+      console.log("Temps enregistré:", resultat);
+      setTempsEnregistre(true);
+      setChronoEnCours(false);
+      setSecondesCourues(0);
+    } catch (error) {
+      console.error("Erreur enregistrement du temps:", error);
+      alert("Erreur lors de l'enregistrement du temps.");
+    } finally {
+      setSauvegardeTemps(false);
+    }
+  };
+
+  const boutonChrono = async () => {
+    if (!chronoEnCours) {
+      // Démarre le chrono (uniquement le responsable)
+      setTempsEnregistre(false);
+      setChronoEnCours(true);
+    } else {
+      await arreterChrono();
+    }
+  };
 
   // Fonction pour obtenir le nom complet d'un utilisateur par son ID
   const getNomUtilisateur = (utilisateurId) => {
@@ -265,6 +322,49 @@ export default function TaskDetailModal({
               </p>
             </div>
           )}
+
+          {/* Chronomètre (RF-23) — seul le responsable peut l'activer */}
+          <div className="mb-5">
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+              {"Chronomètre"}
+            </h3>
+            <div className="flex items-center justify-between gap-4 border border-slate-200 bg-slate-50 p-4">
+              <div>
+                <div className="font-mono text-2xl font-semibold text-slate-800 tabular-nums">
+                  {formaterChrono(secondesCourues)}
+                </div>
+                {tempsEnregistre && (
+                  <p className="mt-1 text-xs font-medium text-[#63B23E]">
+                    {"Temps enregistré ✔"}
+                  </p>
+                )}
+              </div>
+              {estResponsable ? (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={boutonChrono}
+                    disabled={sauvegardeTemps}
+                    className={`px-3 py-2 text-sm font-semibold text-white transition disabled:opacity-50 ${
+                      chronoEnCours
+                        ? "bg-red-600 hover:bg-red-700"
+                        : "bg-[#63B23E] hover:bg-[#4a8f2e]"
+                    }`}
+                  >
+                    {sauvegardeTemps
+                      ? "Enregistrement…"
+                      : chronoEnCours
+                        ? "Arrêter"
+                        : "Démarrer"}
+                  </button>
+                </div>
+              ) : (
+                <p className="max-w-[220px] text-right text-xs text-slate-400">
+                  {"Seul le responsable de la tâche peut activer le chronomètre."}
+                </p>
+              )}
+            </div>
+          </div>
 
           {/* Commentaires */}
           <div>

@@ -512,8 +512,9 @@ async def saisir_temps(
 ):
     """
     Saisit le temps passé sur une tâche (RF-23, RF-24).
-    
-    **Permissions :** Tout membre du projet peut saisir son temps.
+
+    **Permissions :** Seul le responsable de la tâche peut activer son
+    chronomètre et enregistrer le temps.
     """
     # 1. Récupère la tâche
     result = await db.execute(
@@ -530,7 +531,14 @@ async def saisir_temps(
     # 2. Vérifie l'accès au projet
     await check_projet_access(tache.projet_id, db=db, token=token)
     
-    # 3. Crée la saisie de temps
+    # 3. Seul le responsable de la tâche peut enregistrer son temps
+    if tache.responsable_id != current_user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Seul le responsable de la tâche peut activer le chronomètre"
+        )
+    
+    # 4. Crée la saisie de temps
     new_temps = SaisieTemps(
         tache_id=tache_id,
         utilisateur_id=current_user_id,
