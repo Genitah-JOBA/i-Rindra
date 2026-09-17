@@ -7,8 +7,10 @@ import "animate.css";
 
 // Fonction pour les liens actifs
 const lienClass = ({ isActive }) =>
-  `flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors  ${
-    isActive ? "bg-[#63B23E] text-white" : "text-white hover:bg-slate-600"
+  `flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors rounded-md mx-1 ${
+    isActive
+      ? "bg-gradient-to-r from-[#4fb0f1] to-[#7df979] text-[#0b2241] font-semibold shadow-md"
+      : "text-white/80 hover:bg-white/10 hover:text-white"
   }`;
 
 // Composant pour les liens avec # (pages non encore créées)
@@ -30,10 +32,7 @@ export default function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  // État pour contrôler l'ouverture/fermeture du menu sur mobile
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  // État pour le menu déroulant du profil
   const [profilMenuOpen, setProfilMenuOpen] = useState(false);
   const profilMenuRef = useRef(null);
 
@@ -42,18 +41,17 @@ export default function Layout() {
     navigate("/login");
   };
 
-  const estFinance = user?.role === "direction" || user?.role === "drh"; // accès à l'argent (facturation + devis)
-  const estGestion = estFinance || user?.role === "chef_de_projet"; // pilotage opérationnel
-  const estAbsences = estFinance || user?.role === "equipe" || user?.role === "chef_de_projet"; // peut consulter/déposer les absences
+  const estFinance = user?.role === "direction" || user?.role === "drh";
+  const estGestion = estFinance || user?.role === "chef_de_projet";
+  const estAbsences =
+    estFinance || user?.role === "equipe" || user?.role === "chef_de_projet";
   const estInterne = estGestion || user?.role === "equipe";
   const estClient = user?.role === "client";
 
-  // Basculer le menu profil
   const toggleProfilMenu = () => {
     setProfilMenuOpen(!profilMenuOpen);
   };
 
-  // Fermer le menu quand on clique ailleurs
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -82,11 +80,12 @@ export default function Layout() {
         />
       )}
 
-      {/* 1. SIDEBAR - En flex pour que le conteneur s'adapte */}
+      {/* 1. SIDEBAR */}
       <aside
         className={`
           w-72 sm:w-64 md:w-52
-          bg-[#3B3B3B] border-r border-slate-600
+          bg-gradient-to-b from-[#0b2241] to-[#1a3a5c]
+          border-r border-white/10
           h-screen flex-shrink-0
           flex flex-col
           fixed md:relative left-0 top-0 z-40
@@ -96,17 +95,16 @@ export default function Layout() {
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
-        {/* Logo avec bouton de fermeture sur mobile */}
-        <div className="p-4 border-b border-slate-600 flex justify-between items-center">
+        {/* Logo */}
+        <div className="p-4 border-b border-white/10 flex justify-between items-center">
           <img
             src="/Logo-i-Rindra-text-couleur.png"
             alt="Logo i-Rindra"
-            className="h-12 w-auto text-white"
+            className="h-12 w-auto"
           />
-          {/* Bouton de fermeture visible uniquement sur mobile */}
           <button
             onClick={() => setSidebarOpen(false)}
-            className="md:hidden p-1.5 text-slate-400 hover:text-white hover:bg-slate-600 transition-colors "
+            className="md:hidden p-1.5 text-white/60 hover:text-white hover:bg-white/10 transition-colors"
             aria-label="Fermer le menu"
           >
             <svg
@@ -126,19 +124,18 @@ export default function Layout() {
           </button>
         </div>
 
-        {/* Navigation avec scrollbar stylisée */}
+        {/* Navigation */}
         <nav
           className="flex-1 p-2 space-y-1 overflow-y-auto sidebar-scroll"
           onClick={() => setSidebarOpen(false)}
         >
           {/* === SECTION COMMUNE À TOUS === */}
           <div className="mb-2">
-            <p className="px-3 py-1 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <p className="px-3 py-1 text-xs font-semibold text-[#7afdf2]/60 uppercase tracking-wider">
               Menu principal
             </p>
           </div>
 
-          {/* Dashboard - pour tous les utilisateurs */}
           {estInterne ? (
             <NavLink to="/" end className={lienClass}>
               <svg
@@ -177,10 +174,9 @@ export default function Layout() {
             </NavLink>
           )}
 
-          {/* === SECTION INTERNE (Direction + Équipe) === */}
+          {/* === SECTION INTERNE === */}
           {estInterne && (
             <>
-              {/* Projets */}
               <NavLink to="/projets" className={lienClass}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -199,7 +195,6 @@ export default function Layout() {
                 Projets
               </NavLink>
 
-              {/* Tâches */}
               <NavLink to="/taches" className={lienClass}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -219,16 +214,15 @@ export default function Layout() {
               </NavLink>
 
               {/* Séparateur */}
-              <div className="my-3 border-t border-slate-600"></div>
+              <div className="my-3 border-t border-white/10"></div>
 
               {/* === SECTION GESTION === */}
               <div className="mb-2">
-                <p className="px-3 py-1 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <p className="px-3 py-1 text-xs font-semibold text-[#7afdf2]/60 uppercase tracking-wider">
                   Gestion
                 </p>
               </div>
 
-              {/* Membres */}
               {estGestion && (
                 <NavLink to="/membres" className={lienClass}>
                   <svg
@@ -249,7 +243,6 @@ export default function Layout() {
                 </NavLink>
               )}
 
-              {/* Clients */}
               {estGestion && (
                 <NavLink to="/clients" className={lienClass}>
                   <svg
@@ -270,7 +263,6 @@ export default function Layout() {
                 </NavLink>
               )}
 
-              {/* Absences */}
               {estAbsences && (
                 <NavLink to="/absences" className={lienClass}>
                   <svg
@@ -287,56 +279,45 @@ export default function Layout() {
                       d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
                     />
                   </svg>
-Disponibilités
+                  Disponibilités
                 </NavLink>
               )}
 
               {/* === SECTION IA === */}
-              {estInterne && (
-                <>
-                  <div className="my-3 border-t border-slate-600"></div>
-                  <div className="mb-2">
-                    <p className="px-3 py-1 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                      Intelligence Artificielle
-                    </p>
-                  </div>
+              <div className="my-3 border-t border-white/10"></div>
+              <div className="mb-2">
+                <p className="px-3 py-1 text-xs font-semibold text-[#7afdf2]/60 uppercase tracking-wider">
+                  Intelligence Artificielle
+                </p>
+              </div>
 
-                  <NavLink
-                    to="/assistant-ia"
-                    className={({ isActive }) =>
-                      `flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-white hover:bg-slate-600 ${
-                        isActive ? "bg-[#63B23E] text-white" : ""
-                      }`
-                    }
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-5 h-5 flex-shrink-0"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
-                      />
-                    </svg>
-                    Assistant IA
-                    <span className="ml-auto text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5  flex-shrink-0">
-                      IA
-                    </span>
-                  </NavLink>
-                </>
-              )}
+              <NavLink to="/assistant-ia" className={lienClass}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-5 h-5 flex-shrink-0"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
+                  />
+                </svg>
+                Assistant IA
+                <span className="ml-auto text-[10px] bg-[#7df979]/20 text-[#7df979] px-2 py-0.5 rounded-full flex-shrink-0">
+                  IA
+                </span>
+              </NavLink>
 
-              {/* === SECTION FINANCIÈRE (Direction / DRH uniquement) === */}
+              {/* === SECTION FINANCIÈRE === */}
               {estFinance && (
                 <>
-                  <div className="my-3 border-t border-slate-600"></div>
+                  <div className="my-3 border-t border-white/10"></div>
                   <div className="mb-2">
-                    <p className="px-3 py-1 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                    <p className="px-3 py-1 text-xs font-semibold text-[#7afdf2]/60 uppercase tracking-wider">
                       Finance
                     </p>
                   </div>
@@ -392,8 +373,8 @@ Disponibilités
                         d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
                       />
                     </svg>
-                    Suggestion devis par IA
-                    <span className="ml-auto text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5  flex-shrink-0">
+                    Suggestion devis IA
+                    <span className="ml-auto text-[10px] bg-[#7df979]/20 text-[#7df979] px-2 py-0.5 rounded-full flex-shrink-0">
                       IA
                     </span>
                   </NavLink>
@@ -405,9 +386,9 @@ Disponibilités
           {/* === SECTION CLIENT === */}
           {estClient && (
             <>
-              <div className="my-3 border-t border-slate-600"></div>
+              <div className="my-3 border-t border-white/10"></div>
               <div className="mb-2">
-                <p className="px-3 py-1 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <p className="px-3 py-1 text-xs font-semibold text-[#7afdf2]/60 uppercase tracking-wider">
                   Mon espace
                 </p>
               </div>
@@ -416,7 +397,7 @@ Disponibilités
                 href="https://b-estimation.example.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-white hover:bg-slate-600 "
+                className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-white/80 hover:bg-white/10 hover:text-white mx-1"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -433,7 +414,7 @@ Disponibilités
                   />
                 </svg>
                 Mes devis
-                <span className="ml-auto text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5  flex-shrink-0">
+                <span className="ml-auto text-[10px] bg-[#4fb0f1]/20 text-[#4fb0f1] px-2 py-0.5 rounded-full flex-shrink-0">
                   ↗
                 </span>
               </a>
@@ -460,8 +441,8 @@ Disponibilités
         </nav>
 
         {/* Bas de la sidebar avec version */}
-        <div className="p-3 border-t border-slate-600">
-          <p className="text-xs text-slate-400 text-center">
+        <div className="p-3 border-t border-white/10">
+          <p className="text-xs text-white/40 text-center">
             v0.1.0 · I-Rindra
           </p>
         </div>
@@ -471,8 +452,7 @@ Disponibilités
       <div className="flex-1 flex flex-col h-screen w-0 min-w-0">
         {/* Header */}
         <header className="border-b bg-white px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center sticky top-0 z-30 shadow-sm">
-
-          {/* Chat e-resaka — accessible à tous les rôles (deep-link produit externe) */}
+          {/* Chat e-resaka */}
           <a
             href={
               import.meta.env.VITE_ERESAKA_URL ||
@@ -480,7 +460,7 @@ Disponibilités
             }
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors bg-slate-200 hover:bg-slate-400 "
+            className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors bg-slate-100 hover:bg-slate-200 rounded-md"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -497,13 +477,14 @@ Disponibilités
               />
             </svg>
             Chat (e-resaka)
-            <span className="ml-auto text-[10px] bg-blue-500/20 text-blue-700 px-2 py-0.5  flex-shrink-0">
+            <span className="ml-auto text-[10px] bg-[#4fb0f1]/20 text-[#4fb0f1] px-2 py-0.5 rounded-full flex-shrink-0">
               ↗
             </span>
           </a>
+
           <button
             onClick={() => setSidebarOpen(true)}
-            className="md:hidden p-2 text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#63B23E] transition-colors "
+            className="md:hidden p-2 text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#4fb0f1] transition-colors rounded-md"
             aria-label="Ouvrir le menu"
           >
             <svg
@@ -526,10 +507,11 @@ Disponibilités
             <NotificationBell />
           </div>
 
+          {/* Profil */}
           <div className="relative" ref={profilMenuRef}>
             <button
               onClick={toggleProfilMenu}
-              className="flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#63B23E] "
+              className="flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#4fb0f1] rounded-md"
               aria-expanded={profilMenuOpen}
               aria-haspopup="true"
             >
@@ -546,7 +528,9 @@ Disponibilités
                 viewBox="0 0 24 24"
                 strokeWidth={2}
                 stroke="currentColor"
-                className={`w-4 h-4 text-slate-500 transition-transform duration-200 ${profilMenuOpen ? "rotate-180" : ""}`}
+                className={`w-4 h-4 text-slate-500 transition-transform duration-200 ${
+                  profilMenuOpen ? "rotate-180" : ""
+                }`}
               >
                 <path
                   strokeLinecap="round"
@@ -557,7 +541,7 @@ Disponibilités
             </button>
 
             {profilMenuOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white shadow-lg border border-slate-200 py-1 z-50 animate__animated animate__fadeInDown ">
+              <div className="absolute right-0 mt-2 w-56 bg-white shadow-lg border border-slate-200 py-1 z-50 animate__animated animate__fadeInDown rounded-lg">
                 <div className="px-4 py-3 border-b border-slate-100">
                   <p className="text-sm font-medium text-slate-900">
                     {user?.prenom} {user?.nom}
@@ -647,32 +631,26 @@ Disponibilités
         </main>
       </div>
 
-      {/* Styles pour la scrollbar personnalisée de la sidebar */}
+      {/* Styles pour la scrollbar */}
       <style>{`
-        /* === SCROLLBAR DE LA SIDEBAR UNIQUEMENT === */
         .sidebar-scroll::-webkit-scrollbar {
           width: 4px;
           height: 4px;
         }
-
         .sidebar-scroll::-webkit-scrollbar-track {
           background: transparent;
         }
-
         .sidebar-scroll::-webkit-scrollbar-thumb {
-          background: #4a5568;
+          background: rgba(122, 253, 242, 0.3);
           border-radius: 10px;
           transition: background 0.3s ease;
         }
-
         .sidebar-scroll::-webkit-scrollbar-thumb:hover {
-          background: #63B23E;
+          background: #7afdf2;
         }
-
-        /* Pour Firefox */
         .sidebar-scroll {
           scrollbar-width: thin;
-          scrollbar-color: #4a5568 transparent;
+          scrollbar-color: rgba(122, 253, 242, 0.3) transparent;
         }
       `}</style>
     </div>

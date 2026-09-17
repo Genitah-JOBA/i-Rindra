@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { tachesService } from "../api/taches";
 import { useAuth } from "../auth/AuthContext";
+import { useChrono } from "../context/ChronoContext";
 
 const couleurPriorite = {
   basse: "bg-slate-100 text-slate-600",
@@ -59,11 +60,16 @@ export default function TaskDetailModal({
   const [nouveau, setNouveau] = useState("");
   const [envoi, setEnvoi] = useState(false);
 
-  // Chronomètre : seul le responsable de la tâche peut l'activer
-  const [chronoEnCours, setChronoEnCours] = useState(false);
-  const [secondesCourues, setSecondesCourues] = useState(0);
+  // Chronomètre : seul le responsable de la tâche peut l'activer.
+  // L'état vit dans un contexte global pour survivre à la fermeture de la modale.
+  const chrono = useChrono();
   const [sauvegardeTemps, setSauvegardeTemps] = useState(false);
   const [tempsEnregistre, setTempsEnregistre] = useState(false);
+
+  const chronoEnCours = chrono.enCours(tache?.id);
+  const chronoEnPause = chrono.enPause(tache?.id);
+  const chronoActif = chronoEnCours || chronoEnPause;
+  const secondesCourues = chrono.getSecondes(tache?.id);
 
   const chargerCommentaires = async () => {
     if (!tache) return;
@@ -84,14 +90,7 @@ export default function TaskDetailModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tache?.id]);
 
-  // Tic-tac du chronomètre (1 seconde)
-  useEffect(() => {
-    if (!chronoEnCours) return;
-    const interval = setInterval(() => {
-      setSecondesCourues((s) => s + 1);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [chronoEnCours]);
+  // Tic-tac du chronomètre : géré par le ChronoContext (continue même modale fermée)
 
   const estResponsable =
     user?.id != null && tache?.responsable_id != null && user.id === tache.responsable_id;
@@ -114,9 +113,8 @@ export default function TaskDetailModal({
         duree_min: minutes,
       });
       console.log("Temps enregistré:", resultat);
+      chrono.reinitialiser(tache.id);
       setTempsEnregistre(true);
-      setChronoEnCours(false);
-      setSecondesCourues(0);
     } catch (error) {
       console.error("Erreur enregistrement du temps:", error);
       alert("Erreur lors de l'enregistrement du temps.");
@@ -125,14 +123,14 @@ export default function TaskDetailModal({
     }
   };
 
-  const boutonChrono = async () => {
-    if (!chronoEnCours) {
-      // Démarre le chrono (uniquement le responsable)
-      setTempsEnregistre(false);
-      setChronoEnCours(true);
-    } else {
-      await arreterChrono();
-    }
+  const demarrerChrono = () => {
+    // Démarre ou reprend le chrono (uniquement le responsable)
+    setTempsEnregistre(false);
+    chrono.demarrer(tache.id);
+  };
+
+  const mettreEnPauseChrono = () => {
+    chrono.mettreEnPause(tache.id);
   };
 
   // Fonction pour obtenir le nom complet d'un utilisateur par son ID
@@ -338,25 +336,46 @@ export default function TaskDetailModal({
                     {"Temps enregistré ✔"}
                   </p>
                 )}
+                {chronoEnPause && (
+                  <p className="mt-1 text-xs font-medium text-amber-600">
+                    {"En pause"}
+                  </p>
+                )}
               </div>
               {estResponsable ? (
                 <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={boutonChrono}
-                    disabled={sauvegardeTemps}
-                    className={`px-3 py-2 text-sm font-semibold text-white transition disabled:opacity-50 ${
-                      chronoEnCours
-                        ? "bg-red-600 hover:bg-red-700"
-                        : "bg-[#63B23E] hover:bg-[#4a8f2e]"
-                    }`}
-                  >
-                    {sauvegardeTemps
-                      ? "Enregistrement…"
-                      : chronoEnCours
-                        ? "Arrêter"
-                        : "Démarrer"}
-                  </button>
+                  {!chronoActif && (
+                    <button
+                      type="button"
+                      onClick={demarrerChrono}
+                      disabled={sauvegardeTemps}
+                      className="bg-[#63B23E] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#4a8f2e] disabled:opacity-50"
+                    >
+                      {"Démarrer"}
+                    </button>
+                  )}
+                  {chronoActif && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={
+                          chronoEnCours ? mettreEnPauseChrono : demarrerChrono
+                        }
+                        disabled={sauvegardeTemps}
+                        className="bg-amber-500 px-3 py-2 text-sm font-semibold text-white transition hover:bg-amber-600 disabled:opacity-50"
+                      >
+                        {chronoEnCours ? "Pause" : "Reprendre"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={arreterChrono}
+                        disabled={sauvegardeTemps}
+                        className="bg-red-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
+                      >
+                        {sauvegardeTemps ? "Enregistrement…" : "Arrêter"}
+                      </button>
+                    </>
+                  )}
                 </div>
               ) : (
                 <p className="max-w-[220px] text-right text-xs text-slate-400">

@@ -34,11 +34,11 @@ ChartJS.register(
   Filler,
 );
 
-// Couleurs des statuts
+// Couleurs des statuts (charte i-Rindra)
 const couleurStatut = {
-  vert: "bg-green-100 text-green-800",
-  orange: "bg-orange-100 text-orange-800",
-  rouge: "bg-red-100 text-red-800",
+  vert: "bg-[#7df979]/20 text-[#3a8a3a]",
+  orange: "bg-amber-100 text-amber-700",
+  rouge: "bg-red-100 text-red-700",
 };
 
 const statutIcone = {
@@ -47,7 +47,6 @@ const statutIcone = {
   rouge: "🔴",
 };
 
-// Devise d'affichage des statistiques financières
 const DEVISE = "Ar";
 
 function formatMontant(n, devise = DEVISE) {
@@ -60,186 +59,77 @@ function formatMontant(n, devise = DEVISE) {
   );
 }
 
-// National = devise ariary ("Ar", "MGA"…). Tout le reste = International.
 function estDeviseNationale(devise) {
   const d = String(devise || "").trim().toUpperCase();
   return d === "" || d === "AR" || d === "MGA" || d === "ARIARY";
 }
 
-// Couleurs pour les graphiques
+// Palette graphiques alignée sur la charte i-Rindra
 const CHART_COLORS = {
-  vert: "#22c55e",
+  vert: "#7df979",
   orange: "#f59e0b",
   rouge: "#ef4444",
-  bleu: "#3b82f6",
+  bleu: "#4fb0f1",
+  turquoise: "#7afdf2",
+  marine: "#0b2241",
   violet: "#8b5cf6",
   rose: "#ec4899",
 };
 
 // === COMPOSANTS D'ICÔNES SVG ===
 
-// Icône Tableau de bord
 const DashboardIcon = ({ className = "w-5 h-5" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className={className}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"
-    />
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
   </svg>
 );
 
-// Icône Projets
 const ProjetsIcon = ({ className = "w-5 h-5" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className={className}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.06-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"
-    />
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.06-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
   </svg>
 );
 
-// Icône Tâches
 const TachesIcon = ({ className = "w-5 h-5" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className={className}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-    />
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
   </svg>
 );
 
-// Icône Rafraîchir
 const RefreshIcon = ({ className = "w-5 h-5", spinning = false }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={2}
-    stroke="currentColor"
-    className={`${className} ${spinning ? "animate-spin" : ""}`}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
-    />
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={`${className} ${spinning ? "animate-spin" : ""}`}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
   </svg>
 );
 
-// Icône Statut Bon
 const BonIcon = ({ className = "w-5 h-5" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={2}
-    stroke="currentColor"
-    className={className}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-    />
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
   </svg>
 );
 
-// Icône Statut Attention
 const AttentionIcon = ({ className = "w-5 h-5" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={2}
-    stroke="currentColor"
-    className={className}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
-    />
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
   </svg>
 );
 
-// Icône Statut Critique
 const CritiqueIcon = ({ className = "w-5 h-5" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={2}
-    stroke="currentColor"
-    className={className}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M6 18L18 6M6 6l12 12"
-    />
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
   </svg>
 );
 
-// Icône Argent (billet de banque)
 const MoneyIcon = ({ className = "w-5 h-5" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className={className}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
-    />
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
   </svg>
 );
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const estFinance =
-    user?.role === "direction" || user?.role === "drh";
-  const MOIS = [
-          "Jan",
-          "Fév",
-          "Mar",
-          "Avr",
-          "Mai",
-          "Juin",
-          "Juil",
-          "Aoû",
-          "Sep",
-          "Oct",
-          "Nov",
-          "Déc",
-        ];
+  const estFinance = user?.role === "direction" || user?.role === "drh";
+  const MOIS = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Aoû", "Sep", "Oct", "Nov", "Déc"];
   const [projets, setProjets] = useState([]);
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -282,9 +172,7 @@ export default function Dashboard() {
         setEvolutionData(evoGenerees);
       }
     } catch (err) {
-      setErreur(
-        err.response?.data?.detail || "Erreur de chargement des données.",
-      );
+      setErreur(err.response?.data?.detail || "Erreur de chargement des données.");
     } finally {
       setLoading(false);
     }
@@ -301,15 +189,10 @@ export default function Dashboard() {
         const moisIndex = date.getMonth();
         projetsParMois[moisIndex] = (projetsParMois[moisIndex] || 0) + 1;
       }
-      if (
-        projet.date_fin_prevue &&
-        projet.statut_sante === "vert" &&
-        projet.avancement_pct === 100
-      ) {
+      if (projet.date_fin_prevue && projet.statut_sante === "vert" && projet.avancement_pct === 100) {
         const date = new Date(projet.date_fin_prevue);
         const moisIndex = date.getMonth();
-        projetsTerminesParMois[moisIndex] =
-          (projetsTerminesParMois[moisIndex] || 0) + 1;
+        projetsTerminesParMois[moisIndex] = (projetsTerminesParMois[moisIndex] || 0) + 1;
       }
     });
 
@@ -346,17 +229,13 @@ export default function Dashboard() {
         max: 100,
         ticks: {
           callback: (value) => value + "%",
-          font: {
-            size: window.innerWidth < 640 ? 8 : 10,
-          },
+          font: { size: window.innerWidth < 640 ? 8 : 10 },
         },
       },
       x: {
         grid: { display: false },
         ticks: {
-          font: {
-            size: window.innerWidth < 640 ? 8 : 10,
-          },
+          font: { size: window.innerWidth < 640 ? 8 : 10 },
           maxRotation: window.innerWidth < 640 ? 45 : 0,
           minRotation: window.innerWidth < 640 ? 45 : 0,
         },
@@ -374,17 +253,14 @@ export default function Dashboard() {
           padding: window.innerWidth < 640 ? 10 : 20,
           usePointStyle: true,
           pointStyle: "circle",
-          font: {
-            size: window.innerWidth < 640 ? 10 : 12,
-          },
+          font: { size: window.innerWidth < 640 ? 10 : 12 },
         },
       },
       tooltip: {
         callbacks: {
           label: function (context) {
             const total = context.dataset.data.reduce((a, b) => a + b, 0);
-            const percentage =
-              total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+            const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
             return `${context.label}: ${context.parsed} projet (${percentage}%)`;
           },
         },
@@ -402,60 +278,42 @@ export default function Dashboard() {
         labels: {
           usePointStyle: true,
           pointStyle: "circle",
-          font: {
-            size: window.innerWidth < 640 ? 10 : 12,
-          },
+          font: { size: window.innerWidth < 640 ? 10 : 12 },
         },
       },
     },
     scales: {
       y: {
         beginAtZero: true,
-        ticks: {
-          stepSize: 1,
-          font: {
-            size: window.innerWidth < 640 ? 8 : 10,
-          },
-        },
+        ticks: { stepSize: 1, font: { size: window.innerWidth < 640 ? 8 : 10 } },
       },
       x: {
         ticks: {
-          font: {
-            size: window.innerWidth < 640 ? 8 : 10,
-          },
+          font: { size: window.innerWidth < 640 ? 8 : 10 },
           maxRotation: window.innerWidth < 640 ? 45 : 0,
         },
       },
     },
   };
 
-  // « Encaissé par mois » — ventillé par devise (National = Ar, sinon International)
   const sections = argent?.par_devise || [];
-  const nationalSection =
-    sections.find((s) => estDeviseNationale(s.devise)) || null;
-  const sectionsInternationales = sections.filter(
-    (s) => !estDeviseNationale(s.devise),
-  );
+  const nationalSection = sections.find((s) => estDeviseNationale(s.devise)) || null;
+  const sectionsInternationales = sections.filter((s) => !estDeviseNationale(s.devise));
 
-  // Section « Toutes devises » → stats combinées de l'ensemble (onglet Tous)
-  const sectionToutes =
-    argent &&
-    ({
-      ca_encaisse: argent.ca_encaisse,
-      reste_a_payer: argent.reste_a_payer,
-      en_attente: argent.en_attente,
-      total_factures: argent.total_factures,
-      impayees: argent.impayees,
-      encaisse_par_mois: argent.encaisse_par_mois || [],
-    });
+  const sectionToutes = argent && {
+    ca_encaisse: argent.ca_encaisse,
+    reste_a_payer: argent.reste_a_payer,
+    en_attente: argent.en_attente,
+    total_factures: argent.total_factures,
+    impayees: argent.impayees,
+    encaisse_par_mois: argent.encaisse_par_mois || [],
+  };
 
-  // Projets filtrés selon l'onglet (via la devise du client).
   const deviseParClient = (clients || []).reduce((acc, c) => {
     acc[c.id] = c.devise || "Ar";
     return acc;
   }, {});
-  const estNationalProjet = (p) =>
-    estDeviseNationale(deviseParClient[p.client_id]);
+  const estNationalProjet = (p) => estDeviseNationale(deviseParClient[p.client_id]);
   const projetsAffiches =
     vueFinance === "national"
       ? projets.filter(estNationalProjet)
@@ -463,7 +321,6 @@ export default function Dashboard() {
         ? projets.filter((p) => !estNationalProjet(p))
         : projets;
 
-  // Stats recalculées sur les projets affichés (onglet courant).
   const statsAffiches = {
     total: projetsAffiches.length,
     vert: projetsAffiches.filter((p) => p.statut_sante === "vert").length,
@@ -471,30 +328,16 @@ export default function Dashboard() {
     rouge: projetsAffiches.filter((p) => p.statut_sante === "rouge").length,
     avancementMoyen:
       projetsAffiches.length > 0
-        ? Math.round(
-            projetsAffiches.reduce(
-              (acc, p) => acc + (p.avancement_pct || 0),
-              0,
-            ) / projetsAffiches.length,
-          )
+        ? Math.round(projetsAffiches.reduce((acc, p) => acc + (p.avancement_pct || 0), 0) / projetsAffiches.length)
         : 0,
-    tachesTotales: projetsAffiches.reduce(
-      (acc, p) => acc + (p.taches_total || 0),
-      0,
-    ),
-    tachesTerminees: projetsAffiches.reduce(
-      (acc, p) => acc + (p.taches_terminees || 0),
-      0,
-    ),
+    tachesTotales: projetsAffiches.reduce((acc, p) => acc + (p.taches_total || 0), 0),
+    tachesTerminees: projetsAffiches.reduce((acc, p) => acc + (p.taches_terminees || 0), 0),
   };
 
-  const evolutionAffiche =
-    vueFinance === "tous" ? evolutionData : genererEvolution(projetsAffiches);
+  const evolutionAffiche = vueFinance === "tous" ? evolutionData : genererEvolution(projetsAffiches);
 
   const barChartData = {
-    labels: projetsAffiches.map((p) =>
-      p.nom?.length > 15 ? p.nom.substring(0, 15) + "..." : p.nom || "Sans nom",
-    ),
+    labels: projetsAffiches.map((p) => (p.nom?.length > 15 ? p.nom.substring(0, 15) + "..." : p.nom || "Sans nom")),
     datasets: [
       {
         label: "Avancement (%)",
@@ -505,7 +348,7 @@ export default function Dashboard() {
           return CHART_COLORS.rouge;
         }),
         borderColor: projetsAffiches.map((p) => {
-          if (p.statut_sante === "vert") return "#16a34a";
+          if (p.statut_sante === "vert") return "#5ccf5c";
           if (p.statut_sante === "orange") return "#d97706";
           return "#dc2626";
         }),
@@ -520,11 +363,7 @@ export default function Dashboard() {
     datasets: [
       {
         data: [statsAffiches.vert, statsAffiches.orange, statsAffiches.rouge],
-        backgroundColor: [
-          CHART_COLORS.vert,
-          CHART_COLORS.orange,
-          CHART_COLORS.rouge,
-        ],
+        backgroundColor: [CHART_COLORS.vert, CHART_COLORS.orange, CHART_COLORS.rouge],
         borderColor: ["#ffffff", "#ffffff", "#ffffff"],
         borderWidth: 3,
       },
@@ -538,7 +377,7 @@ export default function Dashboard() {
         label: "Projets en cours",
         data: evolutionAffiche.actifs || Array(12).fill(0),
         borderColor: CHART_COLORS.bleu,
-        backgroundColor: "rgba(59, 130, 246, 0.1)",
+        backgroundColor: "rgba(79, 176, 241, 0.1)",
         fill: true,
         tension: 0.4,
         pointBackgroundColor: CHART_COLORS.bleu,
@@ -548,7 +387,7 @@ export default function Dashboard() {
         label: "Projets terminés",
         data: evolutionAffiche.termines || Array(12).fill(0),
         borderColor: CHART_COLORS.vert,
-        backgroundColor: "rgba(34, 197, 94, 0.1)",
+        backgroundColor: "rgba(125, 249, 121, 0.1)",
         fill: true,
         tension: 0.4,
         pointBackgroundColor: CHART_COLORS.vert,
@@ -558,11 +397,7 @@ export default function Dashboard() {
   };
 
   const getStatutLabel = (statut) => {
-    const labels = {
-      vert: "Bon",
-      orange: "Attention",
-      rouge: "Critique",
-    };
+    const labels = { vert: "Bon", orange: "Attention", rouge: "Critique" };
     return labels[statut] || statut;
   };
 
@@ -575,7 +410,7 @@ export default function Dashboard() {
       {/* En-tête avec animation */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 animate__animated animate__fadeInDown">
         <div>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#0b2241] to-[#4fb0f1] bg-clip-text text-transparent">
             Bonjour {user?.prenom || ""} {user?.nom || ""} !
           </h1>
           <p className="text-sm text-slate-500">Voici l'ensemble des projets.</p>
@@ -583,30 +418,27 @@ export default function Dashboard() {
         <button
           onClick={handleRefresh}
           disabled={loading}
-          className="mt-2 sm:mt-0 flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-[#63B23E] text-white text-sm sm:text-base  hover:bg-[#3F894E] transition-colors disabled:opacity-50"
+          className="mt-2 sm:mt-0 flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-[#4fb0f1] to-[#7df979] text-[#0b2241] font-semibold text-sm sm:text-base hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50"
         >
           <RefreshIcon spinning={loading} className="w-4 h-4" />
           {loading ? "Chargement…" : "Rafraîchir"}
         </button>
       </div>
 
-      {/* Chargement avec animation */}
+      {/* Chargement */}
       {loading && (
         <div className="flex justify-center items-center py-12 animate__animated animate__pulse">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#63B23E]"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4fb0f1]"></div>
           <span className="ml-3 text-slate-500">{"Chargement…"}</span>
         </div>
       )}
 
       {/* Erreur */}
       {erreur && (
-        <div className="mb-4  bg-red-50 px-4 py-3 text-sm text-red-700 border border-red-200 animate__animated animate__shakeX">
+        <div className="mb-4 bg-red-50 px-4 py-3 text-sm text-red-700 border border-red-200 animate__animated animate__shakeX">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <span>⚠️ {erreur}</span>
-            <button
-              onClick={handleRefresh}
-              className="text-red-600 hover:text-red-800 underline text-sm sm:text-base"
-            >
+            <button onClick={handleRefresh} className="text-red-600 hover:text-red-800 underline text-sm sm:text-base">
               Réessayer
             </button>
           </div>
@@ -629,10 +461,10 @@ export default function Dashboard() {
                   className={`px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors ${
                     vueFinance === t.id
                       ? t.id === "national"
-                        ? "bg-green-600 text-white"
+                        ? "bg-[#7df979] text-[#0b2241]"
                         : t.id === "international"
-                          ? "bg-blue-600 text-white"
-                          : "bg-[#63B23E] text-white"
+                          ? "bg-[#4fb0f1] text-white"
+                          : "bg-gradient-to-r from-[#4fb0f1] to-[#7df979] text-[#0b2241]"
                       : "text-slate-600 hover:bg-slate-100"
                   }`}
                 >
@@ -642,7 +474,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Statistiques financières (direction / DRH uniquement) — selon l'onglet */}
+          {/* Statistiques financières */}
           {estFinance && (
             <div className="mb-4 sm:mb-6 space-y-3 sm:space-y-4">
               {vueFinance === "tous" && (
@@ -684,66 +516,35 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* Cartes statistiques avec animation */}
+          {/* Cartes statistiques */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
             <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.05s' }}>
-              <StatCard
-                title={"Total Projet"}
-                value={statsAffiches.total}
-                color="text-slate-900"
-                icon={<DashboardIcon className="w-5 h-5 text-slate-600" />}
-              />
+              <StatCard title={"Total Projet"} value={statsAffiches.total} color="text-[#0b2241]" icon={<DashboardIcon className="w-5 h-5 text-[#4fb0f1]" />} />
             </div>
             <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.10s' }}>
-              <StatCard
-                title={"En bon état"}
-                value={statsAffiches.vert}
-                color="text-green-600"
-                icon={<BonIcon className="w-5 h-5 text-green-600" />}
-              />
+              <StatCard title={"En bon état"} value={statsAffiches.vert} color="text-green-600" icon={<BonIcon className="w-5 h-5 text-[#7df979]" />} />
             </div>
             <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.15s' }}>
-              <StatCard
-                title={"Attention"}
-                value={statsAffiches.orange}
-                color="text-orange-600"
-                icon={<AttentionIcon className="w-5 h-5 text-orange-600" />}
-              />
+              <StatCard title={"Attention"} value={statsAffiches.orange} color="text-orange-600" icon={<AttentionIcon className="w-5 h-5 text-orange-600" />} />
             </div>
             <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.20s' }}>
-              <StatCard
-                title={"Critique"}
-                value={statsAffiches.rouge}
-                color="text-red-600"
-                icon={<CritiqueIcon className="w-5 h-5 text-red-600" />}
-              />
+              <StatCard title={"Critique"} value={statsAffiches.rouge} color="text-red-600" icon={<CritiqueIcon className="w-5 h-5 text-red-600" />} />
             </div>
             <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.25s' }}>
-              <StatCard
-                title={"Moyenne"}
-                value={`${statsAffiches.avancementMoyen}%`}
-                color="text-blue-600"
-                icon={<TachesIcon className="w-5 h-5 text-blue-600" />}
-              />
+              <StatCard title={"Moyenne"} value={`${statsAffiches.avancementMoyen}%`} color="text-[#4fb0f1]" icon={<TachesIcon className="w-5 h-5 text-[#4fb0f1]" />} />
             </div>
             <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.30s' }}>
-              <StatCard
-                title={"Tâches"}
-                value={`${statsAffiches.tachesTerminees}/${statsAffiches.tachesTotales}`}
-                color="text-purple-600"
-                icon={<TachesIcon className="w-5 h-5 text-purple-600" />}
-              />
+              <StatCard title={"Tâches"} value={`${statsAffiches.tachesTerminees}/${statsAffiches.tachesTotales}`} color="text-[#7DA1AF]" icon={<TachesIcon className="w-5 h-5 text-[#7DA1AF]" />} />
             </div>
           </div>
 
-          {/* Graphiques avec animation */}
+          {/* Graphiques */}
           {projetsAffiches.length > 0 ? (
             <>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
-                {/* Graphique en barres */}
-                <div className="bg-white border border-slate-200 p-3 sm:p-4 shadow-sm  animate__animated animate__fadeInUp" style={{ animationDelay: '0.10s' }}>
+                <div className="bg-white border border-slate-200 p-3 sm:p-4 shadow-sm animate__animated animate__fadeInUp" style={{ animationDelay: '0.10s' }}>
                   <h3 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2 sm:mb-3 flex items-center gap-2">
-                    <ProjetsIcon className="w-4 h-4 text-slate-500" />
+                    <ProjetsIcon className="w-4 h-4 text-[#4fb0f1]" />
                     Avancement des projets
                   </h3>
                   <div className="h-48 sm:h-56 md:h-64">
@@ -751,39 +552,23 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Graphique en donut */}
-                <div className="bg-white border border-slate-200 p-3 sm:p-4 shadow-sm  animate__animated animate__fadeInUp" style={{ animationDelay: '0.20s' }}>
+                <div className="bg-white border border-slate-200 p-3 sm:p-4 shadow-sm animate__animated animate__fadeInUp" style={{ animationDelay: '0.20s' }}>
                   <h3 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2 sm:mb-3 flex items-center gap-2">
-                    <DashboardIcon className="w-4 h-4 text-slate-500" />
+                    <DashboardIcon className="w-4 h-4 text-[#4fb0f1]" />
                     Répartition des statuts
                   </h3>
                   <div className="h-48 sm:h-56 md:h-64 flex items-center justify-center">
                     <div className="w-40 sm:w-52 md:w-64 h-40 sm:h-52 md:h-64">
-                      <Doughnut
-                        data={doughnutChartData}
-                        options={doughnutOptions}
-                      />
+                      <Doughnut data={doughnutChartData} options={doughnutOptions} />
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Graphique linéaire */}
-              <div className="bg-white border border-slate-200 p-3 sm:p-4 shadow-sm  mb-4 sm:mb-6 animate__animated animate__fadeInUp" style={{ animationDelay: '0.30s' }}>
+              <div className="bg-white border border-slate-200 p-3 sm:p-4 shadow-sm mb-4 sm:mb-6 animate__animated animate__fadeInUp" style={{ animationDelay: '0.30s' }}>
                 <h3 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2 sm:mb-3 flex items-center gap-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-4 h-4 text-slate-500"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1.5-1.5m0 0l-1.5 1.5m1.5-1.5V3.75m-7.5 0h16.5"
-                    />
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-[#4fb0f1]">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1.5-1.5m0 0l-1.5 1.5m1.5-1.5V3.75m-7.5 0h16.5" />
                   </svg>
                   Évolution des projets
                 </h3>
@@ -792,21 +577,16 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Liste des projets */}
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-2 sm:mb-3">
                   <h3 className="text-xs sm:text-sm font-semibold text-slate-700 flex items-center gap-2">
-                    <ProjetsIcon className="w-4 h-4 text-slate-500" />
+                    <ProjetsIcon className="w-4 h-4 text-[#4fb0f1]" />
                     Liste des projets ({projetsAffiches.length})
                   </h3>
                 </div>
                 <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {projetsAffiches.map((p, index) => (
-                    <div 
-                      key={p.id} 
-                      className="animate__animated animate__fadeInUp" 
-                      style={{ animationDelay: `${0.05 + (index * 0.05)}s` }}
-                    >
+                    <div key={p.id} className="animate__animated animate__fadeInUp" style={{ animationDelay: `${0.05 + (index * 0.05)}s` }}>
                       <ProjectCard projet={p} />
                     </div>
                   ))}
@@ -814,7 +594,7 @@ export default function Dashboard() {
               </div>
             </>
           ) : (
-            <div className="text-center py-8 sm:py-12 bg-slate-50 border border-slate-200  animate__animated animate__fadeInUp">
+            <div className="text-center py-8 sm:py-12 bg-slate-50 border border-slate-200 animate__animated animate__fadeInUp">
               <p className="text-slate-500">
                 {vueFinance === "national"
                   ? "Aucun projet national pour le moment."
@@ -830,48 +610,20 @@ export default function Dashboard() {
   );
 }
 
-// Bloc financier « National » ou « International » — cartes + encaissé par mois
-// `section` : stats d'une devise donnée (StatsParDevise) ; `sections` : plusieurs
-// devises internationales éventuelles (EUR, USD…) à afficher en sous-blocs.
-function BlocFinance({
-  titre,
-  sousTitre,
-  section,
-  devise,
-  messageVide,
-  accent,
-  animationDelay,
-  sections = null,
-}) {
+// Bloc financier
+function BlocFinance({ titre, sousTitre, section, devise, messageVide, accent, animationDelay, sections = null }) {
   const sousBlocs =
     sections && sections.length > 0
       ? sections.map((s, i) => (
-          <SousBlocFinance
-            key={s.devise}
-            section={s}
-            devise={s.devise}
-            accent={accent}
-            vide={i === 0 ? messageVide : "Aucun encaissement pour le moment."}
-          />
+          <SousBlocFinance key={s.devise} section={s} devise={s.devise} accent={accent} vide={i === 0 ? messageVide : "Aucun encaissement pour le moment."} />
         ))
-      : [
-          <SousBlocFinance
-            key="defaut"
-            section={section}
-            devise={devise}
-            accent={accent}
-            vide={messageVide || "Aucun encaissement pour le moment."}
-          />,
-        ];
+      : [<SousBlocFinance key="defaut" section={section} devise={devise} accent={accent} vide={messageVide || "Aucun encaissement pour le moment."} />];
 
   return (
-    <div
-      className="bg-white border border-slate-200 p-3 sm:p-4 shadow-sm animate__animated animate__fadeInUp"
-      style={{ animationDelay }}
-    >
+    <div className="bg-white border border-slate-200 p-3 sm:p-4 shadow-sm animate__animated animate__fadeInUp" style={{ animationDelay }}>
       <div className="mb-2 sm:mb-3 flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-xs sm:text-sm font-semibold text-slate-700 flex items-center gap-2">
-          <MoneyIcon className="w-4 h-4 text-slate-500" />
+          <MoneyIcon className="w-4 h-4 text-[#4fb0f1]" />
           {titre}
         </h3>
         <span className="text-[10px] sm:text-xs text-slate-400">{sousTitre}</span>
@@ -881,7 +633,7 @@ function BlocFinance({
   );
 }
 
-// Cartes + graphique « Encaissé par mois » pour une devise précise.
+// Sous-bloc finance
 function SousBlocFinance({ section, devise, accent, vide }) {
   const items = section?.encaisse_par_mois || [];
   const chartData = {
@@ -917,19 +669,14 @@ function SousBlocFinance({ section, devise, accent, vide }) {
       y: {
         beginAtZero: true,
         ticks: {
-          callback: (value) =>
-            new Intl.NumberFormat("fr-FR", { notation: "compact" }).format(value),
-          font: {
-            size: window.innerWidth < 640 ? 8 : 10,
-          },
+          callback: (value) => new Intl.NumberFormat("fr-FR", { notation: "compact" }).format(value),
+          font: { size: window.innerWidth < 640 ? 8 : 10 },
         },
       },
       x: {
         grid: { display: false },
         ticks: {
-          font: {
-            size: window.innerWidth < 640 ? 8 : 10,
-          },
+          font: { size: window.innerWidth < 640 ? 8 : 10 },
           maxRotation: window.innerWidth < 640 ? 45 : 0,
           minRotation: window.innerWidth < 640 ? 45 : 0,
         },
@@ -940,42 +687,15 @@ function SousBlocFinance({ section, devise, accent, vide }) {
   return (
     <div>
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
-        <StatCard
-          title={"CA encaissé"}
-          value={formatMontant(section?.ca_encaisse, devise)}
-          color="text-emerald-600"
-          icon={<MoneyIcon className="w-5 h-5 text-emerald-600" />}
-        />
-        <StatCard
-          title={"Reste à payer"}
-          value={formatMontant(section?.reste_a_payer, devise)}
-          color="text-amber-600"
-          icon={<MoneyIcon className="w-5 h-5 text-amber-600" />}
-        />
-        <StatCard
-          title={"En attente"}
-          value={formatMontant(section?.en_attente, devise)}
-          color="text-blue-600"
-          icon={<MoneyIcon className="w-5 h-5 text-blue-600" />}
-        />
-        <StatCard
-          title={"Factures"}
-          value={section?.total_factures ?? 0}
-          color="text-slate-800"
-          icon={<MoneyIcon className="w-5 h-5 text-slate-600" />}
-        />
-        <StatCard
-          title={"Impayées"}
-          value={section?.impayees ?? 0}
-          color="text-red-600"
-          icon={<MoneyIcon className="w-5 h-5 text-red-600" />}
-        />
+        <StatCard title={"CA encaissé"} value={formatMontant(section?.ca_encaisse, devise)} color="text-[#3a8a3a]" icon={<MoneyIcon className="w-5 h-5 text-[#7df979]" />} />
+        <StatCard title={"Reste à payer"} value={formatMontant(section?.reste_a_payer, devise)} color="text-amber-600" icon={<MoneyIcon className="w-5 h-5 text-amber-600" />} />
+        <StatCard title={"En attente"} value={formatMontant(section?.en_attente, devise)} color="text-[#4fb0f1]" icon={<MoneyIcon className="w-5 h-5 text-[#4fb0f1]" />} />
+        <StatCard title={"Factures"} value={section?.total_factures ?? 0} color="text-[#0b2241]" icon={<MoneyIcon className="w-5 h-5 text-[#4fb0f1]" />} />
+        <StatCard title={"Impayées"} value={section?.impayees ?? 0} color="text-red-600" icon={<MoneyIcon className="w-5 h-5 text-red-600" />} />
       </div>
 
       <div className="mt-2 sm:mt-3">
-        <h4 className="text-xs font-semibold text-slate-600 mb-1 sm:mb-2">
-          Encaissé par mois ({devise})
-        </h4>
+        <h4 className="text-xs font-semibold text-slate-600 mb-1 sm:mb-2">Encaissé par mois ({devise})</h4>
         {items.length > 0 ? (
           <div className="h-44 sm:h-48">
             <Bar data={chartData} options={options} />
@@ -988,124 +708,72 @@ function SousBlocFinance({ section, devise, accent, vide }) {
   );
 }
 
-// Composant StatCard avec icône SVG et animation au survol
+// Composant StatCard
 function StatCard({ title, value, color, icon }) {
   return (
-    <div className="bg-white border border-slate-200 p-2 sm:p-3 md:p-4 shadow-sm  hover:shadow-md transition-all duration-300 hover:border-[#63B23E] hover:scale-105">
+    <div className="bg-white border border-slate-200 p-2 sm:p-3 md:p-4 shadow-sm hover:shadow-md transition-all duration-300 hover:border-[#4fb0f1] hover:scale-105">
       <div className="flex items-center gap-1.5 sm:gap-2">
         <div className="flex-shrink-0">{icon}</div>
         <div className="min-w-0">
-          <p className="text-[8px] sm:text-[10px] text-slate-500 uppercase tracking-wider truncate">
-            {title}
-          </p>
-          <p
-            className={`text-sm sm:text-base md:text-xl font-bold truncate ${color}`}
-          >
-            {value}
-          </p>
+          <p className="text-[8px] sm:text-[10px] text-slate-500 uppercase tracking-wider truncate">{title}</p>
+          <p className={`text-sm sm:text-base md:text-xl font-bold truncate ${color}`}>{value}</p>
         </div>
       </div>
     </div>
   );
 }
 
-// Composant ProjectCard avec icônes SVG
+// Composant ProjectCard
 function ProjectCard({ projet }) {
   const getStatutLabel = (statut) => {
-    const labels = {
-      vert: "Bon",
-      orange: "Attention",
-      rouge: "Critique",
-    };
+    const labels = { vert: "Bon", orange: "Attention", rouge: "Critique" };
     return labels[statut] || statut;
   };
 
   const couleurStatut = {
-    vert: "bg-green-100 text-green-800",
-    orange: "bg-orange-100 text-orange-800",
-    rouge: "bg-red-100 text-red-800",
+    vert: "bg-[#7df979]/20 text-[#3a8a3a]",
+    orange: "bg-amber-100 text-amber-700",
+    rouge: "bg-red-100 text-red-700",
   };
 
-  const statutIcone = {
-    vert: "🟢",
-    orange: "🟠",
-    rouge: "🔴",
-  };
+  const statutIcone = { vert: "🟢", orange: "🟠", rouge: "🔴" };
 
   return (
     <div
-      className="group border border-slate-200 bg-white p-3 sm:p-4 shadow-sm hover:shadow-md hover:border-[#63B23E] transition-all duration-300  cursor-pointer hover:-translate-y-1"
+      className="group border border-slate-200 bg-white p-3 sm:p-4 shadow-sm hover:shadow-md hover:border-[#4fb0f1] transition-all duration-300 cursor-pointer hover:-translate-y-1"
       onClick={() => (window.location.href = `/projets/${projet.id}`)}
     >
       <div className="mb-2 flex items-start justify-between gap-2">
-        <h2 className="font-semibold text-slate-900 truncate text-xs sm:text-sm md:text-base">
-          {projet.nom || "Sans nom"}
-        </h2>
-        <span
-          className={`flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2.5 py-0.5 text-[10px] sm:text-xs font-medium whitespace-nowrap flex-shrink-0 rounded-full ${
-            couleurStatut[projet.statut_sante] || "bg-slate-100 text-slate-700"
-          }`}
-        >
-          <span className="text-[10px] sm:text-xs">
-            {statutIcone[projet.statut_sante] || "⚪"}
-          </span>
-          <span className="hidden xs:inline">
-            {getStatutLabel(projet.statut_sante)}
-          </span>
+        <h2 className="font-semibold text-slate-900 truncate text-xs sm:text-sm md:text-base">{projet.nom || "Sans nom"}</h2>
+        <span className={`flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2.5 py-0.5 text-[10px] sm:text-xs font-medium whitespace-nowrap flex-shrink-0 ${couleurStatut[projet.statut_sante] || "bg-slate-100 text-slate-700"}`}>
+          <span className="text-[10px] sm:text-xs">{statutIcone[projet.statut_sante] || "⚪"}</span>
+          <span className="hidden xs:inline">{getStatutLabel(projet.statut_sante)}</span>
         </span>
       </div>
 
       {projet.client && (
         <div className="flex items-center gap-1 text-[10px] sm:text-xs text-slate-500 mb-2 truncate">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-3 h-3 flex-shrink-0"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
-            />
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3 flex-shrink-0">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
           </svg>
           {projet.client}
         </div>
       )}
 
-      <div className="mb-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+      <div className="mb-1 h-1.5 w-full overflow-hidden bg-slate-100">
         <div
           className={`h-full rounded-full transition-all duration-500 ${
-            (projet.avancement_pct || 0) >= 80
-              ? "bg-green-500"
-              : (projet.avancement_pct || 0) >= 40
-                ? "bg-yellow-500"
-                : "bg-blue-500"
+            (projet.avancement_pct || 0) >= 80 ? "bg-[#7df979]" : (projet.avancement_pct || 0) >= 40 ? "bg-[#4fb0f1]" : "bg-[#7afdf2]"
           }`}
           style={{ width: `${projet.avancement_pct || 0}%` }}
         />
       </div>
 
       <div className="flex justify-between items-center mt-1">
-        <p className="text-[10px] sm:text-xs text-slate-500">
-          {projet.avancement_pct || 0}% terminé
-        </p>
+        <p className="text-[10px] sm:text-xs text-slate-500">{projet.avancement_pct || 0}% terminé</p>
         <span className="text-[10px] sm:text-xs text-slate-400 flex items-center gap-1">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-3 h-3"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           {projet.taches_terminees || 0}/{projet.taches_total || 0}
         </span>
@@ -1113,19 +781,8 @@ function ProjectCard({ projet }) {
 
       {projet.date_fin_prevue && (
         <div className="flex items-center gap-1 text-[10px] sm:text-xs text-slate-400 mt-2">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-3 h-3"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
-            />
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
           </svg>
           {new Date(projet.date_fin_prevue).toLocaleDateString("fr-FR")}
         </div>

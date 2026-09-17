@@ -5,6 +5,7 @@ import { projetsService } from "../../api/projets";
 import { clientsService } from "../../api/client";
 import { utilisateursService } from "../../api/utilisateurs";
 import { useMessage } from "../../context/MessageContext";
+import { useAuth } from "../../auth/AuthContext";
 import 'animate.css';
 
 // Icônes SVG
@@ -38,11 +39,17 @@ const CalendarIcon = ({ className = "w-4 h-4" }) => (
   </svg>
 );
 
-// Couleurs des statuts
+const SearchIcon = ({ className = "w-4 h-4" }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+  </svg>
+);
+
+// Couleurs des statuts (charte i-Rindra)
 const couleurStatut = {
-  vert: "bg-green-100 text-green-800",
-  orange: "bg-orange-100 text-orange-800",
-  rouge: "bg-red-100 text-red-800",
+  vert: "bg-[#7df979]/20 text-[#3a8a3a]",
+  orange: "bg-amber-100 text-amber-700",
+  rouge: "bg-red-100 text-red-700",
 };
 
 const statutIcone = {
@@ -56,9 +63,12 @@ const getStatutLabel = (statut) => {
   return labels[statut] || statut;
 };
 
+const ROLES_GESTION = ["direction", "drh", "chef_de_projet"];
+
 export default function Projets() {
   const navigate = useNavigate();
-  const { showError } = useMessage();
+  const { user } = useAuth();
+  const { showError, showSuccess, showConfirm } = useMessage();
 
   const [projets, setProjets] = useState([]);
   const [clients, setClients] = useState([]);
@@ -108,7 +118,6 @@ export default function Projets() {
   // ---------- CHAT (redirection e-resaka) ----------
   const chat = (projet, e) => {
     e?.stopPropagation();
-    // Ouvrir le chat du projet dans e-resaka
     const url = `https://e-resaka.example.com/chat?projet=${projet.id}`;
     window.open(url, "_blank", "noopener,noreferrer");
   };
@@ -129,18 +138,18 @@ export default function Projets() {
 
   const statuts = [
     { id: "tous", label: "Tous", color: "bg-slate-100 text-slate-700" },
-    { id: "vert", label: "🟢 Bon", color: "bg-green-100 text-green-800" },
-    { id: "orange", label: "🟠 Attention", color: "bg-orange-100 text-orange-800" },
-    { id: "rouge", label: "🔴 Critique", color: "bg-red-100 text-red-800" },
+    { id: "vert", label: "🟢 Bon", color: "bg-[#7df979]/20 text-[#3a8a3a]" },
+    { id: "orange", label: "🟠 Attention", color: "bg-amber-100 text-amber-700" },
+    { id: "rouge", label: "🔴 Critique", color: "bg-red-100 text-red-700" },
   ];
 
   return (
     <div className="animate__animated animate__fadeIn w-full px-4 sm:px-6 lg:px-8">
-      {/* En-tête */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+      {/* En-tête avec animation */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 animate__animated animate__fadeInDown">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
-            {"Projets"}
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-[#0b2241] to-[#4fb0f1] bg-clip-text text-transparent">
+            Projets
           </h1>
           <p className="text-sm text-slate-500">
             {projets.length} projet{projets.length > 1 ? "s" : ""}
@@ -149,15 +158,15 @@ export default function Projets() {
       </div>
 
       {/* Filtres */}
-      <div className="flex flex-wrap items-center gap-3 mb-6">
+      <div className="flex flex-wrap items-center gap-3 mb-6 animate__animated animate__fadeInUp">
         <div className="flex flex-wrap gap-1.5">
           {statuts.map((s) => (
             <button
               key={s.id}
               onClick={() => setFiltreStatut(s.id)}
-              className={`px-3 py-1.5 text-xs font-medium  transition-colors ${
+              className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all duration-200 ${
                 filtreStatut === s.id
-                  ? s.color + " ring-2 ring-offset-1 ring-slate-300"
+                  ? s.color + " ring-2 ring-offset-1 ring-[#4fb0f1] shadow-sm"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
@@ -174,9 +183,9 @@ export default function Projets() {
             <button
               key={a.id}
               onClick={() => setFiltreArchive(a.id)}
-              className={`px-3 py-1.5 text-xs font-medium  transition-colors ${
+              className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all duration-200 ${
                 filtreArchive === a.id
-                  ? "bg-slate-800 text-white ring-2 ring-offset-1 ring-slate-400"
+                  ? "bg-gradient-to-r from-[#4fb0f1] to-[#7df979] text-[#0b2241] font-semibold ring-2 ring-offset-1 ring-[#4fb0f1] shadow-sm"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
@@ -184,13 +193,14 @@ export default function Projets() {
             </button>
           ))}
         </div>
-        <div className="flex-1 min-w-[150px]">
+        <div className="flex-1 min-w-[150px] relative">
+          <SearchIcon className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             value={recherche}
             onChange={(e) => setRecherche(e.target.value)}
             placeholder="Rechercher un projet..."
-            className="w-full px-3 py-1.5 text-sm border border-slate-300  focus:outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+            className="w-full pl-9 pr-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4fb0f1] focus:border-transparent"
           />
         </div>
         <span className="text-xs text-slate-400 whitespace-nowrap">
@@ -199,27 +209,27 @@ export default function Projets() {
       </div>
 
       {loading && (
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin  h-8 w-8 border-b-2 border-[#63B23E]"></div>
-          <span className="ml-3 text-slate-500">{"Chargement…"}</span>
+        <div className="flex justify-center items-center py-12 animate__animated animate__pulse">
+          <div className="animate-spin h-8 w-8 border-b-2 border-[#4fb0f1] rounded-full"></div>
+          <span className="ml-3 text-slate-500">Chargement…</span>
         </div>
       )}
       {erreur && <p className="text-red-600">{erreur}</p>}
 
       {!loading && !erreur && projetsFiltres.length === 0 && (
-        <div className="border border-dashed border-slate-300 p-10 text-center text-slate-500 ">
+        <div className="border border-dashed border-slate-300 p-10 text-center text-slate-500 rounded-lg animate__animated animate__fadeInUp">
           {recherche || filtreStatut !== "tous" || filtreArchive !== "actifs" ? (
             <>
               <p>Aucun projet ne correspond à vos filtres.</p>
               <button
                 onClick={() => { setFiltreStatut("tous"); setRecherche(""); setFiltreArchive("actifs"); }}
-                className="mt-2 text-[#63B23E] hover:underline"
+                className="mt-2 text-[#4fb0f1] hover:underline font-medium"
               >
                 Réinitialiser les filtres
               </button>
             </>
           ) : (
-            <p>{"Aucun projet. Cliquez sur « Nouveau projet » pour commencer."}</p>
+            <p>Aucun projet. Cliquez sur « Nouveau projet » pour commencer.</p>
           )}
         </div>
       )}
@@ -230,7 +240,7 @@ export default function Projets() {
           <div
             key={p.id}
             onClick={() => navigate(`/projets/${p.id}`)}
-            className="group relative cursor-pointer border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:border-[#63B23E]  animate__animated animate__fadeInUp"
+            className="group relative cursor-pointer border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:shadow-lg hover:border-[#4fb0f1] rounded-lg animate__animated animate__fadeInUp hover:-translate-y-1"
             style={{ animationDelay: `${index * 50}ms` }}
           >
             {/* En-tête avec nom et statut */}
@@ -243,13 +253,13 @@ export default function Projets() {
                 {p.nom}
               </h2>
               {p.archive ? (
-                <span className="flex items-center gap-1 shrink-0 px-2 py-0.5 text-xs font-medium  bg-slate-200 text-slate-600">
+                <span className="flex items-center gap-1 shrink-0 px-2 py-0.5 text-xs font-medium rounded-full bg-slate-200 text-slate-600">
                   <ArchiveIcon className="w-3 h-3" />
                   <span className="hidden sm:inline">Archivé</span>
                 </span>
               ) : (
                 <span
-                  className={`flex items-center gap-2 shrink-0 px-2 py-0.5 text-xs font-medium  ${
+                  className={`flex items-center gap-2 shrink-0 px-2 py-0.5 text-xs font-medium rounded-full ${
                     couleurStatut[p.statut_sante] || "bg-slate-100 text-slate-700"
                   }`}
                 >
@@ -262,17 +272,17 @@ export default function Projets() {
             {/* Informations du projet */}
             <div className="space-y-1.5 text-xs text-slate-500">
               <div className="flex items-center gap-1">
-                <BuildingIcon className="w-3.5 h-3.5" />
+                <BuildingIcon className="w-3.5 h-3.5 text-[#4fb0f1]" />
                 <span>Client : {nomClient(p.client_id)}</span>
               </div>
               {p.responsable_id && (
                 <div className="flex items-center gap-1">
-                  <UserIcon className="w-3.5 h-3.5" />
+                  <UserIcon className="w-3.5 h-3.5 text-[#4fb0f1]" />
                   <span>Responsable : {nomResponsable(p.responsable_id)}</span>
                 </div>
               )}
               <div className="flex items-center gap-1">
-                <CalendarIcon className="w-3.5 h-3.5" />
+                <CalendarIcon className="w-3.5 h-3.5 text-[#4fb0f1]" />
                 <span>
                   Début : {p.date_debut
                     ? new Date(p.date_debut).toLocaleDateString("fr-FR")
@@ -281,7 +291,7 @@ export default function Projets() {
               </div>
               {p.date_fin_prevue && (
                 <div className="flex items-center gap-1">
-                  <CalendarIcon className="w-3.5 h-3.5" />
+                  <CalendarIcon className="w-3.5 h-3.5 text-[#4fb0f1]" />
                   <span>Fin : {new Date(p.date_fin_prevue).toLocaleDateString("fr-FR")}</span>
                 </div>
               )}
@@ -289,21 +299,21 @@ export default function Projets() {
 
             {/* Barre de progression */}
             <div className="mt-3">
-              <div className="mb-1 h-1.5 w-full overflow-hidden  bg-slate-100">
+              <div className="mb-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
                 <div
-                  className={`h-full  transition-all duration-500 ${
+                  className={`h-full rounded-full transition-all duration-500 ${
                     (p.avancement_pct || 0) >= 80
-                      ? "bg-green-500"
+                      ? "bg-[#7df979]"
                       : (p.avancement_pct || 0) >= 40
-                      ? "bg-yellow-500"
-                      : "bg-blue-500"
+                      ? "bg-[#4fb0f1]"
+                      : "bg-[#7afdf2]"
                   }`}
                   style={{ width: `${p.avancement_pct || 0}%` }}
                 />
               </div>
               <div className="flex justify-between items-center">
                 <p className="text-xs text-slate-500">
-                  {p.avancement_pct || 0}% {"terminé"}
+                  {p.avancement_pct || 0}% terminé
                 </p>
                 <span className="text-xs text-slate-400">
                   {p.taches_terminees || 0}/{p.taches_total || 0} tâches
@@ -311,14 +321,13 @@ export default function Projets() {
               </div>
             </div>
 
-            {/* Bouton actions en bas à droite - visible sur desktop (chat uniquement :
-                la gestion du cycle de vie du projet est gérée depuis B-estimation) */}
+            {/* Bouton Chat en bas à droite */}
             <div className="mt-3 pt-2 border-t border-slate-100 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               {!p.archive && (
                 <button
                   onClick={(e) => chat(p, e)}
                   title="Accéder au chat du projet"
-                  className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50  transition-colors"
+                  className="p-1.5 text-slate-500 hover:text-[#4fb0f1] hover:bg-[#4fb0f1]/10 rounded-lg transition-colors"
                 >
                   <ChatIcon className="w-4 h-4" />
                 </button>

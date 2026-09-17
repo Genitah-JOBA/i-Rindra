@@ -349,9 +349,14 @@ async def archiver_projet(
     projet_id: int,
     projet: Projet = Depends(check_projet_access),
     db: AsyncSession = Depends(get_db),
-    _: str = Depends(_projets_b_estimation)
+    _: str = Depends(check_direction_or_chef_projet)
 ):
     """Archive un projet (soft delete)"""
+    if projet.archive:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ce projet est déjà archivé"
+        )
     projet.archive = True
     await db.commit()
     await db.refresh(projet)
@@ -363,9 +368,14 @@ async def desarchiver_projet(
     projet_id: int,
     projet: Projet = Depends(check_projet_access),
     db: AsyncSession = Depends(get_db),
-    _: str = Depends(_projets_b_estimation)
+    _: str = Depends(check_direction_or_chef_projet)
 ):
     """Désarchive un projet"""
+    if not projet.archive:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ce projet n'est pas archivé"
+        )
     projet.archive = False
     await db.commit()
     await db.refresh(projet)
