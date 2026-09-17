@@ -122,6 +122,34 @@ export default function Projets() {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
+  const peutArchiver = user && ROLES_GESTION.includes(user.role);
+
+  const basculerArchive = async (projet, e) => {
+    e?.stopPropagation();
+    const archiver = !projet.archive;
+    const ok = await showConfirm({
+      title: archiver ? "Archiver le projet" : "Désarchiver le projet",
+      message: archiver
+        ? `Voulez-vous archiver le projet « ${projet.nom} » ?`
+        : `Voulez-vous désarchiver le projet « ${projet.nom} » ?`,
+      confirmLabel: archiver ? "Archiver" : "Désarchiver",
+      cancelLabel: "Annuler",
+    });
+    if (!ok) return;
+    try {
+      const maj = archiver
+        ? await projetsService.archiver(projet.id)
+        : await projetsService.desarchiver(projet.id);
+      setProjets((prev) =>
+        prev.map((p) => (p.id === projet.id ? { ...p, archive: maj.archive } : p))
+      );
+      showSuccess(archiver ? "Projet archivé." : "Projet désarchivé.");
+    } catch (err) {
+      const msg = err.response?.data?.detail || "Erreur lors de l'opération.";
+      showError(msg);
+    }
+  };
+
   const nomClient = (id) => clients.find((c) => c.id === id)?.nom || "—";
   const nomResponsable = (id) => responsables.find((r) => r.id === id)?.prenom + " " + responsables.find((r) => r.id === id)?.nom || "—";
 
@@ -164,7 +192,7 @@ export default function Projets() {
             <button
               key={s.id}
               onClick={() => setFiltreStatut(s.id)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all duration-200 ${
+              className={`px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
                 filtreStatut === s.id
                   ? s.color + " ring-2 ring-offset-1 ring-[#4fb0f1] shadow-sm"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -183,7 +211,7 @@ export default function Projets() {
             <button
               key={a.id}
               onClick={() => setFiltreArchive(a.id)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all duration-200 ${
+              className={`px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
                 filtreArchive === a.id
                   ? "bg-gradient-to-r from-[#4fb0f1] to-[#7df979] text-[#0b2241] font-semibold ring-2 ring-offset-1 ring-[#4fb0f1] shadow-sm"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -200,7 +228,7 @@ export default function Projets() {
             value={recherche}
             onChange={(e) => setRecherche(e.target.value)}
             placeholder="Rechercher un projet..."
-            className="w-full pl-9 pr-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4fb0f1] focus:border-transparent"
+            className="w-full pl-9 pr-3 py-1.5 text-sm border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#4fb0f1] focus:border-transparent"
           />
         </div>
         <span className="text-xs text-slate-400 whitespace-nowrap">
@@ -217,7 +245,7 @@ export default function Projets() {
       {erreur && <p className="text-red-600">{erreur}</p>}
 
       {!loading && !erreur && projetsFiltres.length === 0 && (
-        <div className="border border-dashed border-slate-300 p-10 text-center text-slate-500 rounded-lg animate__animated animate__fadeInUp">
+        <div className="border border-dashed border-slate-300 p-10 text-center text-slate-500 animate__animated animate__fadeInUp">
           {recherche || filtreStatut !== "tous" || filtreArchive !== "actifs" ? (
             <>
               <p>Aucun projet ne correspond à vos filtres.</p>
@@ -240,7 +268,7 @@ export default function Projets() {
           <div
             key={p.id}
             onClick={() => navigate(`/projets/${p.id}`)}
-            className="group relative cursor-pointer border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:shadow-lg hover:border-[#4fb0f1] rounded-lg animate__animated animate__fadeInUp hover:-translate-y-1"
+            className="group relative cursor-pointer border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:shadow-lg hover:border-[#4fb0f1] animate__animated animate__fadeInUp hover:-translate-y-1"
             style={{ animationDelay: `${index * 50}ms` }}
           >
             {/* En-tête avec nom et statut */}
@@ -253,13 +281,13 @@ export default function Projets() {
                 {p.nom}
               </h2>
               {p.archive ? (
-                <span className="flex items-center gap-1 shrink-0 px-2 py-0.5 text-xs font-medium rounded-full bg-slate-200 text-slate-600">
+                <span className="flex items-center gap-1 shrink-0 px-2 py-0.5 text-xs font-medium bg-slate-200 text-slate-600">
                   <ArchiveIcon className="w-3 h-3" />
                   <span className="hidden sm:inline">Archivé</span>
                 </span>
               ) : (
                 <span
-                  className={`flex items-center gap-2 shrink-0 px-2 py-0.5 text-xs font-medium rounded-full ${
+                  className={`flex items-center gap-2 shrink-0 px-2 py-0.5 text-xs font-medium ${
                     couleurStatut[p.statut_sante] || "bg-slate-100 text-slate-700"
                   }`}
                 >
@@ -299,9 +327,9 @@ export default function Projets() {
 
             {/* Barre de progression */}
             <div className="mt-3">
-              <div className="mb-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+              <div className="mb-1 h-1.5 w-full overflow-hidden bg-slate-100">
                 <div
-                  className={`h-full rounded-full transition-all duration-500 ${
+                  className={`h-full transition-all duration-500 ${
                     (p.avancement_pct || 0) >= 80
                       ? "bg-[#7df979]"
                       : (p.avancement_pct || 0) >= 40
@@ -321,13 +349,22 @@ export default function Projets() {
               </div>
             </div>
 
-            {/* Bouton Chat en bas à droite */}
+            {/* Actions en bas à droite */}
             <div className="mt-3 pt-2 border-t border-slate-100 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              {peutArchiver && (
+                <button
+                  onClick={(e) => basculerArchive(p, e)}
+                  title={p.archive ? "Désarchiver le projet" : "Archiver le projet"}
+                  className="p-1.5 text-slate-500 hover:text-[#4fb0f1] hover:bg-[#4fb0f1]/10 transition-colors"
+                >
+                  <ArchiveIcon className="w-4 h-4" />
+                </button>
+              )}
               {!p.archive && (
                 <button
                   onClick={(e) => chat(p, e)}
                   title="Accéder au chat du projet"
-                  className="p-1.5 text-slate-500 hover:text-[#4fb0f1] hover:bg-[#4fb0f1]/10 rounded-lg transition-colors"
+                  className="p-1.5 text-slate-500 hover:text-[#4fb0f1] hover:bg-[#4fb0f1]/10 transition-colors"
                 >
                   <ChatIcon className="w-4 h-4" />
                 </button>

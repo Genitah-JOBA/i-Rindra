@@ -42,12 +42,20 @@ const UserIcon = ({ className = "w-5 h-5" }) => (
   </svg>
 );
 
+// Palette login
+const C = {
+  dark: "#0b2241",
+  blue: "#4fb0f1",
+  green: "#7df979",
+  cyan: "#7afdf2",
+};
+
 const couleurRole = {
-  direction: "bg-purple-100 text-purple-700",
-  drh: "bg-rose-100 text-rose-700",
-  chef_de_projet: "bg-indigo-100 text-indigo-700",
-  equipe: "bg-blue-100 text-blue-700",
-  client: "bg-amber-100 text-amber-700",
+  direction: "bg-[#0b2241] text-[#7afdf2]",
+  drh: "bg-[#4fb0f1]/15 text-[#0b2241]",
+  chef_de_projet: "bg-[#7afdf2]/30 text-[#0b2241]",
+  equipe: "bg-[#7df979]/30 text-[#0b2241]",
+  client: "bg-slate-100 text-slate-600",
 };
 
 const labelRole = {
@@ -201,7 +209,7 @@ export default function Membres() {
       {/* En-tête */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 animate__animated animate__fadeInDown">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
+          <h1 className="text-2xl font-bold" style={{ color: C.dark }}>
             Membres
           </h1>
           <p className="text-sm text-slate-500">
@@ -215,14 +223,18 @@ export default function Membres() {
               value={recherche}
               onChange={(e) => setRecherche(e.target.value)}
               placeholder={"Rechercher…"}
-              className="w-48 sm:w-56 pl-8 pr-3 py-2 text-sm border border-slate-300  outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+              className="w-48 sm:w-56 pl-8 pr-3 py-2 text-sm border border-slate-300 outline-none focus:ring-2 focus:border-transparent"
+              style={{ "--tw-ring-color": C.blue }}
             />
             <SearchIcon className="w-4 h-4 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
           </div>
           {estGestion && (
             <button
               onClick={ouvrirAjout}
-              className="flex items-center gap-2 bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white  transition hover:bg-[#4a8f2e]"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white transition"
+              style={{ backgroundColor: C.dark }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = C.blue)}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = C.dark)}
             >
               <PlusIcon className="w-4 h-4" />
               Ajouter
@@ -233,12 +245,12 @@ export default function Membres() {
 
       {loading && (
         <div className="flex justify-center items-center py-12 animate__animated animate__pulse">
-          <div className="animate-spin  h-8 w-8 border-b-2 border-[#63B23E]"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: C.blue }}></div>
           <span className="ml-3 text-slate-500">{"Chargement…"}</span>
         </div>
       )}
       {erreur && (
-        <div className="mb-4  bg-red-50 px-4 py-3 text-sm text-red-700 border border-red-200 animate__animated animate__shakeX">
+        <div className="mb-4 bg-red-50 px-4 py-3 text-sm text-red-700 border border-red-200 animate__animated animate__shakeX">
           ⚠️ {erreur}
         </div>
       )}
@@ -250,11 +262,19 @@ export default function Membres() {
               {filtres.map((u, index) => (
                 <div
                   key={u.id}
-                  className="border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md hover:border-[#63B23E] transition-all duration-300  animate__animated animate__fadeInUp"
-                  style={{ animationDelay: `${index * 0.05}s` }}
+                  className="border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md transition-all duration-300 animate__animated animate__fadeInUp"
+                  style={{
+                    animationDelay: `${index * 0.05}s`,
+                    borderTop: `3px solid ${C.blue}`,
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.borderColor = C.green)}
+                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#e2e8f0")}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center bg-[#63B23E]/10 text-sm font-semibold text-[#63B23E] ">
+                    <div
+                      className="flex h-11 w-11 shrink-0 items-center justify-center text-sm font-semibold"
+                      style={{ backgroundColor: `${C.blue}20`, color: C.dark }}
+                    >
                       {initiales(u)}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -266,19 +286,22 @@ export default function Membres() {
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     <span
-                      className={`px-2 py-0.5 text-[10px] font-medium  ${
+                      className={`px-2 py-0.5 text-[10px] font-medium ${
                         couleurRole[u.role] || "bg-slate-100 text-slate-600"
                       }`}
                     >
                       {labelRole[u.role] || u.role}
                     </span>
                     {u.metier && (
-                      <span className="bg-slate-100 px-2 py-0.5 text-[10px] text-slate-600 ">
+                      <span
+                        className="px-2 py-0.5 text-[10px]"
+                        style={{ backgroundColor: `${C.cyan}30`, color: C.dark }}
+                      >
                         {u.metier}
                       </span>
                     )}
                     {!u.actif && (
-                      <span className="bg-red-100 px-2 py-0.5 text-[10px] text-red-600 ">
+                      <span className="bg-red-100 px-2 py-0.5 text-[10px] text-red-600">
                         inactif
                       </span>
                     )}
@@ -287,14 +310,18 @@ export default function Membres() {
                     <div className="mt-3 flex justify-end gap-3 border-t border-slate-100 pt-2">
                       <button
                         onClick={() => ouvrirEdition(u)}
-                        className="flex items-center gap-1 text-xs text-slate-500 hover:text-[#63B23E] transition-colors"
+                        className="flex items-center gap-1 text-xs text-slate-500 transition-colors"
+                        onMouseEnter={(e) => (e.currentTarget.style.color = C.blue)}
+                        onMouseLeave={(e) => (e.currentTarget.style.color = "")}
                       >
                         <EditIcon className="w-3.5 h-3.5" />
                         Modifier
                       </button>
                       <button
                         onClick={() => demanderSuppression(u)}
-                        className="flex items-center gap-1 text-xs text-slate-500 hover:text-red-600 transition-colors"
+                        className="flex items-center gap-1 text-xs text-slate-500 transition-colors"
+                        onMouseEnter={(e) => (e.currentTarget.style.color = "#dc2626")}
+                        onMouseLeave={(e) => (e.currentTarget.style.color = "")}
                       >
                         <TrashIcon className="w-3.5 h-3.5" />
                         Supprimer
@@ -305,13 +332,16 @@ export default function Membres() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 bg-slate-50 border border-dashed border-slate-300 ">
+            <div className="text-center py-12 bg-slate-50 border border-dashed border-slate-300">
               <UserIcon className="w-12 h-12 text-slate-300 mx-auto mb-3" />
               <p className="text-sm text-slate-500">Aucun membre trouvé.</p>
               {estGestion && (
                 <button
                   onClick={ouvrirAjout}
-                  className="mt-4 px-4 py-2 bg-[#63B23E] text-white  hover:bg-[#4a8f2e] transition-colors"
+                  className="mt-4 px-4 py-2 text-white transition-colors"
+                  style={{ backgroundColor: C.dark }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = C.blue)}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = C.dark)}
                 >
                   + Ajouter
                 </button>
@@ -324,14 +354,16 @@ export default function Membres() {
       {/* MODAL AJOUT / ÉDITION */}
       {modalOuvert && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate__animated animate__fadeIn">
-          <div className="w-full max-w-md bg-white p-6 shadow-xl  animate__animated animate__zoomIn">
+          <div className="w-full max-w-md bg-white p-6 shadow-xl animate__animated animate__zoomIn">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-900">
+              <h2 className="text-lg font-semibold" style={{ color: C.dark }}>
                 {editionId ? "Modifier le membre" : "Ajouter un membre"}
               </h2>
               <button
                 onClick={() => setModalOuvert(false)}
-                className="text-slate-400 hover:text-slate-700 transition-colors"
+                className="text-slate-400 transition-colors"
+                onMouseEnter={(e) => (e.currentTarget.style.color = C.dark)}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "")}
               >
                 <CloseIcon className="w-5 h-5" />
               </button>
@@ -346,11 +378,10 @@ export default function Membres() {
                   <input
                     type="text"
                     value={form.prenom}
-                    onChange={(e) =>
-                      setForm({ ...form, prenom: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, prenom: e.target.value })}
                     required
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:border-transparent"
+                    style={{ "--tw-ring-color": C.blue }}
                   />
                 </div>
                 <div>
@@ -362,7 +393,8 @@ export default function Membres() {
                     value={form.nom}
                     onChange={(e) => setForm({ ...form, nom: e.target.value })}
                     required
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:border-transparent"
+                    style={{ "--tw-ring-color": C.blue }}
                   />
                 </div>
               </div>
@@ -376,7 +408,8 @@ export default function Membres() {
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   required
-                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:border-transparent"
+                  style={{ "--tw-ring-color": C.blue }}
                 />
               </div>
 
@@ -388,12 +421,11 @@ export default function Membres() {
                   <input
                     type="password"
                     value={form.mot_de_passe}
-                    onChange={(e) =>
-                      setForm({ ...form, mot_de_passe: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, mot_de_passe: e.target.value })}
                     required
                     minLength={4}
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:border-transparent"
+                    style={{ "--tw-ring-color": C.blue }}
                   />
                 </div>
               )}
@@ -406,7 +438,8 @@ export default function Membres() {
                   <select
                     value={form.role}
                     onChange={(e) => setForm({ ...form, role: e.target.value })}
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent appearance-none bg-white"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:border-transparent appearance-none bg-white"
+                    style={{ "--tw-ring-color": C.blue }}
                   >
                     <option value="direction">Direction</option>
                     <option value="drh">DRH</option>
@@ -421,11 +454,10 @@ export default function Membres() {
                   <input
                     type="text"
                     value={form.metier}
-                    onChange={(e) =>
-                      setForm({ ...form, metier: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, metier: e.target.value })}
                     placeholder="développeur, graphiste…"
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:border-transparent"
+                    style={{ "--tw-ring-color": C.blue }}
                   />
                 </div>
               </div>
@@ -435,17 +467,15 @@ export default function Membres() {
                   <input
                     type="checkbox"
                     checked={form.actif}
-                    onChange={(e) =>
-                      setForm({ ...form, actif: e.target.checked })
-                    }
-                    className="accent-[#63B23E]"
+                    onChange={(e) => setForm({ ...form, actif: e.target.checked })}
+                    style={{ accentColor: C.blue }}
                   />
                   Compte actif
                 </label>
               )}
 
               {formErreur && (
-                <div className=" bg-red-50 px-3 py-2 text-sm text-red-700 border border-red-200">
+                <div className="bg-red-50 px-3 py-2 text-sm text-red-700 border border-red-200">
                   ⚠️ {formErreur}
                 </div>
               )}
@@ -454,14 +484,19 @@ export default function Membres() {
                 <button
                   type="button"
                   onClick={() => setModalOuvert(false)}
-                  className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100  transition-colors"
+                  className="px-4 py-2 text-sm text-slate-600 transition-colors"
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f1f5f9")}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "")}
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={enregistrement}
-                  className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white  transition hover:bg-[#4a8f2e] disabled:opacity-50"
+                  className="px-4 py-2 text-sm font-semibold text-white transition disabled:opacity-50"
+                  style={{ backgroundColor: C.dark }}
+                  onMouseEnter={(e) => !enregistrement && (e.currentTarget.style.backgroundColor = C.blue)}
+                  onMouseLeave={(e) => !enregistrement && (e.currentTarget.style.backgroundColor = C.dark)}
                 >
                   {enregistrement
                     ? "Enregistrement…"
@@ -484,7 +519,7 @@ export default function Membres() {
                 <TrashIcon className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-semibold text-slate-900">
+                <h3 className="text-base font-semibold" style={{ color: C.dark }}>
                   Confirmer la suppression
                 </h3>
                 <p className="mt-1 text-sm text-slate-500">
@@ -501,7 +536,9 @@ export default function Membres() {
               <button
                 type="button"
                 onClick={() => setConfirmSuppression(null)}
-                className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 transition-colors"
+                className="px-4 py-2 text-sm text-slate-600 transition-colors"
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f1f5f9")}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "")}
               >
                 Annuler
               </button>

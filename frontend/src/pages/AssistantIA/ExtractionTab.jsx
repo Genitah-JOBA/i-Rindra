@@ -15,7 +15,6 @@ import {
   IconCheck,
   IconX,
   IconUsers,
-  IconCheckCircle,
   IconRefresh,
   IconArrowRight,
 } from "./Shared";
@@ -92,6 +91,58 @@ function DispoBadge({ membres, date }) {
   );
 }
 
+// Carte d'une suggestion (section « suggérées » ou « rejetées »)
+function SuggestionCarte({ suggestion: s, membresDispo, onValider, onRejeter }) {
+  return (
+    <Carte className="p-4 flex flex-col gap-2">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h4 className="font-semibold text-slate-900">{s.titre}</h4>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full ${STYLE_STATUT[s.statut] || STYLE_STATUT.en_attente}`}>
+              {LIBELLE_STATUT[s.statut] || LIBELLE_STATUT.en_attente}
+            </span>
+          </div>
+          <p className="text-xs text-slate-400 mt-1">
+            Priorité {s.priorite} · Échéance {toFR(s.echeance)}
+          </p>
+        </div>
+        <BadgeIA modele={null} />
+      </div>
+
+      {s.description && (
+        <p className="text-sm text-slate-600 whitespace-pre-wrap line-clamp-3">{s.description}</p>
+      )}
+
+      {s.statut === "en_attente" && s.echeance && (
+        <DispoBadge membres={membresDispo} date={s.echeance} />
+      )}
+
+      {s.statut === "en_attente" && (onValider || onRejeter) && (
+        <div className="mt-auto flex items-center gap-2 pt-2 border-t border-slate-100">
+          {onRejeter && (
+            <button
+              onClick={() => onRejeter(s)}
+              className="flex items-center gap-1 border border-red-300 px-2.5 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50 rounded-md"
+            >
+              <IconX /> Rejeter
+            </button>
+          )}
+          {onValider && (
+            <button
+              onClick={() => onValider(s)}
+              className="flex items-center gap-1 bg-[#63B23E] px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-[#4a8f2e] rounded-md ml-auto"
+            >
+              <IconCheck /> Valider
+              <IconArrowRight className="w-3 h-3" />
+            </button>
+          )}
+        </div>
+      )}
+    </Carte>
+  );
+}
+
 export default function ExtractionTab({ projets }) {
   const { showSuccess, showError } = useMessage();
   const [projetId, setProjetId] = useState(null);
@@ -101,6 +152,7 @@ export default function ExtractionTab({ projets }) {
   const [membres, setMembres] = useState([]);
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState("");
+  const [vueStatut, setVueStatut] = useState("suggerees");
   // Map { "YYYY-MM-DD": MembreDisponibilite[] }
   const [dispos, setDispos] = useState({});
 
@@ -223,6 +275,9 @@ export default function ExtractionTab({ projets }) {
     }
   };
 
+  const suggestionsEnAttente = suggestions.filter((s) => s.statut === "en_attente");
+  const suggestionsRejetees = suggestions.filter((s) => s.statut === "rejetee");
+
   return (
     <div className="space-y-4 animate__animated animate__fadeIn">
       <AlertErreur>{erreur}</AlertErreur>
@@ -248,9 +303,25 @@ export default function ExtractionTab({ projets }) {
         </div>
       </Carte>
 
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-slate-800">Suggestions de tâches</h3>
-<button
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        {/* Sélecteur Tâches suggérées / Tâches rejetées */}
+        <div className="inline-flex items-center gap-1 border border-slate-200 bg-white p-1 shadow-sm">
+          {[
+            { id: "suggerees", label: "Tâches suggérées", count: suggestionsEnAttente.length, actif: "bg-amber-100 text-amber-700" },
+            { id: "rejetees", label: "Tâches rejetées", count: suggestionsRejetees.length, actif: "bg-red-100 text-red-700" },
+          ].map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setVueStatut(t.id)}
+              className={`px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors ${
+                vueStatut === t.id ? t.actif : "text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              {t.label} ({t.count})
+            </button>
+          ))}
+        </div>
+        <button
             onClick={async () => {
               await chargerSuggestions(projetId);
               const fresh = await iaService.listerSuggestions({ projet_id: projetId, statut: "en_attente" });
@@ -265,72 +336,46 @@ export default function ExtractionTab({ projets }) {
 
       {chargement && <Spin label="Chargement des suggestions…" />}
 
-      {!chargement && suggestions.length === 0 && (
-        <Carte className="p-8 text-center">
-          <p className="text-sm text-slate-500">
-            {projetId
-              ? "Aucune suggestion. Lancez « Extraire les tâches par IA »."
-              : "Sélectionnez un projet pour voir ses suggestions."}
-          </p>
-        </Carte>
+      {!chargement && vueStatut === "suggerees" && (
+        suggestionsEnAttente.length === 0 ? (
+          <Carte className="p-8 text-center">
+            <p className="text-sm text-slate-500">
+              {projetId
+                ? "Aucune tâche suggérée. Lancez « Extraire les tâches par IA »."
+                : "Sélectionnez un projet pour voir ses suggestions."}
+            </p>
+          </Carte>
+        ) : (
+          <div className="grid gap-3 grid-cols-1 lg:grid-cols-2">
+            {suggestionsEnAttente.map((s) => {
+              const dateKey = toISO(s.echeance);
+              return (
+                <SuggestionCarte
+                  key={s.id}
+                  suggestion={s}
+                  membresDispo={dateKey ? dispos[dateKey] : null}
+                  onValider={valider}
+                  onRejeter={rejeter}
+                />
+              );
+            })}
+          </div>
+        )
       )}
 
-      <div className="grid gap-3 grid-cols-1 lg:grid-cols-2">
-        {suggestions.map((s) => {
-          const dateKey = toISO(s.echeance);
-          const membresDispo = dateKey ? dispos[dateKey] : null;
-          return (
-            <Carte key={s.id} className="p-4 flex flex-col gap-2">
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h4 className="font-semibold text-slate-900">{s.titre}</h4>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${STYLE_STATUT[s.statut] || STYLE_STATUT.en_attente}`}>
-                      {LIBELLE_STATUT[s.statut] || LIBELLE_STATUT.en_attente}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Priorité {s.priorite} · Échéance {toFR(s.echeance)}
-                  </p>
-                </div>
-                <BadgeIA modele={null} />
-              </div>
-
-              {s.description && (
-                <p className="text-sm text-slate-600 whitespace-pre-wrap line-clamp-3">{s.description}</p>
-              )}
-
-              {s.statut === "en_attente" && s.echeance && (
-                <DispoBadge membres={membresDispo} date={s.echeance} />
-              )}
-
-              {s.statut === "en_attente" && (
-                <div className="mt-auto flex items-center gap-2 pt-2 border-t border-slate-100">
-                  <button
-                    onClick={() => rejeter(s)}
-                    className="flex items-center gap-1 border border-red-300 px-2.5 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50 rounded-md"
-                  >
-                    <IconX /> Rejeter
-                  </button>
-                  <button
-                    onClick={() => valider(s)}
-                    className="flex items-center gap-1 bg-[#63B23E] px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-[#4a8f2e] rounded-md ml-auto"
-                  >
-                    <IconCheck /> Valider
-                    <IconArrowRight className="w-3 h-3" />
-                  </button>
-                </div>
-              )}
-              {s.statut !== "en_attente" && s.tache_id && (
-                <p className="flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-2 rounded-md">
-                  <IconCheckCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                  Devenue la tâche #{s.tache_id} (Kanban).
-                </p>
-              )}
-            </Carte>
-          );
-        })}
-      </div>
+      {!chargement && vueStatut === "rejetees" && (
+        suggestionsRejetees.length === 0 ? (
+          <Carte className="p-8 text-center">
+            <p className="text-sm text-slate-500">{"Aucune tâche rejetée."}</p>
+          </Carte>
+        ) : (
+          <div className="grid gap-3 grid-cols-1 lg:grid-cols-2">
+            {suggestionsRejetees.map((s) => (
+              <SuggestionCarte key={s.id} suggestion={s} />
+            ))}
+          </div>
+        )
+      )}
 
       {membres.length > 0 && (
         <p className="text-xs text-slate-400">

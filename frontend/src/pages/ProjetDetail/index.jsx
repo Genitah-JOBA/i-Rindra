@@ -5,17 +5,25 @@ import { projetsService } from "../../api/projets";
 import { fichiersService } from "../../api/fichiers";
 import { useAuth } from "../../auth/AuthContext";
 
+// Palette login
+const C = {
+  dark: "#0b2241",
+  blue: "#4fb0f1",
+  green: "#7df979",
+  cyan: "#7afdf2",
+};
+
 const couleurStatut = {
-  vert: "bg-green-100 text-green-800",
+  vert: "bg-[#7df979]/30 text-[#0b2241]",
   orange: "bg-orange-100 text-orange-800",
   rouge: "bg-red-100 text-red-800",
 };
 
 const couleurRoleGlobal = {
-  direction: "bg-purple-100 text-purple-700",
-  drh: "bg-rose-100 text-rose-700",
-  chef_de_projet: "bg-indigo-100 text-indigo-700",
-  equipe: "bg-blue-100 text-blue-700",
+  direction: "bg-[#0b2241] text-[#7afdf2]",
+  drh: "bg-[#4fb0f1]/15 text-[#0b2241]",
+  chef_de_projet: "bg-[#7afdf2]/30 text-[#0b2241]",
+  equipe: "bg-[#7df979]/30 text-[#0b2241]",
   client: "bg-amber-100 text-amber-700",
 };
 
@@ -26,11 +34,11 @@ const infoType = (mime) => {
   if (m === "application/pdf")
     return { label: "PDF", classe: "bg-red-100 text-red-700" };
   if (m.startsWith("image/"))
-    return { label: "IMG", classe: "bg-purple-100 text-purple-700" };
+    return { label: "IMG", classe: "bg-[#4fb0f1]/20 text-[#0b2241]" };
   if (m.includes("word"))
-    return { label: "DOC", classe: "bg-blue-100 text-blue-700" };
+    return { label: "DOC", classe: "bg-[#7afdf2]/40 text-[#0b2241]" };
   if (m.includes("excel") || m === "text/csv")
-    return { label: "XLS", classe: "bg-green-100 text-green-700" };
+    return { label: "XLS", classe: "bg-[#7df979]/40 text-[#0b2241]" };
   if (m.includes("powerpoint"))
     return { label: "PPT", classe: "bg-orange-100 text-orange-700" };
   if (m.includes("zip") || m.includes("rar"))
@@ -183,11 +191,24 @@ export default function ProjetDetail() {
     }
   };
 
-  if (loading) return <p className="text-slate-500">Chargement…</p>;
+  if (loading)
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div
+          className="animate-spin rounded-full h-8 w-8 border-b-2"
+          style={{ borderColor: C.blue }}
+        ></div>
+        <span className="ml-3 text-slate-500">Chargement…</span>
+      </div>
+    );
   if (erreur)
     return (
       <div>
-        <Link to="/projets" className="text-sm text-[#00B2A0] hover:underline">
+        <Link
+          to="/projets"
+          className="text-sm hover:underline"
+          style={{ color: C.blue }}
+        >
           ← Retour aux projets
         </Link>
         <p className="mt-4 text-red-600">{erreur}</p>
@@ -198,7 +219,11 @@ export default function ProjetDetail() {
     <div className="space-y-6">
       {/* Fil d'ariane + actions */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Link to="/projets" className="text-sm text-[#00B2A0] hover:underline">
+        <Link
+          to="/projets"
+          className="text-sm hover:underline"
+          style={{ color: C.blue }}
+        >
           ← Retour aux projets
         </Link>
       </div>
@@ -211,10 +236,15 @@ export default function ProjetDetail() {
       )}
 
       {/* En-tête projet */}
-      <div className="border bg-white p-6 shadow-sm">
+      <div
+        className="border bg-white p-6 shadow-sm"
+        style={{ borderTop: `3px solid ${C.blue}` }}
+      >
         <div className="mb-2 flex items-start justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-bold text-slate-900">{projet.nom}</h1>
+            <h1 className="text-2xl font-bold" style={{ color: C.dark }}>
+              {projet.nom}
+            </h1>
             {projet.archive && (
               <span className="bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-600">
                 Archivé
@@ -235,8 +265,11 @@ export default function ProjetDetail() {
         )}
         <div className="mb-1 h-2 w-full overflow-hidden bg-slate-100">
           <div
-            className="h-full bg-[#00B2A0]"
-            style={{ width: `${projet.avancement_pct || 0}%` }}
+            className="h-full"
+            style={{
+              width: `${projet.avancement_pct || 0}%`,
+              backgroundColor: C.blue,
+            }}
           />
         </div>
         <div className="flex flex-wrap gap-4 text-xs text-slate-500">
@@ -249,7 +282,8 @@ export default function ProjetDetail() {
         <div className="mt-4">
           <Link
             to={`/taches?projet=${id}`}
-            className="text-sm font-medium text-[#00B2A0] hover:underline"
+            className="text-sm font-medium hover:underline"
+            style={{ color: C.blue }}
           >
             Voir les tâches (Kanban) →
           </Link>
@@ -258,7 +292,7 @@ export default function ProjetDetail() {
 
       {/* Membres de l'équipe */}
       <div className="border bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-lg font-semibold text-slate-900">
+        <h2 className="mb-4 text-lg font-semibold" style={{ color: C.dark }}>
           Équipe du projet ({membres.length})
         </h2>
 
@@ -275,7 +309,10 @@ export default function ProjetDetail() {
                 <p className="font-medium text-slate-800 py-1">
                   {m.prenom} {m.nom}
                   {m.est_responsable && (
-                    <span className="ml-2 bg-[#00B2A0]/10 px-2 py-0.5 text-xs font-medium text-[#00B2A0]">
+                    <span
+                      className="ml-2 px-2 py-0.5 text-xs font-medium"
+                      style={{ backgroundColor: `${C.cyan}40`, color: C.dark }}
+                    >
                       Responsable
                     </span>
                   )}
@@ -297,7 +334,15 @@ export default function ProjetDetail() {
               {estGestion && !m.est_responsable && (
                 <button
                   onClick={() => retirerMembre(m)}
-                  className="border border-slate-200 px-2.5 py-1 text-xs text-slate-600 hover:bg-red-50 hover:text-red-600"
+                  className="border border-slate-200 px-2.5 py-1 text-xs text-slate-600 transition-colors"
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#fef2f2";
+                    e.currentTarget.style.color = "#dc2626";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "";
+                    e.currentTarget.style.color = "";
+                  }}
                 >
                   Retirer
                 </button>
@@ -319,7 +364,8 @@ export default function ProjetDetail() {
               <select
                 value={nouvelUtilisateurId}
                 onChange={(e) => setNouvelUtilisateurId(e.target.value)}
-                className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B2A0]"
+                className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:border-transparent"
+                style={{ "--tw-ring-color": C.blue }}
               >
                 <option value="">— Choisir un utilisateur —</option>
                 {disponibles.map((u) => (
@@ -333,7 +379,18 @@ export default function ProjetDetail() {
             <button
               type="submit"
               disabled={ajoutEnCours || disponibles.length === 0}
-              className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#074E56] disabled:opacity-50"
+              className="px-4 py-2 text-sm font-semibold text-white transition disabled:opacity-50"
+              style={{ backgroundColor: C.dark }}
+              onMouseEnter={(e) =>
+                !ajoutEnCours &&
+                disponibles.length > 0 &&
+                (e.currentTarget.style.backgroundColor = C.blue)
+              }
+              onMouseLeave={(e) =>
+                !ajoutEnCours &&
+                disponibles.length > 0 &&
+                (e.currentTarget.style.backgroundColor = C.dark)
+              }
             >
               {ajoutEnCours ? "Ajout…" : " + Ajouter"}
             </button>
@@ -351,7 +408,7 @@ export default function ProjetDetail() {
 
       {/* Fichiers du projet */}
       <div className="border bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-lg font-semibold text-slate-900">
+        <h2 className="mb-4 text-lg font-semibold" style={{ color: C.dark }}>
           Fichiers du projet ({fichiers.length})
         </h2>
         <p className="mb-4 text-xs text-slate-500">
@@ -372,19 +429,46 @@ export default function ProjetDetail() {
             onSubmit={declencherUpload}
             className="mb-6 flex flex-col gap-3 bg-slate-50 p-4 sm:flex-row sm:items-center"
           >
-<input
-            ref={fichierInputRef}
-            type="file"
-            accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx"
-            onChange={(e) =>
-              setFichierSelectionne(e.target.files[0] || null)
-            }
-              className="flex-1 text-sm text-slate-600 file:mr-3 file:border-0 file:bg-[#074E56] file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-[#00B2A0]"
+            <input
+              ref={fichierInputRef}
+              type="file"
+              accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx"
+              onChange={(e) =>
+                setFichierSelectionne(e.target.files[0] || null)
+              }
+              className="flex-1 text-sm text-slate-600 file:mr-3 file:border-0 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white file:cursor-pointer"
+              style={{
+                // @ts-ignore
+                "--file-bg": C.dark,
+              }}
+              onMouseEnter={(e) => {
+                const btn = e.currentTarget;
+                btn.style.setProperty("--file-bg-hover", C.blue);
+              }}
             />
+            <style>{`
+              input[type="file"]::file-selector-button {
+                background-color: ${C.dark};
+              }
+              input[type="file"]:hover::file-selector-button {
+                background-color: ${C.blue};
+              }
+            `}</style>
             <button
               type="submit"
               disabled={!fichierSelectionne || uploadEnCours}
-              className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#074E56] disabled:opacity-50"
+              className="px-4 py-2 text-sm font-semibold text-white transition disabled:opacity-50"
+              style={{ backgroundColor: C.dark }}
+              onMouseEnter={(e) =>
+                !uploadEnCours &&
+                fichierSelectionne &&
+                (e.currentTarget.style.backgroundColor = C.blue)
+              }
+              onMouseLeave={(e) =>
+                !uploadEnCours &&
+                fichierSelectionne &&
+                (e.currentTarget.style.backgroundColor = C.dark)
+              }
             >
               {uploadEnCours ? "Envoi…" : "Envoyer le fichier"}
             </button>
@@ -429,7 +513,15 @@ export default function ProjetDetail() {
                   <div className="flex shrink-0 items-center gap-2">
                     <button
                       onClick={() => telecharger(f)}
-                      className="border border-slate-200 px-2.5 py-1 text-xs text-slate-600 hover:bg-[#00B2A0]/10 hover:text-[#00B2A0]"
+                      className="border border-slate-200 px-2.5 py-1 text-xs text-slate-600 transition-colors"
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = `${C.blue}15`;
+                        e.currentTarget.style.color = C.dark;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "";
+                        e.currentTarget.style.color = "";
+                      }}
                     >
                       Télécharger
                     </button>
@@ -437,13 +529,27 @@ export default function ProjetDetail() {
                       <>
                         <button
                           onClick={() => renommerFichier(f)}
-                          className="border border-slate-200 px-2.5 py-1 text-xs text-slate-600 hover:bg-slate-50"
+                          className="border border-slate-200 px-2.5 py-1 text-xs text-slate-600 transition-colors"
+                          onMouseEnter={(e) =>
+                            (e.currentTarget.style.backgroundColor = "#f8fafc")
+                          }
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.backgroundColor = "")
+                          }
                         >
                           Renommer
                         </button>
                         <button
                           onClick={() => supprimerFichier(f)}
-                          className="border border-slate-200 px-2.5 py-1 text-xs text-slate-600 hover:bg-red-50 hover:text-red-600"
+                          className="border border-slate-200 px-2.5 py-1 text-xs text-slate-600 transition-colors"
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = "#fef2f2";
+                            e.currentTarget.style.color = "#dc2626";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = "";
+                            e.currentTarget.style.color = "";
+                          }}
                         >
                           Supprimer
                         </button>

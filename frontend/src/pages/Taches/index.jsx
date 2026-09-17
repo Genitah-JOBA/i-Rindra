@@ -18,8 +18,8 @@ const COLONNES = [
 
 const couleurPriorite = {
   basse: "bg-slate-100 text-slate-600",
-  moyenne: "bg-yellow-100 text-yellow-700",
-  haute: "bg-orange-100 text-orange-700",
+  moyenne: "bg-amber-100 text-amber-700",
+  haute: "bg-red-100 text-red-700",
 };
 
 const labelPriorite = {
@@ -217,18 +217,18 @@ export default function Taches() {
       {/* En-tête avec animation */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 animate__animated animate__fadeInDown">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
-            {"Tâches — Kanban"}
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-[#0b2241] to-[#4fb0f1] bg-clip-text text-transparent">
+            Tâches — Kanban
           </h1>
-          <p className="text-sm text-slate-500">{"Organisez les tâches du projet par statut."}</p>
+          <p className="text-sm text-slate-500">Organisez les tâches du projet par statut.</p>
         </div>
         <select
           value={projetId}
           onChange={(e) => setProjetId(e.target.value)}
-          className="border border-slate-300  px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+          className="border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#4fb0f1] focus:border-transparent"
         >
           {projets.length === 0 && (
-            <option value="">{"Aucun projet"}</option>
+            <option value="">Aucun projet</option>
           )}
           {projets.map((p) => (
             <option key={p.id} value={p.id}>
@@ -244,46 +244,46 @@ export default function Taches() {
       {projetId && estGestion && (
         <form
           onSubmit={creerTache}
-          className="mb-6 flex flex-col gap-3 border border-slate-200 bg-white p-4 shadow-sm  md:flex-row md:items-end animate__animated animate__fadeInUp"
+          className="mb-6 flex flex-col gap-3 border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:items-end animate__animated animate__fadeInUp"
         >
           <div className="flex-1">
             <label className="mb-1 block text-xs font-medium text-slate-600">
-              {"Titre"}
+              Titre
             </label>
             <input
               type="text"
               value={form.titre}
               onChange={(e) => setForm({ ...form, titre: e.target.value })}
-              placeholder={"Nouvelle tâche…"}
-              className="w-full border border-slate-300  px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+              placeholder="Nouvelle tâche…"
+              className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#4fb0f1] focus:border-transparent"
             />
           </div>
           <div>
             <label className="mb-1 block text-xs font-medium text-slate-600">
-              {"Priorité"}
+              Priorité
             </label>
             <select
               value={form.priorite}
               onChange={(e) => setForm({ ...form, priorite: e.target.value })}
-              className="border border-slate-300  px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+              className="border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#4fb0f1] focus:border-transparent"
             >
-              <option value="basse">{"Basse"}</option>
-              <option value="moyenne">{"Moyenne"}</option>
-              <option value="haute">{"Haute"}</option>
+              <option value="basse">Basse</option>
+              <option value="moyenne">Moyenne</option>
+              <option value="haute">Haute</option>
             </select>
           </div>
           <div>
             <label className="mb-1 block text-xs font-medium text-slate-600">
-              {"Responsable"}
+              Responsable
             </label>
             <select
               value={form.responsable_id}
               onChange={(e) =>
                 setForm({ ...form, responsable_id: e.target.value })
               }
-              className="border border-slate-300  px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+              className="border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#4fb0f1] focus:border-transparent"
             >
-              <option value="">{"— Aucun —"}</option>
+              <option value="">— Aucun —</option>
               {membres.map((m) => (
                 <option key={m.id} value={m.utilisateur_id}>
                   {m.prenom} {m.nom}
@@ -294,21 +294,21 @@ export default function Taches() {
           </div>
           <div>
             <label className="mb-1 block text-xs font-medium text-slate-600">
-              {"Échéance"}
+              Échéance
             </label>
             <input
               type="date"
               value={form.echeance}
               onChange={(e) => setForm({ ...form, echeance: e.target.value })}
-              className="border border-slate-300  px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+              className="border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#4fb0f1] focus:border-transparent"
             />
           </div>
           <button
             type="submit"
             disabled={creation}
-            className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white  transition hover:bg-[#4a8f2e] disabled:opacity-50"
+            className="bg-gradient-to-r from-[#4fb0f1] to-[#7df979] px-4 py-2 text-sm font-semibold text-[#0b2241] transition-all duration-200 hover:shadow-lg hover:scale-[1.02] disabled:opacity-50"
           >
-            {creation ? "Enregistrement…" : "+ " + "Ajouter"}
+            {creation ? "Enregistrement…" : "+ Ajouter"}
           </button>
         </form>
       )}
@@ -316,8 +316,9 @@ export default function Taches() {
 
       {loading ? (
         <div className="flex justify-center items-center py-12 animate__animated animate__pulse">
-          <div className="animate-spin  h-8 w-8 border-b-2 border-[#63B23E]"></div>
-          <span className="ml-3 text-slate-500">{"Chargement…"}</span>
+          {/* Le chargement garde son arrondi (rounded-full) */}
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4fb0f1]"></div>
+          <span className="ml-3 text-slate-500">Chargement…</span>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -326,12 +327,12 @@ export default function Taches() {
             return (
               <div 
                 key={col.statut} 
-                className="bg-slate-50  p-3 animate__animated animate__fadeInUp"
+                className="bg-slate-50 border border-slate-200 p-3 animate__animated animate__fadeInUp"
                 style={{ animationDelay: `${0.1 + (colIndex * 0.1)}s` }}
               >
                 <h2 className="mb-3 flex items-center justify-between text-sm font-semibold text-slate-700">
                   {col.label}
-                  <span className="bg-white px-2 py-0.5 text-xs text-slate-500 ">
+                  <span className="bg-white border border-slate-200 px-2 py-0.5 text-xs text-slate-500">
                     {tachesCol.length}
                   </span>
                 </h2>
@@ -342,17 +343,17 @@ export default function Taches() {
                     return (
                       <div
                         key={t.id}
-                        className="cursor-pointer border border-slate-200 bg-white p-3 shadow-sm hover:shadow-md hover:border-[#63B23E]  transition-all duration-200 hover:-translate-y-1 animate__animated animate__fadeInUp"
+                        className="cursor-pointer border border-slate-200 bg-white p-3 shadow-sm hover:shadow-md hover:border-[#4fb0f1] transition-all duration-200 hover:-translate-y-1 animate__animated animate__fadeInUp"
                         style={{ animationDelay: `${0.1 + (index * 0.05)}s` }}
                         onClick={() => setTacheActive(t)}
-                        title={"Ouvrir le détail"}
+                        title="Ouvrir le détail"
                       >
                         <div className="mb-1 flex items-start justify-between gap-2">
                           <p className="text-sm font-medium text-slate-800">
                             {t.titre}
                           </p>
                           <span
-                            className={`shrink-0 px-1.5 py-0.5 text-[10px] font-medium  ${
+                            className={`shrink-0 px-1.5 py-0.5 text-[10px] font-medium ${
                               couleurPriorite[t.priorite] ||
                               "bg-slate-100 text-slate-600"
                             }`}
@@ -373,7 +374,7 @@ export default function Taches() {
                                 e.stopPropagation();
                                 deplacer(t, COLONNES[idx - 1].statut);
                               }}
-                              className="border border-slate-300 rounded px-1.5 py-0.5 text-xs text-slate-500 hover:bg-slate-50 disabled:opacity-30 transition-colors"
+                              className="border border-slate-300 px-1.5 py-0.5 text-xs text-slate-500 hover:bg-slate-50 disabled:opacity-30 transition-colors"
                               title="Reculer"
                             >
                               ←
@@ -384,7 +385,7 @@ export default function Taches() {
                                 e.stopPropagation();
                                 deplacer(t, COLONNES[idx + 1].statut);
                               }}
-                              className="border border-slate-300 rounded px-1.5 py-0.5 text-xs text-slate-500 hover:bg-slate-50 disabled:opacity-30 transition-colors"
+                              className="border border-slate-300 px-1.5 py-0.5 text-xs text-slate-500 hover:bg-slate-50 disabled:opacity-30 transition-colors"
                               title="Avancer"
                             >
                               →
@@ -394,8 +395,8 @@ export default function Taches() {
                                 e.stopPropagation();
                                 setTacheActive(t);
                               }}
-                              className="flex items-center gap-1 px-2 text-[11px] text-slate-500 hover:text-[#63B23E] transition-colors"
-title={"Ouvrir le détail"}
+                              className="flex items-center gap-1 px-2 text-[11px] text-slate-500 hover:text-[#4fb0f1] transition-colors"
+                              title="Ouvrir le détail"
                             >
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -423,7 +424,7 @@ title={"Ouvrir le détail"}
                               className="text-xs text-slate-400 hover:text-red-600 transition-colors"
                               title="Supprimer"
                             >
-                              {"Supprimer"}
+                              Supprimer
                             </button>
                           )}
                         </div>

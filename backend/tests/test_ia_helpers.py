@@ -41,6 +41,17 @@ def test_echeance_valide_parse_iso_et_rejette():
     assert ia._echeance_valide(None) is None
 
 
+def test_echeance_future_rejette_ou_raccourcit_le_passe():
+    # Date future : inchangée
+    future = (date.today().replace(year=date.today().year + 1))
+    assert ia._echeance_future(future.isoformat()) == future
+    # Date passée : ramenée à aujourd'hui
+    assert ia._echeance_future("2020-01-01") == date.today()
+    # Invalide / absent : None
+    assert ia._echeance_future("pas-une-date") is None
+    assert ia._echeance_future(None) is None
+
+
 def test_resultat_brut_json_ou_texte():
     assert ia._resultat_brut('{"cle": "valeur"}') == {"cle": "valeur"}
     # Texte non-JSON : stocké dans un wrapper "reponse"

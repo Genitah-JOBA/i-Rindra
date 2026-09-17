@@ -165,6 +165,14 @@ def _echeance_valide(v) -> Optional[date]:
         return None
 
 
+def _echeance_future(v) -> Optional[date]:
+    """Accepte une date parseable ; toute date passée est ramenée à aujourd'hui."""
+    d = _echeance_valide(v)
+    if not d:
+        return None
+    return date.today() if d < date.today() else d
+
+
 # ============================================================
 # Récupération des données projet
 # ============================================================
@@ -299,7 +307,9 @@ SYSTEM_EXTRACTION = (
     '{"taches": [{"titre": "...", "description": "...", "priorite": "haute|moyenne|basse", '
     '"echeance": "AAAA-MM-JJ ou null"}]}. '
     "Attention : 'titre' court et actionnable (commence par un verbe), "
-    "'description' précise le livrable attendu."
+    "'description' précise le livrable attendu. "
+    "'echeance' doit être une date FUTURE ou null : JAMAIS une date passée. "
+    "Utilise 'echeance': null si tu ne connais aucune date."
 )
 
 
@@ -322,12 +332,18 @@ async def extraire_taches(db: AsyncSession, projet_id: int,
             "ou passez le paramètre `texte`."
         )
 
+    system = SYSTEM_EXTRACTION + (
+        f"\nAujourd'hui : {date.today().isoformat()}. "
+        f"Fenêtre prévue du projet : {_iso(projet.date_debut)} → {_iso(projet.date_fin_prevue)}. "
+        "Les échéances proposées doivent se situer entre aujourd'hui et la fin du projet, "
+        "dans la mesure du possible."
+    )
     donnees, modele, analyse_id = await _appel_json(
         db,
         projet_id=projet_id,
         type_analyse=TypeAnalyseIA.EXTRACTION,
         source=source,
-        system=SYSTEM_EXTRACTION,
+        system=system,
         user=f"Cahier des charges du projet « {projet.nom} » :\n\n{entree}",
         temperature=0.2,
         max_tokens=3000,
@@ -342,7 +358,7 @@ async def extraire_taches(db: AsyncSession, projet_id: int,
             titre=str(item["titre"])[:200],
             description=str(item.get("description") or "")[:2000] or None,
             priorite=_priorite_valide(item.get("priorite")),
-            echeance=_echeance_valide(item.get("echeance")),
+            echeance=_echeance_future(item.get("echeance")),
         ))
 
     if not suggestions:

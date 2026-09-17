@@ -67,6 +67,14 @@ const XIcon = ({ className = "w-4 h-4" }) => (
   </svg>
 );
 
+// Palette login
+const C = {
+  dark: "#0b2241",
+  blue: "#4fb0f1",
+  green: "#7df979",
+  cyan: "#7afdf2",
+};
+
 export default function Clients() {
   const { user } = useAuth();
   const { showSuccess, showError } = useMessage();
@@ -141,7 +149,7 @@ export default function Clients() {
       {/* En-tête */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 animate__animated animate__fadeInDown">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
+          <h1 className="text-2xl font-bold" style={{ color: C.dark }}>
             {"Clients"}
           </h1>
           <p className="text-sm text-slate-500">
@@ -154,7 +162,8 @@ export default function Clients() {
             value={recherche}
             onChange={(e) => setRecherche(e.target.value)}
             placeholder={"Rechercher…"}
-            className="w-48 sm:w-56 pl-8 pr-3 py-2 text-sm border border-slate-300 rounded-md outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+            className="w-48 sm:w-56 pl-8 pr-3 py-2 text-sm border border-slate-300 outline-none focus:ring-2 focus:border-transparent"
+            style={{ "--tw-ring-color": C.blue }}
           />
           <SearchIcon className="w-4 h-4 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
         </div>
@@ -162,12 +171,15 @@ export default function Clients() {
 
       {loading && (
         <div className="flex justify-center items-center py-12 animate__animated animate__pulse">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#63B23E]"></div>
+          <div
+            className="animate-spin rounded-full h-8 w-8 border-b-2"
+            style={{ borderColor: C.blue }}
+          ></div>
           <span className="ml-3 text-slate-500">{"Chargement…"}</span>
         </div>
       )}
       {erreur && (
-        <div className="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-700 border border-red-200 animate__animated animate__shakeX">
+        <div className="mb-4 bg-red-50 px-4 py-3 text-sm text-red-700 border border-red-200 animate__animated animate__shakeX">
           ⚠️ {erreur}
         </div>
       )}
@@ -181,11 +193,23 @@ export default function Clients() {
                 return (
                   <div
                     key={e.id}
-                    className="border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md hover:border-[#63B23E] transition-all duration-300 rounded-lg animate__animated animate__fadeInUp"
-                    style={{ animationDelay: `${index * 0.05}s` }}
+                    className="border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md transition-all duration-300 animate__animated animate__fadeInUp"
+                    style={{
+                      animationDelay: `${index * 0.05}s`,
+                      borderTop: `3px solid ${C.blue}`,
+                    }}
+                    onMouseEnter={(ev) =>
+                      (ev.currentTarget.style.borderColor = C.green)
+                    }
+                    onMouseLeave={(ev) =>
+                      (ev.currentTarget.style.borderColor = "#e2e8f0")
+                    }
                   >
                     <div className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center bg-amber-100 text-amber-700 rounded-full">
+                      <div
+                        className="flex h-11 w-11 shrink-0 items-center justify-center"
+                        style={{ backgroundColor: `${C.cyan}40`, color: C.dark }}
+                      >
                         <BuildingIcon className="w-5 h-5" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -215,8 +239,8 @@ export default function Clients() {
                       <div className="flex items-center gap-1 mt-1 pt-1 border-t border-slate-100">
                         {compte ? (
                           <>
-                            <CheckIcon className="w-3.5 h-3.5 text-green-500" />
-                            <span className="text-green-600">{compte.email}</span>
+                            <CheckIcon className="w-3.5 h-3.5" style={{ color: C.green }} />
+                            <span style={{ color: C.dark }}>{compte.email}</span>
                           </>
                         ) : (
                           <>
@@ -228,11 +252,17 @@ export default function Clients() {
 
                       <div className="flex flex-wrap items-center gap-2 mt-1 pt-1 border-t border-slate-100">
                         {estNationalDevise(e.devise) ? (
-                          <span className="px-2 py-0.5 text-[10px] font-medium bg-green-100 text-green-700">
+                          <span
+                            className="px-2 py-0.5 text-[10px] font-medium"
+                            style={{ backgroundColor: `${C.green}40`, color: C.dark }}
+                          >
                             National
                           </span>
                         ) : (
-                          <span className="px-2 py-0.5 text-[10px] font-medium bg-blue-100 text-blue-700">
+                          <span
+                            className="px-2 py-0.5 text-[10px] font-medium"
+                            style={{ backgroundColor: `${C.blue}25`, color: C.dark }}
+                          >
                             International
                           </span>
                         )}
@@ -242,7 +272,8 @@ export default function Clients() {
                             <select
                               value={e.devise || "Ar"}
                               onChange={(ev) => changerDevise(ev, e)}
-                              className="border border-slate-300 px-1 py-0.5 text-[10px] outline-none focus:border-[#63B23E]"
+                              className="border border-slate-300 px-1 py-0.5 text-[10px] outline-none focus:ring-1 focus:border-transparent"
+                              style={{ "--tw-ring-color": C.blue }}
                             >
                               {[...new Set([...DEVISES, e.devise || "Ar"])].map((d) => (
                                 <option key={d} value={d}>
@@ -263,7 +294,7 @@ export default function Clients() {
               })}
             </div>
           ) : (
-            <div className="text-center py-12 bg-slate-50 border border-dashed border-slate-300 rounded-lg">
+            <div className="text-center py-12 bg-slate-50 border border-dashed border-slate-300">
               <BuildingIcon className="w-12 h-12 text-slate-300 mx-auto mb-3" />
               <p className="text-sm text-slate-500">{"Aucun client."}</p>
             </div>
