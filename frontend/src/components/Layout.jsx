@@ -7,7 +7,7 @@ import "animate.css";
 
 // Fonction pour les liens actifs
 const lienClass = ({ isActive }) =>
-  `flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors rounded-md mx-1 ${
+  `flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors mx-1 ${
     isActive
       ? "bg-gradient-to-r from-[#4fb0f1] to-[#7df979] text-[#0b2241] font-semibold shadow-md"
       : "text-white/80 hover:bg-white/10 hover:text-white"
@@ -307,7 +307,7 @@ export default function Layout() {
                   />
                 </svg>
                 Assistant IA
-                <span className="ml-auto text-[10px] bg-[#7df979]/20 text-[#7df979] px-2 py-0.5 rounded-full flex-shrink-0">
+                <span className="ml-auto text-[10px] bg-[#7df979]/20 text-[#7df979] px-2 py-0.5 flex-shrink-0">
                   IA
                 </span>
               </NavLink>
@@ -321,6 +321,27 @@ export default function Layout() {
                       Finance
                     </p>
                   </div>
+
+                  <NavLink to="/suggestion-devis" className={lienClass}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-5 h-5 flex-shrink-0"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
+                      />
+                    </svg>
+                    Suggestion devis par IA
+                    <span className="ml-auto text-[10px] bg-[#7df979]/20 text-[#7df979] px-2 py-0.5 flex-shrink-0">
+                      IA
+                    </span>
+                  </NavLink>
 
                   <NavLink to="/devis-estimations" className={lienClass}>
                     <svg
@@ -356,27 +377,6 @@ export default function Layout() {
                       />
                     </svg>
                     Facturation
-                  </NavLink>
-
-                  <NavLink to="/suggestion-devis" className={lienClass}>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-5 h-5 flex-shrink-0"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
-                      />
-                    </svg>
-                    Suggestion devis IA
-                    <span className="ml-auto text-[10px] bg-[#7df979]/20 text-[#7df979] px-2 py-0.5 rounded-full flex-shrink-0">
-                      IA
-                    </span>
                   </NavLink>
                 </>
               )}
@@ -414,7 +414,7 @@ export default function Layout() {
                   />
                 </svg>
                 Mes devis
-                <span className="ml-auto text-[10px] bg-[#4fb0f1]/20 text-[#4fb0f1] px-2 py-0.5 rounded-full flex-shrink-0">
+                <span className="ml-auto text-[10px] bg-[#4fb0f1]/20 text-[#4fb0f1] px-2 py-0.5 flex-shrink-0">
                   ↗
                 </span>
               </a>
@@ -460,7 +460,7 @@ export default function Layout() {
             }
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors bg-slate-100 hover:bg-slate-200 rounded-md"
+            className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors bg-slate-100 hover:bg-slate-200"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -477,14 +477,14 @@ export default function Layout() {
               />
             </svg>
             Chat (e-resaka)
-            <span className="ml-auto text-[10px] bg-[#4fb0f1]/20 text-[#4fb0f1] px-2 py-0.5 rounded-full flex-shrink-0">
+            <span className="ml-auto text-[10px] bg-[#4fb0f1]/20 text-[#4fb0f1] px-2 py-0.5 flex-shrink-0">
               ↗
             </span>
           </a>
 
           <button
             onClick={() => setSidebarOpen(true)}
-            className="md:hidden p-2 text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#4fb0f1] transition-colors rounded-md"
+            className="md:hidden p-2 text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#4fb0f1] transition-colors"
             aria-label="Ouvrir le menu"
           >
             <svg
@@ -511,7 +511,7 @@ export default function Layout() {
           <div className="relative" ref={profilMenuRef}>
             <button
               onClick={toggleProfilMenu}
-              className="flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#4fb0f1] rounded-md"
+              className="flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#4fb0f1]"
               aria-expanded={profilMenuOpen}
               aria-haspopup="true"
             >
@@ -541,7 +541,7 @@ export default function Layout() {
             </button>
 
             {profilMenuOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white shadow-lg border border-slate-200 py-1 z-50 animate__animated animate__fadeInDown rounded-lg">
+              <div className="absolute right-0 mt-2 w-56 bg-white shadow-lg border border-slate-200 py-1 z-50 animate__animated animate__fadeInDown">
                 <div className="px-4 py-3 border-b border-slate-100">
                   <p className="text-sm font-medium text-slate-900">
                     {user?.prenom} {user?.nom}
@@ -642,7 +642,6 @@ export default function Layout() {
         }
         .sidebar-scroll::-webkit-scrollbar-thumb {
           background: rgba(122, 253, 242, 0.3);
-          border-radius: 10px;
           transition: background 0.3s ease;
         }
         .sidebar-scroll::-webkit-scrollbar-thumb:hover {
