@@ -217,7 +217,7 @@ export default function Taches() {
       {/* En-tête avec animation */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 animate__animated animate__fadeInDown">
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-[#0b2241] to-[#4fb0f1] bg-clip-text text-transparent">
+          <h1 className="font-brand text-2xl font-bold bg-gradient-to-r from-i-primary to-i-blue bg-clip-text text-transparent">
             Tâches — Kanban
           </h1>
           <p className="text-sm text-slate-500">Organisez les tâches du projet par statut.</p>
@@ -225,7 +225,7 @@ export default function Taches() {
         <select
           value={projetId}
           onChange={(e) => setProjetId(e.target.value)}
-          className="border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#4fb0f1] focus:border-transparent"
+          className="border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent"
         >
           {projets.length === 0 && (
             <option value="">Aucun projet</option>
@@ -255,7 +255,7 @@ export default function Taches() {
               value={form.titre}
               onChange={(e) => setForm({ ...form, titre: e.target.value })}
               placeholder="Nouvelle tâche…"
-              className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#4fb0f1] focus:border-transparent"
+              className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent"
             />
           </div>
           <div>
@@ -265,7 +265,7 @@ export default function Taches() {
             <select
               value={form.priorite}
               onChange={(e) => setForm({ ...form, priorite: e.target.value })}
-              className="border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#4fb0f1] focus:border-transparent"
+              className="border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent"
             >
               <option value="basse">Basse</option>
               <option value="moyenne">Moyenne</option>
@@ -281,7 +281,7 @@ export default function Taches() {
               onChange={(e) =>
                 setForm({ ...form, responsable_id: e.target.value })
               }
-              className="border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#4fb0f1] focus:border-transparent"
+              className="border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent"
             >
               <option value="">— Aucun —</option>
               {membres.map((m) => (
@@ -300,13 +300,13 @@ export default function Taches() {
               type="date"
               value={form.echeance}
               onChange={(e) => setForm({ ...form, echeance: e.target.value })}
-              className="border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#4fb0f1] focus:border-transparent"
+              className="border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent"
             />
           </div>
           <button
             type="submit"
             disabled={creation}
-            className="bg-gradient-to-r from-[#4fb0f1] to-[#7df979] px-4 py-2 text-sm font-semibold text-[#0b2241] transition-all duration-200 hover:shadow-lg hover:scale-[1.02] disabled:opacity-50"
+            className="bg-gradient-to-r from-i-blue to-i-green px-4 py-2 text-sm font-semibold text-i-primary transition-all duration-200 hover:shadow-lg hover:scale-[1.02] disabled:opacity-50"
           >
             {creation ? "Enregistrement…" : "+ Ajouter"}
           </button>
@@ -317,7 +317,7 @@ export default function Taches() {
       {loading ? (
         <div className="flex justify-center items-center py-12 animate__animated animate__pulse">
           {/* Le chargement garde son arrondi (rounded-full) */}
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4fb0f1]"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-i-blue"></div>
           <span className="ml-3 text-slate-500">Chargement…</span>
         </div>
       ) : (
@@ -343,7 +343,7 @@ export default function Taches() {
                     return (
                       <div
                         key={t.id}
-                        className="cursor-pointer border border-slate-200 bg-white p-3 shadow-sm hover:shadow-md hover:border-[#4fb0f1] transition-all duration-200 hover:-translate-y-1 animate__animated animate__fadeInUp"
+                        className="cursor-pointer border border-slate-200 bg-white p-3 shadow-sm hover:shadow-md hover:border-i-blue transition-all duration-200 hover:-translate-y-1 animate__animated animate__fadeInUp"
                         style={{ animationDelay: `${0.1 + (index * 0.05)}s` }}
                         onClick={() => setTacheActive(t)}
                         title="Ouvrir le détail"
@@ -395,7 +395,7 @@ export default function Taches() {
                                 e.stopPropagation();
                                 setTacheActive(t);
                               }}
-                              className="flex items-center gap-1 px-2 text-[11px] text-slate-500 hover:text-[#4fb0f1] transition-colors"
+                              className="flex items-center gap-1 px-2 text-[11px] text-slate-500 hover:text-i-blue transition-colors"
                               title="Ouvrir le détail"
                             >
                               <svg

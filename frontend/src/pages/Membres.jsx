@@ -80,6 +80,7 @@ export default function Membres() {
   const { user } = useAuth();
   const { showSuccess, showError } = useMessage();
   const estGestion = ["direction", "drh", "chef_de_projet"].includes(user?.role);
+  const peutSupprimer = ["direction", "drh"].includes(user?.role);
 
   const [utilisateurs, setUtilisateurs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -317,15 +318,17 @@ export default function Membres() {
                         <EditIcon className="w-3.5 h-3.5" />
                         Modifier
                       </button>
-                      <button
-                        onClick={() => demanderSuppression(u)}
-                        className="flex items-center gap-1 text-xs text-slate-500 transition-colors"
-                        onMouseEnter={(e) => (e.currentTarget.style.color = "#dc2626")}
-                        onMouseLeave={(e) => (e.currentTarget.style.color = "")}
-                      >
-                        <TrashIcon className="w-3.5 h-3.5" />
-                        Supprimer
-                      </button>
+                      {peutSupprimer && (
+                        <button
+                          onClick={() => demanderSuppression(u)}
+                          className="flex items-center gap-1 text-xs text-slate-500 transition-colors"
+                          onMouseEnter={(e) => (e.currentTarget.style.color = "#dc2626")}
+                          onMouseLeave={(e) => (e.currentTarget.style.color = "")}
+                        >
+                          <TrashIcon className="w-3.5 h-3.5" />
+                          Supprimer
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>

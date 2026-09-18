@@ -36,7 +36,7 @@ ChartJS.register(
 
 // Couleurs des statuts (charte i-Rindra)
 const couleurStatut = {
-  vert: "bg-[#7df979]/20 text-[#3a8a3a]",
+  vert: "bg-i-green/20 text-[#3a8a3a]",
   orange: "bg-amber-100 text-amber-700",
   rouge: "bg-red-100 text-red-700",
 };
@@ -410,7 +410,7 @@ export default function Dashboard() {
       {/* En-tête avec animation */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 animate__animated animate__fadeInDown">
         <div>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#0b2241] to-[#4fb0f1] bg-clip-text text-transparent">
+          <h1 className="font-brand text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-i-primary to-i-blue bg-clip-text text-transparent">
             Bonjour {user?.prenom || ""} {user?.nom || ""} !
           </h1>
           <p className="text-sm text-slate-500">Voici l'ensemble des projets.</p>
@@ -418,7 +418,7 @@ export default function Dashboard() {
         <button
           onClick={handleRefresh}
           disabled={loading}
-          className="mt-2 sm:mt-0 flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-[#4fb0f1] to-[#7df979] text-[#0b2241] font-semibold text-sm sm:text-base hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50"
+          className="mt-2 sm:mt-0 flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-i-blue to-i-green text-i-primary font-semibold text-sm sm:text-base hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50"
         >
           <RefreshIcon spinning={loading} className="w-4 h-4" />
           {loading ? "Chargement…" : "Rafraîchir"}
@@ -428,7 +428,7 @@ export default function Dashboard() {
       {/* Chargement */}
       {loading && (
         <div className="flex justify-center items-center py-12 animate__animated animate__pulse">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4fb0f1]"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-i-blue"></div>
           <span className="ml-3 text-slate-500">{"Chargement…"}</span>
         </div>
       )}
@@ -461,10 +461,10 @@ export default function Dashboard() {
                   className={`px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors ${
                     vueFinance === t.id
                       ? t.id === "national"
-                        ? "bg-[#7df979] text-[#0b2241]"
+                        ? "bg-i-green text-i-primary"
                         : t.id === "international"
-                          ? "bg-[#4fb0f1] text-white"
-                          : "bg-gradient-to-r from-[#4fb0f1] to-[#7df979] text-[#0b2241]"
+                          ? "bg-i-blue text-white"
+                          : "bg-gradient-to-r from-i-blue to-i-green text-i-primary"
                       : "text-slate-600 hover:bg-slate-100"
                   }`}
                 >
@@ -519,10 +519,10 @@ export default function Dashboard() {
           {/* Cartes statistiques */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
             <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.05s' }}>
-              <StatCard title={"Total Projet"} value={statsAffiches.total} color="text-[#0b2241]" icon={<DashboardIcon className="w-5 h-5 text-[#4fb0f1]" />} />
+              <StatCard title={"Total Projet"} value={statsAffiches.total} color="text-i-primary" icon={<DashboardIcon className="w-5 h-5 text-i-blue" />} />
             </div>
             <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.10s' }}>
-              <StatCard title={"En bon état"} value={statsAffiches.vert} color="text-green-600" icon={<BonIcon className="w-5 h-5 text-[#7df979]" />} />
+              <StatCard title={"En bon état"} value={statsAffiches.vert} color="text-green-600" icon={<BonIcon className="w-5 h-5 text-i-green" />} />
             </div>
             <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.15s' }}>
               <StatCard title={"Attention"} value={statsAffiches.orange} color="text-orange-600" icon={<AttentionIcon className="w-5 h-5 text-orange-600" />} />
@@ -531,7 +531,7 @@ export default function Dashboard() {
               <StatCard title={"Critique"} value={statsAffiches.rouge} color="text-red-600" icon={<CritiqueIcon className="w-5 h-5 text-red-600" />} />
             </div>
             <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.25s' }}>
-              <StatCard title={"Moyenne"} value={`${statsAffiches.avancementMoyen}%`} color="text-[#4fb0f1]" icon={<TachesIcon className="w-5 h-5 text-[#4fb0f1]" />} />
+              <StatCard title={"Moyenne"} value={`${statsAffiches.avancementMoyen}%`} color="text-i-blue" icon={<TachesIcon className="w-5 h-5 text-i-blue" />} />
             </div>
             <div className="animate__animated animate__fadeInUp" style={{ animationDelay: '0.30s' }}>
               <StatCard title={"Tâches"} value={`${statsAffiches.tachesTerminees}/${statsAffiches.tachesTotales}`} color="text-[#7DA1AF]" icon={<TachesIcon className="w-5 h-5 text-[#7DA1AF]" />} />
@@ -544,7 +544,7 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
                 <div className="bg-white border border-slate-200 p-3 sm:p-4 shadow-sm animate__animated animate__fadeInUp" style={{ animationDelay: '0.10s' }}>
                   <h3 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2 sm:mb-3 flex items-center gap-2">
-                    <ProjetsIcon className="w-4 h-4 text-[#4fb0f1]" />
+                    <ProjetsIcon className="w-4 h-4 text-i-blue" />
                     Avancement des projets
                   </h3>
                   <div className="h-48 sm:h-56 md:h-64">
@@ -554,7 +554,7 @@ export default function Dashboard() {
 
                 <div className="bg-white border border-slate-200 p-3 sm:p-4 shadow-sm animate__animated animate__fadeInUp" style={{ animationDelay: '0.20s' }}>
                   <h3 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2 sm:mb-3 flex items-center gap-2">
-                    <DashboardIcon className="w-4 h-4 text-[#4fb0f1]" />
+                    <DashboardIcon className="w-4 h-4 text-i-blue" />
                     Répartition des statuts
                   </h3>
                   <div className="h-48 sm:h-56 md:h-64 flex items-center justify-center">
@@ -567,7 +567,7 @@ export default function Dashboard() {
 
               <div className="bg-white border border-slate-200 p-3 sm:p-4 shadow-sm mb-4 sm:mb-6 animate__animated animate__fadeInUp" style={{ animationDelay: '0.30s' }}>
                 <h3 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2 sm:mb-3 flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-[#4fb0f1]">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-i-blue">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1.5-1.5m0 0l-1.5 1.5m1.5-1.5V3.75m-7.5 0h16.5" />
                   </svg>
                   Évolution des projets
@@ -580,7 +580,7 @@ export default function Dashboard() {
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-2 sm:mb-3">
                   <h3 className="text-xs sm:text-sm font-semibold text-slate-700 flex items-center gap-2">
-                    <ProjetsIcon className="w-4 h-4 text-[#4fb0f1]" />
+                    <ProjetsIcon className="w-4 h-4 text-i-blue" />
                     Liste des projets ({projetsAffiches.length})
                   </h3>
                 </div>
@@ -623,7 +623,7 @@ function BlocFinance({ titre, sousTitre, section, devise, messageVide, accent, a
     <div className="bg-white border border-slate-200 p-3 sm:p-4 shadow-sm animate__animated animate__fadeInUp" style={{ animationDelay }}>
       <div className="mb-2 sm:mb-3 flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-xs sm:text-sm font-semibold text-slate-700 flex items-center gap-2">
-          <MoneyIcon className="w-4 h-4 text-[#4fb0f1]" />
+          <MoneyIcon className="w-4 h-4 text-i-blue" />
           {titre}
         </h3>
         <span className="text-[10px] sm:text-xs text-slate-400">{sousTitre}</span>
@@ -687,10 +687,10 @@ function SousBlocFinance({ section, devise, accent, vide }) {
   return (
     <div>
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
-        <StatCard title={"CA encaissé"} value={formatMontant(section?.ca_encaisse, devise)} color="text-[#3a8a3a]" icon={<MoneyIcon className="w-5 h-5 text-[#7df979]" />} />
+        <StatCard title={"CA encaissé"} value={formatMontant(section?.ca_encaisse, devise)} color="text-[#3a8a3a]" icon={<MoneyIcon className="w-5 h-5 text-i-green" />} />
         <StatCard title={"Reste à payer"} value={formatMontant(section?.reste_a_payer, devise)} color="text-amber-600" icon={<MoneyIcon className="w-5 h-5 text-amber-600" />} />
-        <StatCard title={"En attente"} value={formatMontant(section?.en_attente, devise)} color="text-[#4fb0f1]" icon={<MoneyIcon className="w-5 h-5 text-[#4fb0f1]" />} />
-        <StatCard title={"Factures"} value={section?.total_factures ?? 0} color="text-[#0b2241]" icon={<MoneyIcon className="w-5 h-5 text-[#4fb0f1]" />} />
+        <StatCard title={"En attente"} value={formatMontant(section?.en_attente, devise)} color="text-i-blue" icon={<MoneyIcon className="w-5 h-5 text-i-blue" />} />
+        <StatCard title={"Factures"} value={section?.total_factures ?? 0} color="text-i-primary" icon={<MoneyIcon className="w-5 h-5 text-i-blue" />} />
         <StatCard title={"Impayées"} value={section?.impayees ?? 0} color="text-red-600" icon={<MoneyIcon className="w-5 h-5 text-red-600" />} />
       </div>
 
@@ -711,7 +711,7 @@ function SousBlocFinance({ section, devise, accent, vide }) {
 // Composant StatCard
 function StatCard({ title, value, color, icon }) {
   return (
-    <div className="bg-white border border-slate-200 p-2 sm:p-3 md:p-4 shadow-sm hover:shadow-md transition-all duration-300 hover:border-[#4fb0f1] hover:scale-105">
+    <div className="bg-white border border-slate-200 p-2 sm:p-3 md:p-4 shadow-sm hover:shadow-md transition-all duration-300 hover:border-i-blue hover:scale-105">
       <div className="flex items-center gap-1.5 sm:gap-2">
         <div className="flex-shrink-0">{icon}</div>
         <div className="min-w-0">
@@ -731,7 +731,7 @@ function ProjectCard({ projet }) {
   };
 
   const couleurStatut = {
-    vert: "bg-[#7df979]/20 text-[#3a8a3a]",
+    vert: "bg-i-green/20 text-[#3a8a3a]",
     orange: "bg-amber-100 text-amber-700",
     rouge: "bg-red-100 text-red-700",
   };
@@ -740,7 +740,7 @@ function ProjectCard({ projet }) {
 
   return (
     <div
-      className="group border border-slate-200 bg-white p-3 sm:p-4 shadow-sm hover:shadow-md hover:border-[#4fb0f1] transition-all duration-300 cursor-pointer hover:-translate-y-1"
+      className="group border border-slate-200 bg-white p-3 sm:p-4 shadow-sm hover:shadow-md hover:border-i-blue transition-all duration-300 cursor-pointer hover:-translate-y-1"
       onClick={() => (window.location.href = `/projets/${projet.id}`)}
     >
       <div className="mb-2 flex items-start justify-between gap-2">
@@ -763,7 +763,7 @@ function ProjectCard({ projet }) {
       <div className="mb-1 h-1.5 w-full overflow-hidden bg-slate-100">
         <div
           className={`h-full rounded-full transition-all duration-500 ${
-            (projet.avancement_pct || 0) >= 80 ? "bg-[#7df979]" : (projet.avancement_pct || 0) >= 40 ? "bg-[#4fb0f1]" : "bg-[#7afdf2]"
+            (projet.avancement_pct || 0) >= 80 ? "bg-i-green" : (projet.avancement_pct || 0) >= 40 ? "bg-i-blue" : "bg-i-turquoise"
           }`}
           style={{ width: `${projet.avancement_pct || 0}%` }}
         />

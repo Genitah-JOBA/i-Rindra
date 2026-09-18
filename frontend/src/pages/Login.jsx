@@ -97,21 +97,21 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#0b2241] via-[#0b2241] to-[#1a3a5c] p-4 animate__animated animate__backInDown">
-      <div className="grid w-full max-w-5xl overflow-hidden bg-white shadow-2xl md:grid-cols-2 rounded-2xl">
+    <div className="flex h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-i-primary via-i-primary to-[#1a3a5c] p-4">
+      <div className="grid w-full max-w-5xl max-h-full overflow-hidden bg-white shadow-2xl md:grid-cols-2 rounded-2xl">
         {/* COLONNE GAUCHE : formulaire */}
-        <div className="flex flex-col justify-center p-8 sm:p-12 bg-white">
+        <div className="flex flex-col justify-center p-5 sm:p-8 bg-white">
           {/* Logo mobile */}
           <img
             src="/Logo-i-Rindra-couleur.png"
             alt="i-Rindra"
-            className="mb-6 h-16 w-auto self-center md:hidden"
+            className="mb-4 h-14 w-auto self-center md:hidden"
           />
 
-          <h1 className="mb-1 text-4xl font-bold text-center py-2 bg-gradient-to-r from-[#0b2241] to-[#4fb0f1] bg-clip-text text-transparent">
+          <h1 className="font-brand mb-1 text-3xl font-bold text-center py-1 bg-gradient-to-r from-i-primary to-i-blue bg-clip-text text-transparent">
             Connexion
           </h1>
-          <p className="mb-6 text-sm text-slate-500 text-center">
+          <p className="font-body mb-4 text-sm text-slate-500 text-center">
             Accédez à votre espace i-Rindra.
           </p>
 
@@ -121,7 +121,7 @@ export default function Login() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+          <form onSubmit={handleSubmit} className="font-body space-y-3.5" noValidate>
             {/* Email */}
             <div>
               <label className="mb-1 text-sm font-medium text-slate-700">
@@ -132,8 +132,8 @@ export default function Login() {
                   emailTouche && erreurEmail
                     ? "border-red-500 focus-within:ring-2 focus-within:ring-red-500/30"
                     : emailTouche && !erreurEmail
-                      ? "border-[#7df979] focus-within:ring-2 focus-within:ring-[#7df979]/30"
-                      : "border-slate-300 focus-within:border-[#4fb0f1] focus-within:ring-2 focus-within:ring-[#4fb0f1]/30"
+                      ? "border-i-green focus-within:ring-2 focus-within:ring-i-green/30"
+                      : "border-slate-300 focus-within:border-i-blue focus-within:ring-2 focus-within:ring-i-blue/30"
                 }`}
               >
                 <img src="/adresse.png" alt="email" className="w-5" />
@@ -153,7 +153,7 @@ export default function Login() {
                 />
                 {emailTouche && !erreurEmail && email.length > 0 && (
                   <svg
-                    className="w-5 h-5 text-[#7df979]"
+                    className="w-5 h-5 text-i-green"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -185,8 +185,8 @@ export default function Login() {
                   motDePasseTouche && erreurMotDePasse
                     ? "border-red-500 focus-within:ring-2 focus-within:ring-red-500/30"
                     : motDePasseTouche && !erreurMotDePasse
-                      ? "border-[#7df979] focus-within:ring-2 focus-within:ring-[#7df979]/30"
-                      : "border-slate-300 focus-within:border-[#4fb0f1] focus-within:ring-2 focus-within:ring-[#4fb0f1]/30"
+                      ? "border-i-green focus-within:ring-2 focus-within:ring-i-green/30"
+                      : "border-slate-300 focus-within:border-i-blue focus-within:ring-2 focus-within:ring-i-blue/30"
                 }`}
               >
                 <img src="/fermer-a-cle.png" alt="password" className="w-6" />
@@ -208,7 +208,7 @@ export default function Login() {
                   !erreurMotDePasse &&
                   motDePasse.length > 0 && (
                     <svg
-                      className="w-5 h-5 text-[#7df979]"
+                      className="w-5 h-5 text-i-green"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -225,7 +225,7 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={toggleAfficherMotDePasse}
-                  className="flex items-center justify-center p-1 text-slate-500 hover:text-[#4fb0f1] transition-colors"
+                  className="flex items-center justify-center p-1 text-slate-500 hover:text-i-blue transition-colors"
                   aria-label={
                     afficherMotDePasse
                       ? "Masquer le mot de passe"
@@ -278,18 +278,18 @@ export default function Login() {
               </p>
             </div>
 
-            <div className="block mx-auto text-right transition hover:text-[#4fb0f1] cursor-pointer text-[12px] text-slate-500">
+            <div className="block mx-auto text-right transition hover:text-i-blue cursor-pointer text-[12px] text-slate-500">
               Mot de passe oublié ?
             </div>
 
-            {/* Bouton connexion avec gradient */}
+            {/* Bouton connexion : CTA vert → turquoise (charte) */}
             <button
               type="submit"
               disabled={enCours || !estFormulaireValide()}
-              className={`block w-full py-3 px-5 text-sm font-semibold text-white rounded-lg transition-all duration-200 disabled:opacity-50 ${
+              className={`font-body block w-full py-2.5 px-5 text-sm font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 ${
                 estFormulaireValide()
-                  ? "bg-gradient-to-r from-[#4fb0f1] to-[#7df979] hover:from-[#3a9fe0] hover:to-[#6de069] cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-                  : "bg-gray-400 cursor-not-allowed"
+                  ? "bg-brand-gradient-soft text-i-primary hover:brightness-105 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                  : "bg-gray-400 text-white cursor-not-allowed"
               }`}
             >
               {enCours ? "Connexion…" : "Se connecter"}
@@ -298,30 +298,30 @@ export default function Login() {
         </div>
 
         {/* COLONNE DROITE : panneau de marque (masqué en mobile) */}
-        <div className="relative hidden flex-col items-center justify-center bg-gradient-to-br from-[#0b2241] via-[#0b2241] to-[#1a3a5c] p-12 text-center md:flex overflow-hidden">
+        <div className="relative hidden flex-col items-center justify-center bg-gradient-to-br from-i-primary via-i-primary to-[#1a3a5c] p-8 text-center md:flex overflow-hidden">
           {/* Motifs décoratifs */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#7afdf2] rounded-full filter blur-3xl opacity-10 -translate-y-1/2 translate-x-1/2"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#7df979] rounded-full filter blur-3xl opacity-10 translate-y-1/2 -translate-x-1/2"></div>
-          <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-[#4fb0f1] rounded-full filter blur-3xl opacity-10 -translate-x-1/2 -translate-y-1/2"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-i-turquoise rounded-full filter blur-3xl opacity-10 -translate-y-1/2 translate-x-1/2"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-i-green rounded-full filter blur-3xl opacity-10 translate-y-1/2 -translate-x-1/2"></div>
+          <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-i-blue rounded-full filter blur-3xl opacity-10 -translate-x-1/2 -translate-y-1/2"></div>
 
           {/* Contenu */}
           <div className="relative z-10 flex flex-col items-center">
-            {/* Logo */}
+            {/* Logo blanc : fond bleu nuit → version blanche (charte) */}
             <div className="mb-8 p-4 bg-white/5 rounded-2xl backdrop-blur-sm border border-white/10">
               <img
-                src="/Logo-i-Rindra-couleur.png"
+                src="/Logo-i-Rindra-Blanc.png"
                 alt="Logo i-Rindra"
                 className="w-48 max-w-full"
               />
             </div>
 
-            <h2 className="text-2xl font-bold text-white mb-3">
+            <h2 className="font-brand text-2xl font-bold text-white mb-3">
               Gestion de projets
-              <span className="block bg-gradient-to-r from-[#4fb0f1] to-[#7df979] bg-clip-text text-transparent">
+              <span className="block bg-gradient-to-r from-i-blue to-i-green bg-clip-text text-transparent">
                 assistée par l'IA
               </span>
             </h2>
-            <p className="mt-2 max-w-xs text-sm text-[#7afdf2]/80">
+            <p className="font-body mt-2 max-w-xs text-sm text-i-turquoise/80">
               Centralisez vos projets, suivez l'avancement et laissez
               l'assistant IA vous épauler.
             </p>
@@ -329,15 +329,15 @@ export default function Login() {
             {/* Points forts */}
             <div className="mt-8 flex flex-col gap-2 w-full max-w-xs">
               <div className="flex items-center gap-2 text-left text-xs text-white/80">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#7df979]"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-i-green"></div>
                 <span>Suivi en temps réel</span>
               </div>
               <div className="flex items-center gap-2 text-left text-xs text-white/80">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#4fb0f1]"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-i-blue"></div>
                 <span>Assistant IA intégré</span>
               </div>
               <div className="flex items-center gap-2 text-left text-xs text-white/80">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#7afdf2]"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-i-turquoise"></div>
                 <span>Espace client dédié</span>
               </div>
             </div>

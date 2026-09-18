@@ -47,7 +47,7 @@ const SearchIcon = ({ className = "w-4 h-4" }) => (
 
 // Couleurs des statuts (charte i-Rindra)
 const couleurStatut = {
-  vert: "bg-[#7df979]/20 text-[#3a8a3a]",
+  vert: "bg-i-green/20 text-[#3a8a3a]",
   orange: "bg-amber-100 text-amber-700",
   rouge: "bg-red-100 text-red-700",
 };
@@ -166,7 +166,7 @@ export default function Projets() {
 
   const statuts = [
     { id: "tous", label: "Tous", color: "bg-slate-100 text-slate-700" },
-    { id: "vert", label: "🟢 Bon", color: "bg-[#7df979]/20 text-[#3a8a3a]" },
+    { id: "vert", label: "🟢 Bon", color: "bg-i-green/20 text-[#3a8a3a]" },
     { id: "orange", label: "🟠 Attention", color: "bg-amber-100 text-amber-700" },
     { id: "rouge", label: "🔴 Critique", color: "bg-red-100 text-red-700" },
   ];
@@ -176,7 +176,7 @@ export default function Projets() {
       {/* En-tête avec animation */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 animate__animated animate__fadeInDown">
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-[#0b2241] to-[#4fb0f1] bg-clip-text text-transparent">
+          <h1 className="font-brand text-2xl font-bold bg-gradient-to-r from-i-primary to-i-blue bg-clip-text text-transparent">
             Projets
           </h1>
           <p className="text-sm text-slate-500">
@@ -194,7 +194,7 @@ export default function Projets() {
               onClick={() => setFiltreStatut(s.id)}
               className={`px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
                 filtreStatut === s.id
-                  ? s.color + " ring-2 ring-offset-1 ring-[#4fb0f1] shadow-sm"
+                  ? s.color + " ring-2 ring-offset-1 ring-i-blue shadow-sm"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
@@ -213,7 +213,7 @@ export default function Projets() {
               onClick={() => setFiltreArchive(a.id)}
               className={`px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
                 filtreArchive === a.id
-                  ? "bg-gradient-to-r from-[#4fb0f1] to-[#7df979] text-[#0b2241] font-semibold ring-2 ring-offset-1 ring-[#4fb0f1] shadow-sm"
+                  ? "bg-gradient-to-r from-i-blue to-i-green text-i-primary font-semibold ring-2 ring-offset-1 ring-i-blue shadow-sm"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
@@ -228,7 +228,7 @@ export default function Projets() {
             value={recherche}
             onChange={(e) => setRecherche(e.target.value)}
             placeholder="Rechercher un projet..."
-            className="w-full pl-9 pr-3 py-1.5 text-sm border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#4fb0f1] focus:border-transparent"
+            className="w-full pl-9 pr-3 py-1.5 text-sm border border-slate-300 focus:outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent"
           />
         </div>
         <span className="text-xs text-slate-400 whitespace-nowrap">
@@ -238,7 +238,7 @@ export default function Projets() {
 
       {loading && (
         <div className="flex justify-center items-center py-12 animate__animated animate__pulse">
-          <div className="animate-spin h-8 w-8 border-b-2 border-[#4fb0f1] rounded-full"></div>
+          <div className="animate-spin h-8 w-8 border-b-2 border-i-blue rounded-full"></div>
           <span className="ml-3 text-slate-500">Chargement…</span>
         </div>
       )}
@@ -251,7 +251,7 @@ export default function Projets() {
               <p>Aucun projet ne correspond à vos filtres.</p>
               <button
                 onClick={() => { setFiltreStatut("tous"); setRecherche(""); setFiltreArchive("actifs"); }}
-                className="mt-2 text-[#4fb0f1] hover:underline font-medium"
+                className="mt-2 text-i-blue hover:underline font-medium"
               >
                 Réinitialiser les filtres
               </button>
@@ -268,7 +268,7 @@ export default function Projets() {
           <div
             key={p.id}
             onClick={() => navigate(`/projets/${p.id}`)}
-            className="group relative cursor-pointer border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:shadow-lg hover:border-[#4fb0f1] animate__animated animate__fadeInUp hover:-translate-y-1"
+            className="group relative cursor-pointer border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:shadow-lg hover:border-i-blue animate__animated animate__fadeInUp hover:-translate-y-1"
             style={{ animationDelay: `${index * 50}ms` }}
           >
             {/* En-tête avec nom et statut */}
@@ -300,17 +300,17 @@ export default function Projets() {
             {/* Informations du projet */}
             <div className="space-y-1.5 text-xs text-slate-500">
               <div className="flex items-center gap-1">
-                <BuildingIcon className="w-3.5 h-3.5 text-[#4fb0f1]" />
+                <BuildingIcon className="w-3.5 h-3.5 text-i-blue" />
                 <span>Client : {nomClient(p.client_id)}</span>
               </div>
               {p.responsable_id && (
                 <div className="flex items-center gap-1">
-                  <UserIcon className="w-3.5 h-3.5 text-[#4fb0f1]" />
+                  <UserIcon className="w-3.5 h-3.5 text-i-blue" />
                   <span>Responsable : {nomResponsable(p.responsable_id)}</span>
                 </div>
               )}
               <div className="flex items-center gap-1">
-                <CalendarIcon className="w-3.5 h-3.5 text-[#4fb0f1]" />
+                <CalendarIcon className="w-3.5 h-3.5 text-i-blue" />
                 <span>
                   Début : {p.date_debut
                     ? new Date(p.date_debut).toLocaleDateString("fr-FR")
@@ -319,7 +319,7 @@ export default function Projets() {
               </div>
               {p.date_fin_prevue && (
                 <div className="flex items-center gap-1">
-                  <CalendarIcon className="w-3.5 h-3.5 text-[#4fb0f1]" />
+                  <CalendarIcon className="w-3.5 h-3.5 text-i-blue" />
                   <span>Fin : {new Date(p.date_fin_prevue).toLocaleDateString("fr-FR")}</span>
                 </div>
               )}
@@ -331,10 +331,10 @@ export default function Projets() {
                 <div
                   className={`h-full transition-all duration-500 ${
                     (p.avancement_pct || 0) >= 80
-                      ? "bg-[#7df979]"
+                      ? "bg-i-green"
                       : (p.avancement_pct || 0) >= 40
-                      ? "bg-[#4fb0f1]"
-                      : "bg-[#7afdf2]"
+                      ? "bg-i-blue"
+                      : "bg-i-turquoise"
                   }`}
                   style={{ width: `${p.avancement_pct || 0}%` }}
                 />
@@ -355,7 +355,7 @@ export default function Projets() {
                 <button
                   onClick={(e) => basculerArchive(p, e)}
                   title={p.archive ? "Désarchiver le projet" : "Archiver le projet"}
-                  className="p-1.5 text-slate-500 hover:text-[#4fb0f1] hover:bg-[#4fb0f1]/10 transition-colors"
+                  className="p-1.5 text-slate-500 hover:text-i-blue hover:bg-i-blue/10 transition-colors"
                 >
                   <ArchiveIcon className="w-4 h-4" />
                 </button>
@@ -364,7 +364,7 @@ export default function Projets() {
                 <button
                   onClick={(e) => chat(p, e)}
                   title="Accéder au chat du projet"
-                  className="p-1.5 text-slate-500 hover:text-[#4fb0f1] hover:bg-[#4fb0f1]/10 transition-colors"
+                  className="p-1.5 text-slate-500 hover:text-i-blue hover:bg-i-blue/10 transition-colors"
                 >
                   <ChatIcon className="w-4 h-4" />
                 </button>

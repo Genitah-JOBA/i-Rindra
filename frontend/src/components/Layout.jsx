@@ -9,7 +9,7 @@ import "animate.css";
 const lienClass = ({ isActive }) =>
   `flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors mx-1 ${
     isActive
-      ? "bg-gradient-to-r from-[#4fb0f1] to-[#7df979] text-[#0b2241] font-semibold shadow-md"
+      ? "bg-gradient-to-r from-i-blue to-i-green text-i-primary font-semibold shadow-md"
       : "text-white/80 hover:bg-white/10 hover:text-white"
   }`;
 
@@ -84,7 +84,7 @@ export default function Layout() {
       <aside
         className={`
           w-72 sm:w-64 md:w-52
-          bg-gradient-to-b from-[#0b2241] to-[#1a3a5c]
+          bg-gradient-to-b from-i-primary to-[#1a3a5c]
           border-r border-white/10
           h-screen flex-shrink-0
           flex flex-col
@@ -95,10 +95,10 @@ export default function Layout() {
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
-        {/* Logo */}
+        {/* Logo — fond bleu nuit → version blanche (charte) */}
         <div className="p-4 border-b border-white/10 flex justify-between items-center">
           <img
-            src="/Logo-i-Rindra-text-couleur.png"
+            src="/Logo-i-Rindra-text-Blanc.png"
             alt="Logo i-Rindra"
             className="h-12 w-auto"
           />
@@ -131,7 +131,7 @@ export default function Layout() {
         >
           {/* === SECTION COMMUNE À TOUS === */}
           <div className="mb-2">
-            <p className="px-3 py-1 text-xs font-semibold text-[#7afdf2]/60 uppercase tracking-wider">
+            <p className="px-3 py-1 text-xs font-semibold text-i-turquoise/60 uppercase tracking-wider">
               Menu principal
             </p>
           </div>
@@ -218,7 +218,7 @@ export default function Layout() {
 
               {/* === SECTION GESTION === */}
               <div className="mb-2">
-                <p className="px-3 py-1 text-xs font-semibold text-[#7afdf2]/60 uppercase tracking-wider">
+                <p className="px-3 py-1 text-xs font-semibold text-i-turquoise/60 uppercase tracking-wider">
                   Gestion
                 </p>
               </div>
@@ -286,7 +286,7 @@ export default function Layout() {
               {/* === SECTION IA === */}
               <div className="my-3 border-t border-white/10"></div>
               <div className="mb-2">
-                <p className="px-3 py-1 text-xs font-semibold text-[#7afdf2]/60 uppercase tracking-wider">
+                <p className="px-3 py-1 text-xs font-semibold text-i-turquoise/60 uppercase tracking-wider">
                   Intelligence Artificielle
                 </p>
               </div>
@@ -307,7 +307,7 @@ export default function Layout() {
                   />
                 </svg>
                 Assistant IA
-                <span className="ml-auto text-[10px] bg-[#7df979]/20 text-[#7df979] px-2 py-0.5 flex-shrink-0">
+                <span className="ml-auto text-[10px] bg-i-green/20 text-i-green px-2 py-0.5 flex-shrink-0">
                   IA
                 </span>
               </NavLink>
@@ -317,7 +317,7 @@ export default function Layout() {
                 <>
                   <div className="my-3 border-t border-white/10"></div>
                   <div className="mb-2">
-                    <p className="px-3 py-1 text-xs font-semibold text-[#7afdf2]/60 uppercase tracking-wider">
+                    <p className="px-3 py-1 text-xs font-semibold text-i-turquoise/60 uppercase tracking-wider">
                       Finance
                     </p>
                   </div>
@@ -338,7 +338,7 @@ export default function Layout() {
                       />
                     </svg>
                     Suggestion devis par IA
-                    <span className="ml-auto text-[10px] bg-[#7df979]/20 text-[#7df979] px-2 py-0.5 flex-shrink-0">
+                    <span className="ml-auto text-[10px] bg-i-green/20 text-i-green px-2 py-0.5 flex-shrink-0">
                       IA
                     </span>
                   </NavLink>
@@ -388,7 +388,7 @@ export default function Layout() {
             <>
               <div className="my-3 border-t border-white/10"></div>
               <div className="mb-2">
-                <p className="px-3 py-1 text-xs font-semibold text-[#7afdf2]/60 uppercase tracking-wider">
+                <p className="px-3 py-1 text-xs font-semibold text-i-turquoise/60 uppercase tracking-wider">
                   Mon espace
                 </p>
               </div>
@@ -414,7 +414,7 @@ export default function Layout() {
                   />
                 </svg>
                 Mes devis
-                <span className="ml-auto text-[10px] bg-[#4fb0f1]/20 text-[#4fb0f1] px-2 py-0.5 flex-shrink-0">
+                <span className="ml-auto text-[10px] bg-i-blue/20 text-i-blue px-2 py-0.5 flex-shrink-0">
                   ↗
                 </span>
               </a>
@@ -477,14 +477,14 @@ export default function Layout() {
               />
             </svg>
             Chat (e-resaka)
-            <span className="ml-auto text-[10px] bg-[#4fb0f1]/20 text-[#4fb0f1] px-2 py-0.5 flex-shrink-0">
+            <span className="ml-auto text-[10px] bg-i-blue/20 text-i-blue px-2 py-0.5 flex-shrink-0">
               ↗
             </span>
           </a>
 
           <button
             onClick={() => setSidebarOpen(true)}
-            className="md:hidden p-2 text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#4fb0f1] transition-colors"
+            className="md:hidden p-2 text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-i-blue transition-colors"
             aria-label="Ouvrir le menu"
           >
             <svg
@@ -511,7 +511,7 @@ export default function Layout() {
           <div className="relative" ref={profilMenuRef}>
             <button
               onClick={toggleProfilMenu}
-              className="flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#4fb0f1]"
+              className="flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-i-blue"
               aria-expanded={profilMenuOpen}
               aria-haspopup="true"
             >

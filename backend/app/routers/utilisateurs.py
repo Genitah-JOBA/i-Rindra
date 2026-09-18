@@ -29,6 +29,16 @@ async def _direction_seulement(role: str = Depends(get_current_user_role)):
     return role
 
 
+async def _direction_drh_seulement(role: str = Depends(get_current_user_role)):
+    """Réserve la suppression des membres à la direction et au DRH (pas aux chefs de projet)."""
+    if role not in ("direction", "drh"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Action réservée à la direction",
+        )
+    return role
+
+
 @router.get("/", response_model=List[UtilisateurResponse])
 async def get_utilisateurs(
     db: AsyncSession = Depends(get_db),
@@ -154,9 +164,9 @@ async def update_utilisateur(
 async def delete_utilisateur(
     utilisateur_id: int,
     db: AsyncSession = Depends(get_db),
-    _: str = Depends(_direction_seulement),
+    _: str = Depends(_direction_drh_seulement),
 ):
-    """Supprimer un utilisateur (direction uniquement)."""
+    """Supprimer un utilisateur (direction/DRH uniquement, pas les chefs de projet)."""
     result = await db.execute(
         select(Utilisateur).where(Utilisateur.id == utilisateur_id)
     )
