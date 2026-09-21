@@ -30,7 +30,7 @@ function estTitreSection(ligne) {
 }
 
 function estTitreEnTete(ligne) {
-  return /^(devis n[°o]|agence bienfe|bienfe)/i.test(ligne.trim());
+  return /^(devis n[Â°o]|agence bienfe|bienfe)/i.test(ligne.trim());
 }
 
 function decouperLignes(contenu) {
@@ -129,7 +129,7 @@ export default function DevisContenu({ contenu, className = "" }) {
             return (
               <p
                 key={idx}
-                className="mt-2 mb-1 text-[11px] font-bold text-[#63B23E] uppercase tracking-wider border-l-2 border-[#63B23E] pl-2"
+                className="mt-2 mb-1 text-[11px] font-bold text-i-blue uppercase tracking-wider border-l-2 border-i-blue pl-2"
               >
                 {bloc.texte.replace(/:$/, "")}
               </p>

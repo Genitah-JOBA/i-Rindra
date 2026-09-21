@@ -10,7 +10,7 @@ const infoType = (mime) => {
   if (m === "application/pdf")
     return { label: "PDF", classe: "bg-red-100 text-red-700" };
   if (m.startsWith("image/"))
-    return { label: "IMG", classe: "bg-purple-100 text-purple-700" };
+    return { label: "IMG", classe: "bg-i-blue/10 text-i-blue" };
   if (m.includes("word"))
     return { label: "DOC", classe: "bg-blue-100 text-blue-700" };
   if (m.includes("excel") || m === "text/csv")
@@ -87,7 +87,7 @@ export default function Documents() {
   if (loading)
     return (
       <div className="flex items-center justify-center py-16">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-[#63B23E]"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-i-blue"></div>
         <span className="ml-3 text-slate-500">{"Chargement…"}</span>
       </div>
     );
@@ -117,7 +117,7 @@ export default function Documents() {
         <button
           onClick={chargerDonnees}
           disabled={loading}
-          className="flex items-center gap-2 px-3 py-2 text-sm bg-[#63B23E] text-white hover:bg-[#3F894E] transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-3 py-2 text-sm bg-brand-gradient text-i-primary hover:brightness-110 transition-colors disabled:opacity-50"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -209,7 +209,7 @@ export default function Documents() {
                           </div>
                           <button
                             onClick={() => telecharger(projet.id, f)}
-                            className="flex-shrink-0 inline-flex items-center gap-1.5 border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:border-[#63B23E] hover:text-[#3F894E] transition-colors"
+                            className="flex-shrink-0 inline-flex items-center gap-1.5 border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:border-i-blue hover:text-[#3F894E] transition-colors"
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"

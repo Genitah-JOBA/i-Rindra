@@ -22,7 +22,7 @@ const PRIORITE_STYLE = {
 const STATUT_STYLE = {
   a_faire: "bg-slate-100 text-slate-600",
   en_cours: "bg-blue-100 text-blue-700",
-  en_revue: "bg-purple-100 text-purple-700",
+  en_revue: "bg-i-blue/10 text-i-blue",
   termine: "bg-green-100 text-green-800",
 };
 
@@ -33,9 +33,9 @@ const ALERTE_STYLE = {
 };
 
 const ALERTE_ICONE = {
-  haute: "🔴",
-  moyenne: "🟠",
-  basse: "🟡",
+  haute: "ðŸ”´",
+  moyenne: "ðŸŸ ",
+  basse: "ðŸŸ¡",
 };
 
 const STATUT_MAP = { vert: "Bon", orange: "Attention", rouge: "Critique" };
@@ -181,7 +181,7 @@ export default function MonProjet() {
   if (loading)
     return (
       <div className="flex justify-center items-center py-16">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#63B23E]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-i-blue"></div>
         <span className="ml-3 text-slate-500">{"Chargement…"}</span>
       </div>
     );
@@ -218,7 +218,7 @@ export default function MonProjet() {
             <button
               onClick={chargerDonnees}
               disabled={loading}
-              className="flex items-center gap-2 px-3 py-2 text-sm bg-[#63B23E] text-white hover:bg-[#3F894E] transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-3 py-2 text-sm bg-brand-gradient text-i-primary hover:brightness-110 transition-colors disabled:opacity-50"
             >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -254,8 +254,8 @@ export default function MonProjet() {
                   onClick={() => choisirProjet(p.id)}
                   className={`flex items-center gap-2 px-4 py-2 text-sm font-medium border transition-colors ${
                     actif
-                      ? "bg-[#63B23E] border-[#63B23E] text-white shadow-sm"
-                      : "bg-white border-slate-200 text-slate-700 hover:border-[#63B23E] hover:text-[#3F894E]"
+                      ? "bg-brand-gradient border-i-blue text-white shadow-sm"
+                      : "bg-white border-slate-200 text-slate-700 hover:border-i-blue hover:text-[#3F894E]"
                   }`}
                 >
                   <span className={actif ? "" : "text-slate-400"}>
@@ -283,16 +283,16 @@ export default function MonProjet() {
 
       {/* Cartes indicateurs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
-        <div className="bg-white border border-slate-200 p-4 shadow-sm hover:border-[#63B23E] transition-colors">
+        <div className="bg-white border border-slate-200 p-4 shadow-sm hover:border-i-blue transition-colors">
           <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-wider">
             {"Avancement"}
           </p>
-          <p className="text-xl sm:text-2xl font-bold text-[#63B23E]">
+          <p className="text-xl sm:text-2xl font-bold text-i-blue">
             {projet.avancement_pct || 0}%
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200 p-4 shadow-sm hover:border-[#63B23E] transition-colors">
+        <div className="bg-white border border-slate-200 p-4 shadow-sm hover:border-i-blue transition-colors">
           <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-wider">
             {"Tâches"}
           </p>
@@ -304,7 +304,7 @@ export default function MonProjet() {
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200 p-4 shadow-sm hover:border-[#63B23E] transition-colors">
+        <div className="bg-white border border-slate-200 p-4 shadow-sm hover:border-i-blue transition-colors">
           <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-wider">
             {estTermine ? "Terminées" : "Restantes"}
           </p>
@@ -313,14 +313,14 @@ export default function MonProjet() {
               enRetard ? "text-red-600" : "text-slate-900"
             }`}
           >
-            {estTermine ? "100% ✓" : `${totalTaches - details.termine}`}
+            {estTermine ? "100% âœ“" : `${totalTaches - details.termine}`}
           </p>
           <p className="text-[10px] text-slate-400">
             {STATUT_MAP[projet.statut_sante] || projet.statut_sante}
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200 p-4 shadow-sm hover:border-[#63B23E] transition-colors">
+        <div className="bg-white border border-slate-200 p-4 shadow-sm hover:border-i-blue transition-colors">
           <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-wider">
             {enRetard ? "En retard" : "Statut"}
           </p>
@@ -352,10 +352,10 @@ export default function MonProjet() {
           <div className="mb-1 flex justify-between text-xs text-slate-500">
             <span>
               {projet.avancement_pct || 0}%{" "}
-              {estTermine ? "✓" : "terminé"}
+              {estTermine ? "âœ“" : "terminé"}
             </span>
             <span>
-              {fmtDate(projet.date_debut)} → {fmtDate(projet.date_fin_prevue)}
+              {fmtDate(projet.date_debut)} â†’ {fmtDate(projet.date_fin_prevue)}
             </span>
           </div>
           <div className="mb-6 h-3 w-full overflow-hidden rounded bg-slate-100">
@@ -431,7 +431,7 @@ export default function MonProjet() {
       )}
       {alertes.length === 0 && (
         <div className="mb-6 rounded border-l-4 border-l-green-500 bg-green-50 px-3 py-2 text-sm text-green-700">
-          ✓ {"Aucune alerte. Tout va bien."}
+          âœ“ {"Aucune alerte. Tout va bien."}
         </div>
       )}
 
@@ -499,3 +499,4 @@ export default function MonProjet() {
     </div>
   );
 }
+

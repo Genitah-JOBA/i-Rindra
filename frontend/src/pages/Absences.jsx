@@ -187,7 +187,7 @@ export default function Absences() {
   const statsCartes = stats
     ? [
         { label: "En attente", valeur: stats.en_attente, couleur: "border-[#d97706] text-[#d97706]" },
-        { label: "Acceptées", valeur: stats.acceptees, couleur: "border-[#63B23E] text-[#63B23E]" },
+        { label: "Acceptées", valeur: stats.acceptees, couleur: "border-i-blue text-i-blue" },
         { label: "Refusées", valeur: stats.refusees, couleur: "border-red-500 text-red-600" },
         { label: "Total", valeur: stats.total, couleur: "border-slate-300 text-slate-700" },
       ]
@@ -212,7 +212,7 @@ export default function Absences() {
         {!estDirection && (
           <button
             onClick={ouvrirAjout}
-            className="flex items-center gap-2 bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white  transition hover:bg-[#4a8f2e]"
+            className="flex items-center gap-2 bg-brand-gradient px-4 py-2 text-sm font-semibold text-white  transition hover:brightness-110"
           >
             <PlusIcon className="w-4 h-4" />
             { "+ Nouvelle demande"}
@@ -240,13 +240,13 @@ export default function Absences() {
 
       {loading && (
         <div className="flex justify-center items-center py-12 animate__animated animate__pulse">
-          <div className="animate-spin  h-8 w-8 border-b-2 border-[#63B23E]"></div>
+          <div className="animate-spin  h-8 w-8 border-b-2 border-i-blue"></div>
           <span className="ml-3 text-slate-500">{"Chargement…"}</span>
         </div>
       )}
       {erreur && (
         <div className="mb-4  bg-red-50 px-4 py-3 text-sm text-red-700 border border-red-200 animate__animated animate__shakeX">
-          ⚠️ {erreur}
+          âš ï¸ {erreur}
         </div>
       )}
 
@@ -289,7 +289,7 @@ export default function Absences() {
                       {/* Demandeur (visible direction) */}
                       {afficherDemandeur && (
                         <p className="flex items-center gap-1.5 text-sm font-medium text-slate-800">
-                          <span className="bg-[#63B23E]/10 px-2 py-0.5 text-xs font-semibold text-[#63B23E] ">
+                          <span className="bg-i-blue/10 px-2 py-0.5 text-xs font-semibold text-i-blue ">
                             {a.utilisateur_prenom?.charAt(0)}
                             {a.utilisateur_nom?.charAt(0)}
                           </span>
@@ -303,7 +303,7 @@ export default function Absences() {
                         </span>
                         <span className="flex items-center gap-1 text-xs text-slate-500">
                           <CalendarIcon className="w-3.5 h-3.5" />
-                          {formaterDate(a.date_debut)} → {formaterDate(a.date_fin)}
+                          {formaterDate(a.date_debut)} â†’ {formaterDate(a.date_fin)}
                         </span>
                         <span
                           className={`px-2 py-0.5 text-xs font-medium  ${
@@ -315,7 +315,7 @@ export default function Absences() {
                       </div>
 
                       {a.motif && (
-                        <p className="mt-1 text-sm text-slate-600">« {a.motif} »</p>
+                        <p className="mt-1 text-sm text-slate-600">Â« {a.motif} Â»</p>
                       )}
 
                       {a.commentaire && (
@@ -335,7 +335,7 @@ export default function Absences() {
                               value={commentaire}
                               onChange={(e) => setCommentaire(e.target.value)}
                               placeholder={"Commentaire (optionnel)"}
-                              className="w-44 border border-slate-300 px-2 py-1.5 text-xs outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+                              className="w-44 border border-slate-300 px-2 py-1.5 text-xs outline-none  focus:ring-2 focus:ring-i-blue focus:border-transparent"
                             />
                           )}
                           <button
@@ -352,7 +352,7 @@ export default function Absences() {
                             <>
                               <button
                                 onClick={() => decider(a, "acceptee")}
-                                className="flex items-center gap-1 bg-[#63B23E] px-3 py-1.5 text-xs font-semibold text-white  transition hover:bg-[#4a8f2e]"
+                                className="flex items-center gap-1 bg-brand-gradient px-3 py-1.5 text-xs font-semibold text-white  transition hover:brightness-110"
                               >
                                 <CheckIcon className="w-3.5 h-3.5" />
                                 {"Accepter"}
@@ -397,7 +397,7 @@ export default function Absences() {
               {!estDirection && (
                 <button
                   onClick={ouvrirAjout}
-                  className="mt-4 px-4 py-2 bg-[#63B23E] text-white  hover:bg-[#4a8f2e] transition-colors"
+                  className="mt-4 px-4 py-2 bg-brand-gradient text-i-primary  hover:brightness-110 transition-colors"
                 >
                   { "+ Nouvelle demande"}
                 </button>
@@ -431,7 +431,7 @@ export default function Absences() {
                 <select
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value })}
-                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent appearance-none bg-white"
+                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-i-blue focus:border-transparent appearance-none bg-white"
                 >
                   <option value="conge">{"Congés"}</option>
                   <option value="maladie">{"Maladie"}</option>
@@ -450,7 +450,7 @@ export default function Absences() {
                     value={form.date_debut}
                     onChange={(e) => setForm({ ...form, date_debut: e.target.value })}
                     required
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-i-blue focus:border-transparent"
                   />
                 </div>
                 <div>
@@ -462,7 +462,7 @@ export default function Absences() {
                     value={form.date_fin}
                     onChange={(e) => setForm({ ...form, date_fin: e.target.value })}
                     required
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-i-blue focus:border-transparent"
                   />
                 </div>
               </div>
@@ -476,13 +476,13 @@ export default function Absences() {
                   value={form.motif}
                   onChange={(e) => setForm({ ...form, motif: e.target.value })}
                   placeholder={"Indiquez le motif…"}
-                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none  focus:ring-2 focus:ring-i-blue focus:border-transparent"
                 />
               </div>
 
               {formErreur && (
                 <div className=" bg-red-50 px-3 py-2 text-sm text-red-700 border border-red-200">
-                  ⚠️ {formErreur}
+                  âš ï¸ {formErreur}
                 </div>
               )}
 
@@ -497,7 +497,7 @@ export default function Absences() {
                 <button
                   type="submit"
                   disabled={enregistrement}
-                  className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white  transition hover:bg-[#4a8f2e] disabled:opacity-50"
+                  className="bg-brand-gradient px-4 py-2 text-sm font-semibold text-white  transition hover:brightness-110 disabled:opacity-50"
                 >
                   {enregistrement
                     ? "Enregistrement…"

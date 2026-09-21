@@ -14,7 +14,7 @@ const couleurPriorite = {
 const couleurStatut = {
   a_faire: "bg-slate-100 text-slate-600",
   en_cours: "bg-blue-100 text-blue-700",
-  en_revue: "bg-purple-100 text-purple-700",
+  en_revue: "bg-i-blue/10 text-i-blue",
   termine: "bg-green-100 text-green-700",
 };
 
@@ -332,8 +332,8 @@ export default function TaskDetailModal({
                   {formaterChrono(secondesCourues)}
                 </div>
                 {tempsEnregistre && (
-                  <p className="mt-1 text-xs font-medium text-[#63B23E]">
-                    {"Temps enregistré ✔"}
+                  <p className="mt-1 text-xs font-medium text-i-blue">
+                    {"Temps enregistré âœ”"}
                   </p>
                 )}
                 {chronoEnPause && (
@@ -349,7 +349,7 @@ export default function TaskDetailModal({
                       type="button"
                       onClick={demarrerChrono}
                       disabled={sauvegardeTemps}
-                      className="bg-[#63B23E] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#4a8f2e] disabled:opacity-50"
+                      className="bg-brand-gradient px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
                     >
                       {"Démarrer"}
                     </button>
@@ -393,7 +393,7 @@ export default function TaskDetailModal({
 
             {loadingComments ? (
               <div className="flex justify-center items-center py-4">
-                <div className="animate-spin  h-5 w-5 border-b-2 border-[#63B23E]"></div>
+                <div className="animate-spin  h-5 w-5 border-b-2 border-i-blue"></div>
                 <span className="ml-2 text-sm text-slate-400">{"Chargement…"}</span>
               </div>
             ) : commentaires.length === 0 ? (
@@ -413,7 +413,7 @@ export default function TaskDetailModal({
                       <div className="mb-1 flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                           {/* Avatar */}
-                          <div className="w-6 h-6  bg-[#63B23E]/20 text-[#63B23E] flex items-center justify-center text-xs font-semibold">
+                          <div className="w-6 h-6  bg-brand-gradient/20 text-i-blue flex items-center justify-center text-xs font-semibold">
                             {initiales}
                           </div>
                           <span className="text-xs font-semibold text-slate-700">
@@ -436,7 +436,7 @@ export default function TaskDetailModal({
             {/* Formulaire d'ajout */}
             <form onSubmit={soumettre} className="mt-4">
               <div className="flex items-start gap-2">
-                <div className="w-8 h-8  bg-[#63B23E] text-white flex items-center justify-center text-xs font-semibold flex-shrink-0">
+                <div className="w-8 h-8  bg-brand-gradient text-i-primary flex items-center justify-center text-xs font-semibold flex-shrink-0">
                   {user?.prenom?.charAt(0).toUpperCase() || '?'}
                 </div>
                 <div className="flex-1">
@@ -445,13 +445,13 @@ export default function TaskDetailModal({
                     onChange={(e) => setNouveau(e.target.value)}
                     placeholder={"Écrire un commentaire…"}
                     rows={2}
-                    className="w-full resize-none border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#63B23E]  focus:ring-1 focus:ring-[#63B23E]"
+                    className="w-full resize-none border border-slate-300 px-3 py-2 text-sm outline-none focus:border-i-blue  focus:ring-1 focus:ring-i-blue"
                   />
                   <div className="mt-2 flex justify-end">
                     <button
                       type="submit"
                       disabled={envoi || !nouveau.trim()}
-                      className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white  transition hover:bg-[#4a8f2e] disabled:opacity-50"
+                      className="bg-brand-gradient px-4 py-2 text-sm font-semibold text-white  transition hover:brightness-110 disabled:opacity-50"
                     >
                       {envoi ? "Enregistrement…" : "Envoyer"}
                     </button>

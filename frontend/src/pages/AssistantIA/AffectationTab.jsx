@@ -106,7 +106,7 @@ export default function AffectationTab({ projets }) {
               {suggestions.suggestions.map((s, idx) => (
                 <div key={s.utilisateur_id} className="flex flex-col md:flex-row md:items-center gap-3 border border-slate-200 px-4 py-3 rounded-lg bg-slate-50/60">
                   <div className="flex items-center gap-3 flex-1">
-                    <div className="w-8 h-8 flex items-center justify-center rounded-full bg-[#63B23E]/10 text-[#3f7c28] text-xs font-bold flex-shrink-0">
+                    <div className="w-8 h-8 flex items-center justify-center rounded-full bg-i-blue/10 text-i-blue text-xs font-bold flex-shrink-0">
                       #{idx + 1}
                     </div>
                     <div className="min-w-0">
@@ -115,16 +115,16 @@ export default function AffectationTab({ projets }) {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-[#63B23E]">{s.score} pts</span>
+                    <span className="text-xs font-bold text-i-blue">{s.score} pts</span>
                     <div className="w-28 h-2 bg-slate-200 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-[#63B23E] rounded-full"
+                        className="h-full bg-brand-gradient rounded-full"
                         style={{ width: `${Math.min(s.score, 100)}%` }}
                       />
                     </div>
                     <button
                       onClick={() => affecter(s.utilisateur_id, s.nom)}
-                      className="bg-[#63B23E] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[#4a8f2e] rounded-md flex-shrink-0"
+                      className="bg-brand-gradient px-3 py-1.5 text-xs font-semibold text-white transition hover:brightness-110 rounded-md flex-shrink-0"
                     >
                       Affecter
                     </button>

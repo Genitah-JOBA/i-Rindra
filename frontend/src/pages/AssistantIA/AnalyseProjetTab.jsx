@@ -121,7 +121,7 @@ export default function AnalyseProjetTab({ variante: varianteInitiale, projets, 
               onClick={() => changerVariante(v.id)}
               className={`px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors rounded-md ${
                 varianteId === v.id
-                  ? "bg-[#63B23E] text-white"
+                  ? "bg-brand-gradient text-i-primary"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
             >
@@ -159,7 +159,7 @@ export default function AnalyseProjetTab({ variante: varianteInitiale, projets, 
                   <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Avancement estimé</span>
                   <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-[#63B23E] rounded-full transition-all"
+                      className="h-full bg-brand-gradient rounded-full transition-all"
                       style={{ width: `${Math.min(resultat.avancement_estime, 100)}%` }}
                     />
                   </div>

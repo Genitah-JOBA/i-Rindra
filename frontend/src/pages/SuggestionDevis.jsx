@@ -261,7 +261,7 @@ export default function SuggestionDevis() {
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-2">
-            <IconSparkles className="w-6 h-6 text-purple-600" />
+            <IconSparkles className="w-6 h-6 text-i-blue" />
             Suggestion devis par IA
           </h1>
           <p className="text-sm text-slate-500">
@@ -270,7 +270,7 @@ export default function SuggestionDevis() {
         </div>
         <button
           onClick={ouvrirAjout}
-          className="flex items-center gap-2 bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#4a8f2e]"
+          className="flex items-center gap-2 bg-brand-gradient px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110"
         >
           <IconSparkles className="w-4 h-4" />
           Ajout devis par IA
@@ -280,7 +280,7 @@ export default function SuggestionDevis() {
       {/* Chargement */}
       {loading && (
         <div className="flex justify-center items-center py-12 animate__animated animate__pulse">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#63B23E]"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-i-blue"></div>
           <span className="ml-3 text-slate-500">Chargement…</span>
         </div>
       )}
@@ -288,7 +288,7 @@ export default function SuggestionDevis() {
       {/* Erreur */}
       {erreur && (
         <div className="mb-4 bg-red-50 px-4 py-3 text-sm text-red-700 border border-red-200 animate__animated animate__shakeX">
-          ⚠️ {erreur}
+          âš ï¸ {erreur}
         </div>
       )}
 
@@ -298,7 +298,7 @@ export default function SuggestionDevis() {
           {suggestions.length === 0 && (
             <div className="lg:col-span-2 text-center py-12 bg-slate-50 border border-slate-200 animate__animated animate__fadeInUp">
               <p className="text-slate-500">
-                Aucun devis suggéré pour le moment. Utilisez « Ajout devis par
+Aucun devis suggéré pour le moment. Utilisez « Ajout devis par
                 IA » ou demandez un devis à l'assistant IA depuis « Intelligence
                 Artificielle ».
               </p>
@@ -311,7 +311,7 @@ export default function SuggestionDevis() {
               className="animate__animated animate__fadeInUp"
               style={{ animationDelay: `${0.05 + index * 0.05}s` }}
             >
-              <div className="bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-[#63B23E] transition-all duration-300 flex flex-col h-full">
+              <div className="bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-i-blue transition-all duration-300 flex flex-col h-full">
 <div className="flex items-start justify-between gap-2 border-b border-slate-100 px-4 py-3">
   <div className="min-w-0">
     <div className="flex flex-wrap items-center gap-2">
@@ -354,7 +354,7 @@ export default function SuggestionDevis() {
 
                 <div className="px-4 py-2 border-t border-slate-100 flex flex-wrap items-center gap-2">
                   {s.modele && (
-                    <span className="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] bg-i-blue/10 text-i-blue px-2 py-0.5 rounded-full">
                       IA · {s.modele}
                     </span>
                   )}
@@ -394,7 +394,7 @@ export default function SuggestionDevis() {
                       </button>
                       <button
                         onClick={() => valider(s)}
-                        className="flex items-center gap-1 bg-[#63B23E] px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-[#4a8f2e]"
+                        className="flex items-center gap-1 bg-brand-gradient px-2.5 py-1 text-xs font-semibold text-white transition hover:brightness-110"
                       >
                         <IconCheck className="w-3.5 h-3.5" />
                         Valider
@@ -418,7 +418,7 @@ export default function SuggestionDevis() {
             <form onSubmit={generer} className="space-y-3">
               {formErreur && (
                 <div className="bg-red-50 border border-red-200 p-2 text-sm text-red-700">
-                  ⚠️ {formErreur}
+                  âš ï¸ {formErreur}
                 </div>
               )}
 
@@ -433,7 +433,7 @@ export default function SuggestionDevis() {
                       setForm({ ...form, client_id: e.target.value, projet_id: "" })
                     }
                     required
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#63B23E]"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-i-blue"
                   >
                     <option value="">— Sélectionner un client —</option>
                     {clients.map((c) => (
@@ -454,7 +454,7 @@ export default function SuggestionDevis() {
                     }
                     required
                     disabled={!form.client_id}
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#63B23E] disabled:bg-slate-50 disabled:text-slate-400"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-i-blue disabled:bg-slate-50 disabled:text-slate-400"
                   >
                     <option value="">
                       {form.client_id
@@ -469,7 +469,7 @@ export default function SuggestionDevis() {
                   </select>
                   {form.client_id && projetsDuClient.length === 0 && (
                     <p className="mt-1 text-xs text-amber-600">
-                      ⚠️ Aucun projet trouvé pour ce client
+                      âš ï¸ Aucun projet trouvé pour ce client
                     </p>
                   )}
                 </div>
@@ -486,7 +486,7 @@ export default function SuggestionDevis() {
                     setForm({ ...form, titre: e.target.value })
                   }
                   placeholder="Ex. Site vitrine"
-                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#63B23E]"
+                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-i-blue"
                 />
               </div>
 
@@ -502,7 +502,7 @@ export default function SuggestionDevis() {
                   }
                   placeholder="Décrivez la prestation : le projet, les livrables, les quantités, les délais souhaités…"
                   required
-                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#63B23E]"
+                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-i-blue"
                 />
               </div>
 
@@ -522,7 +522,7 @@ export default function SuggestionDevis() {
                 <button
                   type="submit"
                   disabled={generation}
-                  className="flex items-center gap-2 bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#4a8f2e] disabled:opacity-50"
+                  className="flex items-center gap-2 bg-brand-gradient px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
                 >
                   {generation ? "Génération…" : "Générer par IA"}
                 </button>

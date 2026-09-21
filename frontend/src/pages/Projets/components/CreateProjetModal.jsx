@@ -83,7 +83,7 @@ export default function CreateProjetModal({ isOpen, onClose, onProjetCree }) {
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           {erreur && (
             <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 border border-red-200">
-              ⚠️ {erreur}
+              âš ï¸ {erreur}
             </div>
           )}
 
@@ -98,7 +98,7 @@ export default function CreateProjetModal({ isOpen, onClose, onProjetCree }) {
               onChange={handleChange}
               required
               placeholder="Ex: Site Web Kanto"
-              className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent text-sm"
+              className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent text-sm"
             />
           </div>
 
@@ -112,7 +112,7 @@ export default function CreateProjetModal({ isOpen, onClose, onProjetCree }) {
               onChange={handleChange}
               rows={3}
               placeholder="Description du projet..."
-              className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent text-sm resize-none"
+              className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent text-sm resize-none"
             />
           </div>
 
@@ -126,7 +126,7 @@ export default function CreateProjetModal({ isOpen, onClose, onProjetCree }) {
               value={formData.client}
               onChange={handleChange}
               placeholder="Nom du client"
-              className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent text-sm"
+              className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent text-sm"
             />
           </div>
 
@@ -140,7 +140,7 @@ export default function CreateProjetModal({ isOpen, onClose, onProjetCree }) {
                 name="date_debut"
                 value={formData.date_debut}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent text-sm"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent text-sm"
               />
             </div>
             <div>
@@ -152,7 +152,7 @@ export default function CreateProjetModal({ isOpen, onClose, onProjetCree }) {
                 name="date_fin_prevue"
                 value={formData.date_fin_prevue}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent text-sm"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent text-sm"
               />
             </div>
           </div>
@@ -169,7 +169,7 @@ export default function CreateProjetModal({ isOpen, onClose, onProjetCree }) {
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-[#63B23E] text-white text-sm font-medium rounded-md hover:bg-[#3F894E] transition-colors disabled:opacity-50"
+              className="px-4 py-2 bg-brand-gradient text-i-primary text-sm font-medium rounded-md hover:brightness-110 transition-colors disabled:opacity-50"
             >
               {loading ? "Création..." : "Créer le projet"}
             </button>
@@ -179,3 +179,4 @@ export default function CreateProjetModal({ isOpen, onClose, onProjetCree }) {
     </div>
   );
 }
+

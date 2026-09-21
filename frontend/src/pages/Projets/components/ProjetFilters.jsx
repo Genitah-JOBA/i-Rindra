@@ -94,7 +94,7 @@ export default function ProjetFilters({
             value={rechercheLocale}
             onChange={(e) => setRechercheLocale(e.target.value)}
             placeholder="Rechercher un projet..."
-            className="w-48 sm:w-56 pl-8 pr-8 py-1.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent"
+            className="w-48 sm:w-56 pl-8 pr-8 py-1.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent"
           />
           <SearchIcon className="w-4 h-4 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
           {rechercheLocale && (
@@ -111,3 +111,4 @@ export default function ProjetFilters({
     </div>
   );
 }
+

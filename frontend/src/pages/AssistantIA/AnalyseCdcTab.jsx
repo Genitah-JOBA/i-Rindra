@@ -104,7 +104,7 @@ export default function AnalyseCdcTab({ projets }) {
             {!fichier ? (
               <button
                 onClick={() => inputRef.current?.click()}
-                className="w-full flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-300 hover:border-[#63B23E] hover:bg-green-50/40 transition-colors bg-slate-50 px-4 py-8 rounded-md"
+                className="w-full flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-300 hover:border-i-blue hover:bg-green-50/40 transition-colors bg-slate-50 px-4 py-8 rounded-md"
               >
                 <span className="w-10 h-10 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-500">
                   <IconDocument className="w-5 h-5" />
@@ -118,7 +118,7 @@ export default function AnalyseCdcTab({ projets }) {
               </button>
             ) : (
               <div className="flex items-center gap-3 border border-slate-300 bg-green-50/50 px-4 py-3 rounded-md">
-                <IconDocument className="w-6 h-6 text-[#63B23E] flex-shrink-0" />
+                <IconDocument className="w-6 h-6 text-i-blue flex-shrink-0" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-slate-800">{fichier.name}</p>
                   <p className="text-xs text-slate-500">
@@ -168,8 +168,8 @@ export default function AnalyseCdcTab({ projets }) {
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="bg-[#63B23E]/5 border border-[#63B23E]/10 p-3 rounded-lg">
-              <TitreSection className="text-[#3f7c28]">Points clés</TitreSection>
+            <div className="bg-i-blue/5 border border-i-blue/10 p-3 rounded-lg">
+              <TitreSection className="text-i-blue">Points clés</TitreSection>
               <PuceList items={resultat.points_cles} />
             </div>
             <div className="bg-rose-50 border border-rose-100 p-3 rounded-lg">

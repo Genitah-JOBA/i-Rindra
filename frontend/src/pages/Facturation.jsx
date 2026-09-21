@@ -290,7 +290,7 @@ export default function Facturation() {
     }
   };
 
-  // ✅ Confirmation de suppression avec MessageBox
+  // âœ… Confirmation de suppression avec MessageBox
   const supprimer = async (f) => {
     // Créer une confirmation personnalisée
     const confirmed = await new Promise((resolve) => {
@@ -631,7 +631,7 @@ export default function Facturation() {
           </table>
           
           <div class="totaux">
-            <p><span class="label">📊 Résumé :</span></p>
+            <p><span class="label">ðŸ“Š Résumé :</span></p>
             <p><span class="label">Total factures :</span> <span class="value">${totalFactures}</span></p>
             <p><span class="label">Total TTC :</span> <span class="value">${formatMontantSimple(
               totalTTC
@@ -750,7 +750,7 @@ export default function Facturation() {
           </div>
           <button
             onClick={ouvrirAjout}
-            className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#4a8f2e]"
+            className="bg-brand-gradient px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110"
           >
             + {"Nouvelle facture"}
           </button>
@@ -780,7 +780,7 @@ export default function Facturation() {
         <select
           value={filtreStatut}
           onChange={(e) => setFiltreStatut(e.target.value)}
-          className="border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#63B23E]"
+          className="border border-slate-300 px-3 py-2 text-sm outline-none focus:border-i-blue"
         >
           <option value="">{"Tous les statuts"}</option>
           {STATUTS.map((s) => (
@@ -850,7 +850,7 @@ export default function Facturation() {
                     <div className="flex justify-end gap-3 text-xs">
                       <button
                         onClick={() => ouvrirEdition(f)}
-                        className="text-slate-500 hover:text-[#63B23E]"
+                        className="text-slate-500 hover:text-i-blue"
                       >
                         {"Modifier"}
                       </button>
@@ -886,9 +886,9 @@ export default function Facturation() {
             <form onSubmit={enregistrer} className="space-y-3">
               {(formErreur || dateEmissionError || dateEcheanceError) && (
                 <div className="bg-red-50 border border-red-200 p-2 text-sm text-red-700">
-                  {formErreur && <p>⚠️ {formErreur}</p>}
-                  {dateEmissionError && <p>⚠️ {dateEmissionError}</p>}
-                  {dateEcheanceError && <p>⚠️ {dateEcheanceError}</p>}
+                  {formErreur && <p>âš ï¸ {formErreur}</p>}
+                  {dateEmissionError && <p>âš ï¸ {dateEmissionError}</p>}
+                  {dateEcheanceError && <p>âš ï¸ {dateEcheanceError}</p>}
                 </div>
               )}
 
@@ -909,7 +909,7 @@ export default function Facturation() {
                       });
                     }}
                     required
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#63B23E]"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-i-blue"
                   >
                     <option value="">— Sélectionner un client —</option>
                     {clients.map((c) => (
@@ -929,7 +929,7 @@ export default function Facturation() {
                       setForm({ ...form, projet_id: e.target.value })
                     }
                     required
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#63B23E]"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-i-blue"
                     disabled={!form.client_id}
                   >
                     <option value="">
@@ -953,7 +953,7 @@ export default function Facturation() {
                       (p) => String(p.client_id) === String(form.client_id)
                     ).length === 0 && (
                       <p className="mt-1 text-xs text-amber-600">
-                        ⚠️ Aucun projet trouvé pour ce client
+                        âš ï¸ Aucun projet trouvé pour ce client
                       </p>
                     )}
                 </div>
@@ -974,7 +974,7 @@ export default function Facturation() {
                     }}
                     max={getToday()}
                     required
-                    className={`w-full border px-3 py-2 text-sm outline-none focus:border-[#63B23E] ${
+                    className={`w-full border px-3 py-2 text-sm outline-none focus:border-i-blue ${
                       dateEmissionError ? "border-red-500" : "border-slate-300"
                     }`}
                   />
@@ -996,7 +996,7 @@ export default function Facturation() {
                     }}
                     min={getToday()}
                     required
-                    className={`w-full border px-3 py-2 text-sm outline-none focus:border-[#63B23E] ${
+                    className={`w-full border px-3 py-2 text-sm outline-none focus:border-i-blue ${
                       dateEcheanceError ? "border-red-500" : "border-slate-300"
                     }`}
                   />
@@ -1021,7 +1021,7 @@ export default function Facturation() {
                       setForm({ ...form, montant_ht: e.target.value })
                     }
                     required
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#63B23E]"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-i-blue"
                     placeholder="0.00"
                   />
                 </div>
@@ -1040,7 +1040,7 @@ export default function Facturation() {
                       setForm({ ...form, taux_tva: e.target.value })
                     }
                     required
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#63B23E]"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-i-blue"
                     placeholder="20"
                   />
                 </div>
@@ -1061,7 +1061,7 @@ export default function Facturation() {
                   rows={2}
                   value={form.notes}
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#63B23E]"
+                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-i-blue"
                   placeholder="Notes optionnelles..."
                 />
               </div>
@@ -1077,7 +1077,7 @@ export default function Facturation() {
                 <button
                   type="submit"
                   disabled={enregistrement}
-                  className="bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#4a8f2e] disabled:opacity-50"
+                  className="bg-brand-gradient px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
                 >
                   {enregistrement
                     ? "Enregistrement…"

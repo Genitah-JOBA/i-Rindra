@@ -67,7 +67,7 @@ function DispoBadge({ membres, date }) {
             >
               <span className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0" />
               {m.nom}
-              {m.metier && <span className="text-green-600">· {m.metier}</span>}
+              {m.metier && <span className="text-green-600"> · {m.metier}</span>}
             </span>
           ))}
         </div>
@@ -131,7 +131,7 @@ function SuggestionCarte({ suggestion: s, membresDispo, onValider, onRejeter }) 
           {onValider && (
             <button
               onClick={() => onValider(s)}
-              className="flex items-center gap-1 bg-[#63B23E] px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-[#4a8f2e] rounded-md ml-auto"
+              className="flex items-center gap-1 bg-brand-gradient px-2.5 py-1 text-xs font-semibold text-white transition hover:brightness-110 rounded-md ml-auto"
             >
               <IconCheck /> Valider
               <IconArrowRight className="w-3 h-3" />
@@ -294,7 +294,7 @@ export default function ExtractionTab({ projets }) {
               value={texte}
               onChange={(e) => setTexte(e.target.value)}
               placeholder="Collez ici un contenu précis à découper en tâches…"
-              className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#63B23E] rounded-md"
+              className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-i-blue rounded-md"
             />
           </div>
           <BtnIA onClick={extraire} loading={generation}>
@@ -328,7 +328,7 @@ export default function ExtractionTab({ projets }) {
               await chargerDisponibilites(fresh || [], projetId);
             }}
             disabled={!projetId}
-            className="flex items-center gap-1 text-xs font-medium text-[#3f7c28] hover:text-[#2e5d1f] disabled:text-slate-300"
+            className="flex items-center gap-1 text-xs font-medium text-i-blue hover:text-[#2e5d1f] disabled:text-slate-300"
           >
             <IconRefresh className="w-3.5 h-3.5" /> Actualiser
           </button>

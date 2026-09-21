@@ -60,14 +60,14 @@ export default function DevisEstimations() {
           </h1>
           <p className="text-sm text-slate-500">
             Devis validés par la direction/DRH — les suggestions en attente de
-            validation restent dans « Suggestion devis par IA ».
+            validation restent dans Suggestion devis par IA.
           </p>
         </div>
         <a
           href={B_ESTIMATION_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 border border-[#63B23E] px-4 py-2 text-sm font-semibold text-[#63B23E] transition hover:bg-[#63B23E] hover:text-white"
+          className="flex items-center gap-2 border border-i-blue px-4 py-2 text-sm font-semibold text-i-blue transition hover:bg-brand-gradient hover:text-white"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -84,14 +84,13 @@ export default function DevisEstimations() {
             />
           </svg>
           Ouvrir B-estimation
-          <span className="text-xs">↗</span>
         </a>
       </div>
 
       {/* Chargement */}
       {loading && (
         <div className="flex justify-center items-center py-12 animate__animated animate__pulse">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#63B23E]"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-i-blue"></div>
           <span className="ml-3 text-slate-500">Chargement…</span>
         </div>
       )}
@@ -99,7 +98,7 @@ export default function DevisEstimations() {
       {/* Erreur */}
       {erreur && (
         <div className="mb-4 bg-red-50 px-4 py-3 text-sm text-red-700 border border-red-200 animate__animated animate__shakeX">
-          ⚠️ {erreur}
+          âš ï¸ {erreur}
         </div>
       )}
 
@@ -110,7 +109,7 @@ export default function DevisEstimations() {
             <div className="lg:col-span-2 text-center py-12 bg-slate-50 border border-slate-200 animate__animated animate__fadeInUp">
               <p className="text-slate-500">
                 Aucun devis validé pour le moment. Validez un devis suggéré par
-                l'IA depuis « Suggestion devis par IA » pour le retrouver ici.
+                l'IA depuis Suggestion devis par IA pour le retrouver ici.
               </p>
             </div>
           )}
@@ -121,7 +120,7 @@ export default function DevisEstimations() {
               className="animate__animated animate__fadeInUp"
               style={{ animationDelay: `${0.05 + index * 0.05}s` }}
             >
-              <div className="bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-[#63B23E] transition-all duration-300 flex flex-col h-full">
+              <div className="bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-i-blue transition-all duration-300 flex flex-col h-full">
                 <div className="flex items-start justify-between gap-2 border-b border-slate-100 px-4 py-3">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
@@ -139,7 +138,7 @@ export default function DevisEstimations() {
                     </div>
                     <p className="text-xs text-slate-400">
                       {d.client_nom ? `Client : ${d.client_nom}` : ""}
-                      {d.projet_nom ? ` · Projet : ${d.projet_nom}` : ""} ·{" "}
+                      {d.projet_nom ? `· Projet : ${d.projet_nom}` : ""}·{" "}
                       {dater(d.cree_le)}
                     </p>
                   </div>
@@ -158,7 +157,7 @@ export default function DevisEstimations() {
 
                 <div className="px-4 py-2 border-t border-slate-100 flex flex-wrap items-center gap-2">
                   {d.modele && (
-                    <span className="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] bg-i-blue/10 text-i-blue px-2 py-0.5 rounded-full">
                       IA · {d.modele}
                     </span>
                   )}

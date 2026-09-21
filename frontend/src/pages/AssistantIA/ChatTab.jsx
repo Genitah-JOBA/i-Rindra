@@ -116,8 +116,8 @@ export default function ChatTab() {
           <div className="max-w-2xl mx-auto space-y-4">
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center text-center py-8 animate__animated animate__fadeInUp">
-                 <div className="w-14 h-14 bg-[#63B23E]/10 rounded-full flex items-center justify-center mb-3">
-                  <IconSparkles className="w-7 h-7 text-[#63B23E]" />
+                 <div className="w-14 h-14 bg-i-blue/10 rounded-full flex items-center justify-center mb-3">
+                  <IconSparkles className="w-7 h-7 text-i-blue" />
                 </div>
                 <h2 className="text-lg font-semibold text-slate-800 mb-2">
                   Bonjour ! Je suis votre assistant IA.
@@ -147,7 +147,7 @@ export default function ChatTab() {
                       key={i}
                       onClick={() => handleSend(s)}
                       disabled={!estConfigure || loading}
-                      className="text-left text-sm px-4 py-3 bg-white hover:bg-[#63B23E]/5 hover:text-[#3f7c28] border border-slate-200 hover:border-[#63B23E] transition-colors text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg"
+                      className="text-left text-sm px-4 py-3 bg-white hover:bg-i-blue/5 hover:text-i-blue border border-slate-200 hover:border-i-blue transition-colors text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg"
                     >
                       {s}
                     </button>
@@ -158,13 +158,13 @@ export default function ChatTab() {
 
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate__animated animate__fadeIn`}>
-                <div className={`max-w-[78%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap rounded-lg ${msg.role === "user" ? "bg-[#63B23E] text-white" : "bg-white text-slate-800 border border-slate-200"}`}>
+                <div className={`max-w-[78%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap rounded-lg ${msg.role === "user" ? "bg-brand-gradient text-i-primary" : "bg-white text-slate-800 border border-slate-200"}`}>
                   {msg.role === "assistant" && (
-                    <span className="block text-[10px] font-semibold text-[#63B23E] uppercase mb-1">IA</span>
+                    <span className="block text-[10px] font-semibold text-i-blue uppercase mb-1">IA</span>
                   )}
                   {msg.content}
                   {msg.noteDevis && (
-                    <a href="/suggestion-devis" className="mt-2 flex items-center gap-1 text-[11px] font-medium text-[#3f7c28] bg-[#63B23E]/10 border border-[#63B23E]/30 px-3 py-1.5 rounded-md hover:bg-[#63B23E]/20 transition-colors">
+                    <a href="/suggestion-devis" className="mt-2 flex items-center gap-1 text-[11px] font-medium text-i-blue bg-i-blue/10 border border-i-blue/30 px-3 py-1.5 rounded-md hover:bg-brand-gradient/20 transition-colors">
                       <IconCheck className="w-3.5 h-3.5 flex-shrink-0" />
                       Devis sauvegardé dans « Suggestion devis par IA »
                       <IconArrowRight className="w-3.5 h-3.5 flex-shrink-0" />
@@ -201,7 +201,7 @@ export default function ChatTab() {
             placeholder="Écrivez votre message…"
             disabled={!estConfigure || loading}
             rows={1}
-            className="flex-1 resize-none border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#63B23E] focus:border-transparent disabled:bg-slate-50 disabled:cursor-not-allowed rounded-lg"
+            className="flex-1 resize-none border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent disabled:bg-slate-50 disabled:cursor-not-allowed rounded-lg"
             style={{ minHeight: "44px", maxHeight: "120px" }}
             onInput={(e) => {
               e.target.style.height = "auto";
@@ -211,7 +211,7 @@ export default function ChatTab() {
           <button
             onClick={() => handleSend()}
             disabled={!input.trim() || !estConfigure || loading}
-            className="p-3 bg-[#63B23E] text-white hover:bg-[#4a8f2e] disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors flex-shrink-0 rounded-lg"
+            className="p-3 bg-brand-gradient text-i-primary hover:brightness-110 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors flex-shrink-0 rounded-lg"
           >
             <IconSend className="w-5 h-5" />
           </button>

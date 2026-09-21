@@ -60,8 +60,8 @@ export default function AssistantIA() {
   return (
     <div>
       <header className="mb-6 flex flex-wrap items-center gap-4">
-        <div className="w-10 h-10 bg-[#63B23E]/10 rounded-full flex items-center justify-center flex-shrink-0">
-          <IconSparkles className="w-5 h-5 text-[#63B23E]" />
+        <div className="w-10 h-10 bg-i-blue/10 rounded-full flex items-center justify-center flex-shrink-0">
+          <IconSparkles className="w-5 h-5 text-i-blue" />
         </div>
         <div className="flex-1 min-w-0">
           <h1 className="text-xl font-bold text-slate-900">Assistant IA</h1>
@@ -83,8 +83,8 @@ export default function AssistantIA() {
               onClick={() => setOnglet(o.id)}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors rounded-md ${
                 isActive
-                  ? "bg-[#63B23E] text-white shadow-sm"
-                  : "bg-white text-slate-600 border border-slate-200 hover:border-[#63B23E] hover:text-[#3f7c28]"
+                  ? "bg-brand-gradient text-i-primary shadow-sm"
+                  : "bg-white text-slate-600 border border-slate-200 hover:border-i-blue hover:text-i-blue"
               }`}
             >
               <o.Icon className="w-4 h-4" />
@@ -96,7 +96,7 @@ export default function AssistantIA() {
 
       {!projetsCharge ? (
         <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#63B23E]"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-i-blue"></div>
         </div>
       ) : (
         <section>{actif.render()}</section>

@@ -21,8 +21,9 @@ export default {
       },
 
       backgroundImage: {
+        // Charte : dégradé CTA vert → turquoise (#7DF979 → #7AFDF2)
         "brand-gradient":
-          "linear-gradient(135deg, #4FB0F1 0%, #7DF979 100%)",
+          "linear-gradient(135deg, #7DF979 0%, #7AFDF2 100%)",
 
         "brand-gradient-soft":
           "linear-gradient(135deg, #7DF979 0%, #7AFDF2 100%)",

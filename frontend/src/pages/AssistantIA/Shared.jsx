@@ -2,7 +2,7 @@
 import "animate.css";
 
 // ============================================================
-// Icônes (Heroicons v2 outline — 24×24, stroke)
+// Icônes (Heroicons v2 outline — 24Ã—24, stroke)
 // ============================================================
 
 export function IconSparkles({ className = "w-5 h-5" }) {
@@ -174,7 +174,7 @@ export function Carte({ children, className = "" }) {
 export function BadgeIA({ modele }) {
   if (!modele) return null;
   return (
-    <span className="text-[10px] bg-[#63B23E]/10 text-[#3f7c28] px-2 py-0.5 rounded-full">
+    <span className="text-[10px] bg-i-blue/10 text-i-blue px-2 py-0.5 rounded-full">
       IA · {modele}
     </span>
   );
@@ -186,7 +186,7 @@ export function BtnIA({ children, onClick, loading = false, disabled = false, cl
     <button
       onClick={onClick}
       disabled={disabled || loading}
-      className={`flex items-center gap-2 bg-[#63B23E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#4a8f2e] disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      className={`flex items-center gap-2 bg-brand-gradient px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     >
       <IconSparkles className="w-4 h-4" />
       {loading ? "Analyse en cours…" : children}
@@ -200,7 +200,7 @@ export function SelectProjet({ projets, value, onChange }) {
     <select
       value={value || ""}
       onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)}
-      className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#63B23E] rounded-md"
+      className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-i-blue rounded-md"
     >
       <option value="">— Sélectionner un projet —</option>
       {projets.map((p) => (
@@ -219,7 +219,7 @@ export function SelectTache({ taches, value, onChange, disabled = false }) {
       value={value || ""}
       onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)}
       disabled={disabled}
-      className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#63B23E] rounded-md disabled:bg-slate-50 disabled:text-slate-400"
+      className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-i-blue rounded-md disabled:bg-slate-50 disabled:text-slate-400"
     >
       <option value="">
         {disabled
@@ -250,7 +250,7 @@ export function AlertErreur({ children }) {
 export function Spin({ label = "Chargement…" }) {
   return (
     <div className="flex justify-center items-center py-8 animate__animated animate__pulse">
-      <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-[#63B23E]"></div>
+      <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-i-blue"></div>
       <span className="ml-3 text-sm text-slate-500">{label}</span>
     </div>
   );
@@ -283,7 +283,7 @@ export function PuceList({ items = [] }) {
     <ul className="space-y-1.5">
       {items.map((item, i) => (
         <li key={i} className="flex gap-2 text-sm text-slate-700">
-          <span className="text-[#63B23E] flex-shrink-0 mt-0.5">
+          <span className="text-i-blue flex-shrink-0 mt-0.5">
             <IconCheck className="w-3.5 h-3.5" />
           </span>
           <span className="whitespace-pre-wrap">{item}</span>
