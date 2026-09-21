@@ -51,10 +51,10 @@ const C = {
 };
 
 const couleurRole = {
-  direction: "bg-[#0b2241] text-[#7afdf2]",
-  drh: "bg-[#4fb0f1]/15 text-[#0b2241]",
-  chef_de_projet: "bg-[#7afdf2]/30 text-[#0b2241]",
-  equipe: "bg-[#7df979]/30 text-[#0b2241]",
+  direction: "bg-i-primary text-i-turquoise",
+  drh: "bg-i-blue/15 text-i-primary",
+  chef_de_projet: "bg-i-turquoise/30 text-i-primary",
+  equipe: "bg-i-green/30 text-i-primary",
   client: "bg-slate-100 text-slate-600",
 };
 
@@ -210,7 +210,7 @@ export default function Membres() {
       {/* En-tête */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 animate__animated animate__fadeInDown">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: C.dark }}>
+          <h1 className="font-brand text-2xl font-bold bg-gradient-to-r from-i-primary to-i-blue bg-clip-text text-transparent">
             Membres
           </h1>
           <p className="text-sm text-slate-500">
@@ -224,18 +224,14 @@ export default function Membres() {
               value={recherche}
               onChange={(e) => setRecherche(e.target.value)}
               placeholder={"Rechercher…"}
-              className="w-48 sm:w-56 pl-8 pr-3 py-2 text-sm border border-slate-300 outline-none focus:ring-2 focus:border-transparent"
-              style={{ "--tw-ring-color": C.blue }}
+              className="w-48 sm:w-56 pl-8 pr-3 py-2 text-sm border border-slate-300 outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent"
             />
             <SearchIcon className="w-4 h-4 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
           </div>
           {estGestion && (
             <button
               onClick={ouvrirAjout}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white transition"
-              style={{ backgroundColor: C.dark }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = C.blue)}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = C.dark)}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-i-primary bg-gradient-to-r from-i-green to-i-turquoise transition-all duration-200 hover:brightness-105 hover:shadow-lg"
             >
               <PlusIcon className="w-4 h-4" />
               Ajouter
@@ -246,7 +242,7 @@ export default function Membres() {
 
       {loading && (
         <div className="flex justify-center items-center py-12 animate__animated animate__pulse">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: C.blue }}></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-i-blue"></div>
           <span className="ml-3 text-slate-500">{"Chargement…"}</span>
         </div>
       )}
@@ -263,19 +259,11 @@ export default function Membres() {
               {filtres.map((u, index) => (
                 <div
                   key={u.id}
-                  className="border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md transition-all duration-300 animate__animated animate__fadeInUp"
-                  style={{
-                    animationDelay: `${index * 0.05}s`,
-                    borderTop: `3px solid ${C.blue}`,
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.borderColor = C.green)}
-                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#e2e8f0")}
+                  className="border border-slate-200 border-t-4 border-t-i-blue bg-white p-4 shadow-sm hover:shadow-md hover:border-i-green hover:border-t-i-green transition-all duration-300 animate__animated animate__fadeInUp"
+                  style={{ animationDelay: `${index * 0.05}s` }}
                 >
                   <div className="flex items-center gap-3">
-                    <div
-                      className="flex h-11 w-11 shrink-0 items-center justify-center text-sm font-semibold"
-                      style={{ backgroundColor: `${C.blue}20`, color: C.dark }}
-                    >
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-i-blue/20 text-sm font-semibold text-i-primary">
                       {initiales(u)}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -294,10 +282,7 @@ export default function Membres() {
                       {labelRole[u.role] || u.role}
                     </span>
                     {u.metier && (
-                      <span
-                        className="px-2 py-0.5 text-[10px]"
-                        style={{ backgroundColor: `${C.cyan}30`, color: C.dark }}
-                      >
+                      <span className="bg-i-turquoise/30 px-2 py-0.5 text-[10px] font-medium text-i-primary">
                         {u.metier}
                       </span>
                     )}
@@ -311,9 +296,7 @@ export default function Membres() {
                     <div className="mt-3 flex justify-end gap-3 border-t border-slate-100 pt-2">
                       <button
                         onClick={() => ouvrirEdition(u)}
-                        className="flex items-center gap-1 text-xs text-slate-500 transition-colors"
-                        onMouseEnter={(e) => (e.currentTarget.style.color = C.blue)}
-                        onMouseLeave={(e) => (e.currentTarget.style.color = "")}
+                        className="flex items-center gap-1 text-xs text-slate-500 transition-colors hover:text-i-blue"
                       >
                         <EditIcon className="w-3.5 h-3.5" />
                         Modifier
@@ -341,10 +324,7 @@ export default function Membres() {
               {estGestion && (
                 <button
                   onClick={ouvrirAjout}
-                  className="mt-4 px-4 py-2 text-white transition-colors"
-                  style={{ backgroundColor: C.dark }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = C.blue)}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = C.dark)}
+                  className="mt-4 px-4 py-2 font-semibold text-i-primary bg-gradient-to-r from-i-green to-i-turquoise transition-all duration-200 hover:brightness-105"
                 >
                   + Ajouter
                 </button>
@@ -359,14 +339,12 @@ export default function Membres() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate__animated animate__fadeIn">
           <div className="w-full max-w-md bg-white p-6 shadow-xl animate__animated animate__zoomIn">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold" style={{ color: C.dark }}>
+              <h2 className="font-brand text-lg font-semibold text-i-primary">
                 {editionId ? "Modifier le membre" : "Ajouter un membre"}
               </h2>
               <button
                 onClick={() => setModalOuvert(false)}
-                className="text-slate-400 transition-colors"
-                onMouseEnter={(e) => (e.currentTarget.style.color = C.dark)}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "")}
+                className="text-slate-400 transition-colors hover:text-i-primary"
               >
                 <CloseIcon className="w-5 h-5" />
               </button>
@@ -383,7 +361,7 @@ export default function Membres() {
                     value={form.prenom}
                     onChange={(e) => setForm({ ...form, prenom: e.target.value })}
                     required
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:border-transparent"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent"
                     style={{ "--tw-ring-color": C.blue }}
                   />
                 </div>
@@ -396,24 +374,10 @@ export default function Membres() {
                     value={form.nom}
                     onChange={(e) => setForm({ ...form, nom: e.target.value })}
                     required
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:border-transparent"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent"
                     style={{ "--tw-ring-color": C.blue }}
                   />
                 </div>
-              </div>
-
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-600">
-                  Email <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  required
-                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:border-transparent"
-                  style={{ "--tw-ring-color": C.blue }}
-                />
               </div>
 
               {!editionId && (
@@ -427,7 +391,7 @@ export default function Membres() {
                     onChange={(e) => setForm({ ...form, mot_de_passe: e.target.value })}
                     required
                     minLength={4}
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:border-transparent"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent"
                     style={{ "--tw-ring-color": C.blue }}
                   />
                 </div>
@@ -441,7 +405,7 @@ export default function Membres() {
                   <select
                     value={form.role}
                     onChange={(e) => setForm({ ...form, role: e.target.value })}
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:border-transparent appearance-none bg-white"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent appearance-none bg-white"
                     style={{ "--tw-ring-color": C.blue }}
                   >
                     <option value="direction">Direction</option>
@@ -459,7 +423,7 @@ export default function Membres() {
                     value={form.metier}
                     onChange={(e) => setForm({ ...form, metier: e.target.value })}
                     placeholder="développeur, graphiste…"
-                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:border-transparent"
+                    className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent"
                     style={{ "--tw-ring-color": C.blue }}
                   />
                 </div>

@@ -106,7 +106,7 @@ export default function AffectationTab({ projets }) {
               {suggestions.suggestions.map((s, idx) => (
                 <div key={s.utilisateur_id} className="flex flex-col md:flex-row md:items-center gap-3 border border-slate-200 px-4 py-3 rounded-lg bg-slate-50/60">
                   <div className="flex items-center gap-3 flex-1">
-                    <div className="w-8 h-8 flex items-center justify-center rounded-full bg-purple-100 text-purple-700 text-xs font-bold flex-shrink-0">
+                    <div className="w-8 h-8 flex items-center justify-center rounded-full bg-[#63B23E]/10 text-[#3f7c28] text-xs font-bold flex-shrink-0">
                       #{idx + 1}
                     </div>
                     <div className="min-w-0">

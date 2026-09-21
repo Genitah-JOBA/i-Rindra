@@ -44,6 +44,7 @@ class ChatResponse(BaseModel):
     modele: str
     tokens: Optional[int] = None
     suggestion_devis_sauvee: bool = False  # devis enregistré dans "Suggestion devis par IA"
+    nb_projets_contexte: Optional[int] = None  # projets réels injectés dans le prompt
 
 
 # ============================================================

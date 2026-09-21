@@ -174,7 +174,7 @@ export function Carte({ children, className = "" }) {
 export function BadgeIA({ modele }) {
   if (!modele) return null;
   return (
-    <span className="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
+    <span className="text-[10px] bg-[#63B23E]/10 text-[#3f7c28] px-2 py-0.5 rounded-full">
       IA · {modele}
     </span>
   );

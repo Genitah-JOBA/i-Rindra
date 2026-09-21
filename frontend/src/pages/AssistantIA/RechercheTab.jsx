@@ -101,7 +101,7 @@ export default function RechercheTab({ projets }) {
                 <div key={`${r.type}-${r.id}`} className="border border-slate-200 px-4 py-3 rounded-lg bg-slate-50/60">
                   <span className="text-sm flex items-start gap-2">
                     <span className="flex-shrink-0">
-                      {(ICONE_TYPE[r.type] || IconDocumentText)({ className: "w-4 h-4 text-purple-600 mt-0.5" })}
+                      {(ICONE_TYPE[r.type] || IconDocumentText)({ className: "w-4 h-4 text-[#63B23E] mt-0.5" })}
                     </span>
                     <span>
                       <span className="font-semibold">{r.titre}</span>

@@ -328,7 +328,7 @@ export default function ExtractionTab({ projets }) {
               await chargerDisponibilites(fresh || [], projetId);
             }}
             disabled={!projetId}
-            className="flex items-center gap-1 text-xs font-medium text-purple-700 hover:text-purple-900 disabled:text-slate-300"
+            className="flex items-center gap-1 text-xs font-medium text-[#3f7c28] hover:text-[#2e5d1f] disabled:text-slate-300"
           >
             <IconRefresh className="w-3.5 h-3.5" /> Actualiser
           </button>

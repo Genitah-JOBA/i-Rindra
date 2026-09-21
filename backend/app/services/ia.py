@@ -17,7 +17,7 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-from sqlalchemy import and_, func, select
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.analyse_ia import (
@@ -241,6 +241,116 @@ async def _contexte_projet(db: AsyncSession, projet: Projet) -> str:
     else:
         lignes.append("Tâches : (aucune)")
     return "\n".join(lignes)
+
+
+@dataclass
+class ContexteUtilisateur:
+    """Contexte du chat : texte injectable dans le prompt + compteurs pour l'UI."""
+    texte: str = ""
+    nb_projets: int = 0
+    nb_taches: int = 0
+
+
+def _lignes_contexte(projets, taches, utilisateur_id: int) -> List[str]:
+    """
+    Rend un bloc de contexte des projets / tâches visibles (chat contextuel).
+
+    Met en avant : les tâches de l'utilisateur, les tâches en retard et les
+    prochaines échéances. N'invente rien : tout provient des objets fournis.
+    """
+    par_projet: dict[int, List[Tache]] = {}
+    for t in taches:
+        par_projet.setdefault(t.projet_id, []).append(t)
+
+    lignes: List[str] = [
+        "Voici le contexte réel de l'utilisateur sur la plateforme i-Rindra "
+        "(projets actifs et tâches associées). Réponds en t'appuyant sur ces "
+        "données exactes — ne les invente pas et ne les contredis pas :"
+    ]
+    for p in projets:
+        ts = par_projet.get(p.id, [])
+        en_retard = [t for t in ts if t.echeance and t.echeance < date.today()]
+        a_venir = sorted(
+            (t for t in ts if t.echeance and t.echeance >= date.today()),
+            key=lambda t: t.echeance,
+        )
+        mes = [t for t in ts if t.responsable_id == utilisateur_id]
+
+        lignes.append(
+            f"- [{p.id}] {p.nom} — santé {p.statut_sante.value}, avancement "
+            f"{p.avancement_pct}% ({len(ts)} tâche(s) en cours) ; "
+            f"{_iso(p.date_debut) or '?'} → {_iso(p.date_fin_prevue) or '?'}"
+        )
+
+        details: List[str] = []
+        vues: set = set()
+
+        def ajouter(t, libelle: str):
+            if t.id in vues:
+                return
+            vues.add(t.id)
+            details.append(
+                f"{libelle} #{t.id} « {t.titre} » — {t.statut.value}, "
+                f"priorité {t.priorite.value}, échéance {_iso(t.echeance) or 'sans'}"
+            )
+
+        for t in mes[:2]:
+            ajouter(t, "tâche de l'utilisateur")
+        for t in en_retard[:3]:
+            ajouter(t, "EN RETARD")
+        for t in a_venir[:2]:
+            ajouter(t, "échéance à venir")
+
+        if details:
+            lignes.append("    * " + "\n    * ".join(details))
+
+    return lignes
+
+
+async def contexte_utilisateur(db: AsyncSession, utilisateur_id: int,
+                               role: str,
+                               client_id: Optional[int] = None) -> ContexteUtilisateur:
+    """
+    Synthèse des projets / tâches réellement accessibles à un utilisateur,
+    à injecter dans le prompt système du chat (chat contextuel).
+
+    La visibilité suit les mêmes règles que `/projets` : la direction, le DRH
+    et les chefs de projet voient tout ; « equipe » voit ses projets ; un client
+    voit uniquement les projets de son client_id.
+    """
+    query = select(Projet).where(Projet.archive.is_(False))
+    if role in ("direction", "drh", "chef_de_projet"):
+        pass
+    elif role == "equipe":
+        sous_equipe = select(ProjetMembre.projet_id).where(
+            ProjetMembre.utilisateur_id == utilisateur_id
+        )
+        query = query.where(
+            or_(
+                Projet.responsable_id == utilisateur_id,
+                Projet.id.in_(sous_equipe),
+            )
+        )
+    elif client_id:
+        query = query.where(Projet.client_id == client_id)
+    else:
+        return ContexteUtilisateur(texte="Aucun projet accessible pour cet utilisateur.")
+
+    res = await db.execute(query.order_by(Projet.cree_le.desc()).limit(8))
+    projets = list(res.scalars().all())
+    if not projets:
+        return ContexteUtilisateur(texte="Aucun projet actif pour cet utilisateur.")
+
+    res = await db.execute(
+        select(Tache).where(
+            Tache.projet_id.in_([p.id for p in projets]),
+            Tache.statut != StatutTache.TERMINE,
+        )
+    )
+    taches = list(res.scalars().all())
+
+    texte = _tronquer("\n".join(_lignes_contexte(projets, taches, utilisateur_id)), ENTREE_MAX)
+    return ContexteUtilisateur(texte=texte, nb_projets=len(projets), nb_taches=len(taches))
 
 
 async def _entree_cdc(db, projet: Projet, texte: Optional[str]) -> Tuple[str, Optional[str]]:

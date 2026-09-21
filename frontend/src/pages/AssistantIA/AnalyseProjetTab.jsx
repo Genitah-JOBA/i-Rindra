@@ -1,7 +1,7 @@
-// src/pages/AssistantIA/AnalyseProjetTab.jsx — onglets « analyse courte » sur un projet :
-// variante "resume"  = RF-27 résumé d'avancement
-// variante "detec"   = RF-28 détection de retards / blocages
-// variante "statut"  = RF-29 proposition de statut santé
+// src/pages/AssistantIA/AnalyseProjetTab.jsx — analyses sur un projet :
+// variante "resume" = RF-27 résumé d'avancement
+// variante "detec"  = RF-28 détection de retards / blocages
+// variante "statut" = RF-29 proposition de statut santé
 import { useState } from "react";
 import { iaService } from "../../api/ia";
 import { useMessage } from "../../context/MessageContext";
@@ -27,6 +27,12 @@ const CONFIG = {
     service: (id) => iaService.statutPropose(id),
   },
 };
+
+const VARIANTES = [
+  { id: "resume", label: "Résumé" },
+  { id: "detec", label: "Retards & blocages" },
+  { id: "statut", label: "Statut santé" },
+];
 
 const NIVEAU_ALERTE = {
   rouge: "border-red-200 bg-red-50 text-red-800",
@@ -58,13 +64,27 @@ const LIBELLE_TYPE = {
   risque: "Risque",
 };
 
-export default function AnalyseProjetTab({ variante, projets }) {
+export default function AnalyseProjetTab({ variante: varianteInitiale, projets, gestion = false }) {
   const { showSuccess, showError } = useMessage();
-  const conf = CONFIG[variante];
+  const compatibles = gestion
+    ? VARIANTES
+    : VARIANTES.filter((v) => v.id === "resume");
+  const [varianteId, setVarianteId] = useState(
+    varianteInitiale && compatibles.some((v) => v.id === varianteInitiale)
+      ? varianteInitiale
+      : compatibles[0]?.id || "resume",
+  );
+  const conf = CONFIG[varianteId];
   const [projetId, setProjetId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [resultat, setResultat] = useState(null);
   const [erreur, setErreur] = useState("");
+
+  const changerVariante = (id) => {
+    setVarianteId(id);
+    setResultat(null);
+    setErreur("");
+  };
 
   const lancer = async () => {
     if (!projetId) {
@@ -93,6 +113,24 @@ export default function AnalyseProjetTab({ variante, projets }) {
     <div className="space-y-4 animate__animated animate__fadeIn">
       <AlertErreur>{erreur}</AlertErreur>
 
+      {compatibles.length > 1 && (
+        <div className="inline-flex flex-wrap items-center gap-1 border border-slate-200 bg-white p-1 shadow-sm rounded-md">
+          {compatibles.map((v) => (
+            <button
+              key={v.id}
+              onClick={() => changerVariante(v.id)}
+              className={`px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors rounded-md ${
+                varianteId === v.id
+                  ? "bg-[#63B23E] text-white"
+                  : "text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
+      )}
+
       <Carte className="p-4">
         <div className="flex flex-col gap-3">
           <div className="flex-1">
@@ -114,7 +152,7 @@ export default function AnalyseProjetTab({ variante, projets }) {
             <BadgeIA modele={resultat.modele} />
           </div>
 
-          {variante === "resume" && (
+          {varianteId === "resume" && (
             <>
               {resultat.avancement_estime != null && (
                 <div className="mb-4 flex items-center gap-3">
@@ -144,7 +182,7 @@ export default function AnalyseProjetTab({ variante, projets }) {
             </>
           )}
 
-          {variante === "detec" && (
+          {varianteId === "detec" && (
             <>
               {resultat.alertes.length === 0 ? (
                 <p className="flex items-center gap-1.5 text-sm text-emerald-700 bg-emerald-50 border border-emerald-100 px-4 py-3 rounded-lg">
@@ -169,7 +207,7 @@ export default function AnalyseProjetTab({ variante, projets }) {
             </>
           )}
 
-          {variante === "statut" && (() => {
+          {varianteId === "statut" && (() => {
                 const sante = STATUT_SANTE[resultat.statut_propose];
                 return (
                   <>

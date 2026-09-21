@@ -5,10 +5,12 @@ Routes IA — base du module.
 Endpoints :
   - GET  /ia/status : état de la configuration (sans appel réseau) ;
   - POST /ia/ping   : test de bout en bout vers OpenAI (mini prompt) ;
-  - POST /ia/chat   : conversation avec l'assistant IA ;
+  - POST /ia/chat   : conversation avec l'assistant IA (chat contextuel :
+    le system prompt embarque les projets/tâches réels de l'utilisateur) ;
   - Fonctionnalités métier (RF-25 → RF-31) : analyse CDC, extraction de
     tâches, résumé, détection, statut proposé, affectation, recherche.
 """
+import logging
 from typing import List, Optional
 
 from datetime import date, timedelta
@@ -58,6 +60,7 @@ from app.services.ia import (
     ContenuIndisponibleError,
     ReponseIAInvalideError,
     analyser_cdc,
+    contexte_utilisateur,
     detecter_alertes,
     extraire_taches,
     lister_suggestions,
@@ -70,6 +73,8 @@ from app.services.ia import (
 )
 
 router = APIRouter(prefix="/ia", tags=["IA"])
+
+logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = (
     "Tu es l'assistant IA de la plateforme i-Rindra, un outil de gestion de projets "
@@ -191,14 +196,29 @@ async def ia_chat(
     Conversation avec l'assistant IA.
 
     Accepte un message + un historique optionnel (max 20 messages).
-    Le system prompt contextualise l'assistant dans l'écosystème i-Rindra.
+    Le system prompt contextualise l'assistant dans l'écosystème i-Rindra et
+    embarque les projets / tâches réels accessibles à l'utilisateur (chat
+    contextuel). Si la récupération du contexte échoue, le chat reste
+    disponible sans contexte.
 
     Spécialité volet financier : si la direction/DRH demande un devis
     (mot-clé "devis", "tarif", "estimation"...), la réponse est automatiquement
     sauvegardée dans "Suggestion devis par IA" (table suggestion_devis).
     """
+    # Chat contextuel : le system prompt contient les projets / tâches réels de
+    # l'utilisateur (visibilité identique à /projets).
+    contexte = None
+    try:
+        contexte = await contexte_utilisateur(db, user_id, role)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Contexte utilisateur indisponible, chat sans contexte : %s", exc)
+
+    system = SYSTEM_PROMPT
+    if contexte and contexte.texte:
+        system = f"{system}\n\n{contexte.texte}"
+
     # Construit la liste des messages pour l'API OpenAI
-    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    messages = [{"role": "system", "content": system}]
 
     # Ajoute l'historique (tronqué aux 20 derniers pour limiter les tokens)
     if data.historique:
@@ -244,6 +264,7 @@ async def ia_chat(
         modele=resultat.modele,
         tokens=resultat.tokens,
         suggestion_devis_sauvee=suggestion_devis_sauvee,
+        nb_projets_contexte=contexte.nb_projets if contexte else None,
     )
 
 

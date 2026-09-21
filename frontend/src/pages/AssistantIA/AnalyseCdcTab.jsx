@@ -168,8 +168,8 @@ export default function AnalyseCdcTab({ projets }) {
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="bg-purple-50 border border-purple-100 p-3 rounded-lg">
-              <TitreSection className="text-purple-700">Points clés</TitreSection>
+            <div className="bg-[#63B23E]/5 border border-[#63B23E]/10 p-3 rounded-lg">
+              <TitreSection className="text-[#3f7c28]">Points clés</TitreSection>
               <PuceList items={resultat.points_cles} />
             </div>
             <div className="bg-rose-50 border border-rose-100 p-3 rounded-lg">

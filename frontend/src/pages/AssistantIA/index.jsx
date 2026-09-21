@@ -6,14 +6,10 @@ import { projetsService } from "../../api/projets";
 import { iaService } from "../../api/ia";
 import {
   IconSparkles,
-  IconCheck,
-  IconX,
   IconChatBubble,
   IconDocumentText,
   IconList,
   IconChartBar,
-  IconExclamationCircle,
-  IconHeartPulse,
   IconUsers,
   IconSearch,
 } from "./Shared";
@@ -54,9 +50,7 @@ export default function AssistantIA() {
     { id: "chat", label: "Assistant", Icon: IconChatBubble, requis: true, render: () => <ChatTab /> },
     { id: "analyse", label: "Analyser un CDC", Icon: IconDocumentText, requis: gestion, render: () => <AnalyseCdcTab projets={projets} /> },
     { id: "extraction", label: "Tâches suggérées", Icon: IconList, requis: gestion, render: () => <ExtractionTab projets={projets} /> },
-    { id: "resume", label: "Résumé", Icon: IconChartBar, requis: true, render: () => <AnalyseProjetTab variante="resume" projets={projets} /> },
-    { id: "detec", label: "Retards & blocages", Icon: IconExclamationCircle, requis: gestion, render: () => <AnalyseProjetTab variante="detec" projets={projets} /> },
-    { id: "statut", label: "Statut santé", Icon: IconHeartPulse, requis: gestion, render: () => <AnalyseProjetTab variante="statut" projets={projets} /> },
+    { id: "projet", label: "Analyse du projet", Icon: IconChartBar, requis: true, render: () => <AnalyseProjetTab projets={projets} gestion={gestion} /> },
     { id: "affectation", label: "Affectation", Icon: IconUsers, requis: gestion, render: () => <AffectationTab projets={projets} /> },
     { id: "recherche", label: "Recherche", Icon: IconSearch, requis: true, render: () => <RechercheTab projets={projets} /> },
   ].filter((o) => o.requis);
@@ -65,46 +59,40 @@ export default function AssistantIA() {
 
   return (
     <div>
-      <header className="mb-6">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-            <IconSparkles className="w-6 h-6 text-purple-600" />
-          </div>
-          <div className="flex-1">
-            <h1 className="text-2xl font-bold text-slate-900">Assistant IA</h1>
-            <p className="text-sm text-slate-500">
-              L'IA propose, l'humain valide — analyse, suggestions, alertes et aide à la décision.
-            </p>
-          </div>
-          <span className={`hidden md:inline-flex items-center gap-1.5 text-[11px] px-3 py-1 rounded-full ${config?.configuree ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-            {config?.configuree ? (
-              <><IconCheck className="w-3 h-3" /> IA configurée · {config.modele}</>
-            ) : (
-              <><IconX className="w-3 h-3" /> IA non configurée</>
-            )}
-          </span>
+      <header className="mb-6 flex flex-wrap items-center gap-4">
+        <div className="w-10 h-10 bg-[#63B23E]/10 rounded-full flex items-center justify-center flex-shrink-0">
+          <IconSparkles className="w-5 h-5 text-[#63B23E]" />
         </div>
-
-        <nav className="mt-5 flex flex-wrap gap-1.5">
-          {ONGLETS.map((o) => {
-            const isActive = actif.id === o.id;
-            return (
-              <button
-                key={o.id}
-                onClick={() => setOnglet(o.id)}
-                className={`flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium transition rounded-lg ${
-                  isActive
-                    ? "bg-[#63B23E] text-white shadow-sm"
-                    : "bg-white text-slate-600 border border-slate-200 hover:border-[#63B23E] hover:text-[#3f7c28]"
-                }`}
-              >
-                <o.Icon className="w-4 h-4" />
-                {o.label}
-              </button>
-            );
-          })}
-        </nav>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl font-bold text-slate-900">Assistant IA</h1>
+          <p className="text-sm text-slate-500">L'IA propose, l'humain valide.</p>
+        </div>
+        {config && !config.configuree && (
+          <span className="text-[11px] px-3 py-1 rounded-full bg-red-50 border border-red-200 text-red-600">
+            IA non configurée
+          </span>
+        )}
       </header>
+
+      <nav className="mb-6 flex flex-wrap gap-1.5">
+        {ONGLETS.map((o) => {
+          const isActive = actif.id === o.id;
+          return (
+            <button
+              key={o.id}
+              onClick={() => setOnglet(o.id)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors rounded-md ${
+                isActive
+                  ? "bg-[#63B23E] text-white shadow-sm"
+                  : "bg-white text-slate-600 border border-slate-200 hover:border-[#63B23E] hover:text-[#3f7c28]"
+              }`}
+            >
+              <o.Icon className="w-4 h-4" />
+              {o.label}
+            </button>
+          );
+        })}
+      </nav>
 
       {!projetsCharge ? (
         <div className="flex justify-center py-12">
