@@ -63,17 +63,17 @@ export default function Parametres() {
   };
 
   const champStyle =
-    "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#00B2A0] focus:ring-1 focus:ring-[#00B2A0]";
+    "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none focus:border-i-blue focus:ring-1 focus:ring-i-blue";
 
   return (
-    <div className="max-w-2xl">
-      <h1 className="mb-1 text-2xl font-bold text-slate-900">
+    <div className="flex h-full flex-col">
+      <h1 className="mb-1 font-brand text-2xl font-bold text-i-primary">
         Paramètres
       </h1>
       <p className="mb-6 text-sm text-slate-500">Préférences de l'application.</p>
 
       {/* Compte — modifiable */}
-      <section className="rounded-lg border bg-white p-5 shadow-sm">
+      <section className="flex flex-1 flex-col rounded-lg border bg-white p-5 shadow-sm">
         <h2 className="mb-1 text-base font-semibold text-slate-800">
           Mon compte
         </h2>
@@ -82,7 +82,7 @@ export default function Parametres() {
           <span className="capitalize text-slate-600">{user?.role}</span>
         </p>
 
-        <form onSubmit={onSubmit} className="space-y-4">
+        <form onSubmit={onSubmit} className="flex flex-1 flex-col space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm text-slate-500">
@@ -166,11 +166,11 @@ export default function Parametres() {
             </p>
           )}
 
-          <div className="flex justify-end">
+          <div className="mt-auto flex items-center justify-end">
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-[#00B2A0] px-5 py-2 text-sm font-medium text-white transition hover:bg-[#009b8b] disabled:opacity-60"
+              className="rounded-lg bg-brand-gradient px-5 py-2 text-sm font-medium text-white transition hover:brightness-110 disabled:opacity-60"
             >
               {saving ? "…" : "Enregistrer"}
             </button>

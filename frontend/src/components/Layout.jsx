@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import { useLocation } from "react-router-dom";
 import NotificationBell from "./NotificationBell";
 import "animate.css";
 
@@ -31,6 +32,9 @@ const LienPlaceholder = ({ children, className, titre }) => (
 export default function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  const { pathname } = useLocation();
+const pleinEcran = pathname.startsWith("/assistant-ia");
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profilMenuOpen, setProfilMenuOpen] = useState(false);
@@ -572,7 +576,7 @@ export default function Layout() {
 
                 <button
                   onClick={ouvrirParametres}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors rounded-full"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -624,8 +628,12 @@ export default function Layout() {
         </header>
 
         {/* Corps de la page */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
-          <div className="max-w-7xl w-full mx-auto">
+        <main
+          className={`flex-1 min-h-0 p-4 sm:p-6 md:p-8 ${
+            pleinEcran ? "overflow-hidden" : "overflow-y-auto"
+          }`}
+        >
+          <div className={`w-full ${pleinEcran ? "h-full" : ""}`}>
             <Outlet />
           </div>
         </main>

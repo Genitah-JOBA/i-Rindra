@@ -279,7 +279,7 @@ export default function ExtractionTab({ projets }) {
   const suggestionsRejetees = suggestions.filter((s) => s.statut === "rejetee");
 
   return (
-    <div className="space-y-4 animate__animated animate__fadeIn">
+    <div className="h-full overflow-y-auto space-y-4 animate__animated animate__fadeIn">
       <AlertErreur>{erreur}</AlertErreur>
 
       <Carte className="p-4">

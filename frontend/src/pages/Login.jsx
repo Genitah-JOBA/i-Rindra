@@ -98,7 +98,7 @@ export default function Login() {
 
   return (
     <div className="flex h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-i-primary via-i-primary to-[#1a3a5c] p-4">
-      <div className="grid w-full max-w-5xl max-h-full overflow-hidden bg-white shadow-2xl md:grid-cols-2 rounded-2xl">
+      <div className="grid w-full max-w-7xl max-h-full overflow-hidden bg-white shadow-2xl md:grid-cols-2 rounded-2xl">
         {/* COLONNE GAUCHE : formulaire */}
         <div className="flex flex-col justify-center p-5 sm:p-8 bg-white">
           {/* Logo mobile */}
