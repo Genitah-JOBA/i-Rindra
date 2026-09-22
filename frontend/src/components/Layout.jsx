@@ -38,9 +38,16 @@ const pleinEcran = pathname.startsWith("/assistant-ia");
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profilMenuOpen, setProfilMenuOpen] = useState(false);
+  const [confirmLogoutOpen, setConfirmLogoutOpen] = useState(false);
   const profilMenuRef = useRef(null);
 
   const handleLogout = () => {
+    setConfirmLogoutOpen(true);
+    setProfilMenuOpen(false);
+  };
+
+  const confirmerLogout = () => {
+    setConfirmLogoutOpen(false);
     logout();
     navigate("/login");
   };
@@ -659,7 +666,57 @@ const pleinEcran = pathname.startsWith("/assistant-ia");
           scrollbar-width: thin;
           scrollbar-color: rgba(122, 253, 242, 0.3) transparent;
         }
-      `}</style>
+      `}      </style>
+
+      {/* Confirmation de déconnexion */}
+      {confirmLogoutOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-i-primary/60 p-4 backdrop-blur-sm"
+          onClick={() => setConfirmLogoutOpen(false)}
+        >
+          <div
+            className="animate__animated animate__zoomIn w-full max-w-sm rounded-2xl border border-white/10 bg-white p-6 text-center shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-red-50">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="h-6 w-6 text-red-600"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 9v3.75m-9.303 3.376c-.866 1.5-.217 3.374 1.948 3.374h14.71c2.166 0 2.815-1.875 1.949-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+                />
+              </svg>
+            </div>
+            <h2 className="mb-1 text-base font-semibold text-i-primary">
+              Déconnexion
+            </h2>
+            <p className="mb-4 text-sm text-slate-500">
+              Êtes-vous sûr de vouloir vous déconnecter ?
+            </p>
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={() => setConfirmLogoutOpen(false)}
+                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={confirmerLogout}
+                className="rounded-lg bg-brand-gradient px-4 py-2 text-sm font-medium text-white transition hover:brightness-110"
+              >
+                Déconnexion
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
