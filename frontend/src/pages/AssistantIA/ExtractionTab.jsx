@@ -154,7 +154,11 @@ export default function ExtractionTab({ projets }) {
   const [generation, setGeneration] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [membres, setMembres] = useState([]);
-  const [chargement, setChargement] = useState(true);
+  // `false` au départ : aucun chargement n'est réellement en cours tant que
+  // l'utilisateur n'a pas choisi de projet. Avec `true`, ce composant étant
+  // dépourvu de useEffect, le spinner restait bloqué indéfiniment à
+  // l'ouverture de l'onglet (cf. `chargerSuggestions` / `changerProjet`).
+  const [chargement, setChargement] = useState(false);
   const [erreur, setErreur] = useState("");
   const [vueStatut, setVueStatut] = useState("suggerees");
   // Map { "YYYY-MM-DD": MembreDisponibilite[] }
