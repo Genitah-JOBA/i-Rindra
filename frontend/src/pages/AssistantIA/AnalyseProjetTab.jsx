@@ -137,7 +137,7 @@ export default function AnalyseProjetTab({ variante: varianteInitiale, projets, 
             <label className="mb-1 block text-xs font-medium text-slate-600">Projet</label>
             <SelectProjet projets={projets} value={projetId} onChange={setProjetId} />
           </div>
-          <BtnIA onClick={lancer} loading={loading}>
+          <BtnIA onClick={lancer} loading={loading} className="text-black">
             {conf.bouton}
           </BtnIA>
         </div>

@@ -147,7 +147,7 @@ export default function AnalyseCdcTab({ projets }) {
             </p>
           </div>
 
-          <BtnIA onClick={analyser} loading={loading} disabled={!fichier}>
+          <BtnIA onClick={analyser} loading={loading} disabled={!fichier} className="text-black">
             Analyser le cahier des charges
           </BtnIA>
         </div>
