@@ -662,6 +662,27 @@ async def rejeter_suggestion(db: AsyncSession, suggestion_id: int) -> dict:
     return {"suggestion_id": suggestion.id, "statut": suggestion.statut}
 
 
+async def restaurer_suggestion(db: AsyncSession, suggestion_id: int) -> dict:
+    """
+    Remet une suggestion rejetée dans le panier « à valider » (RF-26).
+
+    Un rejet n'est pas définitif : l'utilisateur peut changer d'avis et
+    réintégrer la tâche. Seules les suggestions rejetées sont concernées —
+    une suggestion validée est déjà une vraie Tache, elle ne revient pas en
+    attente. `tache_id` n'est pas touché (toujours nul sur une suggestion
+    rejetée, par construction).
+    """
+    res = await db.execute(select(SuggestionTache).where(SuggestionTache.id == suggestion_id))
+    suggestion = res.scalar_one_or_none()
+    if not suggestion:
+        raise ValueError("Suggestion introuvable.")
+    if suggestion.statut != StatutSuggestion.REJETEE.value:
+        raise ValueError("Seule une suggestion rejetée peut être réintégrée.")
+    suggestion.statut = StatutSuggestion.EN_ATTENTE
+    await db.commit()
+    return {"suggestion_id": suggestion.id, "statut": suggestion.statut}
+
+
 # ============================================================
 # RF-27 — Résumé de projet
 # ============================================================

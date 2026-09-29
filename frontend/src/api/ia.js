@@ -67,6 +67,12 @@ export const iaService = {
     return data;
   },
 
+  // Remet une suggestion rejetée dans la liste « à valider ».
+  restaurerSuggestion: async (suggestionId) => {
+    const { data } = await api.post(`/ia/suggestions/${suggestionId}/restaurer`);
+    return data;
+  },
+
   // --- RF-27 : résumé de projet ---
   resumeProjet: async (projetId) => {
     const { data } = await api.post(`/ia/projets/${projetId}/resume`);

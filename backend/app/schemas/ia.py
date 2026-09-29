@@ -136,6 +136,12 @@ class SuggestionRejeterResponse(BaseModel):
     statut: str
 
 
+class SuggestionRestaurerResponse(BaseModel):
+    """Résultat de la réintégration d'une suggestion rejetée."""
+    suggestion_id: int
+    statut: str
+
+
 # ============================================================
 # RF-27 — Résumé de projet
 # ============================================================

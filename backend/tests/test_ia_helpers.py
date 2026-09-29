@@ -181,6 +181,76 @@ def test_extraire_taches_refuse_si_tout_est_doublon(monkeypatch):
 
 
 # ============================================================
+# Réintégration d'une suggestion rejetée (RF-26)
+# ============================================================
+
+def _db_avec_suggestion(statut):
+    """Faux session DB qui renvoie une SuggestionTache au statut donné."""
+    suggestion = SimpleNamespace(
+        id=7, titre="Développer le site", projet_id=1,
+        statut=statut, tache_id=None,
+    )
+
+    class _Res:
+        def scalar_one_or_none(self):
+            return suggestion
+
+    class _DB:
+        def __init__(self):
+            self.commits = 0
+
+        async def execute(self, _query):
+            return _Res()
+
+        async def commit(self):
+            self.commits += 1
+
+    return _DB(), suggestion
+
+
+def test_restaurer_suggestion_rejetee_repasse_en_attente():
+    import asyncio
+
+    db, suggestion = _db_avec_suggestion("rejetee")
+
+    res = asyncio.run(ia.restaurer_suggestion(db, 7))
+
+    assert res["suggestion_id"] == 7
+    assert res["statut"] == ia.StatutSuggestion.EN_ATTENTE
+    assert db.commits == 1
+
+
+def test_restaurer_suggestion_refuse_si_pas_rejetee():
+    """Une suggestion déjà validée est une vraie Tache : pas de retour arrière."""
+    import asyncio
+    import pytest
+
+    for statut in ("en_attente", "validee"):
+        db, _ = _db_avec_suggestion(statut)
+        with pytest.raises(ValueError) as exc:
+            asyncio.run(ia.restaurer_suggestion(db, 7))
+        assert "rejetée" in str(exc.value)
+        assert db.commits == 0  # rien n'est écrit
+
+
+def test_restaurer_suggestion_inexistante():
+    import asyncio
+    import pytest
+
+    class _Res:
+        def scalar_one_or_none(self):
+            return None
+
+    class _DB:
+        async def execute(self, _query):
+            return _Res()
+
+    with pytest.raises(ValueError) as exc:
+        asyncio.run(ia.restaurer_suggestion(_DB(), 999))
+    assert "introuvable" in str(exc.value).lower()
+
+
+# ============================================================
 # Chat contextuel — rendu du contexte utilisateur
 # ============================================================
 

@@ -72,7 +72,7 @@ export default function RechercheTab({ projets }) {
           <button
             type="submit"
             disabled={loading}
-            className="bg-brand-gradient px-5 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-50 rounded-md"
+            className="bg-brand-gradient px-5 py-2 text-sm font-semibold text-black transition hover:brightness-110 disabled:opacity-50 rounded-md"
           >
             {loading ? "Recherche…" : "Rechercher"}
           </button>

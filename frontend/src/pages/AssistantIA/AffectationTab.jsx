@@ -80,7 +80,7 @@ export default function AffectationTab({ projets }) {
           </div>
         </div>
         <div className="mt-3">
-          <BtnIA onClick={proposer} loading={loading}>
+          <BtnIA onClick={proposer} loading={loading} className="text-black">
             Classer les membres par l'IA
           </BtnIA>
         </div>

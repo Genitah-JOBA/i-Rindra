@@ -96,7 +96,7 @@ function DispoBadge({ membres, date }) {
 }
 
 // Carte d'une suggestion (section « suggérées » ou « rejetées »)
-function SuggestionCarte({ suggestion: s, membresDispo, onValider, onRejeter }) {
+function SuggestionCarte({ suggestion: s, membresDispo, onValider, onRejeter, onRestaurer }) {
   return (
     <Carte className="p-4 flex flex-col gap-2">
       <div className="flex items-start justify-between gap-2">
@@ -141,6 +141,19 @@ function SuggestionCarte({ suggestion: s, membresDispo, onValider, onRejeter }) 
               <IconArrowRight className="w-3 h-3" />
             </button>
           )}
+        </div>
+      )}
+
+      {/* Réintégration : une tâche rejetée peut revenir dans la liste à valider. */}
+      {s.statut === "rejetee" && onRestaurer && (
+        <div className="mt-auto flex items-center gap-2 pt-2 border-t border-slate-100">
+          <button
+            onClick={() => onRestaurer(s)}
+            title="Remettre cette tâche dans la liste « à valider »"
+            className="flex items-center gap-1 border border-i-blue/40 bg-i-blue/5 px-2.5 py-1 text-xs font-semibold text-i-blue transition hover:bg-i-blue/10 rounded-md ml-auto"
+          >
+            <IconRefresh /> Réintégrer
+          </button>
         </div>
       )}
     </Carte>
@@ -294,6 +307,17 @@ export default function ExtractionTab({ projets }) {
     }
   };
 
+  const restaurer = async (s) => {
+    try {
+      await iaService.restaurerSuggestion(s.id);
+      showSuccess(`Tâche « ${s.titre} » remise dans les suggestions à valider.`);
+      await chargerSuggestions(projetId);
+    } catch (err) {
+      const msg = err.response?.data?.detail || "Réintégration impossible.";
+      showError(msg);
+    }
+  };
+
   const suggestionsEnAttente = suggestions.filter((s) => s.statut === "en_attente");
   const suggestionsRejetees = suggestions.filter((s) => s.statut === "rejetee");
 
@@ -390,7 +414,7 @@ export default function ExtractionTab({ projets }) {
         ) : (
           <div className="grid gap-3 grid-cols-1 lg:grid-cols-2">
             {suggestionsRejetees.map((s) => (
-              <SuggestionCarte key={s.id} suggestion={s} />
+              <SuggestionCarte key={s.id} suggestion={s} onRestaurer={restaurer} />
             ))}
           </div>
         )

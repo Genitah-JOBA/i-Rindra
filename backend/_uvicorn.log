@@ -554,3 +554,589 @@ WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
 2026-09-29 11:18:31,611 INFO sqlalchemy.engine.Engine [cached since 150s ago] (67,)
 2026-09-29 11:18:31,613 INFO sqlalchemy.engine.Engine ROLLBACK
 INFO:     127.0.0.1:4043 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-29 11:19:01,511 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:19:01,512 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-29 11:19:01,512 INFO sqlalchemy.engine.Engine [cached since 179.9s ago] (67,)
+2026-09-29 11:19:01,514 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:5451 - "GET /notifications/count HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10222 - "OPTIONS /notifications/count HTTP/1.1" 200 OK
+2026-09-29 11:19:31,614 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:19:31,615 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-29 11:19:31,616 INFO sqlalchemy.engine.Engine [cached since 210s ago] (67,)
+2026-09-29 11:19:31,617 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:10222 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-29 11:20:01,603 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:20:01,604 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-29 11:20:01,604 INFO sqlalchemy.engine.Engine [cached since 240s ago] (67,)
+2026-09-29 11:20:01,605 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:4079 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-29 11:20:31,607 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:20:31,608 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-29 11:20:31,609 INFO sqlalchemy.engine.Engine [cached since 270s ago] (67,)
+2026-09-29 11:20:31,611 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:14090 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-29 11:21:01,510 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:21:01,511 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-29 11:21:01,511 INFO sqlalchemy.engine.Engine [cached since 299.9s ago] (67,)
+2026-09-29 11:21:01,513 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:10315 - "GET /notifications/count HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10315 - "OPTIONS /ia/projets/15/recherche?q=Date+de+livraison HTTP/1.1" 200 OK
+2026-09-29 11:21:03,215 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:21:03,218 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
+FROM projet 
+WHERE projet.id = $1::INTEGER
+2026-09-29 11:21:03,219 INFO sqlalchemy.engine.Engine [generated in 0.00098s] (15,)
+2026-09-29 11:21:03,235 INFO sqlalchemy.engine.Engine SELECT tache.id, tache.projet_id, tache.titre, tache.description, tache.statut, tache.priorite, tache.echeance, tache.responsable_id, tache.ordre, tache.cree_le, tache.modifie_le 
+FROM tache 
+WHERE tache.projet_id = $1::INTEGER AND (tache.titre ILIKE $2::VARCHAR OR tache.description ILIKE $3::VARCHAR) 
+ LIMIT $4::INTEGER
+2026-09-29 11:21:03,236 INFO sqlalchemy.engine.Engine [generated in 0.00086s] (15, '%Date de livraison%', '%Date de livraison%', 20)
+2026-09-29 11:21:03,246 INFO sqlalchemy.engine.Engine SELECT commentaire_tache.id, commentaire_tache.tache_id, commentaire_tache.utilisateur_id, commentaire_tache.contenu, commentaire_tache.cree_le 
+FROM commentaire_tache JOIN tache ON tache.id = commentaire_tache.tache_id 
+WHERE tache.projet_id = $1::INTEGER AND commentaire_tache.contenu ILIKE $2::VARCHAR 
+ LIMIT $3::INTEGER
+2026-09-29 11:21:03,247 INFO sqlalchemy.engine.Engine [generated in 0.00099s] (15, '%Date de livraison%', 20)
+2026-09-29 11:21:03,254 INFO sqlalchemy.engine.Engine SELECT jalon.id, jalon.titre, jalon.description, jalon.projet_id, jalon.echeance, jalon.atteint, jalon.date_atteint, jalon.cree_le, jalon.modifie_le 
+FROM jalon 
+WHERE jalon.projet_id = $1::INTEGER AND (jalon.titre ILIKE $2::VARCHAR OR jalon.description ILIKE $3::VARCHAR) 
+ LIMIT $4::INTEGER
+2026-09-29 11:21:03,254 INFO sqlalchemy.engine.Engine [generated in 0.00072s] (15, '%Date de livraison%', '%Date de livraison%', 20)
+2026-09-29 11:21:03,260 INFO sqlalchemy.engine.Engine SELECT fichier.id, fichier.projet_id, fichier.nom, fichier.chemin_ou_url, fichier.type_mime, fichier.taille_octets, fichier.televerse_par, fichier.cree_le 
+FROM fichier 
+WHERE fichier.projet_id = $1::INTEGER AND fichier.nom ILIKE $2::VARCHAR 
+ LIMIT $3::INTEGER
+2026-09-29 11:21:03,260 INFO sqlalchemy.engine.Engine [generated in 0.00081s] (15, '%Date de livraison%', 20)
+2026-09-29 11:21:03,266 INFO sqlalchemy.engine.Engine INSERT INTO analyse_ia (projet_id, type, source, entree, resultat_json, modele) VALUES ($1::INTEGER, $2::type_analyse_ia, $3::VARCHAR, $4::VARCHAR, $5::JSONB, $6::VARCHAR) RETURNING analyse_ia.id, analyse_ia.cree_le
+2026-09-29 11:21:03,267 INFO sqlalchemy.engine.Engine [generated in 0.00101s] (15, 'recherche', 'requete:Date de livraison', 'Date de livraison', '{"reponse": "0 r\\u00e9sultat(s)"}', None)
+2026-09-29 11:21:03,279 INFO sqlalchemy.engine.Engine COMMIT
+2026-09-29 11:21:03,285 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:21:03,290 INFO sqlalchemy.engine.Engine SELECT analyse_ia.id, analyse_ia.projet_id, analyse_ia.type, analyse_ia.source, analyse_ia.entree, analyse_ia.resultat_json, analyse_ia.modele, analyse_ia.cree_le 
+FROM analyse_ia 
+WHERE analyse_ia.id = $1::INTEGER
+2026-09-29 11:21:03,291 INFO sqlalchemy.engine.Engine [generated in 0.00092s] (24,)
+2026-09-29 11:21:03,295 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:10315 - "GET /ia/projets/15/recherche?q=Date+de+livraison HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12725 - "OPTIONS /ia/projets/15/recherche?q=livraison HTTP/1.1" 200 OK
+2026-09-29 11:21:13,038 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:21:13,039 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
+FROM projet 
+WHERE projet.id = $1::INTEGER
+2026-09-29 11:21:13,040 INFO sqlalchemy.engine.Engine [cached since 9.821s ago] (15,)
+2026-09-29 11:21:13,042 INFO sqlalchemy.engine.Engine SELECT tache.id, tache.projet_id, tache.titre, tache.description, tache.statut, tache.priorite, tache.echeance, tache.responsable_id, tache.ordre, tache.cree_le, tache.modifie_le 
+FROM tache 
+WHERE tache.projet_id = $1::INTEGER AND (tache.titre ILIKE $2::VARCHAR OR tache.description ILIKE $3::VARCHAR) 
+ LIMIT $4::INTEGER
+2026-09-29 11:21:13,043 INFO sqlalchemy.engine.Engine [cached since 9.807s ago] (15, '%livraison%', '%livraison%', 20)
+2026-09-29 11:21:13,044 INFO sqlalchemy.engine.Engine SELECT commentaire_tache.id, commentaire_tache.tache_id, commentaire_tache.utilisateur_id, commentaire_tache.contenu, commentaire_tache.cree_le 
+FROM commentaire_tache JOIN tache ON tache.id = commentaire_tache.tache_id 
+WHERE tache.projet_id = $1::INTEGER AND commentaire_tache.contenu ILIKE $2::VARCHAR 
+ LIMIT $3::INTEGER
+2026-09-29 11:21:13,045 INFO sqlalchemy.engine.Engine [cached since 9.798s ago] (15, '%livraison%', 20)
+2026-09-29 11:21:13,046 INFO sqlalchemy.engine.Engine SELECT jalon.id, jalon.titre, jalon.description, jalon.projet_id, jalon.echeance, jalon.atteint, jalon.date_atteint, jalon.cree_le, jalon.modifie_le 
+FROM jalon 
+WHERE jalon.projet_id = $1::INTEGER AND (jalon.titre ILIKE $2::VARCHAR OR jalon.description ILIKE $3::VARCHAR) 
+ LIMIT $4::INTEGER
+2026-09-29 11:21:13,046 INFO sqlalchemy.engine.Engine [cached since 9.792s ago] (15, '%livraison%', '%livraison%', 20)
+2026-09-29 11:21:13,048 INFO sqlalchemy.engine.Engine SELECT fichier.id, fichier.projet_id, fichier.nom, fichier.chemin_ou_url, fichier.type_mime, fichier.taille_octets, fichier.televerse_par, fichier.cree_le 
+FROM fichier 
+WHERE fichier.projet_id = $1::INTEGER AND fichier.nom ILIKE $2::VARCHAR 
+ LIMIT $3::INTEGER
+2026-09-29 11:21:13,049 INFO sqlalchemy.engine.Engine [cached since 9.789s ago] (15, '%livraison%', 20)
+2026-09-29 11:21:13,052 INFO sqlalchemy.engine.Engine INSERT INTO analyse_ia (projet_id, type, source, entree, resultat_json, modele) VALUES ($1::INTEGER, $2::type_analyse_ia, $3::VARCHAR, $4::VARCHAR, $5::JSONB, $6::VARCHAR) RETURNING analyse_ia.id, analyse_ia.cree_le
+2026-09-29 11:21:13,052 INFO sqlalchemy.engine.Engine [cached since 9.786s ago] (15, 'recherche', 'requete:livraison', 'livraison', '{"reponse": "0 r\\u00e9sultat(s)"}', None)
+2026-09-29 11:21:13,054 INFO sqlalchemy.engine.Engine COMMIT
+2026-09-29 11:21:13,056 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:21:13,057 INFO sqlalchemy.engine.Engine SELECT analyse_ia.id, analyse_ia.projet_id, analyse_ia.type, analyse_ia.source, analyse_ia.entree, analyse_ia.resultat_json, analyse_ia.modele, analyse_ia.cree_le 
+FROM analyse_ia 
+WHERE analyse_ia.id = $1::INTEGER
+2026-09-29 11:21:13,058 INFO sqlalchemy.engine.Engine [cached since 9.768s ago] (25,)
+2026-09-29 11:21:13,060 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:12725 - "GET /ia/projets/15/recherche?q=livraison HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10009 - "OPTIONS /ia/projets/15/recherche?q=%C3%A9mission HTTP/1.1" 200 OK
+2026-09-29 11:21:27,553 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:21:27,554 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
+FROM projet 
+WHERE projet.id = $1::INTEGER
+2026-09-29 11:21:27,555 INFO sqlalchemy.engine.Engine [cached since 24.34s ago] (15,)
+2026-09-29 11:21:27,557 INFO sqlalchemy.engine.Engine SELECT tache.id, tache.projet_id, tache.titre, tache.description, tache.statut, tache.priorite, tache.echeance, tache.responsable_id, tache.ordre, tache.cree_le, tache.modifie_le 
+FROM tache 
+WHERE tache.projet_id = $1::INTEGER AND (tache.titre ILIKE $2::VARCHAR OR tache.description ILIKE $3::VARCHAR) 
+ LIMIT $4::INTEGER
+2026-09-29 11:21:27,557 INFO sqlalchemy.engine.Engine [cached since 24.32s ago] (15, '%émission%', '%émission%', 20)
+2026-09-29 11:21:27,559 INFO sqlalchemy.engine.Engine SELECT commentaire_tache.id, commentaire_tache.tache_id, commentaire_tache.utilisateur_id, commentaire_tache.contenu, commentaire_tache.cree_le 
+FROM commentaire_tache JOIN tache ON tache.id = commentaire_tache.tache_id 
+WHERE tache.projet_id = $1::INTEGER AND commentaire_tache.contenu ILIKE $2::VARCHAR 
+ LIMIT $3::INTEGER
+2026-09-29 11:21:27,559 INFO sqlalchemy.engine.Engine [cached since 24.31s ago] (15, '%émission%', 20)
+2026-09-29 11:21:27,561 INFO sqlalchemy.engine.Engine SELECT jalon.id, jalon.titre, jalon.description, jalon.projet_id, jalon.echeance, jalon.atteint, jalon.date_atteint, jalon.cree_le, jalon.modifie_le 
+FROM jalon 
+WHERE jalon.projet_id = $1::INTEGER AND (jalon.titre ILIKE $2::VARCHAR OR jalon.description ILIKE $3::VARCHAR) 
+ LIMIT $4::INTEGER
+2026-09-29 11:21:27,561 INFO sqlalchemy.engine.Engine [cached since 24.31s ago] (15, '%émission%', '%émission%', 20)
+2026-09-29 11:21:27,563 INFO sqlalchemy.engine.Engine SELECT fichier.id, fichier.projet_id, fichier.nom, fichier.chemin_ou_url, fichier.type_mime, fichier.taille_octets, fichier.televerse_par, fichier.cree_le 
+FROM fichier 
+WHERE fichier.projet_id = $1::INTEGER AND fichier.nom ILIKE $2::VARCHAR 
+ LIMIT $3::INTEGER
+2026-09-29 11:21:27,563 INFO sqlalchemy.engine.Engine [cached since 24.3s ago] (15, '%émission%', 20)
+2026-09-29 11:21:27,565 INFO sqlalchemy.engine.Engine INSERT INTO analyse_ia (projet_id, type, source, entree, resultat_json, modele) VALUES ($1::INTEGER, $2::type_analyse_ia, $3::VARCHAR, $4::VARCHAR, $5::JSONB, $6::VARCHAR) RETURNING analyse_ia.id, analyse_ia.cree_le
+2026-09-29 11:21:27,566 INFO sqlalchemy.engine.Engine [cached since 24.3s ago] (15, 'recherche', 'requete:émission', 'émission', '{"reponse": "0 r\\u00e9sultat(s)"}', None)
+2026-09-29 11:21:27,567 INFO sqlalchemy.engine.Engine COMMIT
+2026-09-29 11:21:27,568 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:21:27,569 INFO sqlalchemy.engine.Engine SELECT analyse_ia.id, analyse_ia.projet_id, analyse_ia.type, analyse_ia.source, analyse_ia.entree, analyse_ia.resultat_json, analyse_ia.modele, analyse_ia.cree_le 
+FROM analyse_ia 
+WHERE analyse_ia.id = $1::INTEGER
+2026-09-29 11:21:27,569 INFO sqlalchemy.engine.Engine [cached since 24.28s ago] (26,)
+2026-09-29 11:21:27,570 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:10009 - "GET /ia/projets/15/recherche?q=%C3%A9mission HTTP/1.1" 200 OK
+2026-09-29 11:21:31,510 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:21:31,511 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-29 11:21:31,512 INFO sqlalchemy.engine.Engine [cached since 329.9s ago] (67,)
+2026-09-29 11:21:31,516 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:10009 - "GET /notifications/count HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10009 - "OPTIONS /ia/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3530 - "OPTIONS /ia/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10009 - "GET /ia/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10009 - "GET /ia/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10009 - "OPTIONS /ia/chat HTTP/1.1" 200 OK
+2026-09-29 11:21:37,611 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:21:37,613 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
+FROM projet 
+WHERE projet.archive IS false ORDER BY projet.cree_le DESC 
+ LIMIT $1::INTEGER
+2026-09-29 11:21:37,614 INFO sqlalchemy.engine.Engine [generated in 0.00065s] (8,)
+2026-09-29 11:21:37,617 INFO sqlalchemy.engine.Engine SELECT tache.id, tache.projet_id, tache.titre, tache.description, tache.statut, tache.priorite, tache.echeance, tache.responsable_id, tache.ordre, tache.cree_le, tache.modifie_le 
+FROM tache 
+WHERE tache.projet_id IN ($2::INTEGER, $3::INTEGER, $4::INTEGER, $5::INTEGER, $6::INTEGER, $7::INTEGER) AND tache.statut != $1::statut_tache
+2026-09-29 11:21:37,617 INFO sqlalchemy.engine.Engine [generated in 0.00052s] ('termine', 27, 24, 22, 15, 2, 1)
+2026-09-29 11:21:39,904 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:3530 - "POST /ia/chat HTTP/1.1" 200 OK
+2026-09-29 11:22:01,505 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:22:01,505 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-29 11:22:01,506 INFO sqlalchemy.engine.Engine [cached since 359.9s ago] (67,)
+2026-09-29 11:22:01,507 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:10367 - "GET /notifications/count HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10367 - "OPTIONS /ia/suggestions?projet_id=15&statut=tous HTTP/1.1" 200 OK
+2026-09-29 11:22:04,684 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:22:04,686 INFO sqlalchemy.engine.Engine SELECT suggestion_tache.id, suggestion_tache.analyse_ia_id, suggestion_tache.projet_id, suggestion_tache.titre, suggestion_tache.description, suggestion_tache.priorite, suggestion_tache.echeance, suggestion_tache.statut, suggestion_tache.tache_id, suggestion_tache.cree_le 
+FROM suggestion_tache 
+WHERE suggestion_tache.projet_id = $1::INTEGER ORDER BY suggestion_tache.cree_le DESC
+2026-09-29 11:22:04,687 INFO sqlalchemy.engine.Engine [generated in 0.00067s] (15,)
+INFO:     127.0.0.1:10367 - "OPTIONS /projets/15/membres HTTP/1.1" 200 OK
+2026-09-29 11:22:04,698 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:10023 - "GET /ia/suggestions?projet_id=15&statut=tous HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10023 - "OPTIONS /ia/projets/15/disponibilites?date=2024-01-15 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7507 - "OPTIONS /ia/projets/15/disponibilites?date=2024-01-20 HTTP/1.1" 200 OK
+2026-09-29 11:22:04,708 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:22:04,708 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
+FROM projet 
+WHERE projet.id = $1::INTEGER
+2026-09-29 11:22:04,709 INFO sqlalchemy.engine.Engine [cached since 61.49s ago] (15,)
+INFO:     127.0.0.1:7507 - "OPTIONS /ia/projets/15/disponibilites?date=2024-03-15 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3820 - "OPTIONS /ia/projets/15/disponibilites?date=2024-03-25 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10125 - "OPTIONS /ia/projets/15/disponibilites?date=2024-02-05 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3820 - "OPTIONS /ia/projets/15/disponibilites?date=2024-04-05 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7507 - "OPTIONS /ia/projets/15/disponibilites?date=2024-03-30 HTTP/1.1" 200 OK
+2026-09-29 11:22:04,721 INFO sqlalchemy.engine.Engine SELECT utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.metier 
+FROM utilisateur JOIN projet_membre ON projet_membre.utilisateur_id = utilisateur.id 
+WHERE projet_membre.projet_id = $1::INTEGER ORDER BY utilisateur.nom
+2026-09-29 11:22:04,721 INFO sqlalchemy.engine.Engine [generated in 0.00054s] (15,)
+INFO:     127.0.0.1:10125 - "OPTIONS /ia/projets/15/disponibilites?date=2024-04-01 HTTP/1.1" 200 OK
+2026-09-29 11:22:04,737 INFO sqlalchemy.engine.Engine SELECT tache.responsable_id, tache.echeance 
+FROM tache 
+WHERE tache.projet_id = $1::INTEGER AND tache.responsable_id IN ($5::INTEGER, $6::INTEGER, $7::INTEGER) AND tache.echeance IS NOT NULL AND tache.echeance >= $2::DATE AND tache.echeance <= $3::DATE AND tache.statut != $4::statut_tache
+2026-09-29 11:22:04,738 INFO sqlalchemy.engine.Engine [generated in 0.00068s] (15, datetime.date(2024, 1, 13), datetime.date(2024, 1, 17), 'termine', 6, 2, 39)
+2026-09-29 11:22:04,777 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:10023 - "GET /ia/projets/15/disponibilites?date=2024-01-15 HTTP/1.1" 200 OK
+2026-09-29 11:22:04,913 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:22:04,913 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
+FROM projet 
+WHERE projet.id = $1::INTEGER
+2026-09-29 11:22:04,914 INFO sqlalchemy.engine.Engine [cached since 61.7s ago] (15,)
+2026-09-29 11:22:04,915 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:22:04,916 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
+FROM projet 
+WHERE projet.id = $1::INTEGER
+2026-09-29 11:22:04,917 INFO sqlalchemy.engine.Engine [cached since 61.7s ago] (15,)
+2026-09-29 11:22:04,918 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:22:04,918 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
+FROM projet 
+WHERE projet.id = $1::INTEGER
+2026-09-29 11:22:04,919 INFO sqlalchemy.engine.Engine [cached since 61.7s ago] (15,)
+2026-09-29 11:22:04,920 INFO sqlalchemy.engine.Engine SELECT utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.metier 
+FROM utilisateur JOIN projet_membre ON projet_membre.utilisateur_id = utilisateur.id 
+WHERE projet_membre.projet_id = $1::INTEGER ORDER BY utilisateur.nom
+2026-09-29 11:22:04,921 INFO sqlalchemy.engine.Engine [cached since 0.2004s ago] (15,)
+2026-09-29 11:22:04,923 INFO sqlalchemy.engine.Engine SELECT tache.responsable_id, tache.echeance 
+FROM tache 
+WHERE tache.projet_id = $1::INTEGER AND tache.responsable_id IN ($5::INTEGER, $6::INTEGER, $7::INTEGER) AND tache.echeance IS NOT NULL AND tache.echeance >= $2::DATE AND tache.echeance <= $3::DATE AND tache.statut != $4::statut_tache
+2026-09-29 11:22:04,923 INFO sqlalchemy.engine.Engine [cached since 0.1863s ago] (15, datetime.date(2024, 4, 3), datetime.date(2024, 4, 7), 'termine', 6, 2, 39)
+2026-09-29 11:22:04,924 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:22:04,925 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
+FROM projet 
+WHERE projet.id = $1::INTEGER
+2026-09-29 11:22:04,925 INFO sqlalchemy.engine.Engine [cached since 61.71s ago] (15,)
+2026-09-29 11:22:04,926 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:22:04,926 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
+FROM projet 
+WHERE projet.id = $1::INTEGER
+2026-09-29 11:22:04,927 INFO sqlalchemy.engine.Engine [cached since 61.71s ago] (15,)
+2026-09-29 11:22:04,927 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:22:04,928 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
+FROM projet 
+WHERE projet.id = $1::INTEGER
+2026-09-29 11:22:04,928 INFO sqlalchemy.engine.Engine [cached since 61.71s ago] (15,)
+2026-09-29 11:22:04,929 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:10023 - "GET /ia/projets/15/disponibilites?date=2024-04-05 HTTP/1.1" 200 OK
+2026-09-29 11:22:04,934 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:22:04,934 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
+FROM projet 
+WHERE projet.id = $1::INTEGER
+2026-09-29 11:22:04,935 INFO sqlalchemy.engine.Engine [cached since 61.72s ago] (15,)
+2026-09-29 11:22:04,938 INFO sqlalchemy.engine.Engine SELECT utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.metier 
+FROM utilisateur JOIN projet_membre ON projet_membre.utilisateur_id = utilisateur.id 
+WHERE projet_membre.projet_id = $1::INTEGER ORDER BY utilisateur.nom
+2026-09-29 11:22:04,938 INFO sqlalchemy.engine.Engine [cached since 0.2175s ago] (15,)
+2026-09-29 11:22:04,940 INFO sqlalchemy.engine.Engine SELECT tache.responsable_id, tache.echeance 
+FROM tache 
+WHERE tache.projet_id = $1::INTEGER AND tache.responsable_id IN ($5::INTEGER, $6::INTEGER, $7::INTEGER) AND tache.echeance IS NOT NULL AND tache.echeance >= $2::DATE AND tache.echeance <= $3::DATE AND tache.statut != $4::statut_tache
+2026-09-29 11:22:04,941 INFO sqlalchemy.engine.Engine [cached since 0.2033s ago] (15, datetime.date(2024, 3, 28), datetime.date(2024, 4, 1), 'termine', 6, 2, 39)
+2026-09-29 11:22:04,942 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:10023 - "GET /ia/projets/15/disponibilites?date=2024-03-30 HTTP/1.1" 200 OK
+2026-09-29 11:22:04,947 INFO sqlalchemy.engine.Engine SELECT utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.metier 
+FROM utilisateur JOIN projet_membre ON projet_membre.utilisateur_id = utilisateur.id 
+WHERE projet_membre.projet_id = $1::INTEGER ORDER BY utilisateur.nom
+2026-09-29 11:22:04,948 INFO sqlalchemy.engine.Engine [cached since 0.2275s ago] (15,)
+2026-09-29 11:22:04,950 INFO sqlalchemy.engine.Engine SELECT utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.metier 
+FROM utilisateur JOIN projet_membre ON projet_membre.utilisateur_id = utilisateur.id 
+WHERE projet_membre.projet_id = $1::INTEGER ORDER BY utilisateur.nom
+2026-09-29 11:22:04,950 INFO sqlalchemy.engine.Engine [cached since 0.2299s ago] (15,)
+2026-09-29 11:22:04,954 INFO sqlalchemy.engine.Engine SELECT projet_membre.projet_id, projet_membre.utilisateur_id, projet_membre.role_dans_projet, utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le 
+FROM projet_membre JOIN utilisateur ON projet_membre.utilisateur_id = utilisateur.id 
+WHERE projet_membre.projet_id = $1::INTEGER ORDER BY utilisateur.nom, utilisateur.prenom
+2026-09-29 11:22:04,954 INFO sqlalchemy.engine.Engine [generated in 0.00066s] (15,)
+2026-09-29 11:22:04,957 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:22:04,957 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le 
+FROM projet 
+WHERE projet.id = $1::INTEGER
+2026-09-29 11:22:04,958 INFO sqlalchemy.engine.Engine [cached since 61.74s ago] (15,)
+2026-09-29 11:22:04,959 INFO sqlalchemy.engine.Engine SELECT tache.responsable_id, tache.echeance 
+FROM tache 
+WHERE tache.projet_id = $1::INTEGER AND tache.responsable_id IN ($5::INTEGER, $6::INTEGER, $7::INTEGER) AND tache.echeance IS NOT NULL AND tache.echeance >= $2::DATE AND tache.echeance <= $3::DATE AND tache.statut != $4::statut_tache
+2026-09-29 11:22:04,960 INFO sqlalchemy.engine.Engine [cached since 0.2224s ago] (15, datetime.date(2024, 3, 23), datetime.date(2024, 3, 27), 'termine', 6, 2, 39)
+2026-09-29 11:22:04,962 INFO sqlalchemy.engine.Engine SELECT tache.responsable_id, tache.echeance 
+FROM tache 
+WHERE tache.projet_id = $1::INTEGER AND tache.responsable_id IN ($5::INTEGER, $6::INTEGER, $7::INTEGER) AND tache.echeance IS NOT NULL AND tache.echeance >= $2::DATE AND tache.echeance <= $3::DATE AND tache.statut != $4::statut_tache
+2026-09-29 11:22:04,963 INFO sqlalchemy.engine.Engine [cached since 0.225s ago] (15, datetime.date(2024, 2, 3), datetime.date(2024, 2, 7), 'termine', 6, 2, 39)
+2026-09-29 11:22:04,965 INFO sqlalchemy.engine.Engine SELECT utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.metier 
+FROM utilisateur JOIN projet_membre ON projet_membre.utilisateur_id = utilisateur.id 
+WHERE projet_membre.projet_id = $1::INTEGER ORDER BY utilisateur.nom
+2026-09-29 11:22:04,965 INFO sqlalchemy.engine.Engine [cached since 0.2442s ago] (15,)
+2026-09-29 11:22:04,966 INFO sqlalchemy.engine.Engine SELECT utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.metier 
+FROM utilisateur JOIN projet_membre ON projet_membre.utilisateur_id = utilisateur.id 
+WHERE projet_membre.projet_id = $1::INTEGER ORDER BY utilisateur.nom
+2026-09-29 11:22:04,967 INFO sqlalchemy.engine.Engine [cached since 0.2461s ago] (15,)
+2026-09-29 11:22:04,969 INFO sqlalchemy.engine.Engine SELECT utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.metier 
+FROM utilisateur JOIN projet_membre ON projet_membre.utilisateur_id = utilisateur.id 
+WHERE projet_membre.projet_id = $1::INTEGER ORDER BY utilisateur.nom
+2026-09-29 11:22:04,969 INFO sqlalchemy.engine.Engine [cached since 0.2484s ago] (15,)
+2026-09-29 11:22:04,972 INFO sqlalchemy.engine.Engine SELECT tache.responsable_id, tache.echeance 
+FROM tache 
+WHERE tache.projet_id = $1::INTEGER AND tache.responsable_id IN ($5::INTEGER, $6::INTEGER, $7::INTEGER) AND tache.echeance IS NOT NULL AND tache.echeance >= $2::DATE AND tache.echeance <= $3::DATE AND tache.statut != $4::statut_tache
+2026-09-29 11:22:04,973 INFO sqlalchemy.engine.Engine [cached since 0.2353s ago] (15, datetime.date(2024, 3, 30), datetime.date(2024, 4, 3), 'termine', 6, 2, 39)
+2026-09-29 11:22:04,973 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-09-29 11:22:04,976 INFO sqlalchemy.engine.Engine SELECT tache.responsable_id, tache.echeance 
+FROM tache 
+WHERE tache.projet_id = $1::INTEGER AND tache.responsable_id IN ($5::INTEGER, $6::INTEGER, $7::INTEGER) AND tache.echeance IS NOT NULL AND tache.echeance >= $2::DATE AND tache.echeance <= $3::DATE AND tache.statut != $4::statut_tache
+2026-09-29 11:22:04,976 INFO sqlalchemy.engine.Engine [cached since 0.2381s ago] (15, datetime.date(2024, 3, 13), datetime.date(2024, 3, 17), 'termine', 6, 2, 39)
+2026-09-29 11:22:04,977 INFO sqlalchemy.engine.Engine SELECT tache.responsable_id, tache.echeance 
+FROM tache 
+WHERE tache.projet_id = $1::INTEGER AND tache.responsable_id IN ($5::INTEGER, $6::INTEGER, $7::INTEGER) AND tache.echeance IS NOT NULL AND tache.echeance >= $2::DATE AND tache.echeance <= $3::DATE AND tache.statut != $4::statut_tache
+2026-09-29 11:22:04,978 INFO sqlalchemy.engine.Engine [cached since 0.2397s ago] (15, datetime.date(2024, 1, 18), datetime.date(2024, 1, 22), 'termine', 6, 2, 39)
+2026-09-29 11:22:04,979 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-09-29 11:22:04,980 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:7507 - "GET /ia/projets/15/disponibilites?date=2024-03-25 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10367 - "GET /projets/15/membres HTTP/1.1" 200 OK
+2026-09-29 11:22:04,984 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:10023 - "GET /ia/projets/15/disponibilites?date=2024-04-01 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10125 - "GET /ia/projets/15/disponibilites?date=2024-02-05 HTTP/1.1" 200 OK
+2026-09-29 11:22:04,988 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:3820 - "GET /ia/projets/15/disponibilites?date=2024-03-15 HTTP/1.1" 200 OK
+2026-09-29 11:22:04,992 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:5619 - "GET /ia/projets/15/disponibilites?date=2024-01-20 HTTP/1.1" 200 OK
+2026-09-29 11:22:31,608 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:22:31,609 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-29 11:22:31,609 INFO sqlalchemy.engine.Engine [cached since 390s ago] (67,)
+2026-09-29 11:22:31,613 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:11872 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-29 11:23:01,608 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:23:01,609 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-29 11:23:01,609 INFO sqlalchemy.engine.Engine [cached since 420s ago] (67,)
+2026-09-29 11:23:01,611 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:4193 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-29 11:24:02,606 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:24:02,608 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-29 11:24:02,609 INFO sqlalchemy.engine.Engine [cached since 481s ago] (67,)
+2026-09-29 11:24:02,611 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:2262 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-29 11:25:03,613 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:25:03,614 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-29 11:25:03,614 INFO sqlalchemy.engine.Engine [cached since 542s ago] (67,)
+2026-09-29 11:25:03,618 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:7699 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-29 11:25:50,299 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2026-09-29 11:25:50,300 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-29 11:25:50,305 INFO sqlalchemy.engine.Engine select current_schema()
+2026-09-29 11:25:50,305 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-29 11:25:50,308 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2026-09-29 11:25:50,308 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-29 11:25:50,310 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:25:50,329 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:50,330 INFO sqlalchemy.engine.Engine [generated in 0.00083s] ('utilisateur', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:50,335 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:50,336 INFO sqlalchemy.engine.Engine [cached since 0.006825s ago] ('client', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:50,338 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:50,339 INFO sqlalchemy.engine.Engine [cached since 0.009672s ago] ('projet', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:50,340 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:50,341 INFO sqlalchemy.engine.Engine [cached since 0.01178s ago] ('projet_membre', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:50,342 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:50,343 INFO sqlalchemy.engine.Engine [cached since 0.01361s ago] ('tache', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:50,344 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:50,345 INFO sqlalchemy.engine.Engine [cached since 0.01608s ago] ('commentaire_tache', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:50,347 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:50,347 INFO sqlalchemy.engine.Engine [cached since 0.01802s ago] ('saisie_temps', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:50,348 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:50,349 INFO sqlalchemy.engine.Engine [cached since 0.01964s ago] ('jalon', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:50,350 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:50,350 INFO sqlalchemy.engine.Engine [cached since 0.02128s ago] ('fichier', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:50,351 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:50,352 INFO sqlalchemy.engine.Engine [cached since 0.02277s ago] ('notification', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:50,353 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:50,353 INFO sqlalchemy.engine.Engine [cached since 0.02435s ago] ('facture', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:50,355 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:50,355 INFO sqlalchemy.engine.Engine [cached since 0.02671s ago] ('analyse_ia', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:50,357 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:50,358 INFO sqlalchemy.engine.Engine [cached since 0.02937s ago] ('suggestion_tache', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:50,360 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:50,360 INFO sqlalchemy.engine.Engine [cached since 0.03131s ago] ('absence', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:50,361 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:50,362 INFO sqlalchemy.engine.Engine [cached since 0.0332s ago] ('suggestion_devis', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:50,366 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+2026-09-29 11:25:50,366 INFO sqlalchemy.engine.Engine [generated in 0.00060s] ('role_utilisateur', 'pg_catalog')
+2026-09-29 11:25:50,369 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+2026-09-29 11:25:50,370 INFO sqlalchemy.engine.Engine [cached since 0.004394s ago] ('statut_sante', 'pg_catalog')
+2026-09-29 11:25:50,373 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+2026-09-29 11:25:50,374 INFO sqlalchemy.engine.Engine [cached since 0.007954s ago] ('statut_tache', 'pg_catalog')
+2026-09-29 11:25:50,376 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+2026-09-29 11:25:50,377 INFO sqlalchemy.engine.Engine [cached since 0.01088s ago] ('priorite_tache', 'pg_catalog')
+2026-09-29 11:25:50,379 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+2026-09-29 11:25:50,379 INFO sqlalchemy.engine.Engine [cached since 0.0133s ago] ('statut_facture', 'pg_catalog')
+2026-09-29 11:25:50,381 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+2026-09-29 11:25:50,382 INFO sqlalchemy.engine.Engine [cached since 0.01562s ago] ('type_analyse_ia', 'pg_catalog')
+2026-09-29 11:25:50,384 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+2026-09-29 11:25:50,384 INFO sqlalchemy.engine.Engine [cached since 0.01815s ago] ('statut_suggestion', 'pg_catalog')
+2026-09-29 11:25:50,385 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+2026-09-29 11:25:50,386 INFO sqlalchemy.engine.Engine [cached since 0.0203s ago] ('type_absence', 'pg_catalog')
+2026-09-29 11:25:50,388 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+2026-09-29 11:25:50,390 INFO sqlalchemy.engine.Engine [cached since 0.02353s ago] ('statut_absence', 'pg_catalog')
+2026-09-29 11:25:50,392 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+2026-09-29 11:25:50,392 INFO sqlalchemy.engine.Engine [cached since 0.02598s ago] ('statut_suggestion_devis', 'pg_catalog')
+2026-09-29 11:25:50,395 INFO sqlalchemy.engine.Engine ALTER TABLE client ADD COLUMN IF NOT EXISTS devise VARCHAR(10) NOT NULL DEFAULT 'Ar'
+2026-09-29 11:25:50,395 INFO sqlalchemy.engine.Engine [generated in 0.00052s] ()
+2026-09-29 11:25:50,399 INFO sqlalchemy.engine.Engine COMMIT
+2026-09-29 11:25:54,627 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2026-09-29 11:25:54,628 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-29 11:25:54,630 INFO sqlalchemy.engine.Engine select current_schema()
+2026-09-29 11:25:54,632 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-29 11:25:54,634 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2026-09-29 11:25:54,635 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-29 11:25:54,636 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:25:54,646 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:54,647 INFO sqlalchemy.engine.Engine [generated in 0.00063s] ('utilisateur', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:54,651 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:54,651 INFO sqlalchemy.engine.Engine [cached since 0.00526s ago] ('client', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:54,653 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:54,654 INFO sqlalchemy.engine.Engine [cached since 0.008025s ago] ('projet', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:54,656 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:54,657 INFO sqlalchemy.engine.Engine [cached since 0.01049s ago] ('projet_membre', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:54,658 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:54,659 INFO sqlalchemy.engine.Engine [cached since 0.01254s ago] ('tache', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:54,660 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:54,661 INFO sqlalchemy.engine.Engine [cached since 0.01445s ago] ('commentaire_tache', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:54,662 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:54,663 INFO sqlalchemy.engine.Engine [cached since 0.0162s ago] ('saisie_temps', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:54,664 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:54,664 INFO sqlalchemy.engine.Engine [cached since 0.01784s ago] ('jalon', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:54,665 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:54,666 INFO sqlalchemy.engine.Engine [cached since 0.01951s ago] ('fichier', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:54,667 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:54,667 INFO sqlalchemy.engine.Engine [cached since 0.02108s ago] ('notification', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:54,668 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:54,669 INFO sqlalchemy.engine.Engine [cached since 0.02278s ago] ('facture', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:54,670 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:54,670 INFO sqlalchemy.engine.Engine [cached since 0.02426s ago] ('analyse_ia', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:54,672 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:54,672 INFO sqlalchemy.engine.Engine [cached since 0.02617s ago] ('suggestion_tache', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:54,674 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:54,674 INFO sqlalchemy.engine.Engine [cached since 0.02749s ago] ('absence', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:54,675 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-09-29 11:25:54,675 INFO sqlalchemy.engine.Engine [cached since 0.0286s ago] ('suggestion_devis', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-09-29 11:25:54,677 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+2026-09-29 11:25:54,677 INFO sqlalchemy.engine.Engine [generated in 0.00041s] ('role_utilisateur', 'pg_catalog')
+2026-09-29 11:25:54,680 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+2026-09-29 11:25:54,680 INFO sqlalchemy.engine.Engine [cached since 0.00326s ago] ('statut_sante', 'pg_catalog')
+2026-09-29 11:25:54,682 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+2026-09-29 11:25:54,683 INFO sqlalchemy.engine.Engine [cached since 0.005556s ago] ('statut_tache', 'pg_catalog')
+2026-09-29 11:25:54,684 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+2026-09-29 11:25:54,685 INFO sqlalchemy.engine.Engine [cached since 0.008123s ago] ('priorite_tache', 'pg_catalog')
+2026-09-29 11:25:54,686 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+2026-09-29 11:25:54,687 INFO sqlalchemy.engine.Engine [cached since 0.01029s ago] ('statut_facture', 'pg_catalog')
+2026-09-29 11:25:54,690 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+2026-09-29 11:25:54,690 INFO sqlalchemy.engine.Engine [cached since 0.01286s ago] ('type_analyse_ia', 'pg_catalog')
+2026-09-29 11:25:54,691 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+2026-09-29 11:25:54,691 INFO sqlalchemy.engine.Engine [cached since 0.01526s ago] ('statut_suggestion', 'pg_catalog')
+2026-09-29 11:25:54,694 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+2026-09-29 11:25:54,695 INFO sqlalchemy.engine.Engine [cached since 0.01798s ago] ('type_absence', 'pg_catalog')
+2026-09-29 11:25:54,696 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+2026-09-29 11:25:54,697 INFO sqlalchemy.engine.Engine [cached since 0.01998s ago] ('statut_absence', 'pg_catalog')
+2026-09-29 11:25:54,698 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+2026-09-29 11:25:54,699 INFO sqlalchemy.engine.Engine [cached since 0.02192s ago] ('statut_suggestion_devis', 'pg_catalog')
+2026-09-29 11:25:54,701 INFO sqlalchemy.engine.Engine ALTER TABLE client ADD COLUMN IF NOT EXISTS devise VARCHAR(10) NOT NULL DEFAULT 'Ar'
+2026-09-29 11:25:54,701 INFO sqlalchemy.engine.Engine [generated in 0.00047s] ()
+2026-09-29 11:25:54,704 INFO sqlalchemy.engine.Engine COMMIT
+2026-09-29 11:26:04,603 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:26:04,646 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-29 11:26:04,646 INFO sqlalchemy.engine.Engine [generated in 0.00071s] (67,)
+2026-09-29 11:26:04,649 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:8258 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-09-29 11:27:05,611 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-29 11:27:05,612 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-09-29 11:27:05,613 INFO sqlalchemy.engine.Engine [cached since 60.97s ago] (67,)
+2026-09-29 11:27:05,615 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:14333 - "GET /notifications/count HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14379 - "GET /docs HTTP/1.1" 200 OK

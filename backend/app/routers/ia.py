@@ -38,6 +38,7 @@ from app.schemas.ia import (
     SuggestionValiderRequest,
     SuggestionValiderResponse,
     SuggestionRejeterResponse,
+    SuggestionRestaurerResponse,
     ResumeResponse,
     DetectionResponse,
     StatutProposeResponse,
@@ -68,6 +69,7 @@ from app.services.ia import (
     rejeter_suggestion,
     rechercher,
     resume_projet,
+    restaurer_suggestion,
     suggerer_affectation,
     valider_suggestion,
 )
@@ -391,6 +393,24 @@ async def ia_rejeter_suggestion(
     """Rejette une suggestion de tâche (RF-26)."""
     try:
         return await rejeter_suggestion(db, suggestion_id)
+    except Exception as exc:
+        _erreur_ia(exc)
+
+
+@router.post("/suggestions/{suggestion_id}/restaurer", response_model=SuggestionRestaurerResponse)
+async def ia_restaurer_suggestion(
+    suggestion_id: int,
+    db: AsyncSession = Depends(get_db),
+    _: str = Depends(check_direction_or_chef_projet),
+):
+    """
+    Réintègre une suggestion rejetée dans la liste « à valider » (RF-26).
+
+    Permet de revenir sur un rejet : l'utilisateur se trompe, ou la tâche
+    redevient utile après réflexion.
+    """
+    try:
+        return await restaurer_suggestion(db, suggestion_id)
     except Exception as exc:
         _erreur_ia(exc)
 
