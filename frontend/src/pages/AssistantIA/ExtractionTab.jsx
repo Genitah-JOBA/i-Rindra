@@ -316,7 +316,7 @@ export default function ExtractionTab({ projets }) {
               className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-i-blue rounded-md"
             />
           </div>
-          <BtnIA onClick={extraire} loading={generation}>
+          <BtnIA onClick={extraire} loading={generation} className="text-black">
             Extraire les tâches par IA
           </BtnIA>
         </div>
