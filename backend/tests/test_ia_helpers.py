@@ -69,6 +69,118 @@ def test_tronquer_respecte_limite():
 
 
 # ============================================================
+# Extraction de tâches — plafonnement & dédoublonnage (RF-26)
+# ============================================================
+
+def test_normaliser_titre_insensible_aux_accents_et_ponctuation():
+    assert ia._normaliser_titre("Développer le site") == ia._normaliser_titre("developper le site!")
+    assert ia._normaliser_titre("  Créer   une maquette ") == "creer une maquette"
+    # Deux tâches réellement différentes ne doivent PAS fusionner.
+    assert ia._normaliser_titre("Analyser l'existant") != ia._normaliser_titre("Analyser le site actuel")
+
+
+def test_extraire_taches_plafonne_et_deduplique(monkeypatch):
+    """
+    Le vrai symptôme : des dizaines de suggestions, qui s'empilent à chaque clic.
+
+    On vérifie que l'extraction (a) respecte le plafond, (b) écarte les titres
+    déjà présents sur le projet, (c) ne crée pas deux fois la même tâche.
+    """
+    # L'IA renvoie 30 tâches : une partie existe déjà en base, le reste est neuf.
+    existantes = {"Developper le site", "Tester le site", "Former les utilisateurs"}
+    generees = [{"titre": t, "priorite": "moyenne", "echeance": None}
+                for t in list(existantes) + [f"Tache neuve {i}" for i in range(27)]]
+
+    ajoutees = []
+
+    class _ResultatDB:
+        def all(self):
+            return [(t,) for t in existantes]
+
+    class _DB:
+        async def execute(self, _query):
+            return _ResultatDB()
+
+        def add(self, obj):
+            ajoutees.append(obj)
+
+        async def commit(self):
+            pass
+
+    async def _faux_appel_json(*_a, **_k):
+        return {"taches": generees}, "modele-test", 999
+
+    async def _faux_entree(*_a, **_k):
+        return "cahier des charges", "fichier-1"
+
+    async def _faux_projet(*_a, **_k):
+        return SimpleNamespace(
+            id=1, nom="Site vitrine", date_debut=date(2026, 1, 1),
+            date_fin_prevue=date(2026, 12, 31),
+        )
+
+    monkeypatch.setattr(ia, "_projet", _faux_projet)
+    monkeypatch.setattr(ia, "_entree_cdc", _faux_entree)
+    monkeypatch.setattr(ia, "_appel_json", _faux_appel_json)
+    monkeypatch.setattr(ia, "journaliser", _faux_appel_json)
+
+    import asyncio
+
+    res = asyncio.run(ia.extraire_taches(_DB(), 1, texte="cdc"))
+
+    # Plafond respecté
+    assert res["nombre_suggestions"] == ia.MAX_SUGGESTIONS
+    assert len(ajoutees) == ia.MAX_SUGGESTIONS
+    assert res["plafonne"] is True
+
+    # Les 3 titres déjà présents ont été écartés
+    assert res["doublons_ignores"] == 3
+    titres_ajoutes = [o.titre for o in ajoutees]
+    for t in existantes:
+        assert t not in titres_ajoutes
+    assert len(set(titres_ajoutes)) == len(titres_ajoutes)  # pas de doublon interne
+
+
+def test_extraire_taches_refuse_si_tout_est_doublon(monkeypatch):
+    """Relancer sur un projet déjà traité ne doit pas créer de vague vide."""
+    existantes = ["Developper le site", "Tester le site"]
+
+    class _ResultatDB:
+        def all(self):
+            return [(t,) for t in existantes]
+
+    class _DB:
+        async def execute(self, _query):
+            return _ResultatDB()
+
+        def add(self, _obj):
+            raise AssertionError("rien ne doit être inséré")
+
+        async def commit(self):
+            raise AssertionError("rien ne doit être commité")
+
+    async def _faux_appel_json(*_a, **_k):
+        return ({"taches": [{"titre": t} for t in existantes]}, "modele-test", 1)
+
+    async def _faux_entree(*_a, **_k):
+        return "cdc", None
+
+    async def _faux_projet(*_a, **_k):
+        return SimpleNamespace(id=1, nom="P", date_debut=None, date_fin_prevue=None)
+
+    monkeypatch.setattr(ia, "_projet", _faux_projet)
+    monkeypatch.setattr(ia, "_entree_cdc", _faux_entree)
+    monkeypatch.setattr(ia, "_appel_json", _faux_appel_json)
+
+    import asyncio
+    import pytest
+
+    with pytest.raises(ia.ReponseIAInvalideError) as exc:
+        asyncio.run(ia.extraire_taches(_DB(), 1, texte="cdc"))
+    assert "doublon" in str(exc.value).lower()
+
+
+# ============================================================
 # Chat contextuel — rendu du contexte utilisateur
 # ============================================================
 

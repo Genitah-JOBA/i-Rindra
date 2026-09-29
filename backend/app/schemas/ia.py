@@ -13,10 +13,11 @@ class IaStatus(BaseModel):
     """État de la configuration IA, sans appel réseau."""
     configuree: bool
     modele: str
+    fournisseur: str = "groq"
 
 
 class IaPing(BaseModel):
-    """Réponse du test de bout en bout vers OpenAI."""
+    """Réponse du test de bout en bout vers le fournisseur LLM."""
     ok: bool
     reponse: str
     modele: str
@@ -94,6 +95,11 @@ class ExtractionResponse(BaseModel):
     nombre_suggestions: int
     suggestions: List[SuggestionTacheOut] = Field(default_factory=list)
     modele: str
+    # L'IA a proposé plus de tâches que le plafond : seules les N premières
+    # sont enregistrées. `doublons_ignores` = déjà proposées lors d'un
+    # précédent passage (évite les vagues de doublons à chaque clic).
+    plafonne: bool = False
+    doublons_ignores: int = 0
 
 
 class SuggestionItem(BaseModel):

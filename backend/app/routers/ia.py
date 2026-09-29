@@ -4,7 +4,7 @@ Routes IA — base du module.
 
 Endpoints :
   - GET  /ia/status : état de la configuration (sans appel réseau) ;
-  - POST /ia/ping   : test de bout en bout vers OpenAI (mini prompt) ;
+  - POST /ia/ping   : test de bout en bout vers le fournisseur LLM (mini prompt) ;
   - POST /ia/chat   : conversation avec l'assistant IA (chat contextuel :
     le system prompt embarque les projets/tâches réels de l'utilisateur) ;
   - Fonctionnalités métier (RF-25 → RF-31) : analyse CDC, extraction de
@@ -149,15 +149,16 @@ async def ia_status(_: str = Depends(get_current_user_role)):
     et le modèle sélectionné pour les appels.
     """
     return IaStatus(
-        configuree=bool(settings.OPENAI_API_KEY),
-        modele=settings.OPENAI_MODEL,
+        configuree=bool(settings.LLM_API_KEY),
+        modele=settings.LLM_MODEL,
+        fournisseur=settings.LLM_PROVIDER,
     )
 
 
 @router.post("/ping", response_model=IaPing)
 async def ia_ping(_: str = Depends(_pilote_ou_plus)):
     """
-    Test de bout en bout : envoie un mini prompt à OpenAI.
+    Test de bout en bout : envoie un mini prompt au fournisseur LLM.
 
     Vérifie la clé, la connectivité et le modèle configuré.
     Renvoie la réponse brute (texte) et le modèle réellement utilisé.

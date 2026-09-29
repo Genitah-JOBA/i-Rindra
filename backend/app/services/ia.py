@@ -12,6 +12,8 @@ Règles d'or (cf. doc projet) :
 """
 import json
 import logging
+import re
+import unicodedata
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
@@ -39,6 +41,11 @@ logger = logging.getLogger(__name__)
 ENTREE_MAX = 6000
 RESULTAT_MAX = 12000
 
+# Plafond de suggestions enregistrées par extraction. Au-delà, la validation
+# humaine devient ingérable et l'utilisateur rejette tout en bloc. Le prompt
+# demande déjà 5-15 tâches : ce plafond est la filet de sécurité technique.
+MAX_SUGGESTIONS = 15
+
 
 class ContenuIndisponibleError(Exception):
     """Aucun cahier des charges / texte exploitable pour le traitement demandé."""
@@ -62,6 +69,17 @@ def _iso(v):
     if isinstance(v, (date, datetime)):
         return v.isoformat()
     return v
+
+
+def _normaliser_titre(titre: str) -> str:
+    """
+    Clé de comparaison de deux titres de tâches.
+
+    "Développer le site" et "developper le site!" doivent être considérés
+    identiques : on retire accents et ponctuation, on passe en minuscules.
+    """
+    sans_accents = unicodedata.normalize("NFKD", titre).encode("ascii", "ignore").decode()
+    return re.sub(r"[^a-z0-9]+", " ", sans_accents.lower()).strip()
 
 
 def _json_extraire(reponse: str) -> dict:
@@ -416,6 +434,10 @@ SYSTEM_EXTRACTION = (
     "un objet JSON valide au format : "
     '{"taches": [{"titre": "...", "description": "...", "priorite": "haute|moyenne|basse", '
     '"echeance": "AAAA-MM-JJ ou null"}]}. '
+    "RÈGLE DE VOLUME : propose entre 5 et 15 tâches au total, pas plus. "
+    "Regroupe les petits détails techniques dans la description d'une tâche "
+    "plutôt que d'en créer une tâche à chaque fois. Ne scinde pas chaque étape "
+    "intermédiaire : une tâche = un livrable vérifiable. "
     "Attention : 'titre' court et actionnable (commence par un verbe), "
     "'description' précise le livrable attendu. "
     "'echeance' doit être une date FUTURE ou null : JAMAIS une date passée. "
@@ -460,18 +482,41 @@ async def extraire_taches(db: AsyncSession, projet_id: int,
     )
 
     items = donnees.get("taches", []) or []
+
+    # Titres déjà proposés sur ce projet (tous statuts confondus) : relancer
+    # l'extraction ne doit pas recréer la même vague de suggestions en double.
+    res_existants = await db.execute(
+        select(SuggestionTache.titre).where(SuggestionTache.projet_id == projet_id)
+    )
+    titres_vus = {_normaliser_titre(t) for (t,) in res_existants.all() if t}
+
     suggestions: List[SuggestionTacheRecord] = []
-    for item in items[:50]:
+    doublons_ignores = 0
+    for item in items:
+        if len(suggestions) >= MAX_SUGGESTIONS:
+            break
         if not isinstance(item, dict) or not item.get("titre"):
             continue
+        titre = str(item["titre"])[:200]
+        cle = _normaliser_titre(titre)
+        if cle in titres_vus:
+            doublons_ignores += 1
+            continue
+        titres_vus.add(cle)
         suggestions.append(SuggestionTacheRecord(
-            titre=str(item["titre"])[:200],
+            titre=titre,
             description=str(item.get("description") or "")[:2000] or None,
             priorite=_priorite_valide(item.get("priorite")),
             echeance=_echeance_future(item.get("echeance")),
         ))
 
     if not suggestions:
+        if doublons_ignores:
+            raise ReponseIAInvalideError(
+                f"L'IA n'a proposé que des tâches déjà suggérées pour ce projet "
+                f"({doublons_ignores} doublon(s) écarté(s)). Modifiez le texte "
+                "ou rejetez les suggestions existantes avant de relancer."
+            )
         raise ReponseIAInvalideError("L'IA n'a renvoyé aucune tâche exploitable.")
 
     for s in suggestions:
@@ -500,6 +545,8 @@ async def extraire_taches(db: AsyncSession, projet_id: int,
             for s in suggestions
         ],
         "modele": modele,
+        "plafonne": len(items) > MAX_SUGGESTIONS,
+        "doublons_ignores": doublons_ignores,
     }
 
 

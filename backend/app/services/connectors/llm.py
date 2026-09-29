@@ -1,9 +1,14 @@
 # app/services/connectors/llm.py
 """
-Connecteur OpenAI — la « base de l'IA ».
+Connecteur LLM — la « base de l'IA ».
+
+Le SDK `openai` sert de client **universel** : tous les fournisseurs retenus
+(Groq, Gemini, OpenAI, Ollama…) exposent l'API OpenAI, donc le passage de l'un
+à l'autre se limite au `base_url` et au modèle définis dans `settings`
+(voir `_FOURNISSEURS` dans app/core/config.py). Aucun code métier ne change.
 
 Centralise :
-  - la création paresseuse et mise en cache du client AsyncOpenAI (config dans settings) ;
+  - la création paresseuse et mise en cache du client AsyncOpenAI ;
   - les appels de complétion (texte ou JSON) ;
   - une gestion d'erreurs normalisée : chaque erreur du fournisseur remonte
     comme `LLMProviderError(status_code, message)` que les routers transforment
@@ -37,7 +42,7 @@ class LLMConfigError(Exception):
 
 
 class LLMProviderError(Exception):
-    """Erreur du fournisseur OpenAI durant un appel."""
+    """Erreur du fournisseur LLM durant un appel."""
 
     def __init__(self, message: str, status_code: int = 502):
         super().__init__(message)
@@ -45,17 +50,28 @@ class LLMProviderError(Exception):
 
 
 @lru_cache(maxsize=1)
-def get_openai_client() -> AsyncOpenAI:
-    """Retourne le client OpenAI asynchrone (créé une seule fois)."""
-    if not settings.OPENAI_API_KEY:
+def get_client() -> AsyncOpenAI:
+    """
+    Retourne le client LLM asynchrone (créé une seule fois).
+
+    `base_url=None` laisse le SDK viser l'API OpenAI officielle ; renseigné,
+    il pointe vers le fournisseur choisi (Groq, Gemini, Ollama…).
+    """
+    if not settings.LLM_API_KEY:
         raise LLMConfigError(
-            "OPENAI_API_KEY n'est pas configurée dans backend/.env."
+            "LLM_API_KEY n'est pas configurée dans backend/.env "
+            f"(fournisseur « {settings.LLM_PROVIDER} »)."
         )
     return AsyncOpenAI(
-        api_key=settings.OPENAI_API_KEY,
-        timeout=settings.OPENAI_TIMEOUT_SECONDS,
+        api_key=settings.LLM_API_KEY,
+        base_url=settings.LLM_BASE_URL or None,
+        timeout=settings.LLM_TIMEOUT_SECONDS,
         max_retries=2,
     )
+
+
+# Ancien nom conservé : des appelsants hors de ce module peuvent encore l'utiliser.
+get_openai_client = get_client
 
 
 class LLMResult:
@@ -71,11 +87,12 @@ class LLMResult:
 
 
 def _normaliser_erreur(exc: OpenAIError) -> LLMProviderError:
-    """Associe une erreur OpenAI à un (message, code HTTP) compréhensible."""
+    """Associe une erreur du fournisseur à un (message, code HTTP) compréhensible."""
+    nom = settings.LLM_PROVIDER
     if isinstance(exc, AuthenticationError):
-        return LLMProviderError("Clé API OpenAI invalide ou expirée.", 401)
+        return LLMProviderError(f"Clé API {nom} invalide ou expirée.", 401)
     if isinstance(exc, RateLimitError):
-        return LLMProviderError("Quota OpenAI dépassé (rate limit).", 429)
+        return LLMProviderError(f"Quota {nom} dépassé (rate limit).", 429)
     if isinstance(exc, APIConnectionError):
         return LLMProviderError("Connexion au fournisseur IA impossible.", 503)
     if isinstance(exc, APITimeoutError):
@@ -98,13 +115,17 @@ async def chat_completion(
     max_tokens: Optional[int] = None,
 ) -> LLMResult:
     """
-    Appel de complétion unique vers OpenAI.
+    Appel de complétion unique vers le fournisseur LLM configuré.
 
     - `user` : prompt utilisateur (obligatoire).
     - `system` : instructions système (optionnel, ajouté en premier message).
     - `messages` : pour un dialogue complet — si fourni, `system`/`user` sont ignorés.
     - `format="json"` : demande une réponse en JSON (les prompts doivent alors
-      mentionner explicitement le mot « json » pour gpt-4o-mini).
+      mentionner explicitement le mot « json »).
+
+    Le mode JSON natif (`response_format`) n'est pas supporté par tous les
+    modèles des fournisseurs gratuits : en cas de refus, l'appel est rejoué
+    sans ce paramètre — le prompt impose alors le format JSON à lui seul.
     """
     messages = messages or []
 
@@ -125,7 +146,7 @@ async def chat_completion(
             msgs.insert(0, {"role": "system", "content": system})
 
     params = {
-        "model": model or settings.OPENAI_MODEL,
+        "model": model or settings.LLM_MODEL,
         "messages": msgs,
         "temperature": temperature,
     }
@@ -134,15 +155,33 @@ async def chat_completion(
     if max_tokens:
         params["max_tokens"] = max_tokens
 
-    client = get_openai_client()
+    client = get_client()
 
     try:
         reponse = await client.chat.completions.create(**params)
     except LLMConfigError:
         raise
+    except BadRequestError as exc:
+        # Le fournisseur refuse `response_format` : on retente en mode texte
+        # guidé. Toute autre erreur BadRequest est remontée telle quelle.
+        details = str(exc).lower()
+        refuse_le_json = "response_format" in details or "json" in details
+        if "response_format" not in params or not refuse_le_json:
+            raise _normaliser_erreur(exc) from exc
+        params.pop("response_format")
+        logger.warning(
+            "Mode JSON natif refusé (%s) — repli sur une sortie JSON guidée par le prompt.",
+            exc,
+        )
+        try:
+            reponse = await client.chat.completions.create(**params)
+        except OpenAIError as second:
+            erreur = _normaliser_erreur(second)
+            logger.error("Échec appel LLM [%s] : %s", erreur.status_code, erreur)
+            raise erreur from second
     except OpenAIError as exc:
         erreur = _normaliser_erreur(exc)
-        logger.error("Échec appel OpenAI [%s] : %s", erreur.status_code, erreur)
+        logger.error("Échec appel LLM [%s] : %s", erreur.status_code, erreur)
         raise erreur from exc
 
     contenu = reponse.choices[0].message.content or ""
@@ -150,7 +189,8 @@ async def chat_completion(
     if reponse.usage:
         tokens = reponse.usage.total_tokens
 
-    logger.info("Appel OpenAI ok — modele=%s tokens=%s", reponse.model, tokens)
+    logger.info("Appel LLM ok — fournisseur=%s modele=%s tokens=%s",
+                settings.LLM_PROVIDER, reponse.model, tokens)
     return LLMResult(content=contenu, modele=reponse.model, tokens=tokens)
 
 
@@ -162,14 +202,15 @@ async def transcrire_image(
     model: Optional[str] = None,
 ) -> LLMResult:
     """
-    Lecture / transcription d'une image via le modèle vision d'OpenAI.
+    Lecture / transcription d'une image via le modèle vision du fournisseur.
 
     - `image_base64` : contenu de l'image encodé en base64 ;
     - `mime` : type MIME (ex. "image/png", "image/jpeg") ;
     - `prompt` : instruction de transcription.
 
-    Le modèle par défaut (`OPENAI_MODEL`) doit supporter la vision
-    (gpt-4o-mini et gpt-4o la prennent en charge).
+    Utilise `LLM_VISION_MODEL` par défaut : sur Groq c'est Llama 4 Scout, sur
+    Gemini / OpenAI le modèle textuel gère déjà la vision. Repli sur
+    `LLM_MODEL` si aucun modèle vision n'est configuré.
     """
     data_url = f"data:{mime};base64,{image_base64}"
     msgs = [
@@ -182,10 +223,10 @@ async def transcrire_image(
         }
     ]
 
-    client = get_openai_client()
+    client = get_client()
     try:
         reponse = await client.chat.completions.create(
-            model=model or settings.OPENAI_MODEL,
+            model=model or settings.LLM_VISION_MODEL or settings.LLM_MODEL,
             messages=msgs,
             temperature=0.2,
         )
@@ -201,5 +242,6 @@ async def transcrire_image(
     if reponse.usage:
         tokens = reponse.usage.total_tokens
 
-    logger.info("Transcription image ok — modele=%s tokens=%s", reponse.model, tokens)
+    logger.info("Transcription image ok — fournisseur=%s modele=%s tokens=%s",
+                settings.LLM_PROVIDER, reponse.model, tokens)
     return LLMResult(content=contenu, modele=reponse.model, tokens=tokens)

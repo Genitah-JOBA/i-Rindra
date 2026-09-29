@@ -237,11 +237,11 @@ flowchart TD
     S --> R1[configuree: clé présente?<br/>modele configuré]
 
     AD[Admin / Direction] --> P[POST /ia/ping]
-    P --> C[chat_completion via connecteur OpenAI]
-    C --> K{OPENAI_API_KEY?}
+    P --> C[chat_completion via connecteur LLM]
+    C --> K{LLM_API_KEY?}
     K -- non --> E1[503 LLMConfigError]
-    K -- oui --> CL[client AsyncOpenAI en cache]
-    CL --> OK[Appel gpt-4o-mini<br/>max_tokens=5]
+    K -- oui --> CL[client AsyncOpenAI vers base_url<br/>du fournisseur (Groq par défaut)]
+    CL --> OK[Appel du modèle configuré<br/>max_tokens=5]
     OK --> ERR{Erreur fournisseur?}
     ERR -- oui --> E2[LLMProviderError<br/>401/429/503/504/502]
     ERR -- non --> OK2[ia_ping: ok, reponse, modele]

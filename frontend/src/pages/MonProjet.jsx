@@ -33,9 +33,9 @@ const ALERTE_STYLE = {
 };
 
 const ALERTE_ICONE = {
-  haute: "ðŸ”´",
-  moyenne: "ðŸŸ ",
-  basse: "ðŸŸ¡",
+  haute: "🔴",
+  moyenne: "🟠",
+  basse: "🟡",
 };
 
 const STATUT_MAP = { vert: "Bon", orange: "Attention", rouge: "Critique" };
@@ -254,7 +254,7 @@ export default function MonProjet() {
                   onClick={() => choisirProjet(p.id)}
                   className={`flex items-center gap-2 px-4 py-2 text-sm font-medium border transition-colors ${
                     actif
-                      ? "bg-brand-gradient border-i-blue text-white shadow-sm"
+                      ? "bg-brand-gradient border-i-blue text-i-primary font-semibold shadow-sm"
                       : "bg-white border-slate-200 text-slate-700 hover:border-i-blue hover:text-[#3F894E]"
                   }`}
                 >
@@ -265,7 +265,7 @@ export default function MonProjet() {
                   <span
                     className={`text-[10px] font-semibold rounded-full px-2 py-0.5 ${
                       actif
-                        ? "bg-white/20 text-white"
+                        ? "bg-white/50 text-i-primary"
                         : p.avancement_pct >= 100
                           ? "bg-green-100 text-green-700"
                           : "bg-slate-100 text-slate-500"
@@ -313,7 +313,7 @@ export default function MonProjet() {
               enRetard ? "text-red-600" : "text-slate-900"
             }`}
           >
-            {estTermine ? "100% âœ“" : `${totalTaches - details.termine}`}
+            {estTermine ? "100% ✓" : `${totalTaches - details.termine}`}
           </p>
           <p className="text-[10px] text-slate-400">
             {STATUT_MAP[projet.statut_sante] || projet.statut_sante}
@@ -352,10 +352,10 @@ export default function MonProjet() {
           <div className="mb-1 flex justify-between text-xs text-slate-500">
             <span>
               {projet.avancement_pct || 0}%{" "}
-              {estTermine ? "âœ“" : "terminé"}
+              {estTermine ? "✓" : "terminé"}
             </span>
             <span>
-              {fmtDate(projet.date_debut)} â†’ {fmtDate(projet.date_fin_prevue)}
+              {fmtDate(projet.date_debut)} → {fmtDate(projet.date_fin_prevue)}
             </span>
           </div>
           <div className="mb-6 h-3 w-full overflow-hidden rounded bg-slate-100">
@@ -431,7 +431,7 @@ export default function MonProjet() {
       )}
       {alertes.length === 0 && (
         <div className="mb-6 rounded border-l-4 border-l-green-500 bg-green-50 px-3 py-2 text-sm text-green-700">
-          âœ“ {"Aucune alerte. Tout va bien."}
+          ✓ {"Aucune alerte. Tout va bien."}
         </div>
       )}
 

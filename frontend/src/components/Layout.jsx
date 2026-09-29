@@ -166,7 +166,7 @@ const pleinEcran = pathname.startsWith("/assistant-ia");
               Tableau de bord
             </NavLink>
           ) : (
-            <NavLink to="/mon-projet" className={lienClass}>
+            <NavLink to="/mon-projet" end className={lienClass}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"

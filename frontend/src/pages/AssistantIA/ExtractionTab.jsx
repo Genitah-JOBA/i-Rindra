@@ -19,6 +19,10 @@ import {
   IconArrowRight,
 } from "./Shared";
 
+// Doit rester synchronisé avec MAX_SUGGESTIONS dans backend/app/services/ia.py.
+// Sert uniquement à l'affichage du message « plafond atteint ».
+const MAX_SUGGESTIONS = 15;
+
 const LIBELLE_STATUT = {
   en_attente: "À valider",
   validee: "Validé",
@@ -238,7 +242,18 @@ export default function ExtractionTab({ projets }) {
     setErreur("");
     try {
       const data = await iaService.extraireTaches(projetId, texte.trim() || null);
-      showSuccess(`${data.nombre_suggestions} tâches proposées par l'IA. À vous de valider !`);
+      const n = data.nombre_suggestions;
+      const details = [];
+      if (data.plafonne) {
+        details.push(`plafond de ${MAX_SUGGESTIONS} tâches — affinez le CDC pour plus de précision`);
+      }
+      if (data.doublons_ignores > 0) {
+        details.push(`${data.doublons_ignores} doublon(s) écarté(s), déjà suggéré(s)`);
+      }
+      showSuccess(
+        `${n} tâche${n > 1 ? "s" : ""} proposée${n > 1 ? "s" : ""} par l'IA. À vous de valider !` +
+          (details.length ? ` (${details.join(" · ")})` : ""),
+      );
       await chargerSuggestions(projetId);
       // Charger les dispo pour les nouvelles suggestions
       const fresh = await iaService.listerSuggestions({ projet_id: projetId, statut: "en_attente" });

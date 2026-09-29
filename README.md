@@ -36,7 +36,7 @@ assistant IA. Le tout avec une authentification par rôles.
 - **Backend** : Python · **FastAPI** · SQLAlchemy (async) · Pydantic · JWT
 - **Base de données** : **PostgreSQL** (via `asyncpg`)
 - **Frontend** : **React 19** · Vite · Tailwind CSS · React Router · axios
-- **IA** : API OpenAI
+- **IA** : API LLM (Groq par défaut, **gratuit** — compatible OpenAI)
 
 ---
 
@@ -94,7 +94,9 @@ DATABASE_URL=postgresql://postgres:MON_MDP@localhost:5432/Gestion_Projet
 SECRET_KEY=une_cle_secrete_longue_et_aleatoire
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=60
-# OPENAI_API_KEY=sk-...   (pour le futur module IA)
+# IA — clé gratuite Groq : https://console.groq.com/keys
+LLM_PROVIDER=groq
+LLM_API_KEY=gsk_...
 ```
 
 Lance l'API :
@@ -147,7 +149,7 @@ Puis connecte-toi sur la page de login. Le rôle **direction** peut ensuite cré
 
 ## 🗺️ Reste à faire
 
-- **Module IA** (analyse du cahier des charges, extraction de tâches, résumés…) via OpenAI.
+- **Module IA** (analyse du cahier des charges, extraction de tâches, résumés…) via Groq (gratuit).
 - **Interconnexions** e-resaka (chat) et B-estimation (devis) par deep-link.
 - **Recherche intelligente** (pgvector ou recherche plein-texte selon l'hébergement).
 - Réinitialisation du mot de passe, tests automatisés, migrations Alembic.

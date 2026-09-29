@@ -136,7 +136,7 @@ export default function ChatTab() {
                 {!estConfigure && (
                   <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 max-w-md text-sm mb-5 rounded-lg">
                     L'assistant IA n'est pas configuré. Demandez à un
-                    administrateur de définir la clé API OpenAI dans le fichier
+                    administrateur de définir LLM_API_KEY dans le fichier
                     .env du backend.
                   </div>
                 )}
