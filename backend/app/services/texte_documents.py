@@ -6,7 +6,8 @@ Formats pris en charge :
   - texte brut : .txt, .md, .csv
   - PDF : .pdf (via PyMuPDF)
   - Word : .docx (via python-docx), .doc legacy (best-effort)
-  - images : .png, .jpg, .jpeg (transcription vision via OpenAI)
+  - images : .png, .jpg, .jpeg (transcription vision via le modèle configuré
+    dans LLM_VISION_MODEL — sur Groq, qwen3.8-27b est multimodal)
 
 Le service retourne un texte brut prêt à être injecté dans le prompt IA.
 """
@@ -156,7 +157,7 @@ def _extraire_doc_legacy(contenu: bytes) -> str:
 
 
 async def _extraire_image(contenu: bytes, suffix: str) -> str:
-    """Transcrit le texte d'une image (OCR) via le modèle vision d'OpenAI."""
+    """Transcrit le texte d'une image (OCR) via le modèle vision configuré."""
     mime = TYPES_IMAGE[suffix]
     b64 = base64.b64encode(contenu).decode("ascii")
     if len(b64) > MAX_IMAGE_B64:

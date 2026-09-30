@@ -11,15 +11,14 @@ load_dotenv()
 # (SDK `openai` inchangé : seul le `base_url` et le `model` bougent).
 _FOURNISSEURS = {
     # Groq — free tier, très rapide, mode JSON. Modèles réels du compte vérifiés
-    # le 29/09/2026 : qwen3.8-27b répond correctement en français et renvoie du
-    # JSON strict (compatible avec json.loads dans services/ia.py).
+    # le 29/09/2026 : qwen3.8-27b répond correctement en français, renvoie du
+    # JSON strict (compatible avec json.loads dans services/ia.py) et lit les
+    # images (testé : décrit correctement une image de couleur unie) — il
+    # couvre donc le texte, le JSON et l'OCR avec un seul modèle.
     "groq": {
         "base_url": "https://api.groq.com/openai/v1",
         "model": "qwen/qwen3.8-27b",
-        # Vision : à ACTIVER sur le compte (console.groq.com) — absent de la
-        # liste /models par défaut. Sans lui, l'OCR d'images (cahier des charges
-        # scanné) ne fonctionnera pas.
-        "model_vision": "meta-llama/llama-4-scout-17b-16e-instruct",
+        "model_vision": "qwen/qwen3.8-27b",
     },
     # Google Gemini — free tier très généreux, vision + JSON.
     "gemini": {

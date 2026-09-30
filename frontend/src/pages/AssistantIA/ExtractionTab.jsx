@@ -135,7 +135,7 @@ function SuggestionCarte({ suggestion: s, membresDispo, onValider, onRejeter, on
           {onValider && (
             <button
               onClick={() => onValider(s)}
-              className="flex items-center gap-1 bg-brand-gradient px-2.5 py-1 text-xs font-semibold text-white transition hover:brightness-110 rounded-md ml-auto"
+              className="flex items-center gap-1 bg-brand-gradient px-2.5 py-1 text-xs font-semibold text-black transition hover:brightness-110 rounded-md ml-auto"
             >
               <IconCheck /> Valider
               <IconArrowRight className="w-3 h-3" />
