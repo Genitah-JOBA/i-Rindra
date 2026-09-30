@@ -64,6 +64,28 @@ class Settings(BaseSettings):
     LLM_VISION_MODEL: str = os.getenv("LLM_VISION_MODEL", "")
     LLM_TIMEOUT_SECONDS: float = float(os.getenv("LLM_TIMEOUT_SECONDS", 60))
 
+    # Frontend — sert à construire le lien absolu du formulaire de
+    # réinitialisation de mot de passe (le backend doit connaître l'URL publique).
+    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173").rstrip("/")
+
+    # Réinitialisation de mot de passe
+    RESET_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("RESET_TOKEN_EXPIRE_MINUTES", 30))
+
+    # Email (SMTP) — sur o2switch/cPanel, ce sont les serveurs mail de l'hébergeur :
+    #   SMTP_HOST=mail.i-rindra.bef4prod.com
+    #   SMTP_PORT=465, SMTP_USE_SSL=True  (ou 587 + STARTTLS)
+    SMTP_HOST: str = os.getenv("SMTP_HOST", "")
+    SMTP_PORT: int = int(os.getenv("SMTP_PORT", 587))
+    SMTP_USER: str = os.getenv("SMTP_USER", "")
+    SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
+    SMTP_USE_SSL: bool = os.getenv("SMTP_USE_SSL", "false").lower() == "true"
+    SMTP_STARTTLS: bool = os.getenv("SMTP_STARTTLS", "true").lower() == "true"
+    EMAIL_EXPEDITEUR: str = os.getenv("EMAIL_EXPEDITEUR", "no-reply@i-rindra.com")
+
+    # En développement, aucun email n'est envoyé : le lien de réinitialisation
+    # est renvoyé dans la réponse et écrit dans les logs du serveur.
+    RESET_LIEN_EN_REPONSE: bool = os.getenv("RESET_LIEN_EN_REPONSE", "true").lower() == "true"
+
     # Environnement : "development", "production", "test"
     APP_ENV: str = os.getenv("APP_ENV", "development")
 
@@ -75,6 +97,15 @@ class Settings(BaseSettings):
                 "SECRET_KEY doit être défini dans .env en production. "
                 "Générez-la avec : python -c \"import secrets; print(secrets.token_hex(32))\""
             )
+        if self.APP_ENV == "production":
+            # Le jeton de réinitialisation ne doit JAMAIS fuiter dans la réponse
+            # HTTP ni les logs en production : on force le renvoi par email.
+            self.RESET_LIEN_EN_REPONSE = False
+            if not self.SMTP_HOST:
+                raise RuntimeError(
+                    "SMTP_HOST doit être défini dans .env en production, "
+                    "sinon la réinitialisation de mot de passe est inopérante."
+                )
         self._resoudre_fournisseur_llm()
 
     def _resoudre_fournisseur_llm(self):

@@ -203,3 +203,17 @@ CREATE TABLE suggestion_devis (
 CREATE INDEX ix_suggestion_devis_id ON suggestion_devis (id);
 CREATE INDEX ix_suggestion_devis_client_id ON suggestion_devis (client_id);
 CREATE INDEX ix_suggestion_devis_projet_id ON suggestion_devis (projet_id);
+CREATE TABLE mot_de_passe_reinit (
+	id SERIAL NOT NULL,
+	utilisateur_id INTEGER NOT NULL,
+	token_hash VARCHAR(64) NOT NULL,
+	expire_a TIMESTAMP WITH TIME ZONE NOT NULL,
+	utilise_a TIMESTAMP WITH TIME ZONE,
+	cree_le TIMESTAMP WITH TIME ZONE DEFAULT now(),
+	PRIMARY KEY (id),
+	FOREIGN KEY(utilisateur_id) REFERENCES utilisateur (id) ON DELETE CASCADE
+);
+CREATE INDEX ix_mot_de_passe_reinit_id ON mot_de_passe_reinit (id);
+CREATE INDEX ix_mot_de_passe_reinit_utilisateur_id ON mot_de_passe_reinit (utilisateur_id);
+CREATE INDEX ix_mot_de_passe_reinit_token_hash ON mot_de_passe_reinit (token_hash);
+CREATE INDEX ix_mot_de_passe_reinit_utilisateur_utilise ON mot_de_passe_reinit (utilisateur_id, utilise_a);

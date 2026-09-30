@@ -2,7 +2,8 @@
 """
 Schémas Pydantic pour la gestion des utilisateurs (RF-02).
 """
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
+from app.utils.mots_de_passe import LONGUEUR_MAX, verifier_mot_de_passe
+from pydantic import BaseModel, EmailStr, Field, ConfigDict, field_validator
 from datetime import datetime
 from typing import Optional
 
@@ -17,7 +18,17 @@ class UtilisateurBase(BaseModel):
 
 
 class UtilisateurCreate(UtilisateurBase):
-    mot_de_passe: str = Field(..., min_length=4)
+    # La politique (longueur, majuscule, chiffre) est validée par le même
+    # validateur que le reste de l'application — voir utils/mots_de_passe.py.
+    mot_de_passe: str = Field(..., max_length=LONGUEUR_MAX)
+
+    @field_validator("mot_de_passe")
+    @classmethod
+    def _verifier_mot_de_passe(cls, valeur: str) -> str:
+        erreur = verifier_mot_de_passe(valeur)
+        if erreur:
+            raise ValueError(erreur)
+        return valeur
 
 
 class UtilisateurUpdate(BaseModel):

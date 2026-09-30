@@ -1,19 +1,28 @@
 # auth.py
 
 import time
+import logging
 from collections import defaultdict
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, delete
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import hash_password, verify_password, create_access_token, decode_access_token
 from app.models.utilisateur import Utilisateur, RoleUtilisateur
 from app.models.client import Client
+from app.models.mot_de_passe_reinit import MotDePasseReinit
+from app.utils.jetons_reinit import generer_jeton_reinit, hacher_jeton_reinit, jeton_correspondant
+from app.utils.mots_de_passe import verifier_mot_de_passe
+from app.utils.emails import normaliser_email
+from app.utils.email import envoyer_email_reinitialisation, smtp_configure
 from pydantic import BaseModel, EmailStr
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
+
+logger = logging.getLogger("i-rindra.auth")
 
 # --- Rate limiting simple en mémoire ---
 _rate_limits: dict[str, list[float]] = defaultdict(list)
@@ -29,6 +38,23 @@ def _check_rate_limit(key: str):
             detail="Trop de requêtes. Réessayez dans quelques secondes.",
         )
     _rate_limits[key].append(now)
+
+
+def _adresse_client(request: Request) -> str:
+    """
+    Adresse IP de l'appelant, pour le rate limiting.
+
+    `request.client.host` suffit en local et derrière un reverse proxy fidèle.
+    Si un proxy est intercalé, c'est le premier en-tête `X-Forwarded-For` qui
+    fait foi — ce qui n'est pas fiable dès lors que n'importe qui peut le
+    forger. C'est un compromis assumé : le rate limiting est une barrière
+    incidente (on veut décourager le bruit), pas une garantie d'intégrité.
+    Aucune donnée sensible n'est indexée par cette valeur.
+    """
+    direct = request.client.host if request.client else "inconnu"
+    if direct not in ("127.0.0.1", "::1", "testclient"):
+        return direct
+    return request.headers.get("x-forwarded-for", direct).split(",")[0].strip() or direct
 
 # On crée un routeur pour regrouper toutes les routes d'authentification
 router = APIRouter(prefix="/auth", tags=["Authentification"])
@@ -75,9 +101,10 @@ async def login(
     """
     _check_rate_limit(f"login:{form_data.username}")
 
-    # 1. Recherche d'utilisateur par email
+    # 1. Recherche d'utilisateur par email (forme canonique : minuscules)
+    email = normaliser_email(form_data.username)
     result = await db.execute(
-        select(Utilisateur).where(Utilisateur.email == form_data.username)
+        select(Utilisateur).where(Utilisateur.email == email)
     )
     user = result.scalar_one_or_none()
     
@@ -182,13 +209,14 @@ async def update_me(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Utilisateur non trouvé")
 
     # Email : vérifier l'unicité si modifié
-    if data.email and data.email != user.email:
-        r = await db.execute(select(Utilisateur).where(Utilisateur.email == data.email))
+    if data.email and normaliser_email(data.email) != user.email:
+        nouvel_email = normaliser_email(data.email)
+        r = await db.execute(select(Utilisateur).where(Utilisateur.email == nouvel_email))
         if r.scalar_one_or_none():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Cet email est déjà utilisé"
             )
-        user.email = data.email
+        user.email = nouvel_email
 
     if data.nom:
         user.nom = data.nom
@@ -204,11 +232,9 @@ async def update_me(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Le mot de passe actuel est incorrect.",
             )
-        if len(data.nouveau_mot_de_passe) < 8:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Le nouveau mot de passe est trop court (8 caractères minimum).",
-            )
+        erreur = verifier_mot_de_passe(data.nouveau_mot_de_passe)
+        if erreur:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=erreur)
         user.mot_de_passe_hash = hash_password(data.nouveau_mot_de_passe)
 
     await db.commit()
@@ -233,6 +259,226 @@ async def logout():
     Ici, on ne fait rien car l'API est stateless (JWT).
     """
     return {"message": "Déconnexion réussie"}
+
+
+# -Réinitialisation du mot de passe
+#
+# Le flux volontairement ne révèle JAMAIS si une adresse email est enregistrée :
+# `/mot-de-passe-oublie` répond toujours 200 avec le même message. Sans cela, un
+# attaquant pourrait lister les comptes de la plateforme. Les erreurs de jeton
+# renvoient 400 (et non 401) parce que l'intercepteur axios du frontend redirige
+# vers /login sur tout 401 — ce qui ejecterait l'utilisateur en plein formulaire.
+
+MESSAGE_REINIT_GENERIQUE = (
+    "Si un compte est associé à cette adresse email, un lien de réinitialisation "
+    "vient d'être envoyé. Vérifiez votre boîte de réception et vosCourriers indésirables."
+)
+
+
+class MotDePasseOublieRequest(BaseModel):
+    email: EmailStr
+
+
+class MotDePasseOublieResponse(BaseModel):
+    message: str
+    # Renseigné uniquement en développement (jamais en production) pour
+    # permettre de tester le flux sans serveur mail.
+    lien_reinitialisation: Optional[str] = None
+
+
+class ReinitialiserMdpRequest(BaseModel):
+    token: str
+    nouveau_mot_de_passe: str
+
+
+class ReinitialiserMdpResponse(BaseModel):
+    message: str
+
+
+class VerifierJetonResponse(BaseModel):
+    valide: bool
+    # Masquage du type de compte, ex: "i-R••••@domaine.com" — jamais l'adresse
+    # complète, pour qu'un jeton valide ne devienne pas une fuite d'information.
+    email_masque: Optional[str] = None
+
+
+def _masquer_email(email: str) -> str:
+    """« prenom@domaine.fr » -> « p••••@domaine.fr »"""
+    local, _, domaine = email.partition("@")
+    if not domaine:
+        return "••••"
+    return f"{local[:1]}••••@{domaine}"
+
+
+async def _rechercher_jeton_valide(db: AsyncSession, token_en_clair: str) -> Optional[MotDePasseReinit]:
+    """
+    Retourne la ligne de jeton correspondant au token fourni, si elle existe,
+    n'a pas déjà été utilisée et n'est pas expirée. None sinon.
+    """
+    if not token_en_clair or len(token_en_clair) > 128:
+        return None
+
+    empreinte = hacher_jeton_reinit(token_en_clair)
+    resultat = await db.execute(
+        select(MotDePasseReinit).where(
+            MotDePasseReinit.token_hash == empreinte,
+            MotDePasseReinit.utilise_a.is_(None),
+        )
+    )
+    ligne = resultat.scalar_one_or_none()
+    if ligne is None or ligne.est_expire:
+        return None
+    return ligne
+
+
+@router.post("/mot-de-passe-oublie", response_model=MotDePasseOublieResponse)
+async def mot_de_passe_oublie(
+    data: MotDePasseOublieRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Étape 1 : demande un lien de réinitialisation.
+
+    Répond toujours 200 avec un message identique, que l'adresse existe ou non
+    (anti-énumération de comptes).
+    """
+    _check_rate_limit(f"reinit:oublie:{normaliser_email(data.email)}")
+
+    email = normaliser_email(data.email)
+    resultat = await db.execute(select(Utilisateur).where(Utilisateur.email == email))
+    user = resultat.scalar_one_or_none()
+
+    # Utilisateur inconnu ou compte désactivé : on répond normalement, sans rien
+    # faire. La seule trace laissée est un log serveur.
+    if user is None or not user.actif:
+        logger.info("Demande de réinitialisation pour une adresse non utilisable.")
+        return MotDePasseOublieResponse(message=MESSAGE_REINIT_GENERIQUE)
+
+    # Invalide les demandes précédentes : seul le dernier lien mailed reste
+    # valable, ce qui évite que plusieurs liens circulent en parallèle.
+    await db.execute(
+        delete(MotDePasseReinit).where(MotDePasseReinit.utilisateur_id == user.id)
+    )
+
+    jeton, empreinte = generer_jeton_reinit()
+    expire_a = datetime.now(timezone.utc) + timedelta(minutes=settings.RESET_TOKEN_EXPIRE_MINUTES)
+
+    db.add(
+        MotDePasseReinit(
+            utilisateur_id=user.id,
+            token_hash=empreinte,
+            expire_a=expire_a,
+        )
+    )
+    await db.commit()
+
+    envoye = await envoyer_email_reinitialisation(user.email, user.prenom, jeton)
+
+    # En développement, on renvoie le lien pour tester le flux sans SMTP.
+    if settings.RESET_LIEN_EN_REPONSE:
+        from app.utils.email import lien_reinitialisation
+
+        return MotDePasseOublieResponse(
+            message=MESSAGE_REINIT_GENERIQUE,
+            lien_reinitialisation=lien_reinitialisation(jeton),
+        )
+
+    if not envoye:
+        logger.error(
+            "Email de réinitialisation non envoyé (SMTP configuré : %s).",
+            smtp_configure(),
+        )
+
+    return MotDePasseOublieResponse(message=MESSAGE_REINIT_GENERIQUE)
+
+
+@router.get("/verifier-jeton-reinit", response_model=VerifierJetonResponse)
+async def verifier_jeton_reinit(
+    token: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Vérifie qu'un lien est encore valable, pour afficher le formulaire ou une
+    erreur explicite dès l'ouverture de la page.
+    """
+    ligne = await _rechercher_jeton_valide(db, token)
+    if ligne is None:
+        return VerifierJetonResponse(valide=False)
+
+    resultat = await db.execute(
+        select(Utilisateur).where(Utilisateur.id == ligne.utilisateur_id)
+    )
+    user = resultat.scalar_one_or_none()
+    if user is None or not user.actif:
+        return VerifierJetonResponse(valide=False)
+
+    return VerifierJetonResponse(valide=True, email_masque=_masquer_email(user.email))
+
+
+@router.post("/reinitialiser-mdp", response_model=ReinitialiserMdpResponse)
+async def reinitialiser_mdp(
+    data: ReinitialiserMdpRequest,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Étape 2 : applique le nouveau mot de passe.
+
+    Le jeton est à usage unique : il est marqué comme utilisé et l'ancien mot
+    de passe cesse immédiatement de fonctionner.
+    """
+    # Deux garde-fous distincts, car ils protègent contre deux menaces
+    # différentes. L'IP bride le flot (une IP ne peut pas marteler le service) ;
+    # le jeton bride la devinette du lien (une IP ne peut pas bloquer le service).
+    _check_rate_limit(f"reinit:appliquer:ip:{_adresse_client(request)}")
+
+    erreur = verifier_mot_de_passe(data.nouveau_mot_de_passe)
+    if erreur:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=erreur)
+
+    ligne = await _rechercher_jeton_valide(db, data.token)
+    if ligne is None:
+        # 400 et non 401 : voir le commentaire d'en-tête de section.
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ce lien de réinitialisation est invalide ou a expiré. Demandez-en un nouveau.",
+        )
+
+    # Rate limit PAR JETON, et non global : avec une clé unique, dix tentatives
+    # de la part d'un seul attaquant suffisaient à bloquer l'application du
+    # nouveau mot de passe pour tous les autres utilisateurs pendant une minute.
+    _check_rate_limit(f"reinit:appliquer:jeton:{ligne.token_hash}")
+
+    resultat = await db.execute(
+        select(Utilisateur).where(Utilisateur.id == ligne.utilisateur_id)
+    )
+    user = resultat.scalar_one_or_none()
+    if user is None or not user.actif:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ce lien de réinitialisation n'est plus utilisable.",
+        )
+
+    user.mot_de_passe_hash = hash_password(data.nouveau_mot_de_passe)
+
+    # Usage unique : le lien est consommé, et tous les autres jetons de cet
+    # utilisateur sont purgés au passage.
+    ligne.utilise_a = datetime.now(timezone.utc)
+    await db.execute(
+        delete(MotDePasseReinit).where(
+            MotDePasseReinit.utilisateur_id == user.id,
+            MotDePasseReinit.id != ligne.id,
+        )
+    )
+
+    await db.commit()
+
+    logger.info("Mot de passe réinitialisé pour l'utilisateur %s", user.id)
+
+    return ReinitialiserMdpResponse(
+        message="Mot de passe mis à jour. Vous pouvez vous connecter avec votre nouveau mot de passe."
+    )
+
 
 async def get_current_user_id(token: str = Depends(oauth2_scheme)) -> int:
     """
@@ -279,11 +525,16 @@ async def register(
     L'inscription publique est réservée aux rôles 'equipe' et 'client' —
     les comptes 'direction'/'drh'/'chef_de_projet' doivent être créés par la direction.
     """
-    _check_rate_limit(f"register:{user_data.email}")
+    _check_rate_limit(f"register:{normaliser_email(user_data.email)}")
+
+    # L'email est stocké et recherché sous forme canonique : c'est ce qui permet
+    # à « mot de passe oublié » de retrouver n'importe quel compte, quelle que
+    # soit la casse saisie à l'inscription.
+    email = normaliser_email(user_data.email)
 
     # 1. Vérifie que l'email n'est pas déjà utilisé
     result = await db.execute(
-        select(Utilisateur).where(Utilisateur.email == user_data.email)
+        select(Utilisateur).where(Utilisateur.email == email)
     )
     existing_user = result.scalar_one_or_none()
     
@@ -293,11 +544,12 @@ async def register(
             detail="Cet email est déjà utilisé"
         )
 
-    # 1.bis Vérifie la longueur du mot de passe
-    if len(user_data.mot_de_passe) < 8:
+    # 1.bis Applique la politique de mot de passe commune
+    erreur_mdp = verifier_mot_de_passe(user_data.mot_de_passe)
+    if erreur_mdp:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Le mot de passe doit faire au moins 8 caractères.",
+            detail=erreur_mdp,
         )
     
     # 2. Valide le rôle
@@ -339,7 +591,7 @@ async def register(
 
     # 4. Crée le nouvel utilisateur
     new_user = Utilisateur(
-        email=user_data.email,
+        email=email,
         mot_de_passe_hash=hash_password(user_data.mot_de_passe),
         nom=user_data.nom,
         prenom=user_data.prenom,

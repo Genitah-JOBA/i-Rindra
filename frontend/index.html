@@ -5,9 +5,71 @@
     <link rel="icon" type="image/svg+xml" href="/Logo-i-Rindra-couleur.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>i-Rindra -- Gestion Projet</title>
+
+    <!--
+      Pré-connexion à l'API : DNS + TCP + TLS sont lancés EN PARALLÈLE du
+      téléchargement du JavaScript, au lieu d'être enclenchés seulement après
+      le premier `fetch`. Sur un hébergement distant cela retire un aller-retour
+      complet (souvent 100 à 300 ms) sur la requête `/auth/me` qui conditionne
+      l'affichage. `%VITE_API_URL%` est substitué par Vite au build.
+    -->
+    <link rel="preconnect" href="%VITE_API_URL%" crossorigin />
+    <link rel="dns-prefetch" href="%VITE_API_URL%" />
+
+    <style>
+      /* Styles « critiques » : intégrés ici pour ne dépendre d'aucun fichier
+         CSS externe. Ils ne servent qu'à l'écran de démarrage, retiré du DOM
+         dès que React prend la main (voir main.jsx). */
+      #ecran-demarrage {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        background: #f8fafc;
+        color: #64748b;
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        font-size: 0.875rem;
+      }
+      #ecran-demarrage .rond {
+        width: 2rem;
+        height: 2rem;
+        border: 2px solid #e2e8f0;
+        border-top-color: #1e5b8c;
+        border-radius: 9999px;
+        animation: chargement-tourne 0.8s linear infinite;
+      }
+      @keyframes chargement-tourne {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      /* Respecte le réglage système « réduire les animations ». */
+      @media (prefers-reduced-motion: reduce) {
+        #ecran-demarrage .rond {
+          animation: none;
+        }
+      }
+    </style>
   </head>
   <body>
+    <!-- Rendu de l'application (React remplace le contenu de #root). -->
     <div id="root"></div>
+
+    <!--
+      Écran de démarrage affiché AVANT que React ne s'exécute.
+      Sans lui, la page reste entièrement blanche le temps de télécharger et
+      d'analyser le bundle : l'utilisateur perçoit ce délai comme un blocage,
+      ce qui est exactement le symptôme « Chargement… qui prend trop de temps ».
+      Il est retiré par main.jsx dès le premier rendu.
+    -->
+    <div id="ecran-demarrage" role="status" aria-live="polite">
+      <div class="rond" aria-hidden="true"></div>
+      <p>Chargement…</p>
+    </div>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

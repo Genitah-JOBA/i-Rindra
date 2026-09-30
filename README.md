@@ -97,6 +97,10 @@ ACCESS_TOKEN_EXPIRE_MINUTES=60
 # IA — clé gratuite Groq : https://console.groq.com/keys
 LLM_PROVIDER=groq
 LLM_API_KEY=gsk_...
+
+# Réinitialisation de mot de passe (voir § « Mot de passe oublié » plus bas)
+FRONTEND_URL=http://localhost:5173
+RESET_TOKEN_EXPIRE_MINUTES=30
 ```
 
 Lance l'API :
@@ -137,6 +141,48 @@ Puis connecte-toi sur la page de login. Le rôle **direction** peut ensuite cré
 
 ---
 
+## 🔑 Mot de passe oublié
+
+Le lien « Mot de passe oublié » de la page de connexion couvre trois étapes :
+demande du lien par email, ouverture du lien, choix du nouveau mot de passe.
+
+Le lien est **à usage unique** et valable `RESET_TOKEN_EXPIRE_MINUTES` (30 min
+par défaut). Seul son condensat SHA-256 est stocké : une fuite de la table
+`mot_de_passe_reinit` ne permet donc de réinitialiser le mot de passe de
+personne. Les adresses sont normalisées en minuscules à toutes les entrées
+(login, inscription, modification de profil, oubli), ce qui garantit qu'un
+compte est retrouvable quelle que soit la casse saisie.
+
+### En développement
+
+Aucun email n'est envoyé : le backend renvoie le lien directement dans la
+réponse (`RESET_LIEN_EN_REPONSE=true`) et l'affiche sur la page, en plus de
+l'écrire dans les logs. Rien à configurer.
+
+### En production
+
+Il faut un serveur SMTP. Sur o2switch / cPanel, ce sont les serveurs mail de
+l'hébergeur :
+
+```bash
+APP_ENV=production
+SMTP_HOST=mail.i-rindra.bef4prod.com
+SMTP_PORT=465
+SMTP_USE_SSL=true          # port 587 -> laisser false et SMTP_STARTTLS=true
+SMTP_USER=...
+SMTP_PASSWORD=...
+EMAIL_EXPEDITEUR=no-reply@i-rindra.bef4prod.com
+FRONTEND_URL=https://app.i-rindra.bef4prod.com
+```
+
+`FRONTEND_URL` est indispensable : c'est lui qui construit le lien absolu
+envoyé par email. En production, `RESET_LIEN_EN_REPONSE` est forcé à `false`
+(le jeton ne doit jamais fuiter dans une réponse HTTP) et l'application
+**refuse de démarrer** si `SMTP_HOST` est absent — mieux vaut un échec au
+déploiement qu'une réinitialisation inopérante en production.
+
+---
+
 ## 🌐 Déploiement (o2switch / hébergement mutualisé)
 
 - Importer **`schema_o2switch.sql`** (sans `pgvector`) dans la base **PostgreSQL** via phpPgAdmin.
@@ -144,6 +190,7 @@ Puis connecte-toi sur la page de login. Le rôle **direction** peut ensuite cré
   se branche via un pont `passenger_wsgi.py` + `a2wsgi`.
 - Le frontend se déploie en **statique** : `npm run build` → envoyer le contenu de `dist/`,
   avec `VITE_API_URL` pointant sur l'URL de l'API.
+- Régler `APP_ENV=production` et les variables SMTP / `FRONTEND_URL` (voir § « Mot de passe oublié »).
 
 ---
 
@@ -152,7 +199,7 @@ Puis connecte-toi sur la page de login. Le rôle **direction** peut ensuite cré
 - **Module IA** (analyse du cahier des charges, extraction de tâches, résumés…) via Groq (gratuit).
 - **Interconnexions** e-resaka (chat) et B-estimation (devis) par deep-link.
 - **Recherche intelligente** (pgvector ou recherche plein-texte selon l'hébergement).
-- Réinitialisation du mot de passe, tests automatisés, migrations Alembic.
+- Tests automatisés, migrations Alembic.
 
 ---
 

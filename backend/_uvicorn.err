@@ -1,16 +1,24 @@
 INFO:     Will watch for changes in these directories: ['D:\\Project\\i-Rindra\\backend']
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [26236] using WatchFiles
-INFO:     Started server process [23088]
+INFO:     Started reloader process [3164] using WatchFiles
+INFO:     Started server process [8144]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in '_verif_suggestions.py'. Reloading...
+WARNING:  WatchFiles detected changes in 'smoke_test_flux_reinit.py'. Reloading...
 INFO:     Shutting down
 INFO:     Waiting for application shutdown.
 INFO:     Application shutdown complete.
-INFO:     Finished server process [23088]
-WARNING:  WatchFiles detected changes in '_verif_suggestions.py'. Reloading...
-INFO:     Started server process [27528]
+INFO:     Finished server process [8144]
+INFO:     Started server process [14452]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in '_tmp_liste_users.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [14452]
+WARNING:  WatchFiles detected changes in '_tmp_liste_users.py'. Reloading...
+INFO:     Started server process [31124]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 ERROR:    Traceback (most recent call last):
@@ -44,16 +52,19 @@ Traceback (most recent call last):
     await getter
 asyncio.exceptions.CancelledError
 
-INFO:     Started server process [24944]
+INFO:     Started server process [23196]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in 'app\services\ia.py'. Reloading...
+WARNING:  WatchFiles detected changes in 'smoke_test_flux_reinit.py'. Reloading...
+SMTP non configuré — email NON envoyé à oddy@gmail.com. Lien de réinitialisation : http://localhost:5173/reinitialiser-mdp/H84KExc_zODeesRyN2Q8zOMlfFDv2tiRkKCOrJOyeic
+SMTP non configuré — email NON envoyé à oddy@gmail.com. Lien de réinitialisation : http://localhost:5173/reinitialiser-mdp/pcpqMbnpso6ia-BmOHnT-JDgdZ9QoLNY-G1PlsXTw4M
+SMTP non configuré — email NON envoyé à oddy@gmail.com. Lien de réinitialisation : http://localhost:5173/reinitialiser-mdp/GO-aXP_WXFfeAhaP1YdJ3Um3e_54arAHmcP1BIuy9Vk
 INFO:     Shutting down
 INFO:     Waiting for application shutdown.
 INFO:     Application shutdown complete.
-INFO:     Finished server process [24944]
-WARNING:  WatchFiles detected changes in 'app\schemas\ia.py', 'app\routers\ia.py', 'tests\test_ia_helpers.py'. Reloading...
-INFO:     Started server process [25824]
+INFO:     Finished server process [23196]
+WARNING:  WatchFiles detected changes in '_tmp_liste_users.py', 'smoke_test_flux_reinit.py'. Reloading...
+INFO:     Started server process [21956]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 ERROR:    Traceback (most recent call last):
@@ -87,146 +98,13 @@ Traceback (most recent call last):
     await getter
 asyncio.exceptions.CancelledError
 
-INFO:     Started server process [24012]
+INFO:     Started server process [27004]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in '_test_cycle_suggestion.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [24012]
-WARNING:  WatchFiles detected changes in '_test_cycle_suggestion.py'. Reloading...
-INFO:     Started server process [19116]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-ERROR:    Traceback (most recent call last):
-  File "C:\Users\PC\AppData\Local\Programs\Python\Python312\Lib\asyncio\runners.py", line 118, in run
-    return self._loop.run_until_complete(task)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\PC\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 691, in run_until_complete
-    return future.result()
-           ^^^^^^^^^^^^^^^
-asyncio.exceptions.CancelledError
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "C:\Users\PC\AppData\Local\Programs\Python\Python312\Lib\asyncio\runners.py", line 195, in run
-    return runner.run(main)
-           ^^^^^^^^^^^^^^^^
-  File "C:\Users\PC\AppData\Local\Programs\Python\Python312\Lib\asyncio\runners.py", line 123, in run
-    raise KeyboardInterrupt()
-KeyboardInterrupt
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "D:\Project\i-Rindra\.venv\Lib\site-packages\starlette\routing.py", line 700, in lifespan
-    await receive()
-  File "D:\Project\i-Rindra\.venv\Lib\site-packages\uvicorn\lifespan\on.py", line 137, in receive
-    return await self.receive_queue.get()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\PC\AppData\Local\Programs\Python\Python312\Lib\asyncio\queues.py", line 158, in get
-    await getter
-asyncio.exceptions.CancelledError
-
-INFO:     Started server process [6040]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     ('10.64.227.136', 12181) - "WebSocket /" 403
+INFO:     ('10.64.227.136', 8897) - "WebSocket /" 403
 INFO:     connection rejected (403 Forbidden)
 INFO:     connection closed
-WARNING:  WatchFiles detected changes in '_test_vision.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [6040]
-INFO:     Started server process [23424]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in '_test_vision.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [23424]
-WARNING:  WatchFiles detected changes in 'app\core\config.py', '_test_vision.py', 'app\services\texte_documents.py'. Reloading...
-INFO:     Started server process [26856]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-ERROR:    Traceback (most recent call last):
-  File "C:\Users\PC\AppData\Local\Programs\Python\Python312\Lib\asyncio\runners.py", line 118, in run
-    return self._loop.run_until_complete(task)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\PC\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 691, in run_until_complete
-    return future.result()
-           ^^^^^^^^^^^^^^^
-asyncio.exceptions.CancelledError
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "C:\Users\PC\AppData\Local\Programs\Python\Python312\Lib\asyncio\runners.py", line 195, in run
-    return runner.run(main)
-           ^^^^^^^^^^^^^^^^
-  File "C:\Users\PC\AppData\Local\Programs\Python\Python312\Lib\asyncio\runners.py", line 123, in run
-    raise KeyboardInterrupt()
-KeyboardInterrupt
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "D:\Project\i-Rindra\.venv\Lib\site-packages\starlette\routing.py", line 700, in lifespan
-    await receive()
-  File "D:\Project\i-Rindra\.venv\Lib\site-packages\uvicorn\lifespan\on.py", line 137, in receive
-    return await self.receive_queue.get()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\PC\AppData\Local\Programs\Python\Python312\Lib\asyncio\queues.py", line 158, in get
-    await getter
-asyncio.exceptions.CancelledError
-
-INFO:     Started server process [24944]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in '_test_vision.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [24944]
-WARNING:  WatchFiles detected changes in '_test_vision.py', '_verif_cfg.py'. Reloading...
-INFO:     Started server process [5240]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-ERROR:    Traceback (most recent call last):
-  File "C:\Users\PC\AppData\Local\Programs\Python\Python312\Lib\asyncio\runners.py", line 118, in run
-    return self._loop.run_until_complete(task)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\PC\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 691, in run_until_complete
-    return future.result()
-           ^^^^^^^^^^^^^^^
-asyncio.exceptions.CancelledError
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "C:\Users\PC\AppData\Local\Programs\Python\Python312\Lib\asyncio\runners.py", line 195, in run
-    return runner.run(main)
-           ^^^^^^^^^^^^^^^^
-  File "C:\Users\PC\AppData\Local\Programs\Python\Python312\Lib\asyncio\runners.py", line 123, in run
-    raise KeyboardInterrupt()
-KeyboardInterrupt
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "D:\Project\i-Rindra\.venv\Lib\site-packages\starlette\routing.py", line 700, in lifespan
-    await receive()
-  File "D:\Project\i-Rindra\.venv\Lib\site-packages\uvicorn\lifespan\on.py", line 137, in receive
-    return await self.receive_queue.get()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\PC\AppData\Local\Programs\Python\Python312\Lib\asyncio\queues.py", line 158, in get
-    await getter
-asyncio.exceptions.CancelledError
-
-INFO:     Started server process [13588]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
+SMTP non configuré — email NON envoyé à luciarasoanirina8@gmail.com. Lien de réinitialisation : http://localhost:5173/reinitialiser-mdp/3vYuxG33JAJ5oixm1wvSec5djteZwLTGsSa0mcKshfo
+INFO:     ('10.64.227.136', 12818) - "WebSocket /" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed

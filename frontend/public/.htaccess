@@ -1,4 +1,7 @@
-# Routage SPA (React Router) : toute URL inconnue est servie par index.html
+# ============================================================================
+#  1. Routage SPA (React Router)
+#     Toute URL inconnue est servie par index.html (évite les 404 au refresh).
+# ============================================================================
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
@@ -7,3 +10,66 @@
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule . /index.html [L]
 </IfModule>
+
+# ============================================================================
+#  2. Compression
+#     Le bundle JavaScript et le CSS sont du texte : sans compression, le
+#     navigateur télécharge ~733 Ko au lieu de ~200 Ko. C'est de loin le
+#     premier gain de vitesse sur un hébergement mutualisé (o2switch), où la
+#     bande passante est le goulot d'étranglement. Le repli est encodé par
+#     gzip ; brotli n'est appliqué que si le module Apache est disponible.
+# ============================================================================
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css text/xml \
+    application/javascript application/json application/xml \
+    image/svg+xml application/manifest+json
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml \
+    application/javascript application/json application/xml \
+    image/svg+xml application/manifest+json
+  # `no-gzip` : on n'essaie pas de recompresser des images déjà compressées
+  # (PNG/JPEG), ce qui coûte du CPU au serveur pour un gain nul.
+  AddOutputFilterByType DEFLATE_NO_GZIP jpg jpeg png gif webp ico
+</IfModule>
+
+# ============================================================================
+#  3. Cache navigateur
+#     Les fichiers de /assets sont produits par Vite et nommés avec un hash
+#     dans leur nom (ex: index-DLn1HVT7.js) : leur contenu change à chaque
+#     build, donc ils peuvent être mis en cache indéfiniment et servi
+#     directement par le disque (sans PHP).
+# ============================================================================
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault                        "access plus 1 month"
+  ExpiresByType text/html               "access plus 0 seconds"
+  ExpiresByType application/javascript  "access plus 1 year"
+  ExpiresByType text/css                "access plus 1 year"
+  ExpiresByType image/png               "access plus 1 year"
+  ExpiresByType image/svg+xml           "access plus 1 year"
+  ExpiresByType image/jpeg              "access plus 1 year"
+  ExpiresByType image/webp              "access plus 1 year"
+  ExpiresByType font/woff2              "access plus 1 year"
+</IfModule>
+
+# `index.html` ne doit JAMAIS être mis en cache : il référence les chunks par
+# leur nom hashé. Un index.html périmé ferait pointer le navigateur vers des
+# fichiers qui n'existent plus après un déploiement.
+<IfModule mod_headers.c>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+  </FilesMatch>
+  <FilesMatch "\.(js|css|png|jpe?g|svg|webp|woff2?)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>
+
+# ============================================================================
+#  4. Sécurité — le build ne doit JAMAIS exposer ces fichiers.
+# ============================================================================
+<FilesMatch "^\.(env|env\..*|git.*|htpasswd)$">
+  Require all denied
+</FilesMatch>
+

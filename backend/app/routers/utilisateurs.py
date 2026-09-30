@@ -15,6 +15,8 @@ from app.models.utilisateur import Utilisateur, RoleUtilisateur
 from app.models.client import Client
 from app.routers.auth import get_current_user_role
 from app.schemas import UtilisateurCreate, UtilisateurUpdate, UtilisateurResponse
+from app.utils.mots_de_passe import verifier_mot_de_passe
+from app.utils.emails import normaliser_email
 
 router = APIRouter(prefix="/utilisateurs", tags=["Utilisateurs"])
 
@@ -74,9 +76,11 @@ async def create_utilisateur(
     _: str = Depends(_direction_seulement),
 ):
     """Créer un nouvel utilisateur (direction uniquement)."""
-    # Email unique
+    # Email unique — stocké et comparé sous forme canonique (minuscules), comme
+    # partout ailleurs : voir app/utils/emails.py.
+    email = normaliser_email(utilisateur_data.email)
     result = await db.execute(
-        select(Utilisateur).where(Utilisateur.email == utilisateur_data.email)
+        select(Utilisateur).where(Utilisateur.email == email)
     )
     if result.scalar_one_or_none():
         raise HTTPException(
@@ -111,10 +115,17 @@ async def create_utilisateur(
     else:
         client_id_final = None
 
+    erreur_mdp = verifier_mot_de_passe(utilisateur_data.mot_de_passe)
+    if erreur_mdp:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=erreur_mdp,
+        )
+
     nouvel_utilisateur = Utilisateur(
         nom=utilisateur_data.nom,
         prenom=utilisateur_data.prenom,
-        email=utilisateur_data.email,
+        email=email,
         mot_de_passe_hash=hash_password(utilisateur_data.mot_de_passe),
         role=role_enum,
         metier=utilisateur_data.metier,
@@ -152,6 +163,26 @@ async def update_utilisateur(
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Rôle invalide"
             )
+
+    # L'unicité de l'email est ce qui permet à « mot de passe oublié » de
+    # retrouver LE bon compte. Elle doit donc être garantie aussi par cette voie,
+    # et pas seulement à la création.
+    if "email" in donnees and donnees["email"] is not None:
+        nouvel_email = normaliser_email(donnees["email"])
+        if nouvel_email != utilisateur.email:
+            conflit = await db.execute(
+                select(Utilisateur).where(
+                    Utilisateur.email == nouvel_email,
+                    Utilisateur.id != utilisateur_id,
+                )
+            )
+            if conflit.scalar_one_or_none():
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Cet email est déjà utilisé",
+                )
+        donnees["email"] = nouvel_email
+
     for champ, valeur in donnees.items():
         setattr(utilisateur, champ, valeur)
 

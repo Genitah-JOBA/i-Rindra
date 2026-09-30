@@ -1,7 +1,7 @@
 // Login.jsx — page de connexion
 // Formulaire fonctionnel branché sur le backend + redirection selon le rôle.
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
 export default function Login() {
@@ -33,8 +33,11 @@ export default function Login() {
   };
 
   // Fonction de validation du mot de passe
+  // Volontairement laxiste : ici on AUTHENTIFIE, on ne DEFINIT PAS de mot de
+  // passe. Appliquer la politique de robustesse (8 car., majuscule, chiffre)
+  // ici bloquerait les comptes existants créés avant son introduction.
   const validerMotDePasse = (motDePasse) => {
-    if (motDePasse.length <= 4) {
+    if (motDePasse.length < 5) {
       return "Le mot de passe doit contenir au moins 5 caractères";
     }
     return "";
@@ -51,7 +54,6 @@ export default function Login() {
     return (
       email.length >= 5 &&
       validerEmail(email) === "" &&
-      motDePasse.length > 4 &&
       validerMotDePasse(motDePasse) === ""
     );
   };
@@ -118,6 +120,12 @@ export default function Login() {
           {erreur && (
             <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">
               {erreur}
+            </div>
+          )}
+
+          {location.state?.reinitialise && (
+            <div className="mb-4 rounded-lg bg-green-50 border border-green-200 px-3 py-2 text-sm text-green-800">
+              Mot de passe mis à jour. Vous pouvez vous connecter.
             </div>
           )}
 
@@ -278,8 +286,13 @@ export default function Login() {
               </p>
             </div>
 
-            <div className="block mx-auto text-right transition hover:text-i-blue cursor-pointer text-[12px] text-slate-500">
-              Mot de passe oublié ?
+            <div className="block mx-auto text-right">
+              <Link
+                to="/mot-de-passe-oublie"
+                className="inline-block transition hover:text-i-blue cursor-pointer text-[12px] text-slate-500"
+              >
+                Mot de passe oublié ?
+              </Link>
             </div>
 
             {/* Bouton connexion : CTA vert → turquoise (charte) */}

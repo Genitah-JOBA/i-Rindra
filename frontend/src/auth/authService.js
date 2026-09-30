@@ -38,4 +38,31 @@ export const authService = {
     const res = await api.put("/auth/me", data);
     return res.data; // utilisateur mis à jour
   },
+
+  // Étape 1 du flux mot de passe oublié : demande un lien par email.
+  // Le backend répond toujours 200 avec le même message, que l'adresse existe
+  // ou non — c'est volontaire, pour ne pas permettre d'énumérer les comptes.
+  // En développement, `lien_reinitialisation` est renvoyé dans la réponse
+  // (aucun SMTP requis) : on l'affiche pour pouvoir tester le flux.
+  async forgotPassword(email) {
+    const { data } = await api.post("/auth/mot-de-passe-oublie", { email });
+    return data; // { message, lien_reinitialisation? }
+  },
+
+  // Vérifie qu'un lien est encore valable avant d'afficher le formulaire.
+  async verifyResetToken(token) {
+    const { data } = await api.get("/auth/verifier-jeton-reinit", {
+      params: { token },
+    });
+    return data; // { valide: bool, email_masque?: string }
+  },
+
+  // Étape 2 : applique le nouveau mot de passe. Le lien est à usage unique.
+  async resetPassword(token, nouveauMotDePasse) {
+    const { data } = await api.post("/auth/reinitialiser-mdp", {
+      token,
+      nouveau_mot_de_passe: nouveauMotDePasse,
+    });
+    return data; // { message }
+  },
 };
