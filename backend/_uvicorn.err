@@ -108,3 +108,12 @@ SMTP non configuré — email NON envoyé à luciarasoanirina8@gmail.com. Lien de réi
 INFO:     ('10.64.227.136', 12818) - "WebSocket /" 403
 INFO:     connection rejected (403 Forbidden)
 INFO:     connection closed
+INFO:     ('10.64.227.136', 8313) - "WebSocket /" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     ('10.64.227.136', 10566) - "WebSocket /" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed
+INFO:     ('10.64.227.136', 14291) - "WebSocket /" 403
+INFO:     connection rejected (403 Forbidden)
+INFO:     connection closed

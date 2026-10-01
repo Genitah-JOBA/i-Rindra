@@ -212,10 +212,10 @@ export default function Absences() {
         {!estDirection && (
           <button
             onClick={ouvrirAjout}
-            className="flex items-center gap-2 bg-brand-gradient px-4 py-2 text-sm font-semibold text-white  transition hover:brightness-110"
+            className="flex items-center gap-2 bg-brand-gradient px-4 py-2 text-sm font-semibold text-black  transition hover:brightness-110"
           >
             <PlusIcon className="w-4 h-4" />
-            { "+ Nouvelle demande"}
+            { "Nouvelle demande"}
           </button>
         )}
       </div>

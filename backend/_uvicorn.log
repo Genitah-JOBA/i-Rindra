@@ -848,3 +848,19 @@ INFO:     10.64.227.136:12817 - "POST /mcp HTTP/1.1" 404 Not Found
 INFO:     10.64.227.136:12819 - "GET /loginMsg.js HTTP/1.1" 404 Not Found
 INFO:     10.64.227.136:12820 - "GET /cgi/get.cgi?cmd=home_login HTTP/1.1" 404 Not Found
 INFO:     127.0.0.1:6248 - "GET /health HTTP/1.1" 200 OK
+INFO:     10.64.227.136:14861 - "GET / HTTP/1.1" 200 OK
+INFO:     10.64.227.136:8312 - "POST /mcp HTTP/1.1" 404 Not Found
+INFO:     10.64.227.136:8312 - "POST /mcp HTTP/1.1" 404 Not Found
+INFO:     10.64.227.136:8314 - "GET /loginMsg.js HTTP/1.1" 404 Not Found
+INFO:     10.64.227.136:8315 - "GET /cgi/get.cgi?cmd=home_login HTTP/1.1" 404 Not Found
+INFO:     10.64.227.136:12838 - "GET / HTTP/1.1" 200 OK
+INFO:     10.64.227.136:10565 - "POST /mcp HTTP/1.1" 404 Not Found
+INFO:     10.64.227.136:10565 - "POST /mcp HTTP/1.1" 404 Not Found
+INFO:     10.64.227.136:10567 - "GET /loginMsg.js HTTP/1.1" 404 Not Found
+INFO:     10.64.227.136:10568 - "GET /cgi/get.cgi?cmd=home_login HTTP/1.1" 404 Not Found
+INFO:     10.64.227.136:14276 - "GET / HTTP/1.1" 200 OK
+INFO:     10.64.227.136:14290 - "POST /mcp HTTP/1.1" 404 Not Found
+INFO:     10.64.227.136:14290 - "POST /mcp HTTP/1.1" 404 Not Found
+INFO:     10.64.227.136:14292 - "GET /loginMsg.js HTTP/1.1" 404 Not Found
+INFO:     10.64.227.136:14293 - "GET /cgi/get.cgi?cmd=home_login HTTP/1.1" 404 Not Found
+INFO:     10.64.227.136:14294 - "POST /boaform/formPing HTTP/1.1" 404 Not Found

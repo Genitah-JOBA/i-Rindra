@@ -1,0 +1,4 @@
+﻿health #Le délai de l’opération a expiré. -> ERR en 240067 ms : Le délai de l’opération a expiré.
+health #Le délai de l’opération a expiré. -> ERR en 240004 ms : Le délai de l’opération a expiré.
+health #Le délai de l’opération a expiré. -> ERR en 240030 ms : Le délai de l’opération a expiré.
+health #Le délai de l’opération a expiré. -> ERR en 240043 ms : Le délai de l’opération a expiré.
