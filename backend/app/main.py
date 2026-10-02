@@ -2,6 +2,18 @@
 
 import asyncio
 
+# Certificats TLS : Python n'utilise pas le magasin de certificats de Windows.
+# Derrière un antivirus ou un proxy qui inspecte le HTTPS, TOUS les appels
+# sortants (Groq, Hugging Face, SMTP) échouaient alors avec
+# CERTIFICATE_VERIFY_FAILED. truststore fait utiliser le magasin du système,
+# sans désactiver la vérification. À faire avant toute création de client HTTP.
+try:
+    import truststore
+
+    truststore.inject_into_ssl()
+except ImportError:  # pragma: no cover — dépendance absente : comportement par défaut
+    pass
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
