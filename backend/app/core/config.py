@@ -64,6 +64,22 @@ class Settings(BaseSettings):
     LLM_VISION_MODEL: str = os.getenv("LLM_VISION_MODEL", "")
     LLM_TIMEOUT_SECONDS: float = float(os.getenv("LLM_TIMEOUT_SECONDS", 60))
 
+    # Recherche sémantique (RF-31) — pgvector + modèle d'embeddings LOCAL
+    # (fastembed / ONNX). Groq ne fournit pas d'embeddings : le modèle tourne
+    # dans le backend, sans clé ni coût. EMBEDDING_DIM doit correspondre au
+    # modèle ; en changer vide et reconstruit l'index au prochain démarrage.
+    RECHERCHE_VECTORIELLE: bool = os.getenv("RECHERCHE_VECTORIELLE", "true").lower() == "true"
+    EMBEDDING_MODEL: str = os.getenv(
+        "EMBEDDING_MODEL", "minishlab/potion-multilingual-128M"
+    )
+    EMBEDDING_DIM: int = int(os.getenv("EMBEDDING_DIM", 256))
+    EMBEDDING_CACHE_DIR: str = os.getenv("EMBEDDING_CACHE_DIR", ".cache/fastembed")
+    # Filtres de pertinence (calibrés sur potion-multilingual, à revoir si l'on
+    # change de modèle) : similarité cosinus minimale, et part minimale du
+    # meilleur score (écarte la « traîne » de résultats moyens).
+    EMBEDDING_SEUIL: float = float(os.getenv("EMBEDDING_SEUIL", 0.20))
+    EMBEDDING_SEUIL_RELATIF: float = float(os.getenv("EMBEDDING_SEUIL_RELATIF", 0.60))
+
     # Frontend — sert à construire le lien absolu du formulaire de
     # réinitialisation de mot de passe (le backend doit connaître l'URL publique).
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173").rstrip("/")

@@ -78,7 +78,9 @@ export default function RechercheTab({ projets }) {
           </button>
         </form>
         <p className="mt-2 text-xs text-slate-400">
-          La recherche interroge tâches, commentaires, jalons et fichiers du projet.
+          La recherche interroge tâches, commentaires, jalons et fichiers du projet :
+          d'abord les mots exacts, puis les passages proches par le sens (y compris
+          dans le contenu des PDF et documents Word).
         </p>
       </Carte>
 
@@ -108,6 +110,18 @@ export default function RechercheTab({ projets }) {
                       <span className="ml-2 text-[10px] font-semibold text-slate-400 uppercase">
                         {LIBELLE_TYPE[r.type] || r.type} #{r.id}
                       </span>
+                      {r.correspondance === "semantique" ? (
+                        <span
+                          className="ml-2 px-1.5 py-0.5 text-[10px] font-medium bg-i-blue/10 text-i-blue"
+                          title="Trouvé par le sens (recherche sémantique), sans contenir forcément les mots tapés"
+                        >
+                          Similaire {Math.round((r.score || 0) * 100)} %
+                        </span>
+                      ) : (
+                        <span className="ml-2 px-1.5 py-0.5 text-[10px] font-medium bg-i-green/20 text-slate-700">
+                          Exact
+                        </span>
+                      )}
                       {r.extrait && <p className="mt-1 text-xs text-slate-500 italic">{r.extrait}</p>}
                     </span>
                   </span>

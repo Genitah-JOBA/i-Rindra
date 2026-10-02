@@ -222,12 +222,16 @@ class ResultatRecherche(BaseModel):
     titre: str
     extrait: Optional[str] = None
     projet_id: int
+    # "exacte" (plein texte) ou "semantique" (pgvector, proche par le sens)
+    correspondance: str = "exacte"
+    score: Optional[float] = Field(None, description="Similarité cosinus (0 à 1), recherche sémantique")
 
 
 class RechercheResponse(BaseModel):
     """Résultats de recherche dans un projet (RF-31)."""
     analyse_id: int
     requete: str
+    recherche_semantique: bool = False
     nombre_resultats: int
     resultats: List[ResultatRecherche] = Field(default_factory=list)
 

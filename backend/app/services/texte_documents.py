@@ -78,6 +78,36 @@ async def extraire_texte_fichier(fichier: UploadFile) -> str:
     return _extraire_texte_brut(contenu)
 
 
+def extraire_texte_fichier_stocke(chemin: str) -> str | None:
+    """
+    Texte d'un fichier déjà enregistré sur disque (indexation RF-31).
+
+    Synchrone et sans appel réseau : les images (transcription par l'IA) et les
+    formats inconnus sont ignorés. Retourne None si rien n'est exploitable.
+    """
+    p = Path(chemin)
+    suffix = p.suffix.lower()
+    extracteurs = {
+        ".pdf": _extraire_pdf,
+        ".docx": _extraire_docx,
+        ".doc": _extraire_doc_legacy,
+        ".txt": _extraire_texte_brut,
+        ".md": _extraire_texte_brut,
+        ".csv": _extraire_texte_brut,
+    }
+    extraire = extracteurs.get(suffix)
+    if extraire is None or not p.is_file():
+        return None
+    try:
+        contenu = p.read_bytes()
+        if not contenu or len(contenu) > MAX_FICHIER_OCTETS:
+            return None
+        return extraire(contenu) or None
+    except Exception as exc:  # noqa: BLE001 — un fichier illisible ne bloque pas l'index
+        logger.warning("Indexation : lecture impossible de %s (%s)", chemin, exc)
+        return None
+
+
 def _extraire_texte_brut(contenu: bytes) -> str:
     """Texte plat (.txt/.md/.csv) : décode en UTF-8 puis latin-1 en secours."""
     for enc in ("utf-8", "latin-1"):

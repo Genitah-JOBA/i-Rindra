@@ -34,6 +34,7 @@ from app.models.projet import Projet, ProjetMembre, StatutSante
 from app.models.tache import Tache, StatutTache, PrioriteTache, CommentaireTache
 from app.models.utilisateur import Utilisateur
 from app.services.connectors.llm import chat_completion
+from app.services import vecteurs as vecteurs_service
 
 logger = logging.getLogger(__name__)
 
@@ -888,13 +889,17 @@ async def suggerer_affectation(db: AsyncSession, tache_id: int) -> dict:
 
 
 # ============================================================
-# RF-31 — Recherche dans le projet (fallback texte, sans pgvector)
+# RF-31 — Recherche dans le projet (plein texte + sémantique pgvector)
 # ============================================================
 
 async def rechercher(db: AsyncSession, projet_id: int, requete: str) -> dict:
-    """Recherche plein texte (ILIKE) dans tâches, commentaires, jalons, fichiers.
-    La recherche vectorielle (pgvector) sera branchée par-dessus quand l'extension
-    sera disponible — l'endpoint reste compatible. (RF-31)"""
+    """Recherche dans tâches, commentaires, jalons et fichiers (RF-31).
+
+    1. Plein texte (ILIKE) : correspondances exactes, toujours disponible.
+    2. Sémantique (pgvector) : passages proches par le SENS, y compris dans le
+       contenu des fichiers (PDF, Word, texte). Ignorée sans pgvector/modèle.
+    Les correspondances exactes passent en premier ; un résultat déjà trouvé
+    par le plein texte n'est pas répété."""
     motif = f"%{requete.strip()}%"
     resultats = []
 
@@ -947,17 +952,32 @@ async def rechercher(db: AsyncSession, projet_id: int, requete: str) -> dict:
             "extrait": f.type_mime, "projet_id": projet_id,
         })
 
+    for r in resultats:
+        r["correspondance"] = "exacte"
+
+    semantiques = []
+    try:
+        semantiques = await vecteurs_service.rechercher_semantique(db, projet_id, requete)
+    except Exception as exc:  # noqa: BLE001 — la recherche exacte reste servie
+        await db.rollback()
+        logger.warning("Recherche sémantique indisponible : %s", exc)
+    deja = {(r["type"], r["id"]) for r in resultats}
+    for r in semantiques:
+        if (r["type"], r["id"]) not in deja:
+            resultats.append({**r, "correspondance": "semantique"})
+
     analyse = await journaliser(
         db,
         projet_id=projet_id,
         type_analyse=TypeAnalyseIA.RECHERCHE,
         source=f"requete:{requete.strip()}",
         entree=requete,
-        resultat=f"{len(resultats)} résultat(s)",
+        resultat=f"{len(resultats)} résultat(s) dont {len(semantiques)} sémantique(s)",
     )
     return {
         "analyse_id": analyse.id,
         "requete": requete.strip(),
+        "recherche_semantique": vecteurs_service.disponible(),
         "nombre_resultats": len(resultats),
         "resultats": resultats,
     }

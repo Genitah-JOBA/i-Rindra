@@ -1,5 +1,7 @@
 # main.py
 
+import asyncio
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
@@ -7,6 +9,7 @@ from sqlalchemy import text
 from app.routers import auth, projets, taches, dashboard, client, fichiers, utilisateurs, notifications, clients, factures, ia, absences, suggestion_devis
 from app.core.database import engine, Base
 from app.services import notifications as notif_service
+from app.services import vecteurs as vecteurs_service
 import app.models
 
 # Création de l'application
@@ -54,6 +57,12 @@ async def init_db():
         await conn.execute(
             text("ALTER TABLE tache ADD COLUMN IF NOT EXISTS retard_notifie_le TIMESTAMPTZ")
         )
+        # Recherche sémantique (RF-31) : table document_chunk + index pgvector.
+        # Sans l'extension `vector`, ne fait rien (recherche plein texte seule).
+        await vecteurs_service.preparer_base(conn)
+    # Le modèle d'embeddings se charge en arrière-plan : le démarrage de l'API
+    # n'attend pas son premier téléchargement (~500 Mo).
+    app.state.prechargement_embeddings = asyncio.create_task(vecteurs_service.precharger_modele())
     # Le retard apparaît avec le temps, sans action utilisateur : une boucle de
     # fond le détecte et crée les notifications (direction, chef de projet,
     # client du projet).

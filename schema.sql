@@ -196,16 +196,21 @@ CREATE TABLE suggestion_tache (
 );
 
 -- ============================================================
---  12. DOCUMENT_CHUNK  (recherche vectorielle — pgvector — RF-31)
---  dimension 1536 = embeddings OpenAI text-embedding-3-small
---  >>> OPTIONNEL : décommente ce bloc SEULEMENT si pgvector est installé.
+--  12. DOCUMENT_CHUNK  (recherche sémantique — pgvector — RF-31)
+--  dimension 256 = modèle local minishlab/potion-multilingual-128M (fastembed)
+--  >>> Créée et migrée AUTOMATIQUEMENT au démarrage de l'API si pgvector est
+--      installé (app/services/vecteurs.py). Bloc donné pour référence.
 -- ============================================================
 -- CREATE TABLE document_chunk (
 --     id                  BIGSERIAL PRIMARY KEY,
 --     projet_id           BIGINT REFERENCES projet(id) ON DELETE CASCADE,
---     source              TEXT,                    -- fichier / message d'origine
---     contenu             TEXT NOT NULL,
---     embedding           vector(1536)
+--     source              TEXT,                    -- titre de la source
+--     contenu             TEXT NOT NULL,           -- passage (~400 caractères)
+--     embedding           vector(256),
+--     source_type         VARCHAR(20),             -- tache | commentaire | jalon | fichier
+--     source_id           BIGINT,
+--     empreinte           VARCHAR(64),             -- SHA-256 : ré-encodage si modifié
+--     cree_le             TIMESTAMPTZ NOT NULL DEFAULT now()
 -- );
 
 -- ============================================================
@@ -290,8 +295,9 @@ CREATE INDEX idx_suggestion_devis_projet ON suggestion_devis (projet_id);
 CREATE INDEX idx_suggestion_devis_date   ON suggestion_devis (cree_le);
 
 -- Index vectoriel (similarité cosinus) — OPTIONNEL, décommente avec la table document_chunk :
--- CREATE INDEX idx_chunk_embedding
---     ON document_chunk USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
+-- CREATE INDEX idx_chunk_embedding_hnsw
+--     ON document_chunk USING hnsw (embedding vector_cosine_ops);
+-- CREATE INDEX idx_chunk_source ON document_chunk (projet_id, source_type, source_id);
 
 -- ============================================================
 --  FIN DU SCHÉMA
