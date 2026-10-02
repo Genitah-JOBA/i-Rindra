@@ -349,7 +349,7 @@ export default function TaskDetailModal({
                       type="button"
                       onClick={demarrerChrono}
                       disabled={sauvegardeTemps}
-                      className="bg-brand-gradient px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
+                      className="bg-brand-gradient px-3 py-2 text-sm font-semibold text-black transition hover:brightness-110 disabled:opacity-50"
                     >
                       {"Démarrer"}
                     </button>
@@ -451,7 +451,7 @@ export default function TaskDetailModal({
                     <button
                       type="submit"
                       disabled={envoi || !nouveau.trim()}
-                      className="bg-brand-gradient px-4 py-2 text-sm font-semibold text-white  transition hover:brightness-110 disabled:opacity-50"
+                      className="bg-brand-gradient px-4 py-2 text-sm font-semibold text-black  transition hover:brightness-110"
                     >
                       {envoi ? "Enregistrement…" : "Envoyer"}
                     </button>
