@@ -34,6 +34,10 @@ export default function Taches() {
   const projetParam = searchParams.get("projet");
   const { showSuccess, showError } = useMessage();
   const estGestion = ["direction", "drh", "chef_de_projet"].includes(user?.role);
+  // L'équipe peut créer ses propres tâches : elle en devient le responsable.
+  // Le client, lui, reste en lecture seule (espace /mon-projet).
+  const estEquipe = user?.role === "equipe";
+  const peutCreerTache = estGestion || estEquipe;
 
   const [projets, setProjets] = useState([]);
   const [projetId, setProjetId] = useState("");
@@ -144,13 +148,15 @@ export default function Taches() {
     }
     setCreation(true);
     try {
+      // L'équipe n'a pas de sélecteur de responsable : le backend l'affecte
+      // automatiquement à l'auteur de la tâche.
       await tachesService.create(projetId, {
         projet_id: parseInt(projetId, 10),
         titre: form.titre,
         description: form.description || null,
         priorite: form.priorite,
         statut: "a_faire",
-        responsable_id: form.responsable_id
+        responsable_id: estGestion && form.responsable_id
           ? parseInt(form.responsable_id, 10)
           : null,
         echeance: form.echeance || null,

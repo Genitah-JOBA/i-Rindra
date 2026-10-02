@@ -91,6 +91,7 @@ CREATE TABLE tache (
 	echeance DATE, 
 	responsable_id INTEGER, 
 	ordre INTEGER NOT NULL, 
+	retard_notifie_le TIMESTAMP WITH TIME ZONE, 
 	cree_le TIMESTAMP WITH TIME ZONE DEFAULT now(), 
 	modifie_le TIMESTAMP WITH TIME ZONE DEFAULT now(), 
 	PRIMARY KEY (id), 

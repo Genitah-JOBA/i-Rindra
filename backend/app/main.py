@@ -6,6 +6,7 @@ from sqlalchemy import text
 
 from app.routers import auth, projets, taches, dashboard, client, fichiers, utilisateurs, notifications, clients, factures, ia, absences, suggestion_devis
 from app.core.database import engine, Base
+from app.services import notifications as notif_service
 import app.models
 
 # Création de l'application
@@ -47,6 +48,21 @@ async def init_db():
         await conn.execute(
             text("ALTER TABLE client ADD COLUMN IF NOT EXISTS devise VARCHAR(10) NOT NULL DEFAULT 'Ar'")
         )
+        # Migration idempotente : marqueur d'alerte de retard sur les tâches.
+        # `create_all` ne modifie jamais une table déjà créée : sur une base
+        # existante, seule cette instruction ajoute la colonne.
+        await conn.execute(
+            text("ALTER TABLE tache ADD COLUMN IF NOT EXISTS retard_notifie_le TIMESTAMPTZ")
+        )
+    # Le retard apparaît avec le temps, sans action utilisateur : une boucle de
+    # fond le détecte et crée les notifications (direction, chef de projet,
+    # client du projet).
+    notif_service.demarrer_surveillance_retards()
+
+
+@app.on_event("shutdown")
+async def stopper_surveillance():
+    await notif_service.arreter_surveillance_retards()
 
 @app.get("/")
 async def root():

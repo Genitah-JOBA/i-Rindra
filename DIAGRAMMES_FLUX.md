@@ -39,6 +39,16 @@ flowchart TD
     EQ & DIR & ADM --> TACHE[Créer / déplacer une tâche<br/>Kanban]
     TACHE --> AV[Recalcul avancement du projet<br/>update_projet_avancement]
     TACHE -->|notification « tache_avancement »| NTAV[Direction + client + membres<br/>sauf l'auteur]
+    DIR & ADM --> DELT[Supprimer une tâche]
+    DELT -->|notification « tache_supprimee »| NSUP[Direction + chef de projet<br/>+ membres + client]
+    TACHE --> RETARD{Tâche en retard ?<br/>échéance dépassée et non terminée}
+    RETARD -->|oui| NRET[notification « tache_retard »<br/>anti-doublon : retard_notifie_le]
+    NRET --> NRETDIR[Direction + DRH + chef de projet<br/>lien /taches?projet=]
+    NRET --> NRETCLI[Client du projet<br/>lien /mon-projet]
+
+    %% Détection du retard : aucune action ne le provoque (le temps passe)
+    TIME[Tâche de fond — scan horaire] --> RETARD
+    NOTIF2[GET /notifications/count<br/>toutes les 30 s] --> RETARD
 
     %% Deuxième niveau
     AV --> PJ[Projet : statut_sante, avancement_pct]
@@ -53,7 +63,7 @@ flowchart TD
     CLI --> TCLI[GET /client/mon-projet/taches]
 
     %% Notifications
-    NDIR & NCLI & NMEM & NTAV --> NOTIF[GET /notifications]
+    NDIR & NCLI & NMEM & NTAV & NSUP & NRETDIR & NRETCLI --> NOTIF[GET /notifications]
     NOTIF --> LU1[PATCH /notifications/:id/lue]
     NOTIF --> LU2[PATCH /notifications/toutes-lues]
 

@@ -2,6 +2,7 @@
 """
 Notifications de l'utilisateur connecté.
 """
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, update
@@ -9,11 +10,38 @@ from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 
-from app.core.database import get_db
+logger = logging.getLogger(__name__)
+
+from app.core.database import get_db, AsyncSessionLocal
 from app.routers.auth import get_current_user_id
 from app.models.notification import Notification
+from app.services import notifications as notif_service
 
 router = APIRouter(prefix="/notifications", tags=["Notifications"])
+
+
+async def _detecter_retards():
+    """
+    Opportuniste : à chaque lecture de la cloche, on regarde si une tâche est
+    devenue en retard depuis la dernière fois.
+
+    La boucle de fond (démarrée dans main.py) reste le filet de sécurité — elle
+    couvre le cas où personne n'a d'onglet ouvert. Ce passage ici rend l'alerte
+    quasi immédiate dès qu'un utilisateur se connecte, sans la dupliquer (le
+    marqueur `retard_notifie_le` garantit l'unicité).
+
+    Session VOLONTAIREMENT séparée de celle de la requête : ce scan écrit en
+    base, et le commit ne doit surtout pas emmener avec lui une transaction de
+    lecture en cours sur le chemin de l'appelant.
+    """
+    try:
+        async with AsyncSessionLocal() as session:
+            n = await notif_service.scanner_taches_en_retard(session)
+            if n:
+                await session.commit()
+    except Exception:
+        # Une alerte ne doit jamais faire échouer la lecture des notifications.
+        logger.exception("Scan des tâches en retard interrompu")
 
 
 class NotificationResponse(BaseModel):
@@ -32,6 +60,8 @@ async def mes_notifications(
     user_id: int = Depends(get_current_user_id),
 ):
     """Mes notifications (les plus récentes d'abord)."""
+    await _detecter_retards()
+
     res = await db.execute(
         select(Notification)
         .where(Notification.destinataire_id == user_id)
@@ -47,6 +77,10 @@ async def nombre_non_lues(
     user_id: int = Depends(get_current_user_id),
 ):
     """Nombre de notifications non lues (pour le badge)."""
+    # La cloche interroge ce endpoint toutes les 30 s : c'est le point de
+    # passage naturel pour détecter les nouveaux retards.
+    await _detecter_retards()
+
     res = await db.execute(
         select(func.count(Notification.id)).where(
             Notification.destinataire_id == user_id,

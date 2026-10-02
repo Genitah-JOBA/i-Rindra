@@ -18,6 +18,12 @@ const formatDate = (iso) => {
   }
 };
 
+// Alertes de pilotage : retard d'une tâche et suppression. Ces deux événements
+// appellent une décision (relancer, replanifier), ils se distinguent donc du
+// reste du flux.
+const TYPES_ALERTE = ["tache_retard", "tache_supprimee"];
+const estAlerte = (n) => TYPES_ALERTE.includes(n.type);
+
 export default function NotificationBell() {
   const [open, setOpen] = useState(false);
   const [count, setCount] = useState(0);
@@ -168,15 +174,25 @@ export default function NotificationBell() {
               <li key={n.id}>
                 <button
                   onClick={() => clic(n)}
-                  className={`w-full px-4 py-3 text-left text-sm hover:bg-slate-50 ${
+                  className={`flex w-full items-start gap-2 px-4 py-3 text-left text-sm hover:bg-slate-50 ${
                     n.lu
                       ? "text-slate-500"
-                      : "bg-[#00B2A0]/5 font-medium text-slate-800"
+                      : estAlerte(n)
+                        ? "bg-red-50/60 font-medium text-slate-800"
+                        : "bg-[#00B2A0]/5 font-medium text-slate-800"
                   }`}
                 >
-                  {n.message}
-                  <span className="mt-0.5 block text-xs text-slate-400">
-                    {formatDate(n.cree_le)}
+                  {estAlerte(n) && (
+                    <span
+                      className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-red-500"
+                      aria-hidden="true"
+                    />
+                  )}
+                  <span className="min-w-0 flex-1">
+                    {n.message}
+                    <span className="mt-0.5 block text-xs text-slate-400">
+                      {formatDate(n.cree_le)}
+                    </span>
                   </span>
                 </button>
               </li>

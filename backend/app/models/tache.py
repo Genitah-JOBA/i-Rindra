@@ -40,6 +40,9 @@ class Tache(Base):
     echeance = Column(Date, nullable=True)
     responsable_id = Column(Integer, ForeignKey("utilisateur.id", ondelete="SET NULL"), nullable=True, index=True)
     ordre = Column(Integer, nullable=False, default=0)   # position dans la colonne Kanban
+    # Dernière alerte de retard envoyée (anti-doublon, remis à None dès que la
+    # tâche n'est plus en retard : elle peut alors être re-alertée).
+    retard_notifie_le = Column(DateTime(timezone=True), nullable=True)
     cree_le = Column(DateTime(timezone=True), server_default=func.now())
     modifie_le = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 

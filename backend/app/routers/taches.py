@@ -34,6 +34,43 @@ from app.schemas.tache import (
 
 router = APIRouter(prefix="/taches", tags=["Tâches"])
 
+
+# ============================================================
+# UTILITAIRES
+# ============================================================
+
+async def check_gestion_ou_equipe(role: str = Depends(get_current_user_role)):
+    """
+    Droits de création d'une tâche : la gestion, ou un membre de l'équipe.
+
+    Un membre de l'équipe qui crée une tâche en devient automatiquement le
+    responsable : il s'engage sur sa propre tâche (voir `create_tache`).
+    """
+    if role not in ("direction", "drh", "chef_de_projet", "equipe"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Seule la gestion ou un membre de l'équipe peut créer une tâche",
+        )
+    return role
+
+
+async def _reevaluer_retard(db: AsyncSession, tache: Tache, auteur_id: int = None):
+    """
+    Synchronise l'alerte de retard d'une tâche après une modification.
+
+    - Tâche redevenue à l'heure (terminée, échéance repoussée) : on efface le
+      marqueur pour qu'une future alerte soit possible.
+    - Tâche qui vient de basculer en retard : on notifie la direction, le chef
+      de projet, l'équipe et le client du projet.
+    """
+    if notif_service.tache_en_retard(tache):
+        if tache.retard_notifie_le is None:
+            await notif_service.signaler_retard_tache(db, tache, auteur_id=auteur_id)
+    elif tache.retard_notifie_le is not None:
+        tache.retard_notifie_le = None
+    await db.commit()
+
+
 # ============================================================
 # TÂCHES
 # ============================================================
@@ -128,20 +165,43 @@ async def create_tache(
     tache_data: TacheCreate,
     projet: Projet = Depends(check_projet_access),  # Vérifie l'accès
     db: AsyncSession = Depends(get_db),
-    _: str = Depends(check_direction_or_chef_projet)  # Vérifie les permissions
+    current_user_id: int = Depends(get_current_user_id),
+    role: str = Depends(check_gestion_ou_equipe)  # Gestion OU équipe
 ):
     """
     Crée une nouvelle tâche dans un projet.
-    
-    **Permissions :** Seule la direction ou le chef de projet peut créer une tâche (RF-15).
+
+    **Permissions (RF-15) :** la direction, le DRH, le chef de projet ET les
+    membres de l'équipe affectés au projet peuvent créer une tâche.
+
+    **Membre de l'équipe :** il devient automatiquement le responsable de la
+    tâche qu'il crée, et celle-ci démarre en « À faire » :
+      - il s'engage sur sa propre tâche plutôt que de la déléguer ;
+      - une tâche ne peut pas naître déjà terminée, sinon un membre gonflerait
+        l'avancement du projet (calculé sur le nombre de tâches terminées).
+
+    La gestion, elle, choisit librement le responsable et le statut initial.
     """
     # 1. Vérifie que le projet existe
     # Déjà fait par check_projet_access
-    
-    # 2. Vérifie que le responsable existe (si spécifié)
-    if tache_data.responsable_id:
+
+    est_equipe = role == "equipe"
+
+    # 2. Détermine le responsable
+    if est_equipe:
+        # L'équipe ne choisit pas : elle porte elle-même la tâche qu'elle crée.
+        responsable_id = current_user_id
+        statut_initial = tache_data.statut or StatutTache.A_FAIRE
+        if statut_initial == StatutTache.TERMINE:
+            statut_initial = StatutTache.A_FAIRE
+    else:
+        responsable_id = tache_data.responsable_id
+        statut_initial = tache_data.statut or StatutTache.A_FAIRE
+
+    # 3. Vérifie que le responsable existe (si spécifié)
+    if responsable_id:
         result = await db.execute(
-            select(Utilisateur).where(Utilisateur.id == tache_data.responsable_id)
+            select(Utilisateur).where(Utilisateur.id == responsable_id)
         )
         responsable = result.scalar_one_or_none()
         
@@ -151,24 +211,24 @@ async def create_tache(
                 detail="Responsable non trouvé"
             )
     
-    # 3. Calcule l'ordre (dernière position dans la colonne)
+    # 4. Calcule l'ordre (dernière position dans la colonne)
     result = await db.execute(
         select(func.max(Tache.ordre))
         .where(and_(
             Tache.projet_id == projet_id,
-            Tache.statut == tache_data.statut
+            Tache.statut == statut_initial
         ))
     )
     max_ordre = result.scalar_one_or_none()
     ordre = (max_ordre or 0) + 1
     
-    # 4. Crée la tâche
+    # 5. Crée la tâche
     new_tache = Tache(
         titre=tache_data.titre,
         description=tache_data.description,
         projet_id=projet_id,
-        responsable_id=tache_data.responsable_id,
-        statut=tache_data.statut or StatutTache.A_FAIRE,
+        responsable_id=responsable_id,
+        statut=statut_initial,
         priorite=tache_data.priorite,
         echeance=tache_data.echeance,
         ordre=ordre,
@@ -178,8 +238,15 @@ async def create_tache(
     await db.commit()
     await db.refresh(new_tache)
     
-    # 5. Met à jour l'avancement du projet (RF-09)
+    # 6. Met à jour l'avancement du projet (RF-09)
     await update_projet_avancement(projet_id, db)
+    
+    # 7. Alerte de retard : une tâche peut être créée avec une échéance déjà dépassée.
+    if notif_service.tache_en_retard(new_tache):
+        await notif_service.signaler_retard_tache(
+            db, new_tache, auteur_id=current_user_id
+        )
+        await db.commit()
     
     return TacheResponse.model_validate(new_tache)
 
@@ -260,6 +327,10 @@ async def update_tache(
     # 7. Met à jour l'avancement du projet
     await update_projet_avancement(tache.projet_id, db)
     
+    # 8. Réévalue le retard : une échéance peut être repoussée devant l'échéance
+    #    du jour, ou au contraire reculée et rendre la tâche en retard.
+    await _reevaluer_retard(db, tache)
+    
     return TacheResponse.model_validate(tache)
 
 @router.delete("/{tache_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -267,12 +338,16 @@ async def delete_tache(
     tache_id: int,
     db: AsyncSession = Depends(get_db),
     token: str = Depends(oauth2_scheme),
+    current_user_id: int = Depends(get_current_user_id),
     _: str = Depends(check_direction_or_chef_projet)
 ):
     """
     Supprime une tâche.
-    
+
     **Permissions :** Seule la direction ou le chef de projet peut supprimer une tâche.
+
+    La suppression est notifiée à la direction, au chef de projet, à l'équipe et
+    au client du projet (sauf l'auteur de la suppression).
     """
     # 1. Récupère la tâche
     result = await db.execute(
@@ -290,12 +365,19 @@ async def delete_tache(
     await check_projet_access(tache.projet_id, db=db, token=token)
     
     projet_id = tache.projet_id
+    titre = tache.titre
     
-    # 3. Supprime la tâche
+    # 3. Notification AVANT la suppression : la tâche n'existe plus ensuite et
+    #    ses destinataires (direction, chef de projet, client) doivent l'apprendre.
+    await notif_service.signaler_suppression_tache(
+        db, titre, projet_id, auteur_id=current_user_id
+    )
+    
+    # 4. Supprime la tâche
     await db.delete(tache)
     await db.commit()
     
-    # 4. Met à jour l'avancement du projet
+    # 5. Met à jour l'avancement du projet
     await update_projet_avancement(projet_id, db)
     
     return None
@@ -369,6 +451,10 @@ async def update_tache_statut(
         f"/taches?projet={tache.projet_id}",
     )
     await db.commit()
+
+    # 8. Alerte de retard : sortir la tâche de « Terminé » la rend en retard
+    #    si son échéance est déjà dépassée.
+    await _reevaluer_retard(db, tache, auteur_id=current_user_id)
 
     return TacheResponse.model_validate(tache)
 

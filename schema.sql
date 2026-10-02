@@ -103,6 +103,9 @@ CREATE TABLE tache (
     echeance            DATE,
     responsable_id      BIGINT REFERENCES utilisateur(id) ON DELETE SET NULL,   -- RF-13
     ordre               INTEGER NOT NULL DEFAULT 0,                 -- position dans la colonne Kanban
+    -- Dernière alerte de retard envoyée ; NULL = pas encore alerté.
+    -- Remis à NULL dès que la tâche n'est plus en retard (réarmement).
+    retard_notifie_le   TIMESTAMPTZ,
     cree_le             TIMESTAMPTZ NOT NULL DEFAULT now(),
     modifie_le          TIMESTAMPTZ NOT NULL DEFAULT now()
 );
