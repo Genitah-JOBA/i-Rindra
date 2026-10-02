@@ -270,7 +270,7 @@ export default function SuggestionDevis() {
         </div>
         <button
           onClick={ouvrirAjout}
-          className="flex items-center gap-2 bg-brand-gradient px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110"
+          className="flex items-center gap-2 bg-brand-gradient px-4 py-2 text-sm font-semibold text-black transition hover:brightness-110"
         >
           <IconSparkles className="w-4 h-4" />
           Ajout devis par IA
@@ -394,7 +394,7 @@ Aucun devis suggéré pour le moment. Utilisez « Ajout devis par
                       </button>
                       <button
                         onClick={() => valider(s)}
-                        className="flex items-center gap-1 bg-brand-gradient px-2.5 py-1 text-xs font-semibold text-white transition hover:brightness-110"
+                        className="flex items-center gap-1 bg-brand-gradient px-2.5 py-1 text-xs font-semibold text-black transition hover:brightness-110"
                       >
                         <IconCheck className="w-3.5 h-3.5" />
                         Valider
