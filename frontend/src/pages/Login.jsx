@@ -76,10 +76,8 @@ export default function Login() {
     setEnCours(true);
     try {
       const { user } = await login(email, motDePasse);
-      const destination =
-        user.role === "client"
-          ? "/mon-projet"
-          : location.state?.from?.pathname || "/";
+      // Toujours l'accueil du rôle après connexion, jamais la dernière page consultée.
+      const destination = user.role === "client" ? "/mon-projet" : "/";
       navigate(destination, { replace: true });
     } catch (err) {
       if (!err.response) {

@@ -1,5 +1,5 @@
 // ProtectedRoute.jsx — protège les routes selon l'authentification et le rôle.
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
 // Écran d'attente du jeton. Distinct de l'erreur ci-dessous : ici on ne sait
@@ -62,7 +62,6 @@ function ApiInjoignable({ message, onRecharger }) {
 export default function ProtectedRoute({ children, roles }) {
   const { isAuthenticated, user, loading, erreurBoot, rechargerUtilisateur } =
     useAuth();
-  const location = useLocation();
 
   // Tant qu'on vérifie le token, on n'affiche rien (évite un flash vers /login).
   if (loading) return <Attente />;
@@ -75,9 +74,9 @@ export default function ProtectedRoute({ children, roles }) {
     );
   }
 
-  // Non connecté -> vers la page de login (on mémorise la page demandée).
+  // Non connecté -> vers la page de login (après connexion : tableau de bord).
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/login" replace />;
   }
 
   // Connecté mais rôle non autorisé -> accueil adapté au rôle (évite les boucles).
