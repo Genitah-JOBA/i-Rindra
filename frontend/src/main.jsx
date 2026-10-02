@@ -6,6 +6,10 @@ import { MessageProvider } from "./context/MessageContext"; // ⬅️ AJOUT
 import { ChronoProvider } from "./context/ChronoContext"; // ⬅️ AJOUT
 import "./index.css";
 import App from "./App.jsx";
+import { redirigerVersAccueilAuDemarrage } from "./utils/accueilAuDemarrage";
+
+// À l'ouverture (hors F5), on démarre toujours sur le tableau de bord.
+redirigerVersAccueilAuDemarrage();
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

@@ -179,18 +179,44 @@ export default function Taches() {
     }
   };
 
-  // Déplacer une tâche vers un autre statut
+  // Déplacer une tâche vers un autre statut (boutons ← → ou glisser-déposer).
+  // Mise à jour optimiste : la carte change de colonne tout de suite ; si le
+  // serveur refuse (droits, réseau), on la remet à sa place.
   const deplacer = async (tache, nouveauStatut) => {
+    if (tache.statut === nouveauStatut) return;
+    const ancienStatut = tache.statut;
+    const appliquer = (statut) =>
+      setTaches((prev) =>
+        prev.map((t) => (t.id === tache.id ? { ...t, statut } : t)),
+      );
+    appliquer(nouveauStatut);
     try {
       await tachesService.changeStatut(tache.id, nouveauStatut);
       showSuccess(
         `Tâche déplacée vers "${COLONNES.find((c) => c.statut === nouveauStatut)?.label}"`,
       );
-      await chargerTaches();
     } catch (err) {
+      appliquer(ancienStatut);
       const msg = err.response?.data?.detail || "Impossible de déplacer la tâche.";
       showError(msg);
     }
+  };
+
+  // ---------- Glisser-déposer (RF-12) ----------
+  const [tacheGlissee, setTacheGlissee] = useState(null);
+  const [colonneSurvolee, setColonneSurvolee] = useState(null);
+
+  const finGlisser = () => {
+    setTacheGlissee(null);
+    setColonneSurvolee(null);
+  };
+
+  const deposer = (e, statut) => {
+    e.preventDefault();
+    const id = Number(e.dataTransfer.getData("text/plain"));
+    const tache = taches.find((t) => t.id === id);
+    finGlisser();
+    if (tache) deplacer(tache, statut);
   };
 
   const supprimer = async (tache) => {
@@ -345,10 +371,25 @@ export default function Taches() {
           {COLONNES.map((col, colIndex) => {
             const tachesCol = taches.filter((t) => t.statut === col.statut);
             return (
-              <div 
-                key={col.statut} 
-                className="bg-slate-50 border border-slate-200 p-3 animate__animated animate__fadeInUp"
+              <div
+                key={col.statut}
+                className={`border p-3 transition-colors animate__animated animate__fadeInUp ${
+                  colonneSurvolee === col.statut
+                    ? "bg-i-blue/10 border-i-blue border-dashed"
+                    : "bg-slate-50 border-slate-200"
+                }`}
                 style={{ animationDelay: `${0.1 + (colIndex * 0.1)}s` }}
+                onDragOver={(e) => {
+                  if (tacheGlissee === null) return;
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = "move";
+                  if (colonneSurvolee !== col.statut) setColonneSurvolee(col.statut);
+                }}
+                onDragLeave={(e) => {
+                  // Ignore les sorties vers un élément enfant de la colonne
+                  if (!e.currentTarget.contains(e.relatedTarget)) setColonneSurvolee(null);
+                }}
+                onDrop={(e) => deposer(e, col.statut)}
               >
                 <h2 className="mb-3 flex items-center justify-between text-sm font-semibold text-slate-700">
                   {col.label}
@@ -363,10 +404,19 @@ export default function Taches() {
                     return (
                       <div
                         key={t.id}
-                        className="cursor-pointer border border-slate-200 bg-white p-3 shadow-sm hover:shadow-md hover:border-i-blue transition-all duration-200 hover:-translate-y-1 animate__animated animate__fadeInUp"
+                        draggable
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData("text/plain", String(t.id));
+                          e.dataTransfer.effectAllowed = "move";
+                          setTacheGlissee(t.id);
+                        }}
+                        onDragEnd={finGlisser}
+                        className={`cursor-grab active:cursor-grabbing border border-slate-200 bg-white p-3 shadow-sm hover:shadow-md hover:border-i-blue transition-all duration-200 hover:-translate-y-1 animate__animated animate__fadeInUp ${
+                          tacheGlissee === t.id ? "opacity-40" : ""
+                        }`}
                         style={{ animationDelay: `${0.1 + (index * 0.05)}s` }}
                         onClick={() => setTacheActive(t)}
-                        title="Ouvrir le détail"
+                        title="Glisser pour changer de colonne · cliquer pour le détail"
                       >
                         <div className="mb-1 flex items-start justify-between gap-2">
                           <p className="text-sm font-medium text-slate-800">
