@@ -68,8 +68,26 @@ function addDays(date, days) {
   return result.toISOString().slice(0, 10);
 }
 
+// Icône poubelle (remplace FontAwesome)
+const TrashIcon = ({ className = "w-4 h-4" }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.8}
+    stroke="currentColor"
+    className={className}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+    />
+  </svg>
+);
+
 export default function Facturation() {
-  const { showSuccess, showError, showWarning, showInfo } = useMessage();
+  const { showSuccess, showError } = useMessage();
   const tableRef = useRef(null);
 
   const [factures, setFactures] = useState([]);
@@ -290,9 +308,8 @@ export default function Facturation() {
     }
   };
 
-  // âœ… Confirmation de suppression avec MessageBox
+  // Confirmation de suppression
   const supprimer = async (f) => {
-    // Créer une confirmation personnalisée
     const confirmed = await new Promise((resolve) => {
       const container = document.createElement("div");
       container.className =
@@ -631,7 +648,7 @@ export default function Facturation() {
           </table>
           
           <div class="totaux">
-            <p><span class="label">ðŸ“Š Résumé :</span></p>
+            <p><span class="label">📊 Résumé :</span></p>
             <p><span class="label">Total factures :</span> <span class="value">${totalFactures}</span></p>
             <p><span class="label">Total TTC :</span> <span class="value">${formatMontantSimple(
               totalTTC
@@ -750,7 +767,7 @@ export default function Facturation() {
           </div>
           <button
             onClick={ouvrirAjout}
-            className="bg-brand-gradient px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110"
+            className="bg-brand-gradient px-4 py-2 text-sm font-semibold text-black transition hover:brightness-110"
           >
             + {"Nouvelle facture"}
           </button>
@@ -856,8 +873,9 @@ export default function Facturation() {
                       </button>
                       <button
                         onClick={() => supprimer(f)}
-                        className="text-slate-500 hover:text-red-600"
+                        className="flex items-center gap-1 text-slate-500 hover:text-red-600"
                       >
+                        <TrashIcon className="w-3.5 h-3.5" />
                         {"Supprimer"}
                       </button>
                     </div>
@@ -886,9 +904,9 @@ export default function Facturation() {
             <form onSubmit={enregistrer} className="space-y-3">
               {(formErreur || dateEmissionError || dateEcheanceError) && (
                 <div className="bg-red-50 border border-red-200 p-2 text-sm text-red-700">
-                  {formErreur && <p>âš ï¸ {formErreur}</p>}
-                  {dateEmissionError && <p>âš ï¸ {dateEmissionError}</p>}
-                  {dateEcheanceError && <p>âš ï¸ {dateEcheanceError}</p>}
+                  {formErreur && <p>⚠️ {formErreur}</p>}
+                  {dateEmissionError && <p>⚠️ {dateEmissionError}</p>}
+                  {dateEcheanceError && <p>⚠️ {dateEcheanceError}</p>}
                 </div>
               )}
 
@@ -953,7 +971,7 @@ export default function Facturation() {
                       (p) => String(p.client_id) === String(form.client_id)
                     ).length === 0 && (
                       <p className="mt-1 text-xs text-amber-600">
-                        âš ï¸ Aucun projet trouvé pour ce client
+                        ⚠️ Aucun projet trouvé pour ce client
                       </p>
                     )}
                 </div>
@@ -1027,7 +1045,7 @@ export default function Facturation() {
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-slate-600">
-                    {"TVA (%)"} (%){" "}
+                    {"TVA (%)"}{" "}
                     <span className="text-red-500">*</span>
                   </label>
                   <input

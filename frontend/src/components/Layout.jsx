@@ -675,7 +675,7 @@ const pleinEcran = pathname.startsWith("/assistant-ia");
           onClick={() => setConfirmLogoutOpen(false)}
         >
           <div
-            className="animate__animated animate__zoomIn w-full max-w-sm rounded-2xl border border-white/10 bg-white p-6 text-center shadow-2xl"
+            className="animate__animated animate__zoomIn w-full max-w-sm border border-white/10 bg-white p-6 text-center shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-red-50">
@@ -703,13 +703,13 @@ const pleinEcran = pathname.startsWith("/assistant-ia");
             <div className="flex justify-center gap-3">
               <button
                 onClick={() => setConfirmLogoutOpen(false)}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                className="border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
               >
                 Annuler
               </button>
               <button
                 onClick={confirmerLogout}
-                className="rounded-lg bg-brand-gradient px-4 py-2 text-sm font-medium text-black transition hover:brightness-110"
+                className="bg-brand-gradient px-4 py-2 text-sm font-medium text-black transition hover:brightness-110"
               >
                 Déconnexion
               </button>
