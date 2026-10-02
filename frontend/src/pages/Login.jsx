@@ -98,7 +98,7 @@ export default function Login() {
 
   return (
     <div className="flex h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-i-primary via-i-primary to-[#1a3a5c] p-4">
-      <div className="grid w-full max-w-7xl max-h-full overflow-hidden bg-white shadow-2xl md:grid-cols-2 rounded-2xl">
+      <div className="grid w-full max-w-7xl max-h-full overflow-hidden bg-white shadow-2xl md:grid-cols-2">
         {/* COLONNE GAUCHE : formulaire */}
         <div className="flex flex-col justify-center p-5 sm:p-8 bg-white">
           {/* Logo mobile */}
@@ -116,13 +116,13 @@ export default function Login() {
           </p>
 
           {erreur && (
-            <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">
+            <div className="mb-4 bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">
               {erreur}
             </div>
           )}
 
           {location.state?.reinitialise && (
-            <div className="mb-4 rounded-lg bg-green-50 border border-green-200 px-3 py-2 text-sm text-green-800">
+            <div className="mb-4 bg-green-50 border border-green-200 px-3 py-2 text-sm text-green-800">
               Mot de passe mis à jour. Vous pouvez vous connecter.
             </div>
           )}
@@ -134,7 +134,7 @@ export default function Login() {
                 Email <span className="text-red-500">*</span>
               </label>
               <div
-                className={`flex gap-2 items-center w-full border-2 rounded-lg px-3 py-2.5 text-sm transition ${
+                className={`flex gap-2 items-center w-full border-2 px-3 py-2.5 text-sm transition ${
                   emailTouche && erreurEmail
                     ? "border-red-500 focus-within:ring-2 focus-within:ring-red-500/30"
                     : emailTouche && !erreurEmail
@@ -187,7 +187,7 @@ export default function Login() {
                 Mot de passe <span className="text-red-500">*</span>
               </label>
               <div
-                className={`flex items-center gap-2 w-full border-2 rounded-lg px-3 py-2.5 text-sm transition ${
+                className={`flex items-center gap-2 w-full border-2 px-3 py-2.5 text-sm transition ${
                   motDePasseTouche && erreurMotDePasse
                     ? "border-red-500 focus-within:ring-2 focus-within:ring-red-500/30"
                     : motDePasseTouche && !erreurMotDePasse
@@ -297,7 +297,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={enCours || !estFormulaireValide()}
-              className={`font-body block w-full py-2.5 px-5 text-sm font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 ${
+              className={`font-body block w-full py-2.5 px-5 text-sm font-semibold transition-all duration-200 disabled:opacity-50 ${
                 estFormulaireValide()
                   ? "bg-brand-gradient-soft text-i-primary hover:brightness-105 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                   : "bg-gray-400 text-white cursor-not-allowed"
@@ -318,7 +318,7 @@ export default function Login() {
           {/* Contenu */}
           <div className="relative z-10 flex flex-col items-center">
             {/* Logo blanc : fond bleu nuit → version blanche (charte) */}
-            <div className="mb-8 p-4 bg-white/5 rounded-2xl backdrop-blur-sm border border-white/10">
+            <div className="mb-8 p-4 bg-white/5 backdrop-blur-sm border border-white/10">
               <img
                 src="/Logo-i-Rindra-Blanc.png"
                 alt="Logo i-Rindra"
@@ -340,15 +340,15 @@ export default function Login() {
             {/* Points forts */}
             <div className="mt-8 flex flex-col gap-2 w-full max-w-xs">
               <div className="flex items-center gap-2 text-left text-xs text-white/80">
-                <div className="w-1.5 h-1.5 rounded-full bg-i-green"></div>
+                <div className="w-1.5 h-1.5 bg-i-green"></div>
                 <span>Suivi en temps réel</span>
               </div>
               <div className="flex items-center gap-2 text-left text-xs text-white/80">
-                <div className="w-1.5 h-1.5 rounded-full bg-i-blue"></div>
+                <div className="w-1.5 h-1.5 bg-i-blue"></div>
                 <span>Assistant IA intégré</span>
               </div>
               <div className="flex items-center gap-2 text-left text-xs text-white/80">
-                <div className="w-1.5 h-1.5 rounded-full bg-i-turquoise"></div>
+                <div className="w-1.5 h-1.5 bg-i-turquoise"></div>
                 <span>Espace client dédié</span>
               </div>
             </div>

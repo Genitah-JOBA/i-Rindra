@@ -7,7 +7,7 @@ import { useMessage } from "../../context/MessageContext";
 import { Carte, BtnIA, SelectProjet, SelectTache, AlertErreur, BadgeIA, Spin, IconChatBubble, IconInfo } from "./Shared";
 
 export default function AffectationTab({ projets }) {
-  const { showSuccess, showError } = useMessage();
+  const { showSuccess, showError, showConfirm } = useMessage();
   const [projetId, setProjetId] = useState(null);
   const [taches, setTaches] = useState([]);
   const [tacheId, setTacheId] = useState(null);
@@ -54,7 +54,13 @@ export default function AffectationTab({ projets }) {
   };
 
   const affecter = async (userId, nom) => {
-    if (!window.confirm(`Affecter définitivement la tâche à ${nom} ?`)) return;
+    const ok = await showConfirm({
+      type: "info",
+      title: "Affecter la tâche",
+      message: `Affecter définitivement la tâche à ${nom} ?`,
+      confirmLabel: "Affecter",
+    });
+    if (!ok) return;
     try {
       await tachesService.affecter(tacheId, userId);
       showSuccess(`Tâche affectée à ${nom}.`);

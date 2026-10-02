@@ -710,3 +710,136 @@ WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
 2026-10-02 17:52:59,895 INFO sqlalchemy.engine.Engine [cached since 297.2s ago] (66,)
 2026-10-02 17:52:59,901 INFO sqlalchemy.engine.Engine ROLLBACK
 INFO:     127.0.0.1:7421 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-10-02 17:53:30,620 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-02 17:53:30,620 INFO sqlalchemy.engine.Engine SELECT tache.id, tache.projet_id, tache.titre, tache.description, tache.statut, tache.priorite, tache.echeance, tache.responsable_id, tache.ordre, tache.retard_notifie_le, tache.cree_le, tache.modifie_le 
+FROM tache 
+WHERE tache.echeance IS NOT NULL AND tache.echeance < $1::DATE AND tache.statut != $2::statut_tache AND tache.retard_notifie_le IS NULL
+2026-10-02 17:53:30,620 INFO sqlalchemy.engine.Engine [cached since 328s ago] (datetime.date(2026, 10, 2), 'termine')
+2026-10-02 17:53:30,620 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-10-02 17:53:30,627 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-02 17:53:30,627 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-10-02 17:53:30,627 INFO sqlalchemy.engine.Engine [cached since 328s ago] (66,)
+2026-10-02 17:53:30,627 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:2779 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-10-02 17:54:00,622 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-02 17:54:00,622 INFO sqlalchemy.engine.Engine SELECT tache.id, tache.projet_id, tache.titre, tache.description, tache.statut, tache.priorite, tache.echeance, tache.responsable_id, tache.ordre, tache.retard_notifie_le, tache.cree_le, tache.modifie_le 
+FROM tache 
+WHERE tache.echeance IS NOT NULL AND tache.echeance < $1::DATE AND tache.statut != $2::statut_tache AND tache.retard_notifie_le IS NULL
+2026-10-02 17:54:00,622 INFO sqlalchemy.engine.Engine [cached since 358s ago] (datetime.date(2026, 10, 2), 'termine')
+2026-10-02 17:54:00,629 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-10-02 17:54:00,630 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-02 17:54:00,632 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-10-02 17:54:00,632 INFO sqlalchemy.engine.Engine [cached since 358s ago] (66,)
+2026-10-02 17:54:00,634 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:1460 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-10-02 17:55:01,629 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-02 17:55:01,629 INFO sqlalchemy.engine.Engine SELECT tache.id, tache.projet_id, tache.titre, tache.description, tache.statut, tache.priorite, tache.echeance, tache.responsable_id, tache.ordre, tache.retard_notifie_le, tache.cree_le, tache.modifie_le 
+FROM tache 
+WHERE tache.echeance IS NOT NULL AND tache.echeance < $1::DATE AND tache.statut != $2::statut_tache AND tache.retard_notifie_le IS NULL
+2026-10-02 17:55:01,629 INFO sqlalchemy.engine.Engine [cached since 419s ago] (datetime.date(2026, 10, 2), 'termine')
+2026-10-02 17:55:01,629 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-10-02 17:55:01,639 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-02 17:55:01,639 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-10-02 17:55:01,639 INFO sqlalchemy.engine.Engine [cached since 419s ago] (66,)
+2026-10-02 17:55:01,639 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:11945 - "GET /notifications/count HTTP/1.1" 200 OK
+2026-10-02 17:55:59,253 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-02 17:55:59,253 INFO sqlalchemy.engine.Engine SELECT tache.id, tache.projet_id, tache.titre, tache.description, tache.statut, tache.priorite, tache.echeance, tache.responsable_id, tache.ordre, tache.retard_notifie_le, tache.cree_le, tache.modifie_le 
+FROM tache 
+WHERE tache.echeance IS NOT NULL AND tache.echeance < $1::DATE AND tache.statut != $2::statut_tache AND tache.retard_notifie_le IS NULL
+2026-10-02 17:55:59,253 INFO sqlalchemy.engine.Engine [cached since 476.6s ago] (datetime.date(2026, 10, 2), 'termine')
+2026-10-02 17:55:59,253 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-10-02 17:55:59,256 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-02 17:55:59,258 INFO sqlalchemy.engine.Engine SELECT count(notification.id) AS count_1 
+FROM notification 
+WHERE notification.destinataire_id = $1::INTEGER AND notification.lu = false
+2026-10-02 17:55:59,258 INFO sqlalchemy.engine.Engine [cached since 476.6s ago] (66,)
+2026-10-02 17:55:59,259 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:7794 - "GET /notifications/count HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7794 - "GET /absences HTTP/1.1" 307 Temporary Redirect
+2026-10-02 17:56:00,905 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-02 17:56:00,906 INFO sqlalchemy.engine.Engine SELECT count(absence.id) AS count_1 
+FROM absence 
+WHERE absence.statut = $1::statut_absence
+2026-10-02 17:56:00,906 INFO sqlalchemy.engine.Engine [cached since 213.8s ago] ('en_attente',)
+2026-10-02 17:56:00,906 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-02 17:56:00,906 INFO sqlalchemy.engine.Engine SELECT absence.id, absence.utilisateur_id, absence.type, absence.date_debut, absence.date_fin, absence.motif, absence.statut, absence.decideur_id, absence.commentaire, absence.cree_le, absence.decide_le, utilisateur.nom, utilisateur.prenom, utilisateur.id AS id_1 
+FROM absence JOIN utilisateur ON absence.utilisateur_id = utilisateur.id ORDER BY absence.cree_le DESC
+2026-10-02 17:56:00,906 INFO sqlalchemy.engine.Engine [cached since 213.8s ago] ()
+2026-10-02 17:56:00,908 INFO sqlalchemy.engine.Engine SELECT count(absence.id) AS count_1 
+FROM absence 
+WHERE absence.statut = $1::statut_absence
+2026-10-02 17:56:00,908 INFO sqlalchemy.engine.Engine [cached since 213.8s ago] ('acceptee',)
+2026-10-02 17:56:00,909 INFO sqlalchemy.engine.Engine SELECT count(absence.id) AS count_1 
+FROM absence 
+WHERE absence.statut = $1::statut_absence
+2026-10-02 17:56:00,909 INFO sqlalchemy.engine.Engine [cached since 213.8s ago] ('refusee',)
+2026-10-02 17:56:00,909 INFO sqlalchemy.engine.Engine SELECT count(absence.id) AS count_1 
+FROM absence
+2026-10-02 17:56:00,909 INFO sqlalchemy.engine.Engine [cached since 213.8s ago] ()
+2026-10-02 17:56:00,913 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:12568 - "GET /absences/statistiques HTTP/1.1" 200 OK
+2026-10-02 17:56:00,913 INFO sqlalchemy.engine.Engine SELECT utilisateur.nom, utilisateur.prenom 
+FROM utilisateur 
+WHERE utilisateur.id = $1::INTEGER
+2026-10-02 17:56:00,913 INFO sqlalchemy.engine.Engine [cached since 213.8s ago] (66,)
+2026-10-02 17:56:00,913 INFO sqlalchemy.engine.Engine SELECT utilisateur.nom, utilisateur.prenom 
+FROM utilisateur 
+WHERE utilisateur.id = $1::INTEGER
+2026-10-02 17:56:00,913 INFO sqlalchemy.engine.Engine [cached since 213.8s ago] (2,)
+2026-10-02 17:56:00,913 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:7794 - "GET /absences/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10604 - "GET /utilisateurs HTTP/1.1" 307 Temporary Redirect
+2026-10-02 17:56:01,081 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-02 17:56:01,082 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le, (SELECT count(tache.id) AS count_1 
+FROM tache 
+WHERE tache.projet_id = projet.id AND tache.statut = $1::statut_tache) AS taches_terminees, (SELECT count(tache.id) AS count_2 
+FROM tache 
+WHERE tache.projet_id = projet.id) AS taches_total 
+FROM projet 
+WHERE projet.archive = false
+2026-10-02 17:56:01,082 INFO sqlalchemy.engine.Engine [cached since 248s ago] ('termine',)
+2026-10-02 17:56:01,082 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-02 17:56:01,084 INFO sqlalchemy.engine.Engine SELECT client.id, client.nom, client.contact, client.email, client.telephone, client.devise, client.cree_le 
+FROM client ORDER BY client.nom
+2026-10-02 17:56:01,085 INFO sqlalchemy.engine.Engine [cached since 248s ago] ()
+INFO:     127.0.0.1:10604 - "GET /utilisateurs HTTP/1.1" 307 Temporary Redirect
+2026-10-02 17:56:01,096 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-10-02 17:56:01,099 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:12568 - "GET /clients/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7794 - "GET /projets/?archive=false HTTP/1.1" 200 OK
+2026-10-02 17:56:01,107 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-02 17:56:01,109 INFO sqlalchemy.engine.Engine SELECT utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le 
+FROM utilisateur
+2026-10-02 17:56:01,109 INFO sqlalchemy.engine.Engine [cached since 247.9s ago] ()
+2026-10-02 17:56:01,116 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-10-02 17:56:01,118 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-02 17:56:01,119 INFO sqlalchemy.engine.Engine SELECT client.id, client.nom, client.contact, client.email, client.telephone, client.devise, client.cree_le 
+FROM client ORDER BY client.nom
+2026-10-02 17:56:01,119 INFO sqlalchemy.engine.Engine [cached since 248s ago] ()
+INFO:     127.0.0.1:10604 - "GET /utilisateurs/ HTTP/1.1" 200 OK
+2026-10-02 17:56:01,120 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-02 17:56:01,120 INFO sqlalchemy.engine.Engine SELECT projet.id, projet.nom, projet.description, projet.client_id, projet.responsable_id, projet.date_debut, projet.date_fin_prevue, projet.statut_sante, projet.avancement_pct, projet.archive, projet.cree_le, projet.modifie_le, (SELECT count(tache.id) AS count_1 
+FROM tache 
+WHERE tache.projet_id = projet.id AND tache.statut = $1::statut_tache) AS taches_terminees, (SELECT count(tache.id) AS count_2 
+FROM tache 
+WHERE tache.projet_id = projet.id) AS taches_total 
+FROM projet 
+WHERE projet.archive = false
+2026-10-02 17:56:01,120 INFO sqlalchemy.engine.Engine [cached since 248s ago] ('termine',)
+2026-10-02 17:56:01,128 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-10-02 17:56:01,129 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:7794 - "GET /projets/?archive=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12568 - "GET /clients/ HTTP/1.1" 200 OK
+2026-10-02 17:56:01,131 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-02 17:56:01,132 INFO sqlalchemy.engine.Engine SELECT utilisateur.id, utilisateur.nom, utilisateur.prenom, utilisateur.email, utilisateur.mot_de_passe_hash, utilisateur.role, utilisateur.client_id, utilisateur.metier, utilisateur.actif, utilisateur.cree_le 
+FROM utilisateur
+2026-10-02 17:56:01,132 INFO sqlalchemy.engine.Engine [cached since 247.9s ago] ()
+2026-10-02 17:56:01,133 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:10604 - "GET /utilisateurs/ HTTP/1.1" 200 OK

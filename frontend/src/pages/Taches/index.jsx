@@ -32,7 +32,7 @@ export default function Taches() {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const projetParam = searchParams.get("projet");
-  const { showSuccess, showError } = useMessage();
+  const { showSuccess, showError, showConfirm } = useMessage();
   const estGestion = ["direction", "drh", "chef_de_projet"].includes(user?.role);
   // L'équipe peut créer ses propres tâches : elle en devient le responsable.
   // Le client, lui, reste en lecture seule (espace /mon-projet).
@@ -220,7 +220,13 @@ export default function Taches() {
   };
 
   const supprimer = async (tache) => {
-    if (!window.confirm(`Supprimer la tâche « ${tache.titre} » ?`)) return;
+    const ok = await showConfirm({
+      type: "error",
+      title: "Supprimer la tâche",
+      message: `Supprimer définitivement la tâche « ${tache.titre} » ?`,
+      confirmLabel: "Supprimer",
+    });
+    if (!ok) return;
     try {
       await tachesService.remove(tache.id);
       setTaches((prev) => prev.filter((t) => t.id !== tache.id));

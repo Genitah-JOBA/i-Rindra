@@ -63,7 +63,8 @@ class ReponseIAInvalideError(Exception):
 def _tronquer(texte: Optional[str], max_car: int = ENTREE_MAX) -> Optional[str]:
     if not texte:
         return texte
-    return texte[:max_car]
+    # NUL (0x00) est refusé par PostgreSQL : ne jamais le laisser atteindre la base
+    return texte.replace("\x00", "")[:max_car]
 
 
 def _iso(v):

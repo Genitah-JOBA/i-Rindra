@@ -161,7 +161,7 @@ function SuggestionCarte({ suggestion: s, membresDispo, onValider, onRejeter, on
 }
 
 export default function ExtractionTab({ projets }) {
-  const { showSuccess, showError } = useMessage();
+  const { showSuccess, showError, showConfirm } = useMessage();
   const [projetId, setProjetId] = useState(null);
   const [texte, setTexte] = useState("");
   const [generation, setGeneration] = useState(false);
@@ -296,7 +296,13 @@ export default function ExtractionTab({ projets }) {
   };
 
   const rejeter = async (s) => {
-    if (!window.confirm(`Rejeter la suggestion « ${s.titre} » ?`)) return;
+    const ok = await showConfirm({
+      type: "warning",
+      title: "Rejeter la suggestion",
+      message: `Rejeter la suggestion « ${s.titre} » ? Vous pourrez la restaurer plus tard.`,
+      confirmLabel: "Rejeter",
+    });
+    if (!ok) return;
     try {
       await iaService.rejeterSuggestion(s.id);
       showSuccess("Suggestion rejetée.");

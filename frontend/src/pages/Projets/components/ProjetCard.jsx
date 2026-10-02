@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { projetsService } from "../../../api/projets";
+import { useMessage } from "../../../context/MessageContext";
 
 // Icônes SVG
 const EyeIcon = ({ className = "w-4 h-4" }) => (
@@ -91,6 +92,7 @@ const iconesStatut = {
 
 export default function ProjetCard({ projet, onProjetSupprime }) {
   const navigate = useNavigate();
+  const { showConfirm, showSuccess, showError } = useMessage();
   const [menuOuvert, setMenuOuvert] = useState(false);
   const [suppression, setSuppression] = useState(false);
 
@@ -100,17 +102,19 @@ export default function ProjetCard({ projet, onProjetSupprime }) {
   };
 
   const handleSupprimer = async () => {
-    if (
-      window.confirm(
-        `Voulez-vous vraiment supprimer le projet "${projet.nom}" ?`,
-      )
-    ) {
-      try {
-        await projetsService.delete(projet.id);
-        onProjetSupprime(projet.id);
-      } catch (err) {
-        alert("Erreur lors de la suppression du projet.");
-      }
+    const ok = await showConfirm({
+      type: "error",
+      title: "Supprimer le projet",
+      message: `Voulez-vous vraiment supprimer le projet « ${projet.nom} » ? Ses tâches, jalons et fichiers seront aussi supprimés.`,
+      confirmLabel: "Supprimer",
+    });
+    if (!ok) return;
+    try {
+      await projetsService.delete(projet.id);
+      onProjetSupprime(projet.id);
+      showSuccess(`Projet « ${projet.nom} » supprimé.`);
+    } catch (err) {
+      showError(err.response?.data?.detail || "Erreur lors de la suppression du projet.");
     }
   };
 

@@ -4,6 +4,7 @@ import { useParams, Link } from "react-router-dom";
 import { projetsService } from "../../api/projets";
 import { fichiersService } from "../../api/fichiers";
 import { useAuth } from "../../auth/AuthContext";
+import { useMessage } from "../../context/MessageContext";
 
 // Palette login
 const C = {
@@ -59,6 +60,7 @@ const formatTaille = (octets) => {
 
 export default function ProjetDetail() {
   const { user } = useAuth();
+  const { showConfirm, showError } = useMessage();
   const { id } = useParams();
   const estGestion = ["direction", "drh", "chef_de_projet"].includes(user?.role);
 
@@ -126,7 +128,7 @@ export default function ProjetDetail() {
     try {
       await fichiersService.telecharger(id, f.id, f.nom);
     } catch (err) {
-      alert(
+      showError(
         err.response?.data?.detail || "Impossible de télécharger ce fichier.",
       );
     }
@@ -144,18 +146,23 @@ export default function ProjetDetail() {
       await fichiersService.renommer(id, f.id, nouveauNom.trim());
       await charger();
     } catch (err) {
-      alert(err.response?.data?.detail || "Impossible de renommer ce fichier.");
+      showError(err.response?.data?.detail || "Impossible de renommer ce fichier.");
     }
   };
 
   const supprimerFichier = async (f) => {
-    if (!window.confirm(`Supprimer définitivement le fichier « ${f.nom} » ?`))
-      return;
+    const ok = await showConfirm({
+      type: "error",
+      title: "Supprimer le fichier",
+      message: `Supprimer définitivement le fichier « ${f.nom} » ?`,
+      confirmLabel: "Supprimer",
+    });
+    if (!ok) return;
     try {
       await fichiersService.remove(id, f.id);
       await charger();
     } catch (err) {
-      alert(err.response?.data?.detail || "Impossible de supprimer ce fichier.");
+      showError(err.response?.data?.detail || "Impossible de supprimer ce fichier.");
     }
   };
 
@@ -181,13 +188,18 @@ export default function ProjetDetail() {
   };
 
   const retirerMembre = async (membre) => {
-    if (!window.confirm(`Retirer ${membre.prenom} ${membre.nom} du projet ?`))
-      return;
+    const ok = await showConfirm({
+      type: "warning",
+      title: "Retirer le membre",
+      message: `Retirer ${membre.prenom} ${membre.nom} de l'équipe du projet ?`,
+      confirmLabel: "Retirer",
+    });
+    if (!ok) return;
     try {
       await projetsService.removeMembre(id, membre.utilisateur_id);
       await charger();
     } catch (err) {
-      alert(err.response?.data?.detail || "Impossible de retirer ce membre.");
+      showError(err.response?.data?.detail || "Impossible de retirer ce membre.");
     }
   };
 

@@ -49,6 +49,17 @@ MAX_TEXTE_CARACTERES = 190_000
 MIN_TEXTE_CARACTERES = 20
 
 
+# Caractères de contrôle refusés ou inutiles : PostgreSQL rejette NUL (0x00)
+# dans une colonne texte (« séquence d'octets invalide pour l'encodage UTF8 »),
+# ce qui faisait échouer l'analyse en erreur 500. On garde tabulation et retours à la ligne.
+_CONTROLES = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+
+
+def nettoyer_texte(texte: str | None) -> str:
+    """Retire les caractères de contrôle (dont NUL) d'un texte extrait."""
+    return _CONTROLES.sub("", texte or "")
+
+
 async def extraire_texte_fichier(fichier: UploadFile) -> str:
     """Extrait le texte d'un fichier importé selon son extension."""
     suffix = Path(fichier.filename or "").suffix.lower()
@@ -68,14 +79,16 @@ async def extraire_texte_fichier(fichier: UploadFile) -> str:
         )
 
     if suffix in TYPES_IMAGE:
-        return await _extraire_image(contenu, suffix)
-    if suffix == ".pdf":
-        return _extraire_pdf(contenu)
-    if suffix == ".docx":
-        return _extraire_docx(contenu)
-    if suffix == ".doc":
-        return _extraire_doc_legacy(contenu)
-    return _extraire_texte_brut(contenu)
+        texte = await _extraire_image(contenu, suffix)
+    elif suffix == ".pdf":
+        texte = _extraire_pdf(contenu)
+    elif suffix == ".docx":
+        texte = _extraire_docx(contenu)
+    elif suffix == ".doc":
+        texte = _extraire_doc_legacy(contenu)
+    else:
+        texte = _extraire_texte_brut(contenu)
+    return nettoyer_texte(texte).strip()
 
 
 def extraire_texte_fichier_stocke(chemin: str) -> str | None:
@@ -102,15 +115,18 @@ def extraire_texte_fichier_stocke(chemin: str) -> str | None:
         contenu = p.read_bytes()
         if not contenu or len(contenu) > MAX_FICHIER_OCTETS:
             return None
-        return extraire(contenu) or None
+        return nettoyer_texte(extraire(contenu)).strip() or None
     except Exception as exc:  # noqa: BLE001 — un fichier illisible ne bloque pas l'index
         logger.warning("Indexation : lecture impossible de %s (%s)", chemin, exc)
         return None
 
 
 def _extraire_texte_brut(contenu: bytes) -> str:
-    """Texte plat (.txt/.md/.csv) : décode en UTF-8 puis latin-1 en secours."""
-    for enc in ("utf-8", "latin-1"):
+    """Texte plat (.txt/.md/.csv) : UTF-16 si BOM, sinon UTF-8 puis latin-1 en secours."""
+    # .txt enregistré en UTF-16 (BOM) : décodé en latin-1, il donnait un NUL sur deux
+    if contenu.startswith((b"\xff\xfe", b"\xfe\xff")):
+        return contenu.decode("utf-16", errors="replace").strip()
+    for enc in ("utf-8-sig", "latin-1"):
         try:
             return contenu.decode(enc).strip()
         except UnicodeDecodeError:

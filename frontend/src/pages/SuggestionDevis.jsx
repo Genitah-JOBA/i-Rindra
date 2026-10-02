@@ -104,7 +104,7 @@ function IconX({ className = "w-4 h-4" }) {
 }
 
 export default function SuggestionDevis() {
-  const { showSuccess, showError } = useMessage();
+  const { showSuccess, showError, showConfirm } = useMessage();
   const naviguer = useNavigate();
   const [suggestions, setSuggestions] = useState([]);
   const [clients, setClients] = useState([]);
@@ -210,9 +210,12 @@ export default function SuggestionDevis() {
   };
 
   const supprimer = async (s) => {
-    const confirmed = window.confirm(
-      `Supprimer ce devis suggéré${s.titre ? ` : "${s.titre}"` : ""} ?`
-    );
+    const confirmed = await showConfirm({
+      type: "error",
+      title: "Supprimer le devis suggéré",
+      message: `Supprimer définitivement ce devis suggéré${s.titre ? ` « ${s.titre} »` : ""} ?`,
+      confirmLabel: "Supprimer",
+    });
     if (!confirmed) return;
     try {
       await suggestionDevisService.remove(s.id);
@@ -236,9 +239,12 @@ export default function SuggestionDevis() {
   };
 
   const refuser = async (s) => {
-    const confirmed = window.confirm(
-      `Refuser ce devis suggéré${s.titre ? ` : "${s.titre}"` : ""} ?`
-    );
+    const confirmed = await showConfirm({
+      type: "warning",
+      title: "Refuser le devis suggéré",
+      message: `Refuser ce devis suggéré${s.titre ? ` « ${s.titre} »` : ""} ?`,
+      confirmLabel: "Refuser",
+    });
     if (!confirmed) return;
     try {
       await suggestionDevisService.setStatut(s.id, "refusee");
