@@ -39,6 +39,34 @@ router = APIRouter(prefix="/taches", tags=["Tâches"])
 # UTILITAIRES
 # ============================================================
 
+def _responsable_de_creation(role: str, current_user_id: int, payload) -> Optional[int]:
+    """
+    Responsable de la tâche en cours de création.
+
+    Un membre de l'équipe en devient automatiquement le responsable : il porte
+    sa propre tâche au lieu de la déléguer. Un `responsable_id` présent dans la
+    requête est alors IGNORÉ — c'est le serveur qui tranche, pas le client.
+    """
+    if role == "equipe":
+        return current_user_id
+    return payload.responsable_id
+
+
+def _statut_de_creation(role: str, payload) -> StatutTache:
+    """
+    Statut initial de la tâche en cours de création.
+
+    L'équipe ne peut pas créer une tâche déjà « terminée » : l'avancement du
+    projet est le ratio tâches terminées / total, une tâche née terminée
+    gonflerait donc le taux sans aucun travail réalisé. La gestion, elle, garde
+    sa liberté ( reprise de projet, tâche soldée d'emblée).
+    """
+    statut = payload.statut or StatutTache.A_FAIRE
+    if role == "equipe" and statut == StatutTache.TERMINE:
+        return StatutTache.A_FAIRE
+    return statut
+
+
 async def check_gestion_ou_equipe(role: str = Depends(get_current_user_role)):
     """
     Droits de création d'une tâche : la gestion, ou un membre de l'équipe.
@@ -185,18 +213,9 @@ async def create_tache(
     # 1. Vérifie que le projet existe
     # Déjà fait par check_projet_access
 
-    est_equipe = role == "equipe"
-
-    # 2. Détermine le responsable
-    if est_equipe:
-        # L'équipe ne choisit pas : elle porte elle-même la tâche qu'elle crée.
-        responsable_id = current_user_id
-        statut_initial = tache_data.statut or StatutTache.A_FAIRE
-        if statut_initial == StatutTache.TERMINE:
-            statut_initial = StatutTache.A_FAIRE
-    else:
-        responsable_id = tache_data.responsable_id
-        statut_initial = tache_data.statut or StatutTache.A_FAIRE
+    # 2. Détermine le responsable et le statut initial
+    responsable_id = _responsable_de_creation(role, current_user_id, tache_data)
+    statut_initial = _statut_de_creation(role, tache_data)
 
     # 3. Vérifie que le responsable existe (si spécifié)
     if responsable_id:

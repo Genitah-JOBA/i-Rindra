@@ -46,6 +46,12 @@ flowchart TD
     NRET --> NRETDIR[Direction + DRH + chef de projet<br/>lien /taches?projet=]
     NRET --> NRETCLI[Client du projet<br/>lien /mon-projet]
 
+    %% Qui porte la tâche qu'il crée
+    EQ --> CREA[Crée une tâche]
+    CREA --> AUTORESP[Le membre devient responsable<br/>statut forcé « À faire »<br/>pas de délégation possible]
+    DIR & ADM --> CREA2[Crée une tâche]
+    CREA2 --> CHOIX[Choix libre du responsable<br/>et du statut initial]
+
     %% Détection du retard : aucune action ne le provoque (le temps passe)
     TIME[Tâche de fond — scan horaire] --> RETARD
     NOTIF2[GET /notifications/count<br/>toutes les 30 s] --> RETARD

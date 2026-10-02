@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { clientsService } from "../api/client";
 import { utilisateursService } from "../api/utilisateurs";
 import { useMessage } from "../context/MessageContext";
-import { useAuth } from "../auth/AuthContext";
 import 'animate.css';
 
 // Icônes SVG
@@ -76,9 +75,7 @@ const C = {
 };
 
 export default function Clients() {
-  const { user } = useAuth();
-  const { showSuccess, showError } = useMessage();
-  const estGestion = ["direction", "drh", "chef_de_projet", "equipe"].includes(user?.role);
+  const { showError } = useMessage();
 
   const [entreprises, setEntreprises] = useState([]);
   const [comptes, setComptes] = useState([]);
@@ -115,24 +112,6 @@ export default function Clients() {
     const d = String(devise || "").trim().toUpperCase();
     return d === "" || d === "AR" || d === "MGA" || d === "ARIARY";
   };
-
-  const changerDevise = async (ev, client) => {
-    const nouveau = ev.target.value;
-    const actuel = client.devise || "Ar";
-    if (nouveau === actuel) return;
-    try {
-      await clientsService.update(client.id, { devise: nouveau });
-      setEntreprises((prev) =>
-        prev.map((c) => (c.id === client.id ? { ...c, devise: nouveau } : c)),
-      );
-      showSuccess(`Devise de "${client.nom}" mise à jour : ${nouveau}`);
-    } catch (err) {
-      const msg = err.response?.data?.detail || "Impossible de modifier la devise.";
-      showError(msg);
-    }
-  };
-
-  const DEVISES = ["Ar", "EUR", "USD", "MGA", "XOF", "GBP", "AUD", "CAD"];
 
   const filtres = entreprises.filter((e) => {
     if (!recherche) return true;
@@ -266,27 +245,10 @@ export default function Clients() {
                             International
                           </span>
                         )}
-                        {estGestion ? (
-                          <label className="flex items-center gap-1 text-[10px] text-slate-500">
-                            Devise :
-                            <select
-                              value={e.devise || "Ar"}
-                              onChange={(ev) => changerDevise(ev, e)}
-                              className="border border-slate-300 px-1 py-0.5 text-[10px] outline-none focus:ring-1 focus:border-transparent"
-                              style={{ "--tw-ring-color": C.blue }}
-                            >
-                              {[...new Set([...DEVISES, e.devise || "Ar"])].map((d) => (
-                                <option key={d} value={d}>
-                                  {d}
-                                </option>
-                              ))}
-                            </select>
-                          </label>
-                        ) : (
-                          <span className="text-[10px] text-slate-500">
-                            Devise : {e.devise || "Ar"}
-                          </span>
-                        )}
+                        {/* Devise en lecture seule : fixée à la création, jamais modifiée */}
+                        <span className="text-[10px] text-slate-500">
+                          Devise : {e.devise || "Ar"}
+                        </span>
                       </div>
                     </div>
                   </div>

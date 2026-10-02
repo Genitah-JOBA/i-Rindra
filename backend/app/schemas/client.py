@@ -28,7 +28,8 @@ class ClientUpdate(BaseModel):
     contact: Optional[str] = None
     email: Optional[EmailStr] = None
     telephone: Optional[str] = None
-    devise: Optional[str] = None
+    # Pas de 'devise' : elle est fixée à la création et ne change plus
+    # (un client en Ar reste en Ar). Un champ 'devise' envoyé est ignoré.
 
 
 class ClientResponse(ClientBase):

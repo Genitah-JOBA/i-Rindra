@@ -355,7 +355,7 @@ export default function Absences() {
                             <div className="flex gap-2">
                               <button
                                 onClick={() => decider(a, "acceptee")}
-                                className="flex items-center gap-1 bg-brand-gradient px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:brightness-110"
+                                className="flex items-center gap-1 bg-brand-gradient px-3 py-1.5 text-xs font-semibold text-black shadow-sm transition hover:brightness-110"
                               >
                                 <CheckIcon className="w-3.5 h-3.5" />
                                 {"Accepter"}
