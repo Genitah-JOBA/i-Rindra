@@ -10,7 +10,6 @@ import { redirigerVersAccueilAuDemarrage } from "./utils/accueilAuDemarrage";
 
 // À l'ouverture (hors F5), on démarre toujours sur le tableau de bord.
 redirigerVersAccueilAuDemarrage();
-
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>

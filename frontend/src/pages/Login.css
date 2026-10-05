@@ -1,7 +1,7 @@
 /* Login.css — animations de la page de connexion (charte i-Rindra).
    Principe : discret mais vivant. Mouvements lents, rien qui ne gêne la
    saisie. Tout est coupé si l'utilisateur demande moins d'animations
-   (prefers-reduced-motion). La scène du projet est dans LoginScene.jsx. */
+   (prefers-reduced-motion).  */
 
 /* ---------- Apparition du formulaire (une seule fois) ---------- */
 .login-apparition {
@@ -15,24 +15,39 @@
   to   { opacity: 1; translate: 0 0; }
 }
 
-/* ---------- Scène du projet : message de l'IA à chaque étape ---------- */
-.login-scene-texte {
-  animation: login-scene-texte 0.5s ease-out;
+/* ---------- Panneau de marque : fond « aurore » ----------
+   Lueurs vert / turquoise / bleu ciel de la charte sur le bleu nuit, qui
+   se déplacent très lentement (comme les couvertures de la charte). */
+.login-aurore {
+  background:
+    radial-gradient(40% 50% at 15% 85%, rgba(125, 249, 121, 0.28), transparent 70%),
+    radial-gradient(45% 55% at 85% 20%, rgba(122, 253, 242, 0.20), transparent 70%),
+    radial-gradient(35% 40% at 60% 60%, rgba(79, 176, 241, 0.16), transparent 70%);
+  background-size: 140% 140%;
+  animation: login-aurore 16s ease-in-out infinite alternate;
 }
 
-@keyframes login-scene-texte {
-  from { opacity: 0.4; translate: 4px 0; }
-  to   { opacity: 1; translate: 0 0; }
+@keyframes login-aurore {
+  0%   { background-position: 0% 100%; }
+  50%  { background-position: 60% 40%; }
+  100% { background-position: 100% 0%; }
 }
 
-/* Points « l'IA réfléchit » */
-.login-scene-point {
-  animation: login-scene-point 0.9s ease-in-out infinite;
+/* ---------- Halo tournant derrière le logo ---------- */
+.login-halo-logo {
+  background: conic-gradient(from 0deg, #4fb0f1, #7df979, #7afdf2, transparent 70%, #4fb0f1);
+  filter: blur(6px);
+  opacity: 0.85;
+  animation: login-tourne 8s linear infinite, login-pulse 4s ease-in-out infinite;
 }
 
-@keyframes login-scene-point {
-  0%, 100% { opacity: 0.3; translate: 0 0; }
-  50%      { opacity: 1;   translate: 0 -2px; }
+@keyframes login-tourne {
+  to { rotate: 360deg; }
+}
+
+@keyframes login-pulse {
+  0%, 100% { scale: 1;    opacity: 0.7; }
+  50%      { scale: 1.06; opacity: 1; }
 }
 
 /* ---------- Reflet sur le bouton « Se connecter » ---------- */
@@ -60,7 +75,7 @@
 /* ---------- Accessibilité ---------- */
 @media (prefers-reduced-motion: reduce) {
   .login-apparition { animation: none; opacity: 1; }
-  .login-scene-texte,
-  .login-scene-point,
+  .login-aurore,
+  .login-halo-logo,
   .login-cta-reflet::after { animation: none; }
 }

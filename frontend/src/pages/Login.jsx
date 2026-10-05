@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import "./Login.css";
-import LoginScene from "./LoginScene";
 
 
 export default function Login() {
@@ -102,7 +101,7 @@ export default function Login() {
   return (
     <div className="flex h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-i-primary via-i-primary to-[#1a3a5c] p-4">
       {/* Carte compacte : 2 colonnes d'environ 420 px sur grand écran */}
-      <div className="grid w-full max-w-[860px] max-h-full overflow-y-auto bg-white shadow-2xl md:grid-cols-2">
+      <div className="grid w-full max-w-[1100px] max-h-full overflow-y-auto bg-white shadow-2xl md:grid-cols-2">
         {/* COLONNE GAUCHE : formulaire */}
         <div className="flex flex-col justify-center p-6 sm:p-8 bg-white">
           {/* Logo mobile */}
@@ -188,9 +187,6 @@ export default function Login() {
               {emailTouche && erreurEmail && (
                 <p className="mt-1 text-xs text-red-500">{erreurEmail}</p>
               )}
-              <p className="mt-0.5 text-xs text-slate-400">
-                Minimum 5 caractères (ex: nom@domaine.com)
-              </p>
             </div>
 
             {/* Mot de passe */}
@@ -291,9 +287,6 @@ export default function Login() {
               {motDePasseTouche && erreurMotDePasse && (
                 <p className="mt-1 text-xs text-red-500">{erreurMotDePasse}</p>
               )}
-              <p className="mt-0.5 text-xs text-slate-400">
-                Minimum 5 caractères
-              </p>
             </div>
 
             <div className="block mx-auto text-right">
@@ -328,17 +321,29 @@ export default function Login() {
 
         {/* COLONNE DROITE : panneau de marque (masqué en mobile) */}
         <div className="relative hidden flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-i-primary via-i-primary to-[#1a3a5c] p-8 text-center md:flex">
-          {/* Halos de couleur de la charte (fixes, en fond) */}
-          <div className="absolute top-0 right-0 w-56 h-56 bg-i-turquoise rounded-full filter blur-3xl opacity-10 -translate-y-1/2 translate-x-1/2"></div>
-          <div className="absolute bottom-0 left-0 w-56 h-56 bg-i-green rounded-full filter blur-3xl opacity-10 translate-y-1/2 -translate-x-1/2"></div>
+          {/* Fond « aurore » : dégradé de la charte qui ondule lentement */}
+          <div className="login-aurore pointer-events-none absolute inset-0" aria-hidden="true" />
+
+          {/* Signature de l'auteur : quasi invisible, se révèle au survol */}
+          <span
+            className="absolute bottom-1.5 right-2 z-10 cursor-default select-text font-special text-[9px] tracking-[0.3em] text-white/[0.07] transition-colors duration-700 hover:text-i-turquoise/70"
+            title="Conçu par JRG"
+          >
+            JRG
+          </span>
 
           <div className="relative z-10 flex flex-col items-center">
             {/* Logo blanc : fond bleu nuit → version blanche (charte) */}
-            <img
-              src="/Logo-i-Rindra-Blanc.png"
-              alt="Logo i-Rindra"
-              className="mb-5 w-28 max-w-full"
-            />
+            <div className="relative mb-6 flex h-32 w-32 items-center justify-center">
+              {/* Halo tournant aux couleurs de la marque */}
+              <span className="login-halo-logo absolute inset-0 rounded-full" aria-hidden="true" />
+              <span className="absolute inset-[6px] rounded-full bg-i-primary" aria-hidden="true" />
+              <img
+                src="/Logo-i-Rindra-Blanc.png"
+                alt="Logo i-Rindra"
+                className="relative w-20 max-w-full"
+              />
+            </div>
 
             <h2 className="font-brand text-xl font-bold text-white mb-2">
               Gestion de projets{" "}
@@ -350,8 +355,23 @@ export default function Login() {
               L'IA analyse, propose des tâches ; votre équipe valide et avance.
             </p>
 
-            {/* Scène animée : le parcours d'un projet dans i-Rindra */}
-            <LoginScene />
+            {/* Points forts */}
+            <div className="flex w-full max-w-xs flex-col gap-2">
+              {[
+                { texte: "Suivi en temps réel", couleur: "bg-i-green" },
+                { texte: "Assistant IA intégré", couleur: "bg-i-blue" },
+                { texte: "Espace client dédié", couleur: "bg-i-turquoise" },
+              ].map((p, i) => (
+                <div
+                  key={p.texte}
+                  className="login-apparition flex items-center gap-2 border border-white/10 bg-white/[0.04] px-3 py-2 text-left text-xs text-white/80 backdrop-blur-sm"
+                  style={{ "--delai": `${0.4 + i * 0.15}s` }}
+                >
+                  <span className={`h-1.5 w-1.5 ${p.couleur}`} />
+                  {p.texte}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
