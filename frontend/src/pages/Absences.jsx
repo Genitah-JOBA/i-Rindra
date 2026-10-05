@@ -44,20 +44,27 @@ const FORM_VIDE = {
   motif: "",
 };
 
-// Charte i-Rindra : bleu nuit (i-primary) pour le texte, vert / bleu ciel /
-// turquoise en accents. Les statuts gardent un code couleur explicite
-// (attente = ambre, acceptée = vert de la marque, refusée = rouge).
-const couleurStatut = {
-  en_attente: "bg-amber-100 text-amber-700",
-  acceptee: "bg-i-green/25 text-i-primary",
-  refusee: "bg-red-100 text-red-700",
+// Charte i-Rindra : bleu nuit (i-primary) pour le texte, i-blue comme accent
+// unique. Les surfaces restent neutres (blanc / slate) : le statut est
+// signalé par un simple point de couleur, jamais par un aplat coloré.
+const COULEUR_STATUT = {
+  en_attente: "bg-amber-400",
+  acceptee: "bg-[#3a8a3a]",
+  refusee: "bg-red-500",
 };
 
-const bordureStatut = {
-  en_attente: "border-l-amber-400",
-  acceptee: "border-l-i-green",
-  refusee: "border-l-red-500",
+const ETIQUETTE_STATUT = {
+  en_attente: "En attente",
+  acceptee: "Acceptée",
+  refusee: "Refusée",
 };
+
+const PILL_STATUT =
+  "flex items-center gap-1.5 bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600";
+
+// État actif : pas d'aplat foncé, uniquement une bordure bleu ciel (#51B4EB)
+// pour marquer visuellement l'onglet / le bouton sélectionné.
+const BORDURE_ACTIVE = "border-[#51B4EB]";
 
 // Bouton d'action principal (même dégradé que les autres actions de l'app)
 const BOUTON_PRINCIPAL =
@@ -194,14 +201,7 @@ export default function Absences() {
     }
   };
 
-  const afficherStatut = (statut) => {
-    const map = {
-      en_attente: "En attente",
-      acceptee: "Acceptée",
-      refusee: "Refusée",
-    };
-    return map[statut] || statut;
-  };
+  const afficherStatut = (statut) => ETIQUETTE_STATUT[statut] || statut;
 
   const afficherType = (type) => {
     const map = {
@@ -215,10 +215,10 @@ export default function Absences() {
 
   const statsCartes = stats
     ? [
-        { label: "En attente", valeur: stats.en_attente, couleur: "border-amber-400 text-amber-600" },
-        { label: "Acceptées", valeur: stats.acceptees, couleur: "border-i-green text-i-primary" },
-        { label: "Refusées", valeur: stats.refusees, couleur: "border-red-500 text-red-600" },
-        { label: "Total", valeur: stats.total, couleur: "border-i-blue text-i-blue" },
+        { label: "En attente", valeur: stats.en_attente, statut: "en_attente" },
+        { label: "Acceptées", valeur: stats.acceptees, statut: "acceptee" },
+        { label: "Refusées", valeur: stats.refusees, statut: "refusee" },
+        { label: "Total", valeur: stats.total, statut: null },
       ]
     : [];
 
@@ -251,17 +251,25 @@ export default function Absences() {
         )}
       </div>
 
-      {/* Stats direction : grille responsive avec cartes alignées */}
+      {/* Stats direction : surfaces neutres, seul le point de statut est coloré */}
       {estDirection && stats && (
         <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
           {statsCartes.map((c, i) => (
             <div
               key={c.label}
-              className={`flex flex-col items-center justify-center border-t-4 bg-white p-5 text-center shadow-sm transition hover:shadow-md animate__animated animate__fadeInUp ${c.couleur.split(" ")[0]}`}
+              className="flex flex-col items-center justify-center border border-slate-200 bg-white p-5 text-center shadow-sm transition hover:border-i-blue hover:shadow-md animate__animated animate__fadeInUp"
               style={{ animationDelay: `${i * 0.05}s` }}
             >
               <p className="font-brand text-3xl font-bold text-i-primary">{c.valeur}</p>
-              <p className={`mt-1 text-xs font-medium ${c.couleur.split(" ")[1]}`}>
+              <p className="mt-1 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                {c.statut && (
+                  <span
+                    className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                      COULEUR_STATUT[c.statut]
+                    }`}
+                    aria-hidden="true"
+                  />
+                )}
                 {c.label}
               </p>
             </div>
@@ -291,14 +299,16 @@ export default function Absences() {
                 onClick={() => setSectionActive(s.id)}
                 className={`flex items-center gap-2 border px-4 py-2 text-xs font-medium transition-all duration-200 ${
                   sectionActive === s.id
-                    ? "border-i-primary bg-i-primary text-white shadow-md scale-105"
-                    : "border-i-primary/15 bg-white text-i-primary hover:border-i-blue hover:bg-[#EEFBF6]"
+                    ? `${BORDURE_ACTIVE} bg-white font-semibold text-i-primary shadow-sm`
+                    : "border-slate-200 bg-white text-slate-600 hover:border-i-blue hover:text-i-primary"
                 }`}
               >
                 {s.label}
                 <span
                   className={`px-1.5 py-0.5 text-[10px] font-semibold ${
-                    sectionActive === s.id ? "bg-i-green text-i-primary" : "bg-i-blue/10 text-i-primary"
+                    sectionActive === s.id
+                      ? "bg-[#51B4EB]/15 text-[#1c6fa3]"
+                      : "bg-slate-100 text-slate-600"
                   }`}
                 >
                   {absences.filter((a) => s.types.includes(a.type)).length}
@@ -312,9 +322,7 @@ export default function Absences() {
               {absencesDeSection.map((a, index) => (
                 <div
                   key={a.id}
-                  className={`border border-l-4 border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:border-i-blue/50 hover:shadow-md animate__animated animate__fadeInUp ${
-                    bordureStatut[a.statut] || "border-l-slate-300"
-                  }`}
+                  className="border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:border-i-blue/50 hover:shadow-md animate__animated animate__fadeInUp"
                   style={{ animationDelay: `${index * 0.04}s` }}
                 >
                   {/* Disposition : contenu à gauche, actions à droite (empilé sur mobile) */}
@@ -323,7 +331,7 @@ export default function Absences() {
                       {/* Demandeur */}
                       {afficherDemandeur && (
                         <p className="flex items-center gap-2 text-sm font-semibold text-i-primary">
-                          <span className="flex h-7 w-7 items-center justify-center bg-gradient-to-br from-i-blue to-i-green text-xs font-bold text-i-primary">
+                          <span className="flex h-7 w-7 items-center justify-center bg-slate-100 text-xs font-bold text-i-primary">
                             {a.utilisateur_prenom?.charAt(0)}
                             {a.utilisateur_nom?.charAt(0)}
                           </span>
@@ -332,18 +340,20 @@ export default function Absences() {
                       )}
 
                       <div className="mt-2 flex flex-wrap items-center gap-2">
-                        <span className="bg-i-turquoise/30 px-2.5 py-0.5 text-xs font-medium text-i-primary">
+                        <span className="bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
                           {afficherType(a.type)}
                         </span>
                         <span className="flex items-center gap-1 text-xs text-slate-600">
-                          <CalendarIcon className="w-3.5 h-3.5 text-i-blue" />
+                          <CalendarIcon className="w-3.5 h-3.5 text-slate-400" />
                           {formaterDate(a.date_debut)} → {formaterDate(a.date_fin)}
                         </span>
-                        <span
-                          className={`px-2.5 py-0.5 text-xs font-medium ${
-                            couleurStatut[a.statut] || "bg-slate-100 text-slate-600"
-                          }`}
-                        >
+                        <span className={PILL_STATUT}>
+                          <span
+                            className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                              COULEUR_STATUT[a.statut] || "bg-slate-400"
+                            }`}
+                            aria-hidden="true"
+                          />
                           {afficherStatut(a.statut)}
                         </span>
                       </div>
@@ -380,8 +390,8 @@ export default function Absences() {
                             }
                             className={`border px-3 py-1.5 text-xs font-medium transition-colors ${
                               demandeEnCours === a.id
-                                ? "border-i-primary bg-i-primary text-white"
-                                : "border-i-primary/20 text-i-primary hover:border-i-blue hover:bg-[#EEFBF6]"
+                                ? `${BORDURE_ACTIVE} bg-white font-semibold text-i-primary`
+                                : "border-slate-200 text-slate-600 hover:border-i-blue hover:text-i-primary"
                             }`}
                           >
                             {"Décision"}
@@ -397,7 +407,7 @@ export default function Absences() {
                               </button>
                               <button
                                 onClick={() => decider(a, "refusee")}
-                                className="flex items-center gap-1 bg-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-red-700"
+                                className="flex items-center gap-1 border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:border-red-300 hover:bg-red-50"
                               >
                                 <XIcon className="w-3.5 h-3.5" />
                                 {"Refuser"}
@@ -422,9 +432,9 @@ export default function Absences() {
             </div>
           ) : (
             /* État vide : centrage vertical et horizontal */
-            <div className="flex flex-col items-center justify-center border border-dashed border-i-turquoise bg-[#EEFBF6] py-16 text-center">
-              <CalendarIcon className="w-14 h-14 text-i-blue/50 mb-4" />
-              <p className="text-sm text-i-primary/70 max-w-md">
+            <div className="flex flex-col items-center justify-center border border-dashed border-slate-200 bg-slate-50 py-16 text-center">
+              <CalendarIcon className="w-14 h-14 text-slate-300 mb-4" />
+              <p className="text-sm text-slate-500 max-w-md">
                 {estDirection
                   ? sectionActive === "absence"
                     ? "Aucune demande d'absence pour le moment."
@@ -454,7 +464,7 @@ export default function Absences() {
             <div className="h-1.5 bg-gradient-to-r from-i-blue via-i-green to-i-turquoise" />
             <div className="flex items-center justify-between px-6 pt-5 pb-4">
               <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center bg-i-blue/15 text-i-blue">
+                <span className="flex h-10 w-10 items-center justify-center bg-slate-100 text-slate-500">
                   <CalendarIcon className="w-5 h-5" />
                 </span>
                 <h2 className="font-brand text-lg font-bold text-i-primary">
@@ -463,7 +473,7 @@ export default function Absences() {
               </div>
               <button
                 onClick={() => setModalOuvert(false)}
-                className="p-1 text-i-primary/50 transition-colors hover:bg-[#EEFBF6] hover:text-i-primary"
+                className="p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-i-primary"
                 aria-label="Fermer"
               >
                 <CloseIcon className="w-5 h-5" />
@@ -533,7 +543,7 @@ export default function Absences() {
                 </div>
               )}
 
-              <div className="-mx-6 mt-2 flex flex-col-reverse gap-2 border-t border-i-turquoise/40 bg-[#EEFBF6] px-6 py-3 sm:flex-row sm:justify-end">
+              <div className="-mx-6 mt-2 flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50 px-6 py-3 sm:flex-row sm:justify-end">
                 <button
                   type="button"
                   onClick={() => setModalOuvert(false)}
