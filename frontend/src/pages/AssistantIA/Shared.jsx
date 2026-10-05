@@ -1,5 +1,6 @@
 // src/pages/AssistantIA/Shared.jsx — petites briques d'UI communes aux onglets IA.
 import "animate.css";
+import SpinPartagé from "../../components/Spin";
 
 // ============================================================
 // Icônes (Heroicons v2 outline — 24Ã—24, stroke)
@@ -246,14 +247,10 @@ export function AlertErreur({ children }) {
   );
 }
 
-// Indicateur de chargement
+// Indicateur de chargement — délégué au composant partagé pour que toutes
+// les pages de l'app affichent exactement le même visuel.
 export function Spin({ label = "Chargement…" }) {
-  return (
-    <div className="flex justify-center items-center py-8 animate__animated animate__pulse">
-      <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-i-blue"></div>
-      <span className="ml-3 text-sm text-slate-500">{label}</span>
-    </div>
-  );
+  return <SpinPartagé label={label} />;
 }
 
 // Note complémentaire d'une réponse IA (ex. « aucun membre »)

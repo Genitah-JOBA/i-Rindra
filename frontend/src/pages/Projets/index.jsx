@@ -6,6 +6,7 @@ import { clientsService } from "../../api/client";
 import { utilisateursService } from "../../api/utilisateurs";
 import { useMessage } from "../../context/MessageContext";
 import { useAuth } from "../../auth/AuthContext";
+import Spin from "../../components/Spin";
 import 'animate.css';
 
 // Icônes SVG
@@ -236,12 +237,7 @@ export default function Projets() {
         </span>
       </div>
 
-      {loading && (
-        <div className="flex justify-center items-center py-12 animate__animated animate__pulse">
-          <div className="animate-spin h-8 w-8 border-b-2 border-i-blue rounded-full"></div>
-          <span className="ml-3 text-slate-500">Chargement…</span>
-        </div>
-      )}
+      {loading && <Spin taille="lg" className="py-12" />}
       {erreur && <p className="text-red-600">{erreur}</p>}
 
       {!loading && !erreur && projetsFiltres.length === 0 && (

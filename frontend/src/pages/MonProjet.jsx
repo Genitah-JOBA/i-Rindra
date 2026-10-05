@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import api from "../api/client";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
+import Spin from "../components/Spin";
 import "animate.css";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -178,13 +179,7 @@ export default function MonProjet() {
 
   const fmtPriorite = (p) => PRIORITE_MAP[p] || p;
 
-  if (loading)
-    return (
-      <div className="flex justify-center items-center py-16">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-i-blue"></div>
-        <span className="ml-3 text-slate-500">{"Chargement…"}</span>
-      </div>
-    );
+  if (loading) return <Spin taille="lg" className="py-16" />;
 
   if (erreur)
     return (

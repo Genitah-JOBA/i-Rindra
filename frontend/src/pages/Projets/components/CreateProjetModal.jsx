@@ -169,8 +169,14 @@ export default function CreateProjetModal({ isOpen, onClose, onProjetCree }) {
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-brand-gradient text-i-primary text-sm font-medium rounded-md hover:brightness-110 transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-brand-gradient text-i-primary text-sm font-medium rounded-md hover:brightness-110 transition-colors disabled:opacity-50"
             >
+              {loading && (
+                <span
+                  className="h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-b-2 border-current"
+                  aria-hidden="true"
+                />
+              )}
               {loading ? "Création..." : "Créer le projet"}
             </button>
           </div>

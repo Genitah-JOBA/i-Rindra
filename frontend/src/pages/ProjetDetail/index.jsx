@@ -5,6 +5,7 @@ import { projetsService } from "../../api/projets";
 import { fichiersService } from "../../api/fichiers";
 import { useAuth } from "../../auth/AuthContext";
 import { useMessage } from "../../context/MessageContext";
+import Spin from "../../components/Spin";
 
 // Palette login
 const C = {
@@ -203,16 +204,7 @@ export default function ProjetDetail() {
     }
   };
 
-  if (loading)
-    return (
-      <div className="flex justify-center items-center py-12">
-        <div
-          className="animate-spin rounded-full h-8 w-8 border-b-2"
-          style={{ borderColor: C.blue }}
-        ></div>
-        <span className="ml-3 text-slate-500">Chargement…</span>
-      </div>
-    );
+  if (loading) return <Spin taille="lg" className="py-12" />;
   if (erreur)
     return (
       <div>

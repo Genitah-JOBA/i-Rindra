@@ -6,6 +6,7 @@ import { projetsService } from "../../api/projets";
 import { useAuth } from "../../auth/AuthContext";
 import { useMessage } from "../../context/MessageContext";
 import TaskDetailModal from "../../components/TaskDetailModal";
+import Spin from "../../components/Spin";
 import 'animate.css';
 
 // Les 4 colonnes du Kanban = les statuts du backend
@@ -366,13 +367,7 @@ export default function Taches() {
       )}
       {formErreur && <p className="mb-4 text-sm text-red-600 animate__animated animate__shakeX">{formErreur}</p>}
 
-      {loading ? (
-        <div className="flex justify-center items-center py-12 animate__animated animate__pulse">
-          {/* Le chargement garde son arrondi (rounded-full) */}
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-i-blue"></div>
-          <span className="ml-3 text-slate-500">Chargement…</span>
-        </div>
-      ) : (
+      {loading ? <Spin taille="lg" className="py-12" /> : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {COLONNES.map((col, colIndex) => {
             const tachesCol = taches.filter((t) => t.statut === col.statut);

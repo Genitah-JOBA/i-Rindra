@@ -4,6 +4,7 @@ import { useAuth } from "../../auth/AuthContext";
 import { useMessage } from "../../context/MessageContext";
 import { projetsService } from "../../api/projets";
 import { iaService } from "../../api/ia";
+import Spin from "../../components/Spin";
 import {
   IconSparkles,
   IconChatBubble,
@@ -103,11 +104,8 @@ export default function AssistantIA() {
       {/* Contenu de l'onglet actif */}
       <section className="flex-1 min-h-0 overflow-hidden pt-4">
         {!projetsCharge ? (
-          <div className="h-full flex items-center justify-center">
-            <div className="flex flex-col items-center gap-3">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-i-blue" />
-              <p className="text-sm text-slate-400">Chargement des projets…</p>
-            </div>
+          <div className="h-full">
+            <Spin taille="lg" label="Chargement des projets…" />
           </div>
         ) : (
           <div className="h-full overflow-hidden">{actif.render()}</div>

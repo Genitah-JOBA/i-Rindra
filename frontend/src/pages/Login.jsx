@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import "./Login.css";
+import LoginScene from "./LoginScene";
+
 
 export default function Login() {
   const { login } = useAuth();
@@ -98,9 +101,10 @@ export default function Login() {
 
   return (
     <div className="flex h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-i-primary via-i-primary to-[#1a3a5c] p-4">
-      <div className="grid w-full max-w-7xl max-h-full overflow-hidden bg-white shadow-2xl md:grid-cols-2">
+      {/* Carte compacte : 2 colonnes d'environ 420 px sur grand écran */}
+      <div className="grid w-full max-w-[860px] max-h-full overflow-y-auto bg-white shadow-2xl md:grid-cols-2">
         {/* COLONNE GAUCHE : formulaire */}
-        <div className="flex flex-col justify-center p-5 sm:p-8 bg-white">
+        <div className="flex flex-col justify-center p-6 sm:p-8 bg-white">
           {/* Logo mobile */}
           <img
             src="/Logo-i-Rindra-couleur.png"
@@ -108,10 +112,13 @@ export default function Login() {
             className="mb-4 h-14 w-auto self-center md:hidden"
           />
 
-          <h1 className="font-brand mb-1 text-3xl font-bold text-center py-1 bg-gradient-to-r from-i-primary to-i-blue bg-clip-text text-transparent">
+          <h1 className="login-apparition font-brand mb-1 text-3xl font-bold text-center py-1 bg-gradient-to-r from-i-primary to-i-blue bg-clip-text text-transparent">
             Connexion
           </h1>
-          <p className="font-body mb-4 text-sm text-slate-500 text-center">
+          <p
+            className="login-apparition font-body mb-4 text-sm text-slate-500 text-center"
+            style={{ "--delai": "0.08s" }}
+          >
             Accédez à votre espace i-Rindra.
           </p>
 
@@ -127,7 +134,12 @@ export default function Login() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="font-body space-y-3.5" noValidate>
+          <form
+            onSubmit={handleSubmit}
+            className="login-apparition font-body space-y-3.5"
+            style={{ "--delai": "0.16s" }}
+            noValidate
+          >
             {/* Email */}
             <div>
               <label className="mb-1 text-sm font-medium text-slate-700">
@@ -297,61 +309,49 @@ export default function Login() {
             <button
               type="submit"
               disabled={enCours || !estFormulaireValide()}
-              className={`font-body block w-full py-2.5 px-5 text-sm font-semibold transition-all duration-200 disabled:opacity-50 ${
+              className={`font-body flex items-center justify-center gap-2 block w-full py-2.5 px-5 text-sm font-semibold transition-all duration-200 disabled:opacity-50 ${
                 estFormulaireValide()
-                  ? "bg-brand-gradient-soft text-i-primary hover:brightness-105 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                  ? "login-cta-reflet bg-brand-gradient-soft text-i-primary hover:brightness-105 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                   : "bg-gray-400 text-white cursor-not-allowed"
               }`}
             >
+              {enCours && (
+                <span
+                  className="h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-b-2 border-current"
+                  aria-hidden="true"
+                />
+              )}
               {enCours ? "Connexion…" : "Se connecter"}
             </button>
           </form>
         </div>
 
         {/* COLONNE DROITE : panneau de marque (masqué en mobile) */}
-        <div className="relative hidden flex-col items-center justify-center bg-gradient-to-br from-i-primary via-i-primary to-[#1a3a5c] p-8 text-center md:flex overflow-hidden">
-          {/* Motifs décoratifs */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-i-turquoise rounded-full filter blur-3xl opacity-10 -translate-y-1/2 translate-x-1/2"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-i-green rounded-full filter blur-3xl opacity-10 translate-y-1/2 -translate-x-1/2"></div>
-          <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-i-blue rounded-full filter blur-3xl opacity-10 -translate-x-1/2 -translate-y-1/2"></div>
+        <div className="relative hidden flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-i-primary via-i-primary to-[#1a3a5c] p-8 text-center md:flex">
+          {/* Halos de couleur de la charte (fixes, en fond) */}
+          <div className="absolute top-0 right-0 w-56 h-56 bg-i-turquoise rounded-full filter blur-3xl opacity-10 -translate-y-1/2 translate-x-1/2"></div>
+          <div className="absolute bottom-0 left-0 w-56 h-56 bg-i-green rounded-full filter blur-3xl opacity-10 translate-y-1/2 -translate-x-1/2"></div>
 
-          {/* Contenu */}
           <div className="relative z-10 flex flex-col items-center">
             {/* Logo blanc : fond bleu nuit → version blanche (charte) */}
-            <div className="mb-8 p-4 bg-white/5 backdrop-blur-sm border border-white/10">
-              <img
-                src="/Logo-i-Rindra-Blanc.png"
-                alt="Logo i-Rindra"
-                className="w-48 max-w-full"
-              />
-            </div>
+            <img
+              src="/Logo-i-Rindra-Blanc.png"
+              alt="Logo i-Rindra"
+              className="mb-5 w-28 max-w-full"
+            />
 
-            <h2 className="font-brand text-2xl font-bold text-white mb-3">
-              Gestion de projets
-              <span className="block bg-gradient-to-r from-i-blue to-i-green bg-clip-text text-transparent">
+            <h2 className="font-brand text-xl font-bold text-white mb-2">
+              Gestion de projets{" "}
+              <span className="bg-gradient-to-r from-i-blue to-i-green bg-clip-text text-transparent">
                 assistée par l'IA
               </span>
             </h2>
-            <p className="font-body mt-2 max-w-xs text-sm text-i-turquoise/80">
-              Centralisez vos projets, suivez l'avancement et laissez
-              l'assistant IA vous épauler.
+            <p className="font-body mb-6 max-w-xs text-xs text-i-turquoise/80">
+              L'IA analyse, propose des tâches ; votre équipe valide et avance.
             </p>
 
-            {/* Points forts */}
-            <div className="mt-8 flex flex-col gap-2 w-full max-w-xs">
-              <div className="flex items-center gap-2 text-left text-xs text-white/80">
-                <div className="w-1.5 h-1.5 bg-i-green"></div>
-                <span>Suivi en temps réel</span>
-              </div>
-              <div className="flex items-center gap-2 text-left text-xs text-white/80">
-                <div className="w-1.5 h-1.5 bg-i-blue"></div>
-                <span>Assistant IA intégré</span>
-              </div>
-              <div className="flex items-center gap-2 text-left text-xs text-white/80">
-                <div className="w-1.5 h-1.5 bg-i-turquoise"></div>
-                <span>Espace client dédié</span>
-              </div>
-            </div>
+            {/* Scène animée : le parcours d'un projet dans i-Rindra */}
+            <LoginScene />
           </div>
         </div>
       </div>

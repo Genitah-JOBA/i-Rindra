@@ -1,6 +1,7 @@
 // src/pages/Parametres.jsx — préférences de l'application (compte).
 import { useState, useEffect } from "react";
 import { useAuth } from "../auth/AuthContext";
+import Spin from "../components/Spin";
 
 export default function Parametres() {
   const { user, updateMe } = useAuth();
@@ -167,12 +168,13 @@ export default function Parametres() {
           )}
 
           <div className="mt-auto flex items-center justify-end">
+            {saving && <Spin label="Enregistrement…" taille="sm" className="py-0 mr-3" />}
             <button
               type="submit"
               disabled={saving}
               className="rounded-lg bg-brand-gradient px-5 py-2 text-sm font-medium text-white transition hover:brightness-110 disabled:opacity-60"
             >
-              {saving ? "…" : "Enregistrer"}
+              {saving ? "Enregistrement…" : "Enregistrer"}
             </button>
           </div>
         </form>

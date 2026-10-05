@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/client";
 import { fichiersService } from "../api/fichiers";
+import Spin from "../components/Spin";
 import "animate.css";
 
 const infoType = (mime) => {
@@ -84,13 +85,7 @@ export default function Documents() {
         )
       : "—";
 
-  if (loading)
-    return (
-      <div className="flex items-center justify-center py-16">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-i-blue"></div>
-        <span className="ml-3 text-slate-500">{"Chargement…"}</span>
-      </div>
-    );
+  if (loading) return <Spin taille="lg" className="py-16" />;
 
   if (erreur)
     return (

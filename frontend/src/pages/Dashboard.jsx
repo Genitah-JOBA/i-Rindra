@@ -4,6 +4,7 @@ import { projetsService } from "../api/projets";
 import { facturesService } from "../api/factures";
 import { clientsService } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
+import Spin from "../components/Spin";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -426,12 +427,7 @@ export default function Dashboard() {
       </div>
 
       {/* Chargement */}
-      {loading && (
-        <div className="flex justify-center items-center py-12 animate__animated animate__pulse">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-i-blue"></div>
-          <span className="ml-3 text-slate-500">{"Chargement…"}</span>
-        </div>
-      )}
+      {loading && <Spin taille="lg" className="py-12" />}
 
       {/* Erreur */}
       {erreur && (

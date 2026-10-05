@@ -675,7 +675,7 @@ const pleinEcran = pathname.startsWith("/assistant-ia");
           onClick={() => setConfirmLogoutOpen(false)}
         >
           <div
-            className="animate__animated animate__zoomIn w-full max-w-sm border border-white/10 bg-white p-6 text-center shadow-2xl"
+            className="animate__animated animate__zoomIn animate__faster w-full max-w-sm border border-white/10 bg-white p-6 text-center shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-red-50">

@@ -5,6 +5,7 @@ import { projetsService } from "../../api/projets";
 import { tachesService } from "../../api/taches";
 import { utilisateursService } from "../../api/utilisateurs";
 import { useAuth } from "../../auth/AuthContext";
+import Spin from "../../components/Spin";
 import "animate.css";
 
 // Icônes SVG
@@ -330,12 +331,7 @@ export default function ProjetDetail() {
   ];
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#63B23E]"></div>
-        <span className="ml-3 text-slate-500">Chargement du projet…</span>
-      </div>
-    );
+    return <Spin taille="lg" className="py-12" label="Chargement du projet…" />;
   }
 
   if (erreur) {

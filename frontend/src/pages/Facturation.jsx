@@ -4,6 +4,7 @@ import { facturesService } from "../api/factures";
 import { clientsService } from "../api/client";
 import { projetsService } from "../api/projets";
 import { useMessage } from "../context/MessageContext";
+import Spin from "../components/Spin";
 
 // Devise d'affichage — modifiable en un seul endroit.
 const DEVISE = "Ar";
@@ -811,7 +812,7 @@ export default function Facturation() {
         </span>
       </div>
 
-      {loading && <p className="text-slate-500">{"Chargement…"}</p>}
+      {loading && <Spin taille="lg" className="py-12" />}
       {erreur && <p className="text-red-600">{erreur}</p>}
 
       {!loading && !erreur && (

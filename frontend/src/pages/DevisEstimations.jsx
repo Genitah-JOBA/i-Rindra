@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { suggestionDevisService } from "../api/suggestionDevis";
 import { useMessage } from "../context/MessageContext";
 import DevisModal from "../components/DevisModal";
+import Spin from "../components/Spin";
 import "animate.css";
 
 const B_ESTIMATION_URL = "https://b-estimation.example.com";
@@ -88,12 +89,7 @@ export default function DevisEstimations() {
       </div>
 
       {/* Chargement */}
-      {loading && (
-        <div className="flex justify-center items-center py-12 animate__animated animate__pulse">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-i-blue"></div>
-          <span className="ml-3 text-slate-500">Chargement…</span>
-        </div>
-      )}
+      {loading && <Spin taille="lg" className="py-12" />}
 
       {/* Erreur */}
       {erreur && (

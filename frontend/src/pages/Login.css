@@ -1,0 +1,66 @@
+/* Login.css — animations de la page de connexion (charte i-Rindra).
+   Principe : discret mais vivant. Mouvements lents, rien qui ne gêne la
+   saisie. Tout est coupé si l'utilisateur demande moins d'animations
+   (prefers-reduced-motion). La scène du projet est dans LoginScene.jsx. */
+
+/* ---------- Apparition du formulaire (une seule fois) ---------- */
+.login-apparition {
+  opacity: 0;
+  animation: login-apparition 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: var(--delai, 0s);
+}
+
+@keyframes login-apparition {
+  from { opacity: 0; translate: 0 12px; }
+  to   { opacity: 1; translate: 0 0; }
+}
+
+/* ---------- Scène du projet : message de l'IA à chaque étape ---------- */
+.login-scene-texte {
+  animation: login-scene-texte 0.5s ease-out;
+}
+
+@keyframes login-scene-texte {
+  from { opacity: 0.4; translate: 4px 0; }
+  to   { opacity: 1; translate: 0 0; }
+}
+
+/* Points « l'IA réfléchit » */
+.login-scene-point {
+  animation: login-scene-point 0.9s ease-in-out infinite;
+}
+
+@keyframes login-scene-point {
+  0%, 100% { opacity: 0.3; translate: 0 0; }
+  50%      { opacity: 1;   translate: 0 -2px; }
+}
+
+/* ---------- Reflet sur le bouton « Se connecter » ---------- */
+.login-cta-reflet {
+  position: relative;
+  overflow: hidden;
+}
+.login-cta-reflet::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: linear-gradient(110deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  translate: -150% 0;
+  animation: login-reflet 4.5s ease-in-out infinite;
+  animation-delay: 1s;
+  pointer-events: none;
+}
+
+@keyframes login-reflet {
+  0%, 70% { translate: -150% 0; }
+  100%    { translate: 350% 0; }
+}
+
+/* ---------- Accessibilité ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .login-apparition { animation: none; opacity: 1; }
+  .login-scene-texte,
+  .login-scene-point,
+  .login-cta-reflet::after { animation: none; }
+}

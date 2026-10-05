@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { utilisateursService } from "../api/utilisateurs";
 import { useAuth } from "../auth/AuthContext";
 import { useMessage } from "../context/MessageContext";
+import Spin from "../components/Spin";
 import 'animate.css';
 
 // Icônes SVG
@@ -240,12 +241,7 @@ export default function Membres() {
         </div>
       </div>
 
-      {loading && (
-        <div className="flex justify-center items-center py-12 animate__animated animate__pulse">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-i-blue"></div>
-          <span className="ml-3 text-slate-500">{"Chargement…"}</span>
-        </div>
-      )}
+      {loading && <Spin taille="lg" className="py-12" />}
       {erreur && (
         <div className="mb-4 bg-red-50 px-4 py-3 text-sm text-red-700 border border-red-200 animate__animated animate__shakeX">
           ⚠️ {erreur}
