@@ -68,7 +68,7 @@ export default function DevisEstimations() {
           href={B_ESTIMATION_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 border border-i-blue px-4 py-2 text-sm font-semibold text-i-blue transition hover:bg-brand-gradient hover:text-white"
+          className="flex items-center gap-2 border border-i-blue px-4 py-2 text-sm font-semibold text-i-blue transition hover:bg-brand-gradient hover:text-black"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

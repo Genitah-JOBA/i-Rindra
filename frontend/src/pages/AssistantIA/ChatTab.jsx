@@ -109,7 +109,7 @@ export default function ChatTab() {
   const estConfigure = config?.configuree === true;
 
   return (
-    <div className="flex flex-col h-[62vh] overflow-hidden bg-slate-50 border border-slate-200 rounded-lg">
+    <div className="flex flex-col h-[62vh] overflow-hidden bg-slate-50 border border-slate-200">
       {/* Zone scrollable */}
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto min-h-0">
         <div className="px-4 py-6">
@@ -134,7 +134,7 @@ export default function ChatTab() {
                 </p>
 
                 {!estConfigure && (
-                  <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 max-w-md text-sm mb-5 rounded-lg">
+                  <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 max-w-md text-sm mb-5">
                     L'assistant IA n'est pas configuré. Demandez à un
                     administrateur de définir LLM_API_KEY dans le fichier
                     .env du backend.
@@ -147,7 +147,7 @@ export default function ChatTab() {
                       key={i}
                       onClick={() => handleSend(s)}
                       disabled={!estConfigure || loading}
-                      className="text-left text-sm px-4 py-3 bg-white hover:bg-i-blue/5 hover:text-i-blue border border-slate-200 hover:border-i-blue transition-colors text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg"
+                      className="text-left text-sm px-4 py-3 bg-white hover:bg-i-blue/5 hover:text-i-blue border border-slate-200 hover:border-i-blue transition-colors text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       {s}
                     </button>
@@ -158,13 +158,13 @@ export default function ChatTab() {
 
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate__animated animate__fadeIn`}>
-                <div className={`max-w-[78%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap rounded-lg ${msg.role === "user" ? "bg-brand-gradient text-i-primary" : "bg-white text-slate-800 border border-slate-200"}`}>
+                <div className={`max-w-[78%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${msg.role === "user" ? "bg-brand-gradient text-i-primary" : "bg-white text-slate-800 border border-slate-200"}`}>
                   {msg.role === "assistant" && (
                     <span className="block text-[10px] font-semibold text-i-blue uppercase mb-1">IA</span>
                   )}
                   {msg.content}
                   {msg.noteDevis && (
-                    <a href="/suggestion-devis" className="mt-2 flex items-center gap-1 text-[11px] font-medium text-i-blue bg-i-blue/10 border border-i-blue/30 px-3 py-1.5 rounded-md hover:bg-brand-gradient/20 transition-colors">
+                    <a href="/suggestion-devis" className="mt-2 flex items-center gap-1 text-[11px] font-medium text-i-blue bg-i-blue/10 border border-i-blue/30 px-3 py-1.5 hover:bg-brand-gradient/20 transition-colors">
                       <IconCheck className="w-3.5 h-3.5 flex-shrink-0" />
                       Devis sauvegardé dans « Suggestion devis par IA »
                       <IconArrowRight className="w-3.5 h-3.5 flex-shrink-0" />
@@ -201,7 +201,7 @@ export default function ChatTab() {
             placeholder="Écrivez votre message…"
             disabled={!estConfigure || loading}
             rows={1}
-            className="flex-1 resize-none border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent disabled:bg-slate-50 disabled:cursor-not-allowed rounded-lg"
+            className="flex-1 resize-none border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent disabled:bg-slate-50 disabled:cursor-not-allowed"
             style={{ minHeight: "44px", maxHeight: "120px" }}
             onInput={(e) => {
               e.target.style.height = "auto";
@@ -211,14 +211,14 @@ export default function ChatTab() {
           <button
             onClick={() => handleSend()}
             disabled={!input.trim() || !estConfigure || loading}
-            className="p-3 bg-brand-gradient text-i-primary hover:brightness-110 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors flex-shrink-0 rounded-lg"
+            className="p-3 bg-brand-gradient text-i-primary hover:brightness-110 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors flex-shrink-0"
           >
             <IconSend className="w-5 h-5" />
           </button>
           {messages.length > 0 && (
             <button
               onClick={handleClear}
-              className="p-2 text-slate-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50 flex-shrink-0"
+              className="p-2 text-slate-400 hover:text-red-500 transition-colors hover:bg-red-50 flex-shrink-0"
               title="Effacer la conversation"
             >
               <IconTrash className="w-5 h-5" />

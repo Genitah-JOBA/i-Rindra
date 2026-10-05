@@ -104,7 +104,7 @@ export default function AnalyseCdcTab({ projets }) {
             {!fichier ? (
               <button
                 onClick={() => inputRef.current?.click()}
-                className="w-full flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-300 hover:border-i-blue hover:bg-green-50/40 transition-colors bg-slate-50 px-4 py-8 rounded-md"
+                className="w-full flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-300 hover:border-i-blue hover:bg-green-50/40 transition-colors bg-slate-50 px-4 py-8"
               >
                 <span className="w-10 h-10 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-500">
                   <IconDocument className="w-5 h-5" />
@@ -117,7 +117,7 @@ export default function AnalyseCdcTab({ projets }) {
                 </span>
               </button>
             ) : (
-              <div className="flex items-center gap-3 border border-slate-300 bg-green-50/50 px-4 py-3 rounded-md">
+              <div className="flex items-center gap-3 border border-slate-300 bg-green-50/50 px-4 py-3">
                 <IconDocument className="w-6 h-6 text-i-blue flex-shrink-0" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-slate-800">{fichier.name}</p>
@@ -127,7 +127,7 @@ export default function AnalyseCdcTab({ projets }) {
                 </div>
                 <button
                   onClick={() => setFichier(null)}
-                  className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors flex-shrink-0"
+                  className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0"
                   title="Retirer le fichier"
                 >
                   <IconCroix />
@@ -168,17 +168,17 @@ export default function AnalyseCdcTab({ projets }) {
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="bg-i-blue/5 border border-i-blue/10 p-3 rounded-lg">
+            <div className="bg-i-blue/5 border border-i-blue/10 p-3">
               <TitreSection className="text-i-blue">Points clés</TitreSection>
               <PuceList items={resultat.points_cles} />
             </div>
-            <div className="bg-rose-50 border border-rose-100 p-3 rounded-lg">
+            <div className="bg-rose-50 border border-rose-100 p-3">
               <TitreSection className="text-rose-700">Risques</TitreSection>
               <PuceList items={resultat.risques} />
             </div>
           </div>
 
-          <div className="mt-4 bg-emerald-50 border border-emerald-100 p-3 rounded-lg">
+          <div className="mt-4 bg-emerald-50 border border-emerald-100 p-3">
             <TitreSection className="text-emerald-700">Recommandations</TitreSection>
             <PuceList items={resultat.recommandations} />
           </div>

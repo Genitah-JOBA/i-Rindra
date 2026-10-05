@@ -102,6 +102,17 @@ class Settings(BaseSettings):
     # est renvoyé dans la réponse et écrit dans les logs du serveur.
     RESET_LIEN_EN_REPONSE: bool = os.getenv("RESET_LIEN_EN_REPONSE", "true").lower() == "true"
 
+    # Besti (comptes clients partagés)
+    # ---------------------------------
+    # Les deux clés restent VIDES tant que la liaison n'est pas configurée :
+    # l'API démarre normalement, seule l'intégration Besti est inactive.
+    #   BESTI_WEBHOOK_SECRET : HMAC de vérification des webhooks entrants.
+    #   BESTI_API_KEY        : authentifie l'API d'iRindra auprès de Besti.
+    # Ces deux secrets ne doivent JAMAIS être journalisés ni renvoyés au client.
+    BESTI_URL: str = os.getenv("BESTI_URL", "https://api-besti.bef4prod.com").rstrip("/")
+    BESTI_API_KEY: str = os.getenv("BESTI_API_KEY", "")
+    BESTI_WEBHOOK_SECRET: str = os.getenv("BESTI_WEBHOOK_SECRET", "")
+
     # Environnement : "development", "production", "test"
     APP_ENV: str = os.getenv("APP_ENV", "development")
 

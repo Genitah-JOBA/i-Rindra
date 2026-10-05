@@ -18,7 +18,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from app.routers import auth, projets, taches, dashboard, client, fichiers, utilisateurs, notifications, clients, factures, ia, absences, suggestion_devis
+from app.routers import auth, projets, taches, dashboard, client, fichiers, utilisateurs, notifications, clients, factures, ia, absences, suggestion_devis, besti
 from app.core.database import engine, Base
 from app.services import notifications as notif_service
 from app.services import vecteurs as vecteurs_service
@@ -54,6 +54,7 @@ app.include_router(factures.router)
 app.include_router(ia.router)
 app.include_router(absences.router)
 app.include_router(suggestion_devis.router)
+app.include_router(besti.router)
 
 @app.on_event("startup")
 async def init_db():
@@ -68,6 +69,24 @@ async def init_db():
         # existante, seule cette instruction ajoute la colonne.
         await conn.execute(
             text("ALTER TABLE tache ADD COLUMN IF NOT EXISTS retard_notifie_le TIMESTAMPTZ")
+        )
+        # Migration idempotente : comptes clients partagés avec Besti.
+        # `besti_id` reste NULL pour les comptes iRindra classiques, qui
+        # conservent leur mot de passe local. L'index unique est ce qui rend le
+        # webhook idempotent (upsert sur besti_id). Le DROP NOT NULL permet à
+        # un compte lié de n'avoir aucun hash : son mot de passe est vérifié par
+        # Besti. Aucune donnée existante n'est touchée.
+        await conn.execute(
+            text("ALTER TABLE utilisateur ADD COLUMN IF NOT EXISTS besti_id UUID")
+        )
+        await conn.execute(
+            text(
+                "CREATE UNIQUE INDEX IF NOT EXISTS ix_utilisateur_besti_id "
+                "ON utilisateur (besti_id)"
+            )
+        )
+        await conn.execute(
+            text("ALTER TABLE utilisateur ALTER COLUMN mot_de_passe_hash DROP NOT NULL")
         )
         # Recherche sémantique (RF-31) : table document_chunk + index pgvector.
         # Sans l'extension `vector`, ne fait rien (recherche plein texte seule).

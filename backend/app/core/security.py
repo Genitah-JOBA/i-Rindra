@@ -28,11 +28,17 @@ def hash_password(password: str) -> str:
 
     return pwd_context.hash(password)
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
+def verify_password(plain_password: str, hashed_password: str | None) -> bool:
     """
     Vérifie qu'un mot de passe en clair correspond au hash stocké.
     Retourne True si OK.
+
+    Un hash absent renvoie False sans lever : les comptes clients partagés avec
+    Besti n'ont pas de hash local (leur mot de passe reste chez Besti), et
+    `pwd_context.verify(None, ...)` lèverait une exception au lieu de refuser.
     """
+    if not hashed_password:
+        return False
     password_bytes = plain_password.encode('utf-8')
     if len(password_bytes) > _BCRYPT_MAX_BYTES:
         plain_password = password_bytes[:_BCRYPT_MAX_BYTES].decode('utf-8', errors='ignore')

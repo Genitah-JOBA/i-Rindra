@@ -18,11 +18,18 @@ from app.utils.jetons_reinit import generer_jeton_reinit, hacher_jeton_reinit, j
 from app.utils.mots_de_passe import verifier_mot_de_passe
 from app.utils.emails import normaliser_email
 from app.utils.email import envoyer_email_reinitialisation, smtp_configure
+from app.besti.client import verifier_identifiants as besti_verifier_identifiants
+from app.besti.service import appliquer as besti_appliquer
 from pydantic import BaseModel, EmailStr
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 logger = logging.getLogger("i-rindra.auth")
+
+#: Page Besti qui gère le mot de passe des clients approuvés. Les comptes
+#: clients y sont créés par Besti : iRindra ne détient pas leur mot de passe
+#: et ne peut donc ni l'envoyer ni le changer.
+URL_MOT_DE_PASSE_BESTI = "https://besti.bef4prod.com/users/forgot-password"
 
 # --- Rate limiting simple en mémoire ---
 _rate_limits: dict[str, list[float]] = defaultdict(list)
@@ -86,6 +93,52 @@ class UserResponse(BaseModel):
 
 # Endpoint
 
+def _reponse_token(user: Utilisateur) -> TokenResponse:
+    """Construit la réponse de connexion (jeton + identity), identique pour
+    un compte local et pour un compte lié à Besti : le frontend ne change pas."""
+    token_data = {
+        "sub": str(user.id),
+        "role": user.role.value,
+        "email": user.email,
+        "client_id": user.client_id,
+    }
+    access_token = create_access_token(token_data)
+
+    return TokenResponse(
+        access_token=access_token,
+        user_id=user.id,
+        nom=user.nom,
+        prenom=user.prenom,
+        role=user.role.value,
+    )
+
+
+async def _connexion_locale(user: Utilisateur, mot_de_passe: str) -> TokenResponse:
+    """Connexion d'un compte iRindra classique : vérification locale, inchangée.
+
+    Ce chemin est celui de tous les comptes créés dans iRindra (inscription,
+    création par un administrateur). Besti n'est pas interrogé : ces comptes
+    restent totalement indépendants.
+    """
+    # Vérifie que le mot de passe est correct. `verify_password` renvoie False
+    # si le hash est absent, sans lever : pas d'exception sur un compte lié qui
+    # n'aurait pas de hash local.
+    if not verify_password(mot_de_passe, user.mot_de_passe_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Email ou mot de passe incorrect",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    if not user.actif:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Compte désactivé"
+        )
+
+    return _reponse_token(user)
+
+
 @router.post("/login", response_model=TokenResponse)
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),  # <- Format standard OAuth2
@@ -98,6 +151,14 @@ async def login(
     OAuth2PasswordRequestForm attend les champs :
        - username (on utilisera l'email ici)
        - password
+
+    Deux chemins, jamais mélangés :
+
+    - **compte local** (`besti_id` vide) : tout se passe dans iRindra, comme
+      avant la liaison Besti. Inchangé.
+    - **compte lié Besti, ou email inconnu** : Besti vérifie le mot de passe,
+      car il détient celui des clients qu'il a approuvés. iRindra se contente
+      d'émettre son propre JWT.
     """
     _check_rate_limit(f"login:{form_data.username}")
 
@@ -107,39 +168,47 @@ async def login(
         select(Utilisateur).where(Utilisateur.email == email)
     )
     user = result.scalar_one_or_none()
-    
-    # 2. Vérifie que l'utilisateur existe et que le mot de passe est correct
-    if not user or not verify_password(form_data.password, user.mot_de_passe_hash):
+
+    # 2. Compte LOCAL : son mot de passe est vérifié ici, Besti n'est pas appelé.
+    if user is not None and user.besti_id is None:
+        return await _connexion_locale(user, form_data.password)
+
+    # 3. Compte lié à Besti, ou email inconnu : Besti est seul juge.
+    #
+    # Sans clé API, la liaison est inactive : on renvoie la même erreur qu'un
+    # mot de passe faux, pour ne pas révéler quels emails sont des comptes
+    # Besti. Les comptes locaux ci-dessus restent connectés normalement.
+    if not settings.BESTI_API_KEY:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Email ou mot de passe incorrect",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
-    # 3. Vérifie que le compte est actif
+
+    # Un compte lié désactivé ne peut plus se connecter, même si Besti valide
+    # encore le mot de passe : la désactivation a été décidée ici.
+    if user is not None and not user.actif:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Compte désactivé"
+        )
+
+    # Besti lève 401 / 403 / 429 / 503 selon sa réponse : on laisse ces codes
+    # remonter tels quels.
+    compte = await besti_verifier_identifiants(email, form_data.password)
+
+    # Si le webhook n'est jamais arrivé (client approuvé avant la liaison, envoi
+    # perdu), le compte n'existe peut-être pas encore : on le crée au passage,
+    # par le même chemin que le webhook, avec le rôle client.
+    user = await besti_appliquer(db, "user.activated", compte)
+
     if not user.actif:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Compte désactivé"
         )
-    
-    # 4. Crée le token JWT avec les informations de l'utilisateur
-    token_data = {
-        "sub": str(user.id),
-        "role": user.role.value,
-        "email": user.email,
-        "client_id": user.client_id,
-    }
-    access_token = create_access_token(token_data)
-    
-    # 5. Retourne le token + infos utilisateur
-    return TokenResponse(
-        access_token=access_token,
-        user_id=user.id,
-        nom=user.nom,
-        prenom=user.prenom,
-        role=user.role.value,
-    )
+
+    return _reponse_token(user)
 
 @router.get("/me", response_model=UserResponse)
 async def get_current_user(
@@ -207,6 +276,22 @@ async def update_me(
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Utilisateur non trouvé")
+
+    if user.besti_id is not None:
+        # Un client Besti n'a pas de mot de passe ici : le changer localement
+        # n'aurait aucun effet (Besti refuserait le nouveau), et modifier son
+        # email le rendrait introuvable à la prochaine connexion, Besti
+        # ne connaissant que l'adresse qu'il a approuvée. On renvoie vers Besti.
+        if data.nouveau_mot_de_passe or (
+            data.email and normaliser_email(data.email) != user.email
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    "Votre compte est géré par Besti : modifiez votre mot de passe "
+                    f"ou votre adresse email sur {URL_MOT_DE_PASSE_BESTI}."
+                ),
+            )
 
     # Email : vérifier l'unicité si modifié
     if data.email and normaliser_email(data.email) != user.email:
@@ -339,8 +424,12 @@ async def mot_de_passe_oublie(
     """
     Étape 1 : demande un lien de réinitialisation.
 
-    Répond toujours 200 avec un message identique, que l'adresse existe ou non
-    (anti-énumération de comptes).
+    Répond 200 dans tous les cas, avec le même message pour une adresse
+    inconnue, désactivée ou locale (anti-énumération de comptes).
+
+    Cas particulier : un compte *lié à Besti* ne peut pas être réinitialisé
+    ici — Besti détient le mot de passe. La réponse renvoie alors vers la page
+    Besti, ce qui est le comportement attendu par l'utilisateur sur ce cas.
     """
     _check_rate_limit(f"reinit:oublie:{normaliser_email(data.email)}")
 
@@ -353,6 +442,20 @@ async def mot_de_passe_oublie(
     if user is None or not user.actif:
         logger.info("Demande de réinitialisation pour une adresse non utilisable.")
         return MotDePasseOublieResponse(message=MESSAGE_REINIT_GENERIQUE)
+
+    # Compte client géré par Besti : aucun jeton local n'est créé (il ne
+    # servirait à rien, aucun hash n'existe ici). Le message renvoie vers Besti,
+    # seule autorité qui puisse changer ce mot de passe.
+    if user.besti_id is not None:
+        logger.info(
+            "Demande de réinitialisation sur un compte lié à Besti : ignorée."
+        )
+        return MotDePasseOublieResponse(
+            message=(
+                "Votre compte est géré par Besti : demandez la réinitialisation "
+                f"sur {URL_MOT_DE_PASSE_BESTI}."
+            )
+        )
 
     # Invalide les demandes précédentes : seul le dernier lien mailed reste
     # valable, ce qui évite que plusieurs liens circulent en parallèle.

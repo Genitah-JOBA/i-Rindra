@@ -66,7 +66,7 @@ export default function AssistantIA() {
     <div className="h-full flex flex-col overflow-hidden">
       {/* En-tête compact */}
       <header className="flex-shrink-0 flex items-center gap-3 px-1 pb-3">
-        <div className="w-9 h-9 bg-i-blue/10 rounded-lg flex items-center justify-center flex-shrink-0">
+        <div className="w-9 h-9 bg-i-blue/10 flex items-center justify-center flex-shrink-0">
           <IconSparkles className="w-4 h-4 text-i-blue" />
         </div>
         <div className="flex-1 min-w-0">
@@ -88,7 +88,7 @@ export default function AssistantIA() {
             <button
               key={o.id}
               onClick={() => setOnglet(o.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-all rounded-md ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-all ${
                 isActive
                   ? "bg-brand-gradient text-i-primary shadow-sm"
                   : "bg-white text-slate-600 border border-slate-200 hover:border-i-blue hover:text-i-blue hover:bg-i-blue/5"
