@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../auth/AuthContext";
 import Spin from "../components/Spin";
+import LiaisonBesti from "../components/LiaisonBesti";
 
 export default function Parametres() {
   const { user, updateMe } = useAuth();
@@ -179,6 +180,9 @@ export default function Parametres() {
           </div>
         </form>
       </section>
+
+      {/* Liaison avec B-esti : réservée à la direction / DRH */}
+      {(user?.role === "direction" || user?.role === "drh") && <LiaisonBesti />}
     </div>
   );
 }
