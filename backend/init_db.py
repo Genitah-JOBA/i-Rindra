@@ -66,9 +66,20 @@ _log(f"Connexion à : {url_masquee(DATABASE_URL)}")
 try:
     with psycopg2.connect(DSN) as conn:
         with conn.cursor() as cur:
+            # Base déjà initialisée (cas de TOUS les redéploiements) : schema.sql
+            # n'est pas idempotent (CREATE TYPE / CREATE TABLE échoueraient sur
+            # « already exists ») et ferait échouer le démarrage. Les évolutions
+            # de schéma sont appliquées par les migrations idempotentes du
+            # démarrage de l'API (app/main.py).
+            cur.execute("SELECT to_regclass('public.utilisateur') IS NOT NULL")
+            if cur.fetchone()[0]:
+                _log("[OK] Schéma déjà présent : rien à initialiser.")
+                raise SystemExit(0)
             cur.execute(sql_content)
         conn.commit()
     _log("[OK] Schéma de base de données initialisé avec succès.")
+except SystemExit:
+    raise
 except Exception as e:
     # On masque le secret si l'erreur contient l'URL complète (psycopg2
     # recopie parfois le DSN dans son message).
