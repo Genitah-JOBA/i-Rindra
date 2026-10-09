@@ -65,7 +65,7 @@ export default function Parametres() {
   };
 
   const champStyle =
-    "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none focus:border-i-blue focus:ring-1 focus:ring-i-blue";
+    "w-full border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none focus:border-i-blue focus:ring-1 focus:ring-i-blue";
 
   return (
     <div className="flex h-full flex-col">
@@ -75,7 +75,7 @@ export default function Parametres() {
       <p className="mb-6 text-sm text-slate-500">Préférences de l'application.</p>
 
       {/* Compte — modifiable */}
-      <section className="flex flex-1 flex-col rounded-lg border bg-white p-5 shadow-sm">
+      <section className="flex flex-1 flex-col border bg-white p-5 shadow-sm">
         <h2 className="mb-1 text-base font-semibold text-slate-800">
           Mon compte
         </h2>
@@ -158,12 +158,12 @@ export default function Parametres() {
           </div>
 
           {erreur && (
-            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+            <p className="bg-red-50 px-3 py-2 text-sm text-red-600">
               {erreur}
             </p>
           )}
           {succes && (
-            <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-600">
+            <p className="bg-emerald-50 px-3 py-2 text-sm text-emerald-600">
               Informations mises à jour.
             </p>
           )}

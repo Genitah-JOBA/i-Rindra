@@ -1,6 +1,7 @@
 // src/components/FactureModal.jsx — détail d'une facture + téléchargement de son PDF
 // (gabarit des devis, charte i-Rindra). Montants affichés dans la devise du client.
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { facturesService } from "../api/factures";
 import { useMessage } from "../context/MessageContext";
 
@@ -68,7 +69,8 @@ export default function FactureModal({ facture, devise = "Ar", onClose, onModifi
     }
   };
 
-  return (
+  // Portal : au-dessus de l'en-tête collant, quel que soit l'endroit où la page est rendue
+  return createPortal(
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-i-primary/60 p-4 backdrop-blur-[2px] animate__animated animate__fadeIn animate__faster"
       onClick={onClose}
@@ -157,6 +159,7 @@ export default function FactureModal({ facture, devise = "Ar", onClose, onModifi
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

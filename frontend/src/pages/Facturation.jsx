@@ -1,5 +1,6 @@
 // src/pages/Facturation.jsx — volet financier : factures clients (ADMIN uniquement).
 import { useEffect, useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import { facturesService } from "../api/factures";
 import { clientsService } from "../api/client";
 import { projetsService } from "../api/projets";
@@ -600,10 +601,12 @@ export default function Facturation() {
         />
       )}
 
-      {/* MODALE AJOUT / ÉDITION AVEC PROJET OBLIGATOIRE */}
-      {modalOuvert && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate__animated animate__fadeIn">
-          <div className="w-full max-w-lg bg-white p-6 shadow-xl animate__animated animate__zoomIn">
+      {/* MODALE AJOUT / ÉDITION AVEC PROJET OBLIGATOIRE
+          Rendue dans document.body (portal) : dessinée dans la page, elle restait
+          sous l'en-tête collant, piégée par le contexte d'empilement du contenu. */}
+      {modalOuvert && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-i-primary/60 p-4 backdrop-blur-[2px] animate__animated animate__fadeIn animate__faster sm:items-center">
+          <div className="my-6 w-full max-w-lg bg-white p-6 shadow-2xl animate__animated animate__zoomIn animate__faster">
             <h2 className="mb-4 text-lg font-semibold text-slate-900">
               {editionId ? "Modifier la facture" : "Nouvelle facture"}
             </h2>
@@ -810,7 +813,8 @@ export default function Facturation() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );
