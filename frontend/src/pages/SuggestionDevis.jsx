@@ -271,7 +271,7 @@ export default function SuggestionDevis() {
             <IconSparkles className="w-6 h-6 text-i-blue" />
             Suggestion devis par IA
           </h1>
-          <p className="text-sm text-slate-500">
+          <p className="mt-2 text-sm text-slate-500">
             Devis proposés par l'IA — direction / DRH uniquement.
           </p>
         </div>
@@ -328,10 +328,20 @@ export default function SuggestionDevis() {
                         {LIBELLE_STATUT[s.statut] || LIBELLE_STATUT.en_attente}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-400">
-                      {s.client_nom ? `Client : ${s.client_nom}` : "Sans client associé"}
-                      {s.projet_nom ? ` · Projet : ${s.projet_nom}` : ""} ·{" "}
-                      {dater(s.cree_le)}
+                    <p className="mt-1.5 text-xs text-slate-400">
+                      {/* Séparateur « · » espacé, seulement entre éléments présents */}
+                      {[
+                        s.client_nom ? `Client : ${s.client_nom}` : "Sans client associé",
+                        s.projet_nom && `Projet : ${s.projet_nom}`,
+                        dater(s.cree_le),
+                      ]
+                        .filter(Boolean)
+                        .map((element, i) => (
+                          <span key={i}>
+                            {i > 0 && <span className="mx-2 text-slate-300">·</span>}
+                            {element}
+                          </span>
+                        ))}
                     </p>
                   </div>
                   <button
@@ -524,7 +534,7 @@ export default function SuggestionDevis() {
                 <button
                   type="submit"
                   disabled={generation}
-                  className="flex items-center gap-2 bg-brand-gradient px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
+                  className="flex items-center gap-2 bg-brand-gradient px-4 py-2 text-sm font-semibold text-black transition hover:brightness-110 disabled:opacity-50"
                 >
                   {generation ? "Génération…" : "Générer par IA"}
                 </button>

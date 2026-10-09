@@ -39,6 +39,8 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    # Nom des fichiers téléchargés (PDF de devis et de factures) lisible par le frontend
+    expose_headers=["Content-Disposition"],
 )
 
 # Enregistrement des routers

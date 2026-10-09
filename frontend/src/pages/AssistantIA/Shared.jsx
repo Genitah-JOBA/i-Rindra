@@ -187,7 +187,7 @@ export function BtnIA({ children, onClick, loading = false, disabled = false, cl
     <button
       onClick={onClick}
       disabled={disabled || loading}
-      className={`flex items-center gap-2 bg-brand-gradient px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      className={`flex items-center gap-2 bg-brand-gradient px-4 py-2 text-sm font-semibold text-black transition hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     >
       <IconSparkles className="w-4 h-4" />
       {loading ? "Analyse en cours…" : children}

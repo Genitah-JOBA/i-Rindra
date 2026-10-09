@@ -1,0 +1,169 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="dsc" name="DSC Analyser CDC">
+    <mxGraphModel dx="4760" dy="2697" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1760" pageHeight="1040" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c1" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;shape=umlFrame;width=360;height=34;align=left;spacingLeft=8;" value="" vertex="1">
+          <mxGeometry height="1290" width="1240" x="270" y="-90" as="geometry" />
+        </mxCell>
+        <mxCell id="c2" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;" value="Chef de projet" vertex="1">
+          <mxGeometry height="70" width="36" x="70" y="-70" as="geometry" />
+        </mxCell>
+        <mxCell id="c3" edge="1" parent="1" source="c2" style="fontSize=40;fontFamily=Times New Roman;html=1;endArrow=none;dashed=1;dashPattern=4 4;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="90" y="160" as="sourcePoint" />
+            <mxPoint x="90" y="1160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c4" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;" value="Fournisseur IA&lt;br&gt;(Groq)" vertex="1">
+          <mxGeometry height="70" width="36" x="1590" y="-70" as="geometry" />
+        </mxCell>
+        <mxCell id="c5" edge="1" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;endArrow=none;dashed=1;dashPattern=4 4;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1620" y="20" as="sourcePoint" />
+            <mxPoint x="1620" y="1150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c6" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;fontStyle=4;" value=":RouteurIA" vertex="1">
+          <mxGeometry height="60" width="240" x="340" y="-30" as="geometry" />
+        </mxCell>
+        <mxCell id="c7" edge="1" parent="1" source="c6" style="fontSize=40;fontFamily=Times New Roman;html=1;endArrow=none;dashed=1;dashPattern=4 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="460" y="130" as="sourcePoint" />
+            <mxPoint x="460" y="1140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c8" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;fontStyle=4;" value=":ServiceIA" vertex="1">
+          <mxGeometry height="60" width="240" x="740" y="-30" as="geometry" />
+        </mxCell>
+        <mxCell id="c9" edge="1" parent="1" source="c8" style="fontSize=40;fontFamily=Times New Roman;html=1;endArrow=none;dashed=1;dashPattern=4 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="860" y="130" as="sourcePoint" />
+            <mxPoint x="860" y="1159.88" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c10" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;" value="" vertex="1">
+          <mxGeometry height="840" width="16" x="452" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="c11" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;" value="" vertex="1">
+          <mxGeometry height="810" width="16" x="852" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="c12" edge="1" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;verticalAlign=bottom;endArrow=block;endFill=1;endSize=12;" value="analyserCdc(projetId, fichier)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="90" y="134" as="sourcePoint" />
+            <mxPoint x="452" y="134" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c13" edge="1" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;verticalAlign=bottom;endArrow=block;endFill=1;endSize=12;align=left;spacingLeft=6;verticalAlign=middle;" value="vérifier JWT et droits">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="538" y="172" />
+              <mxPoint x="538" y="204" />
+            </Array>
+            <mxPoint x="468" y="172" as="sourcePoint" />
+            <mxPoint x="478" y="204" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c14" edge="1" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;verticalAlign=bottom;endArrow=block;endFill=1;endSize=12;align=left;spacingLeft=6;verticalAlign=middle;" value="extraire_texte_fichier(fichier)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="538" y="240" />
+              <mxPoint x="538" y="272" />
+            </Array>
+            <mxPoint x="468" y="240" as="sourcePoint" />
+            <mxPoint x="478" y="272" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c15" edge="1" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;verticalAlign=bottom;endArrow=block;endFill=1;endSize=12;" value="analyser_cdc(projetId, texte)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="468" y="353" as="sourcePoint" />
+            <mxPoint x="852" y="353" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c16" edge="1" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;verticalAlign=bottom;endArrow=block;endFill=1;endSize=12;align=left;spacingLeft=6;verticalAlign=middle;" value="_entree_cdc(projet, texte)">
+          <mxGeometry relative="1" x="-0.0123" y="12" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="938" y="392" />
+              <mxPoint x="938" y="424" />
+            </Array>
+            <mxPoint x="868" y="392" as="sourcePoint" />
+            <mxPoint x="878" y="424" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c17" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;shape=umlFrame;width=60;height=30;" value="alt" vertex="1">
+          <mxGeometry height="420" width="1290" x="390" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="c18" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;text;align=left;fontSize=18;" value="[aucun texte disponible]" vertex="1">
+          <mxGeometry height="30" width="300" x="460" y="477" as="geometry" />
+        </mxCell>
+        <mxCell id="c19" edge="1" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;verticalAlign=bottom;endArrow=open;dashed=1;dashPattern=8 6;endSize=12;" value="ContenuIndisponibleError">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="852" y="568" as="sourcePoint" />
+            <mxPoint x="468" y="568" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="HA9P4Zgj07gZhoQ6rzHH-1" connectable="0" parent="c19" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Text" vertex="1">
+          <mxGeometry relative="1" x="-0.2504" y="3" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c20" edge="1" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;endArrow=none;dashed=1;dashPattern=12 8;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="390" y="598" as="sourcePoint" />
+            <mxPoint x="1680" y="598" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c21" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;text;align=left;fontSize=18;" value="[texte disponible]" vertex="1">
+          <mxGeometry height="30" width="260" x="396" y="599" as="geometry" />
+        </mxCell>
+        <mxCell id="c22" edge="1" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;verticalAlign=bottom;endArrow=block;endFill=1;endSize=12;" value="chat_completion(system, user)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="868" y="650" as="sourcePoint" />
+            <mxPoint x="1620" y="650" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c23" edge="1" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;verticalAlign=bottom;endArrow=open;dashed=1;dashPattern=8 6;endSize=12;" value="réponse JSON">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1620" y="715" as="sourcePoint" />
+            <mxPoint x="868" y="715" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c24" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;fontStyle=4;" value=":AnalyseIA" vertex="1">
+          <mxGeometry height="56" width="220" x="1252" y="750" as="geometry" />
+        </mxCell>
+        <mxCell id="c25" edge="1" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;endArrow=none;dashed=1;dashPattern=4 4;entryX=0.831;entryY=0.966;entryDx=0;entryDy=0;entryPerimeter=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1358" y="710" as="sourcePoint" />
+            <mxPoint x="1358.58" y="1153.88" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c26" edge="1" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;verticalAlign=bottom;endArrow=open;endSize=12;" value="«create» journaliser()">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="868" y="787" as="sourcePoint" />
+            <mxPoint x="1250" y="787" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c27" edge="1" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;verticalAlign=bottom;endArrow=open;dashed=1;dashPattern=8 6;endSize=12;" value="points clés, périmètre, risques">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="852" y="847" as="sourcePoint" />
+            <mxPoint x="468" y="847" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c28" edge="1" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;verticalAlign=bottom;endArrow=open;dashed=1;dashPattern=8 6;endSize=12;" value="200 OK (analyse) / 422">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="452" y="920" as="sourcePoint" />
+            <mxPoint x="90" y="920" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c29" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;shape=umlFrame;width=50;height=30;" value="ref" vertex="1">
+          <mxGeometry height="80" width="1030" x="390" y="1040" as="geometry" />
+        </mxCell>
+        <mxCell id="c30" parent="1" style="fontSize=40;fontFamily=Times New Roman;html=1;text;align=center;verticalAlign=middle;" value="Extraire les tâches()" vertex="1">
+          <mxGeometry height="60" width="890" x="440" y="1055" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

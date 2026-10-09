@@ -359,7 +359,7 @@ export default function Taches() {
           <button
             type="submit"
             disabled={creation}
-            className="bg-gradient-to-r from-i-blue to-i-green px-4 py-2 text-sm font-semibold text-i-primary transition-all duration-200 hover:shadow-lg hover:scale-[1.02] disabled:opacity-50"
+            className="bg-gradient-to-r from-i-blue to-i-green px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:shadow-lg hover:scale-[1.02] disabled:opacity-50"
           >
             {creation ? "Enregistrement…" : "+ Ajouter"}
           </button>

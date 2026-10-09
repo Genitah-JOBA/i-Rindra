@@ -69,7 +69,7 @@ const BORDURE_ACTIVE = "border-[#51B4EB]";
 
 // Bouton d'action principal (même dégradé que les autres actions de l'app)
 const BOUTON_PRINCIPAL =
-  "bg-gradient-to-r from-i-blue to-i-green font-semibold text-i-primary shadow-sm transition-all duration-200 hover:shadow-lg hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100";
+  "bg-gradient-to-r from-i-blue to-i-green font-semibold text-black shadow-sm transition-all duration-200 hover:shadow-lg hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100";
 
 const CHAMP =
   "w-full border border-i-primary/20 bg-white px-3 py-2.5 text-sm text-i-primary outline-none transition focus:border-transparent focus:ring-2 focus:ring-i-blue";

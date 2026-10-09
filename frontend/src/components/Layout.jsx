@@ -4,13 +4,14 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { useLocation } from "react-router-dom";
 import NotificationBell from "./NotificationBell";
+import { BESTI_URL } from "../config/liens";
 import "animate.css";
 
 // Fonction pour les liens actifs
 const lienClass = ({ isActive }) =>
   `flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors mx-1 ${
     isActive
-      ? "bg-gradient-to-r from-i-blue to-i-green text-i-primary font-semibold shadow-md"
+      ? "bg-gradient-to-r from-i-blue to-i-green text-black font-semibold shadow-md"
       : "text-white/80 hover:bg-white/10 hover:text-white"
   }`;
 
@@ -323,6 +324,36 @@ const pleinEcran = pathname.startsWith("/assistant-ia");
                 </span>
               </NavLink>
 
+              {/* === DEVIS (chef de projet / équipe) : consultation des devis validés === */}
+              {estInterne && !estFinance && (
+                <>
+                  <div className="my-3 border-t border-white/10"></div>
+                  <div className="mb-2">
+                    <p className="px-3 py-1 text-xs font-semibold text-i-turquoise/60 uppercase tracking-wider">
+                      Devis
+                    </p>
+                  </div>
+
+                  <NavLink to="/devis-estimations" className={lienClass}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-5 h-5 flex-shrink-0"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h12m-12 2.25h12M3.375 4.5h17.25c.621 0 1.125.504 1.125 1.125v12.75c0 .621-.504 1.125-1.125 1.125H3.375a1.125 1.125 0 01-1.125-1.125V5.625c0-.621.504-1.125 1.125-1.125z"
+                      />
+                    </svg>
+                    Devis & Estimations
+                  </NavLink>
+                </>
+              )}
+
               {/* === SECTION FINANCIÈRE === */}
               {estFinance && (
                 <>
@@ -405,7 +436,7 @@ const pleinEcran = pathname.startsWith("/assistant-ia");
               </div>
 
               <a
-                href="https://b-estimation.example.com"
+                href={BESTI_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-white/80 hover:bg-white/10 hover:text-white mx-1"

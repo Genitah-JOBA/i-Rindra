@@ -74,6 +74,9 @@ export default function App() {
           <Route path="clients" element={<Clients />} />
           <Route path="absences" element={<Absences />} />
           <Route path="assistant-ia" element={<AssistantIA />} />
+          {/* Devis validés : consultation par toute l'équipe interne (lecture seule
+              hors direction / DRH, filtrée côté API selon le rôle) */}
+          <Route path="devis-estimations" element={<DevisEstimations />} />
         </Route>
 
         {/* Volet financier — Direction / DRH uniquement */}
@@ -85,7 +88,6 @@ export default function App() {
           }
         >
           <Route path="facturation" element={<Facturation />} />
-          <Route path="devis-estimations" element={<DevisEstimations />} />
           <Route path="suggestion-devis" element={<SuggestionDevis />} />
         </Route>
 

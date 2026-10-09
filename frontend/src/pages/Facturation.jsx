@@ -5,6 +5,8 @@ import { clientsService } from "../api/client";
 import { projetsService } from "../api/projets";
 import { useMessage } from "../context/MessageContext";
 import Spin from "../components/Spin";
+import { exportFacturesPdf } from "../utils/exportFacturesPdf";
+import FactureModal from "../components/FactureModal";
 
 // Devise d'affichage — modifiable en un seul endroit.
 const DEVISE = "Ar";
@@ -48,15 +50,6 @@ function formatMontant(n) {
   );
 }
 
-// Fonction pour formater le montant sans devise (pour les exports)
-function formatMontantSimple(n) {
-  const v = Number(n || 0);
-  return new Intl.NumberFormat("fr-FR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(v);
-}
-
 // Fonction pour obtenir la date d'aujourd'hui au format YYYY-MM-DD
 function getToday() {
   return new Date().toISOString().slice(0, 10);
@@ -94,6 +87,8 @@ export default function Facturation() {
   const [factures, setFactures] = useState([]);
   const [stats, setStats] = useState(null);
   const [clients, setClients] = useState([]);
+  // Facture ouverte en détail (clic sur une ligne)
+  const [factureActive, setFactureActive] = useState(null);
   const [projets, setProjets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erreur, setErreur] = useState("");
@@ -411,271 +406,13 @@ export default function Facturation() {
     </div>
   );
 
-  // ========== FONCTIONS D'EXPORTATION ==========
-
-  // Export PDF
+  // ========== EXPORT PDF (charte i-Rindra) ==========
   const exportPDF = async () => {
     try {
-      const { jsPDF } = await import("jspdf");
-      const { default: autoTable } = await import("jspdf-autotable");
-
-      const doc = new jsPDF("landscape", "mm", "a4");
-
-      doc.setFontSize(18);
-      doc.setTextColor(99, 178, 62);
-      doc.text("Liste des factures", 14, 22);
-
-      doc.setFontSize(10);
-      doc.setTextColor(100);
-      doc.text(
-        `Généré le ${new Date().toLocaleDateString("fr-FR")} à ${new Date().toLocaleTimeString(
-          "fr-FR"
-        )}`,
-        14,
-        30
-      );
-
-      const tableData = factures.map((f) => [
-        f.numero,
-        f.client_nom || `#${f.client_id}`,
-        f.projet_nom || "—",
-        f.date_emission || "",
-        f.date_echeance || "—",
-        formatMontantSimple(f.montant_ttc),
-        STATUT_LABELS[f.statut] || f.statut,
-      ]);
-
-      autoTable(doc, {
-        head: [
-          [
-            "N°",
-            "Client",
-            "Projet",
-            "Émission",
-            "Échéance",
-            `${"Total TTC"} (${DEVISE})`,
-            "Statut",
-          ],
-        ],
-        body: tableData,
-        startY: 35,
-        styles: { fontSize: 8 },
-        headStyles: {
-          fillColor: [99, 178, 62],
-          textColor: [255, 255, 255],
-          fontStyle: "bold",
-        },
-        alternateRowStyles: { fillColor: [245, 245, 245] },
-        columnStyles: {
-          0: { cellWidth: 25 },
-          1: { cellWidth: 35 },
-          2: { cellWidth: 30 },
-          3: { cellWidth: 20 },
-          4: { cellWidth: 20 },
-          5: { cellWidth: 30, halign: "right" },
-          6: { cellWidth: 25 },
-        },
-        footStyles: {
-          fillColor: [99, 178, 62],
-          textColor: [255, 255, 255],
-          fontStyle: "bold",
-          halign: "right",
-        },
-      });
-
-      const pageCount = doc.internal.getNumberOfPages();
-      for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(8);
-        doc.setTextColor(150);
-        doc.text(
-          `Page ${i} / ${pageCount} - i-Rindra | ${DEVISE}`,
-          doc.internal.pageSize.getWidth() / 2,
-          doc.internal.pageSize.getHeight() - 10,
-          { align: "center" }
-        );
-      }
-
-      doc.save(`factures_${new Date().toISOString().slice(0, 10)}.pdf`);
+      await exportFacturesPdf({ factures, clients });
       showSuccess("PDF exporté avec succès !");
     } catch (err) {
-      showError("Erreur lors de l'export PDF. Vérifiez que jspdf est installé.");
-      console.error(err);
-    }
-  };
-
-  // Export Excel
-  const exportExcel = () => {
-    try {
-      const headers = [
-        "N°",
-        "Client",
-        "Projet",
-        "Émission",
-        "Échéance",
-        `${"Total TTC"} (${DEVISE})`,
-        "Statut",
-      ];
-
-      const rows = factures.map((f) => [
-        f.numero,
-        f.client_nom || `#${f.client_id}`,
-        f.projet_nom || "—",
-        f.date_emission || "",
-        f.date_echeance || "—",
-        formatMontantSimple(f.montant_ttc),
-        STATUT_LABELS[f.statut] || f.statut,
-      ]);
-
-      let csvContent = "\uFEFF";
-      csvContent += headers.join(";") + "\n";
-      rows.forEach((row) => {
-        csvContent += row.join(";") + "\n";
-      });
-
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = `factures_${new Date().toISOString().slice(0, 10)}.csv`;
-      link.click();
-      URL.revokeObjectURL(link.href);
-      showSuccess("Fichier Excel exporté avec succès !");
-    } catch (err) {
-      showError("Erreur lors de l'export Excel.");
-      console.error(err);
-    }
-  };
-
-  // Export Word
-  const exportWord = () => {
-    try {
-      const totalTTC = factures.reduce((sum, f) => sum + (f.montant_ttc || 0), 0);
-      const totalFactures = factures.length;
-      const totalPayees = factures.filter((f) => f.statut === "payee").length;
-
-      let htmlContent = `
-        <html xmlns:o='urn:schemas-microsoft-com:office:office' 
-              xmlns:w='urn:schemas-microsoft-com:office:word' 
-              xmlns='http://www.w3.org/TR/REC-html40'>
-        <head>
-          <meta charset="utf-8">
-          <title>Liste des factures</title>
-          <style>
-            body { font-family: Arial, sans-serif; font-size: 11pt; margin: 40px; }
-            h1 { color: #63B23E; font-size: 20pt; }
-            .date { font-size: 10pt; color: #666; margin-top: 5px; margin-bottom: 20px; }
-            table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-            th { 
-              background-color: #63B23E; 
-              color: white; 
-              font-weight: bold; 
-              padding: 10px 8px; 
-              border: 1px solid #63B23E;
-              text-align: left;
-              font-size: 10pt;
-            }
-            td { 
-              padding: 8px; 
-              border: 1px solid #ccc; 
-              font-size: 10pt;
-            }
-            tr:nth-child(even) { background-color: #f9f9f9; }
-            .footer { 
-              margin-top: 30px; 
-              font-size: 10pt; 
-              color: #666; 
-              text-align: center; 
-              border-top: 2px solid #63B23E;
-              padding-top: 15px;
-            }
-            .totaux { 
-              margin-top: 25px; 
-              background-color: #e8f5e9; 
-              padding: 15px;
-              border: 2px solid #63B23E;
-              border-radius: 5px;
-            }
-            .totaux p { margin: 5px 0; }
-            .totaux .label { font-weight: bold; color: #333; }
-            .totaux .value { color: #63B23E; font-weight: bold; font-size: 12pt; }
-            .text-right { text-align: right; }
-            .text-center { text-align: center; }
-            .total-row { background-color: #e8f5e9 !important; font-weight: bold; }
-            .total-row td { border-color: #63B23E; }
-          </style>
-        </head>
-        <body>
-          <h1>Liste des factures</h1>
-          <p class="date">Généré le ${new Date().toLocaleDateString("fr-FR")} à ${new Date().toLocaleTimeString(
-        "fr-FR"
-      )}</p>
-          
-          <table>
-            <thead>
-              <tr>
-                <th>${"N°"}</th>
-                <th>${"Client"}</th>
-                <th>${"Projet"}</th>
-                <th>${"Émission"}</th>
-                <th>${"Échéance"}</th>
-                <th class="text-right">${"Total TTC"} (${DEVISE})</th>
-                <th>${"Statut"}</th>
-              </tr>
-            </thead>
-            <tbody>
-      `;
-
-      factures.forEach((f) => {
-        htmlContent += `
-          <tr>
-            <td>${f.numero}</td>
-            <td>${f.client_nom || `#${f.client_id}`}</td>
-            <td>${f.projet_nom || "—"}</td>
-            <td>${f.date_emission || ""}</td>
-            <td>${f.date_echeance || "—"}</td>
-            <td class="text-right">${formatMontantSimple(f.montant_ttc)}</td>
-            <td>${STATUT_LABELS[f.statut] || f.statut}</td>
-          </tr>
-        `;
-      });
-
-      htmlContent += `
-              <tr class="total-row">
-                <td colspan="5" class="text-right">TOTAL TTC :</td>
-                <td class="text-right">${formatMontantSimple(totalTTC)}</td>
-                <td></td>
-              </tr>
-            </tbody>
-          </table>
-          
-          <div class="totaux">
-            <p><span class="label">📊 Résumé :</span></p>
-            <p><span class="label">Total factures :</span> <span class="value">${totalFactures}</span></p>
-            <p><span class="label">Total TTC :</span> <span class="value">${formatMontantSimple(
-              totalTTC
-            )} ${DEVISE}</span></p>
-            <p><span class="label">Factures payées :</span> <span class="value">${totalPayees}</span></p>
-          </div>
-          
-          <div class="footer">
-            <strong>i-Rindra</strong> - Gestion de projets assistée par l'IA<br>
-            Document généré automatiquement le ${new Date().toLocaleDateString("fr-FR")}
-          </div>
-        </body>
-        </html>
-      `;
-
-      const blob = new Blob([htmlContent], {
-        type: "application/msword;charset=utf-8",
-      });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = `factures_${new Date().toISOString().slice(0, 10)}.doc`;
-      link.click();
-      URL.revokeObjectURL(link.href);
-      showSuccess("Document Word exporté avec succès !");
-    } catch (err) {
-      showError("Erreur lors de l'export Word.");
+      showError("Erreur lors de l'export PDF.");
       console.error(err);
     }
   };
@@ -693,79 +430,29 @@ export default function Facturation() {
           <p className="text-sm text-slate-500">{"Factures clients et suivi des paiements."}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <div className="flex gap-1">
-            <button
-              onClick={exportPDF}
-              disabled={factures.length === 0}
-              className="flex items-center gap-1 bg-red-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
-              title="Exporter en PDF"
+          <button
+            onClick={exportPDF}
+            disabled={factures.length === 0}
+            className="flex items-center gap-2 border border-i-primary/20 bg-white px-3 py-2 text-xs font-semibold text-i-primary transition hover:border-i-blue hover:bg-[#EEFBF6] disabled:opacity-50"
+            title="Exporter la liste des factures en PDF"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 text-red-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 3v6a2 2 0 002 2h6"
-                />
-              </svg>
-              PDF
-            </button>
-            <button
-              onClick={exportExcel}
-              disabled={factures.length === 0}
-              className="flex items-center gap-1 bg-green-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-green-700 disabled:opacity-50"
-              title="Exporter en Excel (CSV)"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 17v-2m3 2v-4m3 4v-6m-6 6v-2.5m6 2.5v-6M3 6v12a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2z"
-                />
-              </svg>
-              Excel
-            </button>
-            <button
-              onClick={exportWord}
-              disabled={factures.length === 0}
-              className="flex items-center gap-1 bg-blue-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-blue-700 disabled:opacity-50"
-              title="Exporter en Word"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
-                />
-              </svg>
-              Word
-            </button>
-          </div>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+              />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v6a2 2 0 002 2h6" />
+            </svg>
+            Exporter en PDF
+          </button>
           <button
             onClick={ouvrirAjout}
             className="bg-brand-gradient px-4 py-2 text-sm font-semibold text-black transition hover:brightness-110"
@@ -832,7 +519,12 @@ export default function Facturation() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {factures.map((f) => (
-                <tr key={f.id} className="hover:bg-slate-50">
+                <tr
+                  key={f.id}
+                  onClick={() => setFactureActive(f)}
+                  className="cursor-pointer hover:bg-[#EEFBF6]"
+                  title="Voir le détail de la facture"
+                >
                   <td className="px-4 py-3 font-mono text-xs font-medium text-slate-700">
                     {f.numero}
                   </td>
@@ -849,7 +541,7 @@ export default function Facturation() {
                   <td className="px-4 py-3 text-right font-medium text-slate-800">
                     {formatMontant(f.montant_ttc)}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                     <select
                       value={f.statut}
                       onChange={(e) => changerStatut(f, e.target.value)}
@@ -864,7 +556,7 @@ export default function Facturation() {
                       ))}
                     </select>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                     <div className="flex justify-end gap-3 text-xs">
                       <button
                         onClick={() => ouvrirEdition(f)}
@@ -893,6 +585,19 @@ export default function Facturation() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {factureActive && (
+        <FactureModal
+          facture={factureActive}
+          devise={clients.find((c) => c.id === factureActive.client_id)?.devise || "Ar"}
+          onClose={() => setFactureActive(null)}
+          onModifier={() => {
+            const f = factureActive;
+            setFactureActive(null);
+            ouvrirEdition(f);
+          }}
+        />
       )}
 
       {/* MODALE AJOUT / ÉDITION AVEC PROJET OBLIGATOIRE */}
@@ -1096,7 +801,7 @@ export default function Facturation() {
                 <button
                   type="submit"
                   disabled={enregistrement}
-                  className="bg-brand-gradient px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
+                  className="bg-brand-gradient px-4 py-2 text-sm font-semibold text-black transition hover:brightness-110 disabled:opacity-50"
                 >
                   {enregistrement
                     ? "Enregistrement…"

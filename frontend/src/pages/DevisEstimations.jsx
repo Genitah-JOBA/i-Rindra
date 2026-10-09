@@ -1,14 +1,17 @@
-// src/pages/DevisEstimations.jsx — devis & estimations (direction / DRH).
+// src/pages/DevisEstimations.jsx — devis & estimations (direction / DRH ; consultation
+// des devis validés pour les chefs de projet et l'équipe).
 // Les devis générés par l'IA et validés sont centralisés ici.
 // Lien vers l'outil externe B-estimation en tête de page.
 import { useEffect, useState } from "react";
 import { suggestionDevisService } from "../api/suggestionDevis";
+import BoutonPdfDevis from "../components/BoutonPdfDevis";
 import { useMessage } from "../context/MessageContext";
+import { useAuth } from "../auth/AuthContext";
 import DevisModal from "../components/DevisModal";
 import Spin from "../components/Spin";
+import { BESTI_URL } from "../config/liens";
 import "animate.css";
 
-const B_ESTIMATION_URL = "https://b-estimation.example.com";
 
 const LIBELLE_STATUT = {
   en_attente: "À valider",
@@ -24,6 +27,8 @@ const STYLE_STATUT = {
 
 export default function DevisEstimations() {
   const { showError } = useMessage();
+  const { user } = useAuth();
+  const estFinance = user?.role === "direction" || user?.role === "drh";
   const [devis, setDevis] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erreur, setErreur] = useState("");
@@ -59,13 +64,14 @@ export default function DevisEstimations() {
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900">
             Devis & Estimations
           </h1>
-          <p className="text-sm text-slate-500">
-            Devis validés par la direction/DRH — les suggestions en attente de
-            validation restent dans Suggestion devis par IA.
+          <p className="mt-2 text-sm text-slate-500">
+            {estFinance
+              ? "Devis validés par la direction/DRH — les suggestions en attente de validation restent dans Suggestion devis par IA."
+              : "Devis validés par la direction pour vos projets (consultation)."}
           </p>
         </div>
         <a
-          href={B_ESTIMATION_URL}
+          href={BESTI_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 border border-i-blue px-4 py-2 text-sm font-semibold text-i-blue transition hover:bg-brand-gradient hover:text-black"
@@ -104,8 +110,9 @@ export default function DevisEstimations() {
           {devis.length === 0 && (
             <div className="lg:col-span-2 text-center py-12 bg-slate-50 border border-slate-200 animate__animated animate__fadeInUp">
               <p className="text-slate-500">
-                Aucun devis validé pour le moment. Validez un devis suggéré par
-                l'IA depuis Suggestion devis par IA pour le retrouver ici.
+                {estFinance
+                  ? "Aucun devis validé pour le moment. Validez un devis suggéré par l'IA depuis Suggestion devis par IA pour le retrouver ici."
+                  : "Aucun devis validé pour vos projets pour le moment."}
               </p>
             </div>
           )}
@@ -132,10 +139,20 @@ export default function DevisEstimations() {
                         {LIBELLE_STATUT[d.statut] || LIBELLE_STATUT.en_attente}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-400">
-                      {d.client_nom ? `Client : ${d.client_nom}` : ""}
-                      {d.projet_nom ? `· Projet : ${d.projet_nom}` : ""}·{" "}
-                      {dater(d.cree_le)}
+                    <p className="mt-1.5 text-xs text-slate-400">
+                      {/* Séparateur « · » espacé, seulement entre éléments présents */}
+                      {[
+                        d.client_nom && `Client : ${d.client_nom}`,
+                        d.projet_nom && `Projet : ${d.projet_nom}`,
+                        dater(d.cree_le),
+                      ]
+                        .filter(Boolean)
+                        .map((element, i) => (
+                          <span key={i}>
+                            {i > 0 && <span className="mx-2 text-slate-300">·</span>}
+                            {element}
+                          </span>
+                        ))}
                     </p>
                   </div>
                 </div>
@@ -182,6 +199,7 @@ export default function DevisEstimations() {
                     </svg>
                     Voir le détail
                   </button>
+                  <BoutonPdfDevis devis={d} />
                 </div>
               </div>
             </div>
@@ -194,6 +212,7 @@ export default function DevisEstimations() {
         <DevisModal
           devis={devisDetail}
           onClose={() => setDevisDetail(null)}
+          avecPdf
         />
       )}
     </div>

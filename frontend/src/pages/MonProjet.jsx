@@ -81,7 +81,7 @@ export default function MonProjet() {
         api.get("/client/mon-projet", { params }),
         api.get("/client/mon-projet/avancement", { params }),
         api.get("/client/mon-projet/taches", { params }),
-        api.get("/dashboard/alertes"),
+        api.get("/dashboard/alertes", { params }),
       ]);
     setProjet(projetData.data);
     setAvancement(avancementData.data);
@@ -213,7 +213,7 @@ export default function MonProjet() {
             <button
               onClick={chargerDonnees}
               disabled={loading}
-              className="flex items-center gap-2 px-3 py-2 text-sm bg-brand-gradient text-i-primary hover:brightness-110 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-3 py-2 text-sm bg-brand-gradient text-black hover:brightness-110 transition-colors disabled:opacity-50"
             >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -249,7 +249,7 @@ export default function MonProjet() {
                   onClick={() => choisirProjet(p.id)}
                   className={`flex items-center gap-2 px-4 py-2 text-sm font-medium border transition-colors ${
                     actif
-                      ? "bg-brand-gradient border-i-blue text-i-primary font-semibold shadow-sm"
+                      ? "bg-brand-gradient border-i-blue text-black font-semibold shadow-sm"
                       : "bg-white border-slate-200 text-slate-700 hover:border-i-blue hover:text-[#3F894E]"
                   }`}
                 >

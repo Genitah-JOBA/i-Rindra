@@ -19,4 +19,16 @@ export const suggestionDevisService = {
   remove: async (id) => {
     await api.delete(`/suggestion-devis/${id}`);
   },
+  // Données du devis telles qu'imprimées sur le PDF (affichage « Voir le détail »)
+  apercu: async (id) => {
+    const { data } = await api.get(`/suggestion-devis/${id}/apercu`);
+    return data;
+  },
+  // PDF du devis (gabarit B-esti, charte i-Rindra)
+  telechargerPdf: async (id) => {
+    const reponse = await api.get(`/suggestion-devis/${id}/pdf`, { responseType: "blob" });
+    const disposition = reponse.headers?.["content-disposition"] || "";
+    const nom = /filename="?([^";]+)"?/.exec(disposition)?.[1] || `devis-${id}.pdf`;
+    return { blob: reponse.data, nomFichier: nom };
+  },
 };

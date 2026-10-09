@@ -380,7 +380,15 @@ async def pdf_facture(
             )
 
     client_nom, projet_nom = await _noms(db, f)
-    pdf = generer_pdf_facture(f, client_nom, projet_nom)
+    # Devise et coordonnées du client : imprimées telles quelles (aucune conversion)
+    client = (await db.execute(select(Client).where(Client.id == f.client_id))).scalar_one_or_none()
+    pdf = generer_pdf_facture(
+        f, client_nom, projet_nom,
+        devise=(client.devise if client else None) or "Ar",
+        client_contact=client.contact if client else None,
+        client_email=client.email if client else None,
+        client_telephone=client.telephone if client else None,
+    )
     filename = f"facture-{f.numero}.pdf"
     return Response(
         content=pdf,

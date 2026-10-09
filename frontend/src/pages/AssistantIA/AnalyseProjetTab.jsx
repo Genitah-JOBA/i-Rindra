@@ -121,7 +121,7 @@ export default function AnalyseProjetTab({ variante: varianteInitiale, projets, 
               onClick={() => changerVariante(v.id)}
               className={`px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors rounded-md ${
                 varianteId === v.id
-                  ? "bg-brand-gradient text-i-primary"
+                  ? "bg-brand-gradient text-black"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
             >

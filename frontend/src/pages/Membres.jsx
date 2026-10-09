@@ -232,7 +232,7 @@ export default function Membres() {
           {estGestion && (
             <button
               onClick={ouvrirAjout}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-i-primary bg-gradient-to-r from-i-green to-i-turquoise transition-all duration-200 hover:brightness-105 hover:shadow-lg"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-black bg-gradient-to-r from-i-green to-i-turquoise transition-all duration-200 hover:brightness-105 hover:shadow-lg"
             >
               <PlusIcon className="w-4 h-4" />
               Ajouter
@@ -320,7 +320,7 @@ export default function Membres() {
               {estGestion && (
                 <button
                   onClick={ouvrirAjout}
-                  className="mt-4 px-4 py-2 font-semibold text-i-primary bg-gradient-to-r from-i-green to-i-turquoise transition-all duration-200 hover:brightness-105"
+                  className="mt-4 px-4 py-2 font-semibold text-black bg-gradient-to-r from-i-green to-i-turquoise transition-all duration-200 hover:brightness-105"
                 >
                   + Ajouter
                 </button>

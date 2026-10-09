@@ -105,7 +105,7 @@ export function BoutonPrincipal({ children, desactive, valide }) {
       disabled={desactive}
       className={`font-body block w-full py-2.5 px-5 text-sm font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 ${
         valide
-          ? "bg-brand-gradient-soft text-i-primary hover:brightness-105 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+          ? "bg-brand-gradient-soft text-black hover:brightness-105 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
           : "bg-gray-400 text-white cursor-not-allowed"
       }`}
     >

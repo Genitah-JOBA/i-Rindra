@@ -419,7 +419,7 @@ export default function Dashboard() {
         <button
           onClick={handleRefresh}
           disabled={loading}
-          className="mt-2 sm:mt-0 flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-i-blue to-i-green text-i-primary font-semibold text-sm sm:text-base hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50"
+          className="mt-2 sm:mt-0 flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-i-blue to-i-green text-black font-semibold text-sm sm:text-base hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50"
         >
           <RefreshIcon spinning={loading} className="w-4 h-4" />
           {loading ? "Chargement…" : "Rafraîchir"}
@@ -460,7 +460,7 @@ export default function Dashboard() {
                         ? "bg-i-green text-i-primary"
                         : t.id === "international"
                           ? "bg-i-blue text-white"
-                          : "bg-gradient-to-r from-i-blue to-i-green text-i-primary"
+                          : "bg-gradient-to-r from-i-blue to-i-green text-black"
                       : "text-slate-600 hover:bg-slate-100"
                   }`}
                 >

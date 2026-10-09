@@ -169,7 +169,7 @@ export default function CreateProjetModal({ isOpen, onClose, onProjetCree }) {
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-brand-gradient text-i-primary text-sm font-medium rounded-md hover:brightness-110 transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-brand-gradient text-black text-sm font-medium rounded-md hover:brightness-110 transition-colors disabled:opacity-50"
             >
               {loading && (
                 <span

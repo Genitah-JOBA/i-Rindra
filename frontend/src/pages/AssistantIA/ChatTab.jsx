@@ -211,7 +211,7 @@ export default function ChatTab() {
           <button
             onClick={() => handleSend()}
             disabled={!input.trim() || !estConfigure || loading}
-            className="p-3 bg-brand-gradient text-i-primary hover:brightness-110 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors flex-shrink-0"
+            className="p-3 bg-brand-gradient text-black hover:brightness-110 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors flex-shrink-0"
           >
             <IconSend className="w-5 h-5" />
           </button>

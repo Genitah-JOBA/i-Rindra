@@ -112,7 +112,7 @@ export default function Documents() {
         <button
           onClick={chargerDonnees}
           disabled={loading}
-          className="flex items-center gap-2 px-3 py-2 text-sm bg-brand-gradient text-i-primary hover:brightness-110 transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-3 py-2 text-sm bg-brand-gradient text-black hover:brightness-110 transition-colors disabled:opacity-50"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

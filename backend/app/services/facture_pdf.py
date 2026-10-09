@@ -1,170 +1,162 @@
 # app/services/facture_pdf.py
 """
-Génération d'un PDF de facture côté serveur.
-Implémentation minimale (PDF 1.4) : aucun dépendance externe, encodage
-WinAnsi (Latin-1) compatible avec les accents français.
+PDF d'une facture, au même gabarit que les devis (devis_pdf.py) : charte i-Rindra
+(bleu nuit, dégradé bleu ciel → vert → turquoise), logo, blocs « Facturé à » /
+« Projet », récapitulatif HT / TVA / TTC.
+
+Les montants sont imprimés dans la devise du CLIENT (« Ar » par défaut), sans
+aucune conversion. Polices Helvetica intégrées à ReportLab (accents français).
 """
-from datetime import date
-from typing import List, Optional
+import io
+from decimal import Decimal
+from typing import Optional
+from xml.sax.saxutils import escape
+
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_RIGHT
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.units import mm
+from reportlab.platypus import Image, KeepTogether, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
 from app.models.facture import Facture, StatutFacture
+from app.services.devis_pdf import (
+    CIEL, GRIS, GRIS_CLAIR, LOGO, MENTHE, NUIT, _Degrade, _date, _espace, _p, _styles, montant,
+)
 
-
-_STATUT_LIBELLE = {
-    StatutFacture.BROUILLON: "Brouillon",
-    StatutFacture.ENVOYEE: "Envoyée",
-    StatutFacture.PAYEE: "Payée",
-    StatutFacture.EN_RETARD: "En retard",
-    StatutFacture.ANNULEE: "Annulée",
-}
-
-# Couleurs RVB (0-255) associées à chaque statut
-_COULEURS = {
-    StatutFacture.BROUILLON: (120, 120, 120),
-    StatutFacture.ENVOYEE: (0, 178, 160),
-    StatutFacture.PAYEE: (99, 178, 62),
-    StatutFacture.EN_RETARD: (220, 160, 0),
-    StatutFacture.ANNULEE: (210, 60, 60),
+# Libellé, fond et encre du badge de statut
+STATUTS = {
+    StatutFacture.BROUILLON: ("Brouillon", colors.HexColor("#F1F5F9"), colors.HexColor("#475569")),
+    StatutFacture.ENVOYEE: ("Envoyée", colors.HexColor("#DBEAFE"), colors.HexColor("#1E40AF")),
+    StatutFacture.PAYEE: ("Payée", colors.HexColor("#DCFCE7"), NUIT),
+    StatutFacture.EN_RETARD: ("En retard", colors.HexColor("#FEE2E2"), colors.HexColor("#991B1B")),
+    StatutFacture.ANNULEE: ("Annulée", colors.HexColor("#F1F5F9"), colors.HexColor("#94A3B8")),
 }
 
 
-def _esc(s) -> str:
-    """Échappe les caractères réservés d'une chaîne PDF."""
-    return (
-        str(s)
-        .replace("\\", "\\\\")
-        .replace("(", "\\(")
-        .replace(")", "\\)")
-    )
+def _statut(f: Facture) -> StatutFacture:
+    s = f.statut
+    return s if isinstance(s, StatutFacture) else StatutFacture(str(s))
 
 
-def _montant(v) -> str:
-    """Formate un montant : '1234.50' -> '1234,50'."""
-    return f"{v:.2f}".replace(".", ",")
+def generer_pdf_facture(f: Facture, client_nom: Optional[str] = None, projet_nom: Optional[str] = None, *,
+                        devise: str = "Ar", client_contact: Optional[str] = None,
+                        client_email: Optional[str] = None, client_telephone: Optional[str] = None) -> bytes:
+    S = _styles()
+    devise = (devise or "Ar").strip() or "Ar"
+    statut = _statut(f)
+    ht = Decimal(str(f.montant_ht or 0))
+    taux = Decimal(str(f.taux_tva or 0))
+    tva = Decimal(str(f.montant_tva or 0))
+    ttc = Decimal(str(f.montant_ttc or 0))
 
+    buf = io.BytesIO()
+    largeur = A4[0] - 30 * mm
 
-def _date(d) -> str:
-    if not d:
-        return "-"
-    return f"{d.day:02d}/{d.month:02d}/{d.year}"
+    def pied(canvas, doc):
+        canvas.saveState()
+        canvas.setFont("Helvetica", 7.5)
+        canvas.setFillColor(GRIS)
+        canvas.drawString(15 * mm, 10 * mm, f"Bienfe Agency · Facture {f.numero} · i-Rindra")
+        canvas.drawRightString(A4[0] - 15 * mm, 10 * mm, f"Page {doc.page}")
+        canvas.restoreState()
 
+    doc = SimpleDocTemplate(buf, pagesize=A4, leftMargin=15 * mm, rightMargin=15 * mm,
+                            topMargin=14 * mm, bottomMargin=18 * mm,
+                            title=f"Facture {f.numero}", author="Bienfe Agency — i-Rindra")
+    story = []
 
-def _wraplines(s: str, largeur: int) -> List[str]:
-    """Découpe un texte en lignes d'au plus `largeur` caractères."""
-    lignes, courante = [], ""
-    for mot in str(s).split():
-        if len(courante) + len(mot) + 1 > largeur:
-            lignes.append(courante)
-            courante = mot
-        else:
-            courante = (courante + " " + mot).strip()
-    if courante:
-        lignes.append(courante)
-    return lignes
+    # ---- en-tête : logo + agence | FACTURE + numéro + dates + statut
+    logo = (Image(str(LOGO), width=40 * mm, height=40 * mm * 682 / 1684) if LOGO.exists()
+            else _p("i-Rindra", S["fort"]))
+    gauche = [logo, Spacer(1, 3 * mm), _p("Bienfe Agency", S["gras"]), _p("Antananarivo, Madagascar", S["petit"])]
 
+    lib, fond, encre = STATUTS.get(statut, STATUTS[StatutFacture.BROUILLON])
+    badge = Table([[Paragraph(escape(lib), ParagraphStyle("b", fontName="Helvetica-Bold", fontSize=8,
+                                                         textColor=encre, alignment=1))]],
+                  colWidths=[24 * mm], rowHeights=[6 * mm])
+    badge.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), fond), ("ROUNDEDCORNERS", [3, 3, 3, 3]),
+                               ("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("TOPPADDING", (0, 0), (-1, -1), 0),
+                               ("BOTTOMPADDING", (0, 0), (-1, -1), 0)]))
+    dates = Table([[_p("Date d'émission", S["droite"]), _p(_date(f.date_emission), S["droite_g"])],
+                   [_p("Échéance", S["droite"]), _p(_date(f.date_echeance), S["droite_g"])]],
+                  colWidths=[32 * mm, 22 * mm])
+    dates.setStyle(TableStyle([("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                               ("TOPPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 1)]))
+    droite = [Paragraph(_espace("FACTURE"), ParagraphStyle("t", fontName="Helvetica-Bold", fontSize=24, leading=28,
+                                                           textColor=NUIT, alignment=TA_RIGHT)),
+              Paragraph(f"N° {escape(f.numero)}", ParagraphStyle("n", fontName="Helvetica-Bold", fontSize=12,
+                                                                  leading=16, textColor=CIEL, alignment=TA_RIGHT)),
+              Spacer(1, 2 * mm), dates, Spacer(1, 2 * mm), badge]
+    tete = Table([[gauche, droite]], colWidths=[largeur * 0.55, largeur * 0.45])
+    tete.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("ALIGN", (1, 0), (1, 0), "RIGHT"),
+                              ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0)]))
+    story += [tete, Spacer(1, 4 * mm), _Degrade(largeur, 1.4 * mm), Spacer(1, 5 * mm)]
 
-def generer_pdf_facture(f: Facture, client_nom=None, projet_nom=None) -> bytes:
-    """Construit le PDF d'une facture (page A4)."""
-    statut = f.statut if hasattr(f.statut, "value") else StatutFacture(f.statut)
-    blanc = 1, 1, 1
-    noir = 0, 0, 0
-    gris = 0.45, 0.45, 0.45
-    r, g, b = tuple(v / 255 for v in _COULEURS[statut])
+    # ---- blocs « Facturé à » / « Projet »
+    adresse = [Paragraph(_espace("FACTURÉ À"), S["etiq"]), Spacer(1, 2 * mm),
+               _p(client_nom or "Client non renseigné", S["fort"])]
+    for info in (client_contact, client_email, client_telephone):
+        if info:
+            adresse.append(_p(info, S["normal"]))
+    projet = [Paragraph(_espace("PROJET"), S["etiq"]), Spacer(1, 2 * mm),
+              _p(projet_nom or "Prestations de l'agence", S["fort"])]
+    blocs = Table([[adresse, "", projet]], colWidths=[largeur / 2 - 2.5 * mm, 5 * mm, largeur / 2 - 2.5 * mm])
+    blocs.setStyle(TableStyle([("BOX", (0, 0), (0, 0), 0.6, GRIS_CLAIR), ("BOX", (2, 0), (2, 0), 0.6, GRIS_CLAIR),
+                               ("ROUNDEDCORNERS", [4, 4, 4, 4]), ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                               ("LEFTPADDING", (0, 0), (0, 0), 5 * mm), ("LEFTPADDING", (2, 0), (2, 0), 5 * mm),
+                               ("TOPPADDING", (0, 0), (-1, -1), 3.5 * mm), ("BOTTOMPADDING", (0, 0), (-1, -1), 3.5 * mm)]))
+    story += [blocs, Spacer(1, 6 * mm)]
 
-    cmd = []
+    # ---- ligne facturée
+    taux_txt = f"{taux.normalize():f} %".replace(".", ",") if taux else "—"
+    cols = [largeur - 26 * mm - 42 * mm, 26 * mm, 42 * mm]
+    donnees = [[Paragraph("DÉSIGNATION", S["entete"]), Paragraph("TVA", S["entete_d"]),
+                Paragraph("MONTANT&nbsp;HT", S["entete_d"])],
+               [[_p(f"Prestations — {projet_nom}" if projet_nom else "Prestations de l'agence", S["gras"])]
+                + ([_p(f.notes, S["petit"])] if f.notes else []),
+                _p(taux_txt, S["droite"]), _p(montant(ht, devise), S["droite_g"])]]
+    tab = Table(donnees, colWidths=cols)
+    tab.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), NUIT), ("ROUNDEDCORNERS", [4, 4, 0, 0]),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"), ("VALIGN", (0, 0), (-1, 0), "MIDDLE"),
+        ("TOPPADDING", (0, 0), (-1, 0), 3 * mm), ("BOTTOMPADDING", (0, 0), (-1, 0), 3 * mm),
+        ("TOPPADDING", (0, 1), (-1, -1), 3 * mm), ("BOTTOMPADDING", (0, 1), (-1, -1), 3 * mm),
+        ("LINEBELOW", (0, 1), (-1, -1), 0.5, GRIS_CLAIR),
+    ]))
+    story += [tab, Spacer(1, 6 * mm)]
 
-    def texte(x, y, taille, fonte, txt, col=noir):
-        cmd.append(
-            f"BT /{fonte} {taille} Tf {col[0]} {col[1]} {col[2]} rg "
-            f"{x} {y} Td ({_esc(txt)}) Tj ET"
-        )
+    # ---- totaux
+    if statut == StatutFacture.PAYEE:
+        etat = "Facture réglée. Merci pour votre confiance."
+    elif statut == StatutFacture.ANNULEE:
+        etat = "Facture annulée : aucun paiement n'est dû."
+    elif f.date_echeance:
+        etat = f"À régler au plus tard le {_date(f.date_echeance)}."
+    else:
+        etat = "À régler à réception."
+    gauche_tot = [_p(etat, S["gras"]), Spacer(1, 2 * mm), _p(f"Montants exprimés en {devise}.", S["normal"])]
+    lib_tva = f"TVA ({taux_txt})" if taux else "TVA"
+    totaux = Table([[_p("Total HT", S["normal"]), _p(montant(ht, devise), S["droite_g"])],
+                    [_p(lib_tva, S["normal"]), _p(montant(tva, devise), S["droite_g"])]],
+                   colWidths=[38 * mm, 42 * mm])
+    totaux.setStyle(TableStyle([("LEFTPADDING", (0, 0), (-1, -1), 2 * mm), ("RIGHTPADDING", (0, 0), (-1, -1), 2 * mm)]))
+    bloc_tot = [totaux, Spacer(1, 2 * mm),
+                _Degrade(80 * mm, 12 * mm, rayon=3, gauche="Total TTC", droite=montant(ttc, devise))]
+    recap = Table([[gauche_tot, bloc_tot]], colWidths=[largeur - 82 * mm, 82 * mm])
+    recap.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                               ("RIGHTPADDING", (0, 0), (-1, -1), 0), ("ALIGN", (1, 0), (1, 0), "RIGHT")]))
+    story += [KeepTogether(recap), Spacer(1, 8 * mm)]
 
-    def barre(x1, y1, x2, y2, ep=1, c=0.85):
-        cmd.append(f"{c} {c} {c} RG {ep} w {x1} {y1} m {x2} {y2} l S")
+    # ---- encadré de paiement
+    paiement = Table([[[Paragraph(_espace("RÈGLEMENT"), S["etiq"]), Spacer(1, 1.5 * mm),
+                        _p("Merci d'indiquer le numéro de facture " + f.numero + " lors de votre paiement.",
+                           S["petit"])]]],
+                     colWidths=[largeur])
+    paiement.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), MENTHE), ("BOX", (0, 0), (-1, -1), 0.6, CIEL),
+                                  ("LEFTPADDING", (0, 0), (-1, -1), 5 * mm), ("TOPPADDING", (0, 0), (-1, -1), 3 * mm),
+                                  ("BOTTOMPADDING", (0, 0), (-1, -1), 3 * mm)]))
+    story.append(KeepTogether(paiement))
 
-    def bloc(x, y, w, h, cr, cg, cb):
-        cmd.append(f"{cr} {cg} {cb} rg {x} {y} {w} {h} re f")
-
-    # ----- En-tête -----
-    texte(40, 795, 26, "F2", "FACTURE")
-    texte(40, 762, 12, "F1", f"N° {f.numero}", gris)
-
-    # Badge statut
-    bloc(468, 783, 90, 26, r, g, b)
-    texte(478, 797, 11, "F2", _STATUT_LIBELLE[statut], blanc)
-    barre(40, 748, 555, 748)
-
-    # ----- Coordonnées -----
-    texte(40, 720, 10, "F1", "Date d'émission :", gris)
-    texte(140, 720, 11, "F2", _date(f.date_emission))
-    texte(40, 700, 10, "F1", "Date d'échéance :", gris)
-    texte(140, 700, 11, "F2", _date(f.date_echeance))
-    texte(40, 680, 10, "F1", "Client :", gris)
-    texte(140, 680, 11, "F2", client_nom or f"Client n°{f.client_id}")
-    texte(40, 660, 10, "F1", "Projet :", gris)
-    texte(140, 660, 11, "F2", projet_nom or "-")
-    barre(40, 640, 555, 640)
-
-    # ----- Table des montants -----
-    texte(40, 618, 11, "F2", "Désignation")
-    texte(420, 618, 11, "F2", "Montant HT")
-    barre(40, 606, 555, 606)
-    texte(40, 584, 11, "F1", f"Prestations au titre de la facture {f.numero}")
-    texte(420, 584, 11, "F1", f"{_montant(f.montant_ht)} EUR")
-    barre(40, 566, 555, 566)
-
-    # ----- Totaux -----
-    texte(395, 540, 11, "F1", "Total HT", gris)
-    texte(470, 540, 11, "F1", f"{_montant(f.montant_ht)} EUR")
-    texte(395, 522, 11, "F1", f"TVA ({_montant(f.taux_tva)} %)", gris)
-    texte(470, 522, 11, "F1", f"{_montant(f.montant_tva)} EUR")
-    texte(395, 496, 12, "F2", "Total TTC")
-    texte(470, 496, 12, "F2", f"{_montant(f.montant_ttc)} EUR")
-
-    # ----- Notes -----
-    if f.notes:
-        y = 470
-        texte(40, y, 10, "F2", "Notes :", gris)
-        for ligne in _wraplines(f.notes, 100):
-            y -= 16
-            texte(40, y, 10, "F3", ligne)
-
-    stream = ("\n".join(cmd) + "\n").encode("latin-1", "replace")
-    return _assembler(stream)
-
-
-def _assembler(stream: bytes) -> bytes:
-    """Assemble les objets PDF avec une table xref correcte."""
-    objets = [
-        b"<< /Type /Catalog /Pages 2 0 R >>",
-        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-        (
-            b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] "
-            b"/Resources << /Font << /F1 4 0 R /F2 5 0 R /F3 6 0 R >> >> "
-            b"/Contents 7 0 R >>"
-        ),
-        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>",
-        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>",
-        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique /Encoding /WinAnsiEncoding >>",
-        b"<< /Length %d >>\nstream\n%s\nendstream" % (len(stream), stream),
-    ]
-
-    out = bytearray(b"%PDF-1.4\n")
-    offsets = []
-    for i, o in enumerate(objets, start=1):
-        offsets.append(len(out))
-        out += b"%d 0 obj\n" % i
-        out += o
-        out += b"\nendobj\n"
-
-    xref = len(out)
-    out += b"xref\n0 %d\n" % (len(objets) + 1)
-    out += b"0000000000 65535 f \n"
-    for off in offsets:
-        out += b"%010d 00000 n \n" % off
-    out += (
-        b"trailer\n"
-        b"<< /Size %d /Root 1 0 R >>\n"
-        b"startxref\n%d\n%%%%EOF\n" % (len(objets) + 1, xref)
-    )
-    return bytes(out)
+    doc.build(story, onFirstPage=pied, onLaterPages=pied)
+    return buf.getvalue()

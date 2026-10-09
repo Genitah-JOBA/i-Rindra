@@ -158,7 +158,7 @@ function ConfirmHost({ state, onResult }) {
             className={`px-4 py-2 text-sm font-semibold transition-all duration-200 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
               destructif
                 ? 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500'
-                : 'bg-gradient-to-r from-i-blue to-i-green text-i-primary hover:scale-[1.02] focus-visible:ring-i-blue'
+                : 'bg-gradient-to-r from-i-blue to-i-green text-black hover:scale-[1.02] focus-visible:ring-i-blue'
             }`}
           >
             {confirmLabel}

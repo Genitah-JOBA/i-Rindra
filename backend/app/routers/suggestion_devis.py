@@ -1,5 +1,5 @@
 # app/routers/suggestion_devis.py
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from typing import List, Optional
@@ -7,7 +7,7 @@ from typing import List, Optional
 from app.core.database import get_db
 from app.routers.auth import get_current_user_id, get_current_user_role
 from app.models.client import Client
-from app.models.projet import Projet
+from app.models.projet import Projet, ProjetMembre
 from app.models.suggestion_devis import SuggestionDevis, StatutSuggestionDevis
 from app.schemas.suggestion_devis import (
     SuggestionDevisIARequest,
@@ -15,6 +15,7 @@ from app.schemas.suggestion_devis import (
     SuggestionDevisResponse,
     SuggestionDevisStatutUpdate,
 )
+from app.services.devis_pdf import apercu_devis, generer_pdf_devis, numero_devis
 from app.services.connectors.llm import (
     LLMConfigError,
     LLMProviderError,
@@ -35,6 +36,57 @@ async def _finance_seulement(role: str = Depends(get_current_user_role)):
             detail="Accès réservé à la direction ou au DRH (volet financier).",
         )
     return role
+
+
+# ============================================================
+# LECTURE — devis VALIDÉS consultables par l'équipe (« Devis & Estimations »)
+#   - direction / DRH : tous les devis (inchangé) ;
+#   - chef de projet  : devis validés de tous les projets (il voit tous les projets) ;
+#   - équipe          : devis validés des seuls projets dont il est responsable ou membre.
+# Générer, valider, refuser ou supprimer reste réservé à la direction / DRH.
+# ============================================================
+
+ROLES_FINANCE = ("direction", "drh")
+ROLES_LECTURE = ROLES_FINANCE + ("chef_de_projet", "equipe")
+
+
+async def _lecteur(
+    role: str = Depends(get_current_user_role),
+    user_id: int = Depends(get_current_user_id),
+) -> tuple[str, int]:
+    if role not in ROLES_LECTURE:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès non autorisé.")
+    return role, user_id
+
+
+def _projets_du_membre(user_id: int):
+    """Sous-requête : identifiants des projets dont l'utilisateur est responsable ou membre."""
+    return (
+        select(Projet.id).where(Projet.responsable_id == user_id)
+        .union(select(ProjetMembre.projet_id).where(ProjetMembre.utilisateur_id == user_id))
+    )
+
+
+def _filtrer_lecture(q, role: str, user_id: int):
+    if role in ROLES_FINANCE:
+        return q
+    q = q.where(SuggestionDevis.statut == StatutSuggestionDevis.VALIDEE)
+    if role == "equipe":
+        q = q.where(SuggestionDevis.projet_id.in_(_projets_du_membre(user_id)))
+    return q
+
+
+async def _verifier_lecture(db: AsyncSession, s: SuggestionDevis, role: str, user_id: int) -> None:
+    """404 (et non 403) pour un devis non consultable : on ne révèle pas son existence."""
+    if role in ROLES_FINANCE:
+        return
+    introuvable = HTTPException(status_code=404, detail="Suggestion de devis non trouvée.")
+    if s.statut != StatutSuggestionDevis.VALIDEE:
+        raise introuvable
+    if role == "equipe":
+        projets = (await db.execute(_projets_du_membre(user_id))).scalars().all()
+        if s.projet_id not in projets:
+            raise introuvable
 
 
 SYSTEM_PROMPT_DEVIS = (
@@ -136,7 +188,7 @@ def _to_response(
 async def lister_suggestions(
     statut: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
-    _: str = Depends(_finance_seulement),
+    lecteur: tuple[str, int] = Depends(_lecteur),
 ):
     q = (
         select(SuggestionDevis, Client.nom, Projet.nom)
@@ -149,6 +201,7 @@ async def lister_suggestions(
         except ValueError:
             raise HTTPException(status_code=400, detail="Statut invalide.")
         q = q.where(SuggestionDevis.statut == statut_enum)
+    q = _filtrer_lecture(q, *lecteur)
     q = q.order_by(SuggestionDevis.cree_le.desc(), SuggestionDevis.id.desc())
 
     rows = (await db.execute(q)).all()
@@ -271,6 +324,76 @@ async def obtenir_suggestion(
         raise HTTPException(status_code=404, detail="Suggestion de devis non trouvée.")
     s, client_nom, projet_nom = row
     return _to_response(s, client_nom, projet_nom)
+
+
+# ------------------------------------------------------------
+# PDF ET APERÇU DU DEVIS (gabarit B-esti, charte i-Rindra)
+# ------------------------------------------------------------
+
+async def _devis_complet(db: AsyncSession, suggestion_id: int):
+    row = (
+        await db.execute(
+            select(SuggestionDevis, Client, Projet.nom)
+            .outerjoin(Client, SuggestionDevis.client_id == Client.id)
+            .outerjoin(Projet, SuggestionDevis.projet_id == Projet.id)
+            .where(SuggestionDevis.id == suggestion_id)
+        )
+    ).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Suggestion de devis non trouvée.")
+    return row
+
+
+@router.get("/{suggestion_id:int}/apercu")
+async def apercu_suggestion(
+    suggestion_id: int,
+    db: AsyncSession = Depends(get_db),
+    lecteur: tuple[str, int] = Depends(_lecteur),
+):
+    """Données du devis telles qu'imprimées sur le PDF (affichage « Voir le détail »)."""
+    s, client, projet_nom = await _devis_complet(db, suggestion_id)
+    await _verifier_lecture(db, s, *lecteur)
+    return {
+        **apercu_devis(devis_id=s.id, contenu=s.contenu_devis, cree_le=s.cree_le,
+                       devise=(client.devise if client else None) or "Ar"),
+        "client": {
+            "nom": client.nom if client else None,
+            "contact": client.contact if client else None,
+            "email": client.email if client else None,
+            "telephone": client.telephone if client else None,
+        },
+        "projet_nom": projet_nom,
+    }
+
+
+@router.get("/{suggestion_id:int}/pdf")
+async def pdf_suggestion(
+    suggestion_id: int,
+    db: AsyncSession = Depends(get_db),
+    lecteur: tuple[str, int] = Depends(_lecteur),
+):
+    s, client, projet_nom = await _devis_complet(db, suggestion_id)
+    await _verifier_lecture(db, s, *lecteur)
+    pdf = generer_pdf_devis(
+        devis_id=s.id,
+        titre=s.titre,
+        contenu=s.contenu_devis,
+        statut=s.statut.value if hasattr(s.statut, "value") else str(s.statut),
+        cree_le=s.cree_le,
+        modele=s.modele,
+        client_nom=client.nom if client else None,
+        client_contact=client.contact if client else None,
+        client_email=client.email if client else None,
+        client_telephone=client.telephone if client else None,
+        devise=(client.devise if client else None) or "Ar",
+        projet_nom=projet_nom,
+    )
+    nom_fichier = f"devis-{numero_devis(s.id, s.cree_le).replace('/', '-')}.pdf"
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{nom_fichier}"'},
+    )
 
 
 # ------------------------------------------------------------

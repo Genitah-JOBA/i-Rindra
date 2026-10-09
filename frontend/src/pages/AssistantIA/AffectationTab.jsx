@@ -130,7 +130,7 @@ export default function AffectationTab({ projets }) {
                     </div>
                     <button
                       onClick={() => affecter(s.utilisateur_id, s.nom)}
-                      className="bg-brand-gradient px-3 py-1.5 text-xs font-semibold text-white transition hover:brightness-110 rounded-md flex-shrink-0"
+                      className="bg-brand-gradient px-3 py-1.5 text-xs font-semibold text-black transition hover:brightness-110 rounded-md flex-shrink-0"
                     >
                       Affecter
                     </button>

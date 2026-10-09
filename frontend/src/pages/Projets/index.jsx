@@ -214,7 +214,7 @@ export default function Projets() {
               onClick={() => setFiltreArchive(a.id)}
               className={`px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
                 filtreArchive === a.id
-                  ? "bg-gradient-to-r from-i-blue to-i-green text-i-primary font-semibold ring-2 ring-offset-1 ring-i-blue shadow-sm"
+                  ? "bg-gradient-to-r from-i-blue to-i-green text-black font-semibold ring-2 ring-offset-1 ring-i-blue shadow-sm"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >

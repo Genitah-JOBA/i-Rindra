@@ -173,7 +173,7 @@ export default function Parametres() {
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-brand-gradient px-5 py-2 text-sm font-medium text-white transition hover:brightness-110 disabled:opacity-60"
+              className="rounded-lg bg-brand-gradient px-5 py-2 text-sm font-medium text-black transition hover:brightness-110 disabled:opacity-60"
             >
               {saving ? "Enregistrement…" : "Enregistrer"}
             </button>

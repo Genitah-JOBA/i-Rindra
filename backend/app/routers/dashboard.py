@@ -241,10 +241,15 @@ async def get_dashboard_indicateurs(
 async def get_dashboard_alertes(
     token: str = Depends(oauth2_scheme),
     db: AsyncSession = Depends(get_db),
-    limit: int = 10
+    limit: int = 10,
+    projet_id: Optional[int] = None,
 ):
     """
     Alertes pour le dashboard (RF-18).
+
+    `projet_id` (facultatif) limite les alertes à un seul projet — utilisé par
+    l'espace client, qui affiche les alertes du projet sélectionné. Il s'ajoute
+    au filtre d'accès : on ne peut jamais voir un projet hors de son périmètre.
     
     Types d'alertes :
     - Projet en retard
@@ -278,7 +283,10 @@ async def get_dashboard_alertes(
             query_projets = query_projets.where(Projet.client_id == client_id)
         else:
             return []
-    
+
+    if projet_id is not None:
+        query_projets = query_projets.where(Projet.id == projet_id)
+
     result = await db.execute(query_projets)
     projets = result.scalars().all()
     projet_ids = [p.id for p in projets]

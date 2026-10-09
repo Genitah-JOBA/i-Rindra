@@ -10,3 +10,15 @@
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 }
+
+/* Boutons au dégradé de la marque : texte toujours noir, dans toute
+   l'application (lisibilité sur le vert et le bleu ciel, cohérence visuelle).
+   Ne cible que les classes exactes : un bouton qui ne prend le dégradé qu'au
+   survol (`hover:bg-brand-gradient`) garde sa couleur normale. */
+button.bg-brand-gradient,
+button.bg-brand-gradient-soft,
+a.bg-brand-gradient,
+button.bg-gradient-to-r[class*="from-i-"],
+a.bg-gradient-to-r[class*="from-i-"] {
+  color: #000 !important;
+}

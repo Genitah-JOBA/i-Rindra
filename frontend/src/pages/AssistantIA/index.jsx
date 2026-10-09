@@ -90,7 +90,7 @@ export default function AssistantIA() {
               onClick={() => setOnglet(o.id)}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-all ${
                 isActive
-                  ? "bg-brand-gradient text-i-primary shadow-sm"
+                  ? "bg-brand-gradient text-black shadow-sm"
                   : "bg-white text-slate-600 border border-slate-200 hover:border-i-blue hover:text-i-blue hover:bg-i-blue/5"
               }`}
             >
