@@ -38,6 +38,15 @@ export const fichiersService = {
     window.URL.revokeObjectURL(url);
   },
 
+  // Consultation sans téléchargement (PDF/images inline, Word en texte)
+  apercu: async (projetId, fichierId) => {
+    const response = await api.get(
+      `/projets/${projetId}/fichiers/${fichierId}/apercu`,
+      { responseType: "blob" },
+    );
+    return { blob: response.data, type: response.headers["content-type"] || "" };
+  },
+
   // Supprimer un fichier
   remove: async (projetId, fichierId) => {
     await api.delete(`/projets/${projetId}/fichiers/${fichierId}`);

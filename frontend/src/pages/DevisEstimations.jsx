@@ -3,6 +3,7 @@
 // Les devis générés par l'IA et validés sont centralisés ici.
 // Lien vers l'outil externe B-estimation en tête de page.
 import { useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { suggestionDevisService } from "../api/suggestionDevis";
 import BoutonPdfDevis from "../components/BoutonPdfDevis";
 import { useMessage } from "../context/MessageContext";
@@ -33,6 +34,11 @@ export default function DevisEstimations() {
   const [loading, setLoading] = useState(true);
   const [erreur, setErreur] = useState("");
   const [devisDetail, setDevisDetail] = useState(null);
+  // ?projet=ID : ouvert depuis le détail d'un projet -> seulement ses devis
+  const [params] = useSearchParams();
+  const projetFiltre = Number(params.get("projet")) || null;
+  const devisAffiches = projetFiltre ? devis.filter((d) => d.projet_id === projetFiltre) : devis;
+  const nomProjetFiltre = devisAffiches[0]?.projet_nom;
 
   const charger = async () => {
     setLoading(true);
@@ -100,24 +106,37 @@ export default function DevisEstimations() {
       {/* Erreur */}
       {erreur && (
         <div className="mb-4 bg-red-50 px-4 py-3 text-sm text-red-700 border border-red-200 animate__animated animate__shakeX">
-          âš ï¸ {erreur}
+          ⚠️ {erreur}
+        </div>
+      )}
+
+      {projetFiltre && !loading && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border border-i-blue/30 bg-i-blue/5 px-4 py-2.5 text-sm text-slate-700">
+          <span>
+            Devis du projet{nomProjetFiltre ? <> <strong className="text-i-primary">{nomProjetFiltre}</strong></> : " sélectionné"}
+          </span>
+          <Link to="/devis-estimations" className="font-medium text-i-blue hover:underline">
+            Voir tous les devis
+          </Link>
         </div>
       )}
 
       {/* Liste */}
       {!loading && !erreur && (
         <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
-          {devis.length === 0 && (
+          {devisAffiches.length === 0 && (
             <div className="lg:col-span-2 text-center py-12 bg-slate-50 border border-slate-200 animate__animated animate__fadeInUp">
               <p className="text-slate-500">
                 {estFinance
                   ? "Aucun devis validé pour le moment. Validez un devis suggéré par l'IA depuis Suggestion devis par IA pour le retrouver ici."
-                  : "Aucun devis validé pour vos projets pour le moment."}
+                  : projetFiltre
+                    ? "Aucun devis validé pour ce projet pour le moment."
+                    : "Aucun devis validé pour vos projets pour le moment."}
               </p>
             </div>
           )}
 
-          {devis.map((d, index) => (
+          {devisAffiches.map((d, index) => (
             <div
               key={d.id}
               className="animate__animated animate__fadeInUp"

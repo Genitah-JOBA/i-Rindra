@@ -2,7 +2,10 @@
 //   - « Chat du projet » vers i-Resaka (RF-20 / RF-32), pour tous ;
 //   - « Estimation » vers B-esti (RF-34), réservé à la direction / DRH
 //     (cahier des charges : le bouton n'est pas présenté au chef de projet) ;
-//   - « Mes devis » vers B-esti pour le client (RF-21).
+//   - « Mes devis » vers B-esti pour le client (RF-21) ;
+//   - « Devis & estimations » (devis validés du projet, consultation) pour le
+//     chef de projet et l'équipe.
+import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { BESTI_URL, lienChatProjet } from "../config/liens";
 
@@ -26,6 +29,7 @@ export default function LiensProjet({ projetId, className = "" }) {
   const role = user?.role;
   const estFinance = role === "direction" || role === "drh";
   const estClient = role === "client";
+  const estInterne = role === "chef_de_projet" || role === "equipe";
 
   return (
     <div className={`flex flex-wrap gap-2 ${className}`}>
@@ -40,6 +44,13 @@ export default function LiensProjet({ projetId, className = "" }) {
           <IconeDevis />
           {estClient ? "Mes devis" : "Estimation"}
         </a>
+      )}
+      {estInterne && (
+        <Link to={`/devis-estimations?projet=${projetId}`} className={BOUTON}
+              title="Consulter les devis validés de ce projet">
+          <IconeDevis />
+          Devis & estimations
+        </Link>
       )}
     </div>
   );

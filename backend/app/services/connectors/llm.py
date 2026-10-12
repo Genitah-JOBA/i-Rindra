@@ -90,7 +90,12 @@ def _normaliser_erreur(exc: OpenAIError) -> LLMProviderError:
     """Associe une erreur du fournisseur à un (message, code HTTP) compréhensible."""
     nom = settings.LLM_PROVIDER
     if isinstance(exc, AuthenticationError):
-        return LLMProviderError(f"Clé API {nom} invalide ou expirée.", 401)
+        # 502 et non 401 : c'est la clé du SERVEUR qui est refusée par le
+        # fournisseur, pas la session de l'utilisateur. Un 401 ferait croire au
+        # frontend que le jeton a expiré et le renverrait vers /login.
+        return LLMProviderError(
+            f"Clé API {nom} invalide ou expirée : l'administrateur doit la renouveler (LLM_API_KEY).", 502
+        )
     if isinstance(exc, RateLimitError):
         return LLMProviderError(f"Quota {nom} dépassé (rate limit).", 429)
     if isinstance(exc, APIConnectionError):

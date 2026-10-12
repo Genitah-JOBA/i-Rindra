@@ -143,8 +143,19 @@ export default function Taches() {
   const creerTache = async (e) => {
     e.preventDefault();
     setFormErreur("");
-    if (!form.titre.trim()) {
-      setFormErreur("Le titre est requis.");
+    const manquants = [
+      !form.titre.trim() && "le titre",
+      !form.description.trim() && "la description",
+      !form.priorite && "la priorité",
+      estGestion && !form.responsable_id && "le responsable",
+      !form.echeance && "l'échéance",
+    ].filter(Boolean);
+    if (manquants.length) {
+      setFormErreur(`Tous les champs sont obligatoires : renseignez ${manquants.join(", ")}.`);
+      return;
+    }
+    if (form.echeance < new Date().toISOString().slice(0, 10)) {
+      setFormErreur("L'échéance ne peut pas être dans le passé.");
       return;
     }
     setCreation(true);
@@ -153,14 +164,14 @@ export default function Taches() {
       // automatiquement à l'auteur de la tâche.
       await tachesService.create(projetId, {
         projet_id: parseInt(projetId, 10),
-        titre: form.titre,
-        description: form.description || null,
+        titre: form.titre.trim(),
+        description: form.description.trim(),
         priorite: form.priorite,
         statut: "a_faire",
         responsable_id: estGestion && form.responsable_id
           ? parseInt(form.responsable_id, 10)
           : null,
-        echeance: form.echeance || null,
+        echeance: form.echeance,
       });
       showSuccess("Tâche créée avec succès !");
       setForm({
@@ -284,28 +295,44 @@ export default function Taches() {
       {projetId && peutCreerTache && (
         <form
           onSubmit={creerTache}
-          className="mb-6 flex flex-col gap-3 border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:items-end animate__animated animate__fadeInUp"
+          noValidate
+          className="mb-6 grid grid-cols-1 gap-3 border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-2 lg:grid-cols-6 animate__animated animate__fadeInUp"
         >
-          <div className="flex-1">
+          <div className="lg:col-span-2">
             <label className="mb-1 block text-xs font-medium text-slate-600">
-              Titre
+              Titre <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={form.titre}
               onChange={(e) => setForm({ ...form, titre: e.target.value })}
               placeholder="Nouvelle tâche…"
+              required
+              className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent"
+            />
+          </div>
+          <div className="md:col-span-2 lg:col-span-4">
+            <label className="mb-1 block text-xs font-medium text-slate-600">
+              Description <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              placeholder="Livrable attendu, précisions…"
+              required
               className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent"
             />
           </div>
           <div>
             <label className="mb-1 block text-xs font-medium text-slate-600">
-              Priorité
+              Priorité <span className="text-red-500">*</span>
             </label>
             <select
               value={form.priorite}
               onChange={(e) => setForm({ ...form, priorite: e.target.value })}
-              className="border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent"
+              required
+              className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent"
             >
               <option value="basse">Basse</option>
               <option value="moyenne">Moyenne</option>
@@ -313,18 +340,19 @@ export default function Taches() {
             </select>
           </div>
           {estGestion ? (
-            <div>
+            <div className="lg:col-span-2">
               <label className="mb-1 block text-xs font-medium text-slate-600">
-                Responsable
+                Responsable <span className="text-red-500">*</span>
               </label>
               <select
                 value={form.responsable_id}
                 onChange={(e) =>
                   setForm({ ...form, responsable_id: e.target.value })
                 }
-                className="border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent"
+                required
+                className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent"
               >
-                <option value="">— Aucun —</option>
+                <option value="">— Choisir un membre —</option>
                 {membres.map((m) => (
                   <option key={m.id} value={m.utilisateur_id}>
                     {m.prenom} {m.nom}
@@ -336,7 +364,7 @@ export default function Taches() {
           ) : (
             /* L'équipe est automatiquement responsable : on le dit plutôt
                que d'afficher un sélecteur qui n'aurait aucun effet. */
-            <div>
+            <div className="lg:col-span-2">
               <label className="mb-1 block text-xs font-medium text-slate-600">
                 Responsable
               </label>
@@ -347,19 +375,21 @@ export default function Taches() {
           )}
           <div>
             <label className="mb-1 block text-xs font-medium text-slate-600">
-              Échéance
+              Échéance <span className="text-red-500">*</span>
             </label>
             <input
               type="date"
               value={form.echeance}
+              min={new Date().toISOString().slice(0, 10)}
               onChange={(e) => setForm({ ...form, echeance: e.target.value })}
-              className="border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent"
+              required
+              className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent"
             />
           </div>
           <button
             type="submit"
             disabled={creation}
-            className="bg-gradient-to-r from-i-blue to-i-green px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:shadow-lg hover:scale-[1.02] disabled:opacity-50"
+            className="self-end bg-gradient-to-r from-i-blue to-i-green px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:shadow-lg hover:scale-[1.02] disabled:opacity-50"
           >
             {creation ? "Enregistrement…" : "+ Ajouter"}
           </button>

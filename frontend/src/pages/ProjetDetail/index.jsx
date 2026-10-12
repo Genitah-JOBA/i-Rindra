@@ -6,6 +6,7 @@ import { fichiersService } from "../../api/fichiers";
 import { useAuth } from "../../auth/AuthContext";
 import { useMessage } from "../../context/MessageContext";
 import LiensProjet from "../../components/LiensProjet";
+import ApercuFichier from "../../components/ApercuFichier";
 import Spin from "../../components/Spin";
 
 // Palette login
@@ -125,6 +126,8 @@ export default function ProjetDetail() {
       setUploadEnCours(false);
     }
   };
+
+  const [fichierApercu, setFichierApercu] = useState(null);
 
   const telecharger = async (f) => {
     try {
@@ -518,6 +521,12 @@ export default function ProjetDetail() {
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     <button
+                      onClick={() => setFichierApercu(f)}
+                      className="border border-i-blue/40 bg-i-blue/5 px-2.5 py-1 text-xs font-medium text-i-blue transition-colors hover:bg-i-blue/10"
+                    >
+                      Consulter
+                    </button>
+                    <button
                       onClick={() => telecharger(f)}
                       className="border border-slate-200 px-2.5 py-1 text-xs text-slate-600 transition-colors"
                       onMouseEnter={(e) => {
@@ -568,6 +577,9 @@ export default function ProjetDetail() {
           </ul>
         )}
       </div>
+      {fichierApercu && (
+        <ApercuFichier projetId={id} fichier={fichierApercu} onClose={() => setFichierApercu(null)} />
+      )}
     </div>
   );
 }

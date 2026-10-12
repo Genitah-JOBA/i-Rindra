@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import api from "../api/client";
 import { fichiersService } from "../api/fichiers";
 import Spin from "../components/Spin";
+import ApercuFichier from "../components/ApercuFichier";
 import "animate.css";
 
 const infoType = (mime) => {
@@ -39,6 +40,8 @@ export default function Documents() {
   const [fichiersParProjet, setFichiersParProjet] = useState({});
   const [loading, setLoading] = useState(true);
   const [erreur, setErreur] = useState("");
+  // Document ouvert dans la visionneuse : { projetId, fichier }
+  const [apercu, setApercu] = useState(null);
 
   const chargerDonnees = async () => {
     setLoading(true);
@@ -202,9 +205,27 @@ export default function Documents() {
                               </p>
                             </div>
                           </div>
+                          <div className="flex flex-shrink-0 items-center gap-2">
+                          <button
+                            onClick={() => setApercu({ projetId: projet.id, fichier: f })}
+                            className="inline-flex items-center gap-1.5 border border-i-blue/40 bg-i-blue/5 px-3 py-1.5 text-xs font-medium text-i-blue transition-colors hover:bg-i-blue/10"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth={1.5}
+                              stroke="currentColor"
+                              className="w-3.5 h-3.5"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            Consulter
+                          </button>
                           <button
                             onClick={() => telecharger(projet.id, f)}
-                            className="flex-shrink-0 inline-flex items-center gap-1.5 border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:border-i-blue hover:text-[#3F894E] transition-colors"
+                            className="inline-flex items-center gap-1.5 border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:border-i-blue hover:text-[#3F894E] transition-colors"
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -222,6 +243,7 @@ export default function Documents() {
                             </svg>
                             {"Télécharger"}
                           </button>
+                          </div>
                         </div>
                       );
                     })}
@@ -237,6 +259,10 @@ export default function Documents() {
         <div className="mt-6 rounded border-l-4 border-l-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-600">
           {"Aucun document partagé pour le moment. Les documents seront disponibles dès que votre équipe en publiera."}
         </div>
+      )}
+
+      {apercu && (
+        <ApercuFichier projetId={apercu.projetId} fichier={apercu.fichier} onClose={() => setApercu(null)} />
       )}
     </div>
   );

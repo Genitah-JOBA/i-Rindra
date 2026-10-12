@@ -41,6 +41,20 @@ async def _direction_drh_seulement(role: str = Depends(get_current_user_role)):
     return role
 
 
+def _cache_pour(role_appelant: str, cible: Utilisateur) -> bool:
+    """Vrai si la cible est un compte Direction et que l'appelant n'en fait pas partie : le compte lui est caché (404)."""
+    return role_appelant != "direction" and cible.role == RoleUtilisateur.DIRECTION
+
+
+def _verifier_role_direction(role_appelant: str, role_cible) -> None:
+    """Seule la Direction peut créer un compte Direction ou y promouvoir quelqu'un."""
+    if role_cible == RoleUtilisateur.DIRECTION and role_appelant != "direction":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Seule la direction peut attribuer le rôle direction.",
+        )
+
+
 @router.get("/", response_model=List[UtilisateurResponse])
 async def get_utilisateurs(
     db: AsyncSession = Depends(get_db),
@@ -73,7 +87,7 @@ async def get_utilisateur(
 async def create_utilisateur(
     utilisateur_data: UtilisateurCreate,
     db: AsyncSession = Depends(get_db),
-    _: str = Depends(_direction_seulement),
+    role_appelant: str = Depends(_direction_seulement),
 ):
     """Créer un nouvel utilisateur (direction uniquement)."""
     # Email unique — stocké et comparé sous forme canonique (minuscules), comme
@@ -95,6 +109,7 @@ async def create_utilisateur(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Rôle invalide. Choisir parmi : {[r.value for r in RoleUtilisateur]}",
         )
+    _verifier_role_direction(role_appelant, role_enum)
 
     # Règle métier : un 'client' doit être rattaché à un client existant
     if role_enum == RoleUtilisateur.CLIENT:
@@ -143,14 +158,14 @@ async def update_utilisateur(
     utilisateur_id: int,
     utilisateur_data: UtilisateurUpdate,
     db: AsyncSession = Depends(get_db),
-    _: str = Depends(_direction_seulement),
+    role_appelant: str = Depends(_direction_seulement),
 ):
     """Mettre à jour un utilisateur (direction uniquement)."""
     result = await db.execute(
         select(Utilisateur).where(Utilisateur.id == utilisateur_id)
     )
     utilisateur = result.scalar_one_or_none()
-    if not utilisateur:
+    if not utilisateur or _cache_pour(role_appelant, utilisateur):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Utilisateur non trouvé"
         )
@@ -163,6 +178,7 @@ async def update_utilisateur(
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Rôle invalide"
             )
+        _verifier_role_direction(role_appelant, donnees["role"])
 
     # Métier obligatoire pour l'équipe interne (vérifié sur l'état FINAL :
     # rôle et métier peuvent changer dans la même requête).
@@ -204,14 +220,14 @@ async def update_utilisateur(
 async def delete_utilisateur(
     utilisateur_id: int,
     db: AsyncSession = Depends(get_db),
-    _: str = Depends(_direction_drh_seulement),
+    role_appelant: str = Depends(_direction_drh_seulement),
 ):
     """Supprimer un utilisateur (direction/DRH uniquement, pas les chefs de projet)."""
     result = await db.execute(
         select(Utilisateur).where(Utilisateur.id == utilisateur_id)
     )
     utilisateur = result.scalar_one_or_none()
-    if not utilisateur:
+    if not utilisateur or _cache_pour(role_appelant, utilisateur):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Utilisateur non trouvé"
         )

@@ -86,6 +86,8 @@ export default function Membres() {
   const { showSuccess, showError } = useMessage();
   const estGestion = ["direction", "drh", "chef_de_projet"].includes(user?.role);
   const peutSupprimer = ["direction", "drh"].includes(user?.role);
+  // Les comptes Direction ne sont visibles que de la Direction elle-même.
+  const estDirection = user?.role === "direction";
 
   const [utilisateurs, setUtilisateurs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -104,7 +106,11 @@ export default function Membres() {
     setLoading(true);
     try {
       const data = await utilisateursService.list();
-      setUtilisateurs((data || []).filter((u) => u.role !== "client"));
+      setUtilisateurs(
+        (data || []).filter(
+          (u) => u.role !== "client" && (estDirection || u.role !== "direction"),
+        ),
+      );
     } catch (err) {
       const msg = err.response?.data?.detail || "Erreur de chargement des membres.";
       setErreur(msg);
@@ -441,7 +447,7 @@ export default function Membres() {
                     className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent appearance-none bg-white"
                     style={{ "--tw-ring-color": C.blue }}
                   >
-                    <option value="direction">Direction</option>
+                    {estDirection && <option value="direction">Direction</option>}
                     <option value="drh">DRH</option>
                     <option value="chef_de_projet">Chef de projet</option>
                     <option value="equipe">Équipe</option>

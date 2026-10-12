@@ -5,6 +5,8 @@ Routes pour la gestion des fichiers (RF-08).
 Upload, téléchargement, liste, suppression.
 """
 
+import asyncio
+import mimetypes
 import os
 import shutil
 from pathlib import Path
@@ -13,7 +15,7 @@ from typing import List, Optional
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Query
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, PlainTextResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete, and_
 
@@ -24,6 +26,7 @@ from app.routers.projets import check_projet_access, check_direction_or_chef_pro
 from app.models.projet import Projet
 from app.models.fichier import Fichier
 from app.models.utilisateur import Utilisateur
+from app.services.texte_documents import extraire_texte_fichier_stocke
 from app.schemas.fichier import FichierCreate, FichierResponse, FichierListResponse
 
 router = APIRouter(prefix="/projets", tags=["Fichiers"])
@@ -302,6 +305,56 @@ async def telecharger_fichier(
         path=file_path,
         filename=fichier.nom,
         media_type=fichier.type_mime or "application/octet-stream",
+    )
+
+
+# Formats affichés tels quels par le navigateur (visionneuse) ; les documents
+# Word sont convertis en texte, faute de lecteur natif dans le navigateur.
+_APERCU_NATIF = (".pdf", ".png", ".jpg", ".jpeg", ".gif", ".webp", ".txt", ".md", ".csv")
+_APERCU_TEXTE = (".docx", ".doc")
+
+
+@router.get("/{projet_id}/fichiers/{fichier_id}/apercu")
+async def apercu_fichier(
+    projet_id: int,
+    fichier_id: int,
+    projet: Projet = Depends(check_projet_access),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Consultation d'un fichier dans l'application, sans téléchargement.
+
+    PDF, images et textes sont servis « inline » (affichés, pas enregistrés) ;
+    un document Word est renvoyé sous forme de texte. Mêmes droits que le
+    téléchargement : tout membre du projet, y compris le client.
+    """
+    fichier = (await db.execute(
+        select(Fichier).where(and_(Fichier.id == fichier_id, Fichier.projet_id == projet_id))
+    )).scalar_one_or_none()
+    if not fichier:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Fichier non trouvé")
+
+    file_path = Path(fichier.chemin_ou_url)
+    if not file_path.exists():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Le fichier n'existe plus sur le serveur")
+
+    extension = file_path.suffix.lower() or Path(fichier.nom).suffix.lower()
+    if extension in _APERCU_NATIF:
+        type_mime = fichier.type_mime or mimetypes.guess_type(fichier.nom)[0] or "application/octet-stream"
+        if extension in (".txt", ".md", ".csv"):
+            type_mime = "text/plain; charset=utf-8"
+        return FileResponse(
+            path=file_path,
+            filename=fichier.nom,
+            media_type=type_mime,
+            content_disposition_type="inline",
+        )
+    if extension in _APERCU_TEXTE:
+        texte = await asyncio.to_thread(extraire_texte_fichier_stocke, str(file_path))
+        return PlainTextResponse(texte or "Aucun texte lisible dans ce document.")
+    raise HTTPException(
+        status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+        detail="Aperçu indisponible pour ce format : téléchargez le fichier.",
     )
 
 
