@@ -4,7 +4,7 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { useLocation } from "react-router-dom";
 import NotificationBell from "./NotificationBell";
-import { BESTI_URL } from "../config/liens";
+import { BESTI_URL, ERESAKA_URL } from "../config/liens";
 import "animate.css";
 
 // Fonction pour les liens actifs
@@ -496,10 +496,7 @@ const pleinEcran = pathname.startsWith("/assistant-ia");
         <header className="border-b bg-white px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center sticky top-0 z-30 shadow-sm">
           {/* Chat e-resaka */}
           <a
-            href={
-              import.meta.env.VITE_ERESAKA_URL ||
-              "https://e-resaka.example.com"
-            }
+            href={ERESAKA_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors bg-slate-100 hover:bg-slate-200"

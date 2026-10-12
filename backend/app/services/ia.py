@@ -35,6 +35,11 @@ from app.models.tache import Tache, StatutTache, PrioriteTache, CommentaireTache
 from app.models.utilisateur import Utilisateur
 from app.services.connectors.llm import chat_completion
 from app.services import vecteurs as vecteurs_service
+from app.services import recherche_texte
+
+# Similarité minimale d'un résultat « par le sens » quand la recherche par
+# mots-clés a déjà trouvé des réponses (évite les rapprochements lointains).
+SEUIL_SEMANTIQUE_AVEC_EXACT = 0.45
 
 logger = logging.getLogger(__name__)
 
@@ -896,70 +901,66 @@ async def suggerer_affectation(db: AsyncSession, tache_id: int) -> dict:
 async def rechercher(db: AsyncSession, projet_id: int, requete: str) -> dict:
     """Recherche dans tâches, commentaires, jalons et fichiers (RF-31).
 
-    1. Plein texte (ILIKE) : correspondances exactes, toujours disponible.
-    2. Sémantique (pgvector) : passages proches par le SENS, y compris dans le
-       contenu des fichiers (PDF, Word, texte). Ignorée sans pgvector/modèle.
-    Les correspondances exactes passent en premier ; un résultat déjà trouvé
-    par le plein texte n'est pas répété."""
-    motif = f"%{requete.strip()}%"
-    resultats = []
+    1. Mots-clés (« exacte ») : accents, majuscules et mots vides ignorés ; porte
+       sur le titre ET les attributs (échéance, statut, priorité, responsable),
+       ainsi que sur le contenu indexé des fichiers. Toujours disponible.
+    2. Sens (pgvector) : passages proches par le sens, y compris dans les PDF et
+       documents Word. Ignorée sans pgvector / modèle. Quand des correspondances
+       par mots-clés existent, seuls les passages très proches sont ajoutés,
+       pour ne pas noyer les bons résultats sous des rapprochements lointains.
+    Les correspondances par mots-clés passent en premier, sans doublon."""
+    cles = recherche_texte.mots_cles(requete)
+    seuil_mots = recherche_texte.seuil(cles)
+    candidats = []  # (score, résultat)
 
-    res = await db.execute(
-        select(Tache).where(
-            Tache.projet_id == projet_id,
-            Tache.titre.ilike(motif) | Tache.description.ilike(motif),
-        ).limit(20)
-    )
-    for t in res.scalars().all():
-        resultats.append({
-            "type": "tache", "id": t.id, "titre": t.titre,
-            "extrait": t.description, "projet_id": projet_id,
-        })
+    def proposer(type_, id_, titre, texte, extrait):
+        sc = recherche_texte.score(cles, texte)
+        if cles and sc >= seuil_mots:
+            candidats.append((sc, {"type": type_, "id": id_, "titre": titre,
+                                   "extrait": extrait, "projet_id": projet_id}))
 
-    res = await db.execute(
-        select(CommentaireTache).join(Tache, Tache.id == CommentaireTache.tache_id).where(
-            Tache.projet_id == projet_id,
-            CommentaireTache.contenu.ilike(motif),
-        ).limit(20)
-    )
-    for c in res.scalars().all():
-        resultats.append({
-            "type": "commentaire", "id": c.id,
-            "titre": f"Commentaire sur la tâche #{c.tache_id}",
-            "extrait": c.contenu, "projet_id": projet_id,
-        })
+    taches = (await db.execute(select(Tache).where(Tache.projet_id == projet_id))).scalars().all()
+    noms = await vecteurs_service.responsables_du_projet(db, taches)
+    titres_taches = {t.id: t.titre for t in taches}
+    for t in taches:
+        resp = noms.get(t.responsable_id)
+        proposer("tache", t.id, t.titre, vecteurs_service.texte_tache(t, resp), vecteurs_service.resume_tache(t, resp))
 
-    res = await db.execute(
-        select(Jalon).where(
-            Jalon.projet_id == projet_id,
-            Jalon.titre.ilike(motif) | Jalon.description.ilike(motif),
-        ).limit(20)
-    )
-    for j in res.scalars().all():
-        resultats.append({
-            "type": "jalon", "id": j.id, "titre": j.titre,
-            "extrait": j.description, "projet_id": projet_id,
-        })
+    commentaires = (await db.execute(
+        select(CommentaireTache).join(Tache, Tache.id == CommentaireTache.tache_id)
+        .where(Tache.projet_id == projet_id)
+    )).scalars().all()
+    for c in commentaires:
+        proposer("commentaire", c.id, f"Commentaire sur « {titres_taches.get(c.tache_id, c.tache_id)} »",
+                 c.contenu, recherche_texte.extrait_autour(cles, c.contenu))
 
-    res = await db.execute(
-        select(Fichier).where(
-            Fichier.projet_id == projet_id,
-            Fichier.nom.ilike(motif),
-        ).limit(20)
-    )
-    for f in res.scalars().all():
-        resultats.append({
-            "type": "fichier", "id": f.id, "titre": f.nom,
-            "extrait": f.type_mime, "projet_id": projet_id,
-        })
+    jalons = (await db.execute(select(Jalon).where(Jalon.projet_id == projet_id))).scalars().all()
+    for j in jalons:
+        proposer("jalon", j.id, j.titre, vecteurs_service.texte_jalon(j), vecteurs_service.resume_jalon(j))
 
-    for r in resultats:
-        r["correspondance"] = "exacte"
+    # Fichiers : nom + contenu déjà extrait dans l'index (un résultat par fichier,
+    # avec le passage le plus pertinent)
+    fichiers = (await db.execute(select(Fichier).where(Fichier.projet_id == projet_id))).scalars().all()
+    passages = await vecteurs_service.passages_des_fichiers(db, projet_id)
+    for f in fichiers:
+        meilleur = (recherche_texte.score(cles, f.nom), f.type_mime or "")
+        for contenu in passages.get(f.id, []):
+            sc = recherche_texte.score(cles, contenu)
+            if sc > meilleur[0]:
+                meilleur = (sc, recherche_texte.extrait_autour(cles, contenu))
+        if cles and meilleur[0] >= seuil_mots:
+            candidats.append((meilleur[0], {"type": "fichier", "id": f.id, "titre": f.nom,
+                                            "extrait": meilleur[1], "projet_id": projet_id}))
+
+    candidats.sort(key=lambda c: -c[0])
+    resultats = [dict(r, correspondance="exacte") for _, r in candidats[:20]]
 
     semantiques = []
     try:
-        semantiques = await vecteurs_service.rechercher_semantique(db, projet_id, requete)
-    except Exception as exc:  # noqa: BLE001 — la recherche exacte reste servie
+        semantiques = await vecteurs_service.rechercher_semantique(
+            db, projet_id, requete, seuil_min=SEUIL_SEMANTIQUE_AVEC_EXACT if resultats else 0.0,
+        )
+    except Exception as exc:  # noqa: BLE001 — la recherche par mots-clés reste servie
         await db.rollback()
         logger.warning("Recherche sémantique indisponible : %s", exc)
     deja = {(r["type"], r["id"]) for r in resultats}

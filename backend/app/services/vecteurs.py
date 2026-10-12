@@ -31,7 +31,7 @@ from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession
 from starlette.concurrency import run_in_threadpool
 
 from app.core.config import settings
-from app.models import CommentaireTache, Fichier, Jalon, Tache
+from app.models import CommentaireTache, Fichier, Jalon, Tache, Utilisateur
 from app.services.texte_documents import extraire_texte_fichier_stocke
 
 logger = logging.getLogger(__name__)
@@ -224,13 +224,80 @@ def _hash(*parties) -> str:
     return hashlib.sha256("\x1f".join(str(p or "") for p in parties).encode()).hexdigest()
 
 
+# ============================================================
+# Texte décrivant une tâche / un jalon
+# ============================================================
+# Le titre seul ne suffit pas : une question comme « date d'échéance » ou
+# « tâches en retard » porte sur les ATTRIBUTS (échéance, statut, responsable).
+# Ce texte est utilisé à la fois par la recherche par mots-clés et par l'index
+# sémantique ; le modifier change l'empreinte, donc ré-encode automatiquement.
+
+LIBELLES_STATUT = {"a_faire": "À faire", "en_cours": "En cours", "en_revue": "En revue", "termine": "Terminé"}
+
+
+def _valeur(v):
+    return getattr(v, "value", v)
+
+
+def _date_fr(d) -> str:
+    return d.strftime("%d/%m/%Y") if d else ""
+
+
+def texte_tache(t, responsable: Optional[str] = None) -> str:
+    morceaux = [f"Tâche « {t.titre} ».", (t.description or "").strip()]
+    statut = LIBELLES_STATUT.get(_valeur(t.statut), _valeur(t.statut))
+    if statut:
+        morceaux.append(f"Statut : {statut}.")
+    if t.priorite:
+        morceaux.append(f"Priorité : {_valeur(t.priorite)}.")
+    if t.echeance:
+        morceaux.append(f"Échéance (date limite) : {_date_fr(t.echeance)}.")
+    if responsable:
+        morceaux.append(f"Responsable : {responsable}.")
+    return " ".join(m for m in morceaux if m)
+
+
+def resume_tache(t, responsable: Optional[str] = None) -> str:
+    """Ligne courte affichée sous un résultat de recherche."""
+    parts = [LIBELLES_STATUT.get(_valeur(t.statut), "")]
+    if t.echeance:
+        parts.append(f"échéance le {_date_fr(t.echeance)}")
+    if responsable:
+        parts.append(responsable)
+    texte = " · ".join(p for p in parts if p)
+    return f"{texte} — {t.description}" if t.description else texte
+
+
+def texte_jalon(j) -> str:
+    morceaux = [f"Jalon « {j.titre} ».", (j.description or "").strip()]
+    if j.echeance:
+        morceaux.append(f"Échéance (date limite) : {_date_fr(j.echeance)}.")
+    morceaux.append("Atteint." if j.atteint else "Non atteint.")
+    return " ".join(m for m in morceaux if m)
+
+
+def resume_jalon(j) -> str:
+    parts = [f"échéance le {_date_fr(j.echeance)}" if j.echeance else "", "atteint" if j.atteint else "non atteint"]
+    texte = " · ".join(p for p in parts if p)
+    return f"{texte} — {j.description}" if j.description else texte
+
+
+async def responsables_du_projet(db: AsyncSession, taches) -> dict:
+    ids = {t.responsable_id for t in taches if t.responsable_id}
+    if not ids:
+        return {}
+    rows = (await db.execute(select(Utilisateur).where(Utilisateur.id.in_(ids)))).scalars().all()
+    return {u.id: f"{u.prenom} {u.nom}".strip() for u in rows}
+
+
 async def _sources_du_projet(db: AsyncSession, projet_id: int) -> List[_Source]:
     sources: List[_Source] = []
 
     taches = (await db.execute(select(Tache).where(Tache.projet_id == projet_id))).scalars().all()
     titres_taches = {t.id: t.titre for t in taches}
+    noms = await responsables_du_projet(db, taches)
     for t in taches:
-        texte = f"{t.titre}. {t.description or ''}"
+        texte = texte_tache(t, noms.get(t.responsable_id))
         sources.append(_Source("tache", t.id, t.titre, _hash(texte), texte))
 
     commentaires = (await db.execute(
@@ -243,7 +310,7 @@ async def _sources_du_projet(db: AsyncSession, projet_id: int) -> List[_Source]:
 
     jalons = (await db.execute(select(Jalon).where(Jalon.projet_id == projet_id))).scalars().all()
     for j in jalons:
-        texte = f"{j.titre}. {j.description or ''}"
+        texte = texte_jalon(j)
         sources.append(_Source("jalon", j.id, j.titre, _hash(texte), texte))
 
     fichiers = (await db.execute(select(Fichier).where(Fichier.projet_id == projet_id))).scalars().all()
@@ -322,8 +389,29 @@ async def synchroniser_projet(db: AsyncSession, projet_id: int) -> int:
 # Recherche
 # ============================================================
 
+async def passages_des_fichiers(db: AsyncSession, projet_id: int) -> dict:
+    """
+    Texte déjà extrait des fichiers du projet, {fichier_id: [passage, …]}.
+
+    Sert à la recherche par mots-clés dans le CONTENU des documents, sans relire
+    les PDF à chaque recherche. Vide si l'index (pgvector) n'est pas disponible.
+    """
+    if not disponible():
+        return {}
+    await synchroniser_projet(db, projet_id)
+    lignes = (await db.execute(text("""
+        SELECT source_id, contenu FROM document_chunk
+        WHERE projet_id = :p AND source_type = 'fichier'
+        ORDER BY id
+    """), {"p": projet_id})).all()
+    passages: dict = {}
+    for r in lignes:
+        passages.setdefault(r.source_id, []).append(r.contenu)
+    return passages
+
+
 async def rechercher_semantique(db: AsyncSession, projet_id: int, requete: str,
-                                limite: int = 10) -> List[dict]:
+                                limite: int = 10, seuil_min: float = 0.0) -> List[dict]:
     """
     Passages du projet les plus proches du sens de la requête, un seul résultat
     par source (le meilleur passage), filtrés par EMBEDDING_SEUIL et
@@ -346,7 +434,7 @@ async def rechercher_semantique(db: AsyncSession, projet_id: int, requete: str,
     """), {"q": _litteral(vecteurs[0]), "p": projet_id, "k": limite * 4})).all()
 
     meilleur = float(lignes[0].score) if lignes else 0.0
-    seuil = max(settings.EMBEDDING_SEUIL, meilleur * settings.EMBEDDING_SEUIL_RELATIF)
+    seuil = max(settings.EMBEDDING_SEUIL, meilleur * settings.EMBEDDING_SEUIL_RELATIF, seuil_min)
     resultats, vus = [], set()
     for r in lignes:
         cle = (r.source_type, r.source_id)

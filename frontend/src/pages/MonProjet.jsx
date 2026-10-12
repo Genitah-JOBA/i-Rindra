@@ -5,6 +5,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 import Spin from "../components/Spin";
 import "animate.css";
+import LiensProjet from "../components/LiensProjet";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -203,6 +204,7 @@ export default function MonProjet() {
               {projet.nom}
             </h1>
             <p className="text-sm text-slate-500">{"Voici l'avancement de votre projet."}</p>
+            <LiensProjet projetId={projet.id} className="mt-3" />
           </div>
           <div className="flex items-center gap-2">
             <span

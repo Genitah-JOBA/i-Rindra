@@ -5,6 +5,7 @@ import { projetsService } from "../../api/projets";
 import { fichiersService } from "../../api/fichiers";
 import { useAuth } from "../../auth/AuthContext";
 import { useMessage } from "../../context/MessageContext";
+import LiensProjet from "../../components/LiensProjet";
 import Spin from "../../components/Spin";
 
 // Palette login
@@ -267,6 +268,7 @@ export default function ProjetDetail() {
         {projet.description && (
           <p className="mb-4 text-sm text-slate-600">{projet.description}</p>
         )}
+        {!projet.archive && <LiensProjet projetId={projet.id} className="mb-4" />}
         <div className="mb-1 h-2 w-full overflow-hidden bg-slate-100">
           <div
             className="h-full"

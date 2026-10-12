@@ -6,6 +6,7 @@ import { clientsService } from "../../api/client";
 import { utilisateursService } from "../../api/utilisateurs";
 import { useMessage } from "../../context/MessageContext";
 import { useAuth } from "../../auth/AuthContext";
+import { BESTI_URL, lienChatProjet } from "../../config/liens";
 import Spin from "../../components/Spin";
 import 'animate.css';
 
@@ -119,8 +120,14 @@ export default function Projets() {
   // ---------- CHAT (redirection e-resaka) ----------
   const chat = (projet, e) => {
     e?.stopPropagation();
-    const url = `https://e-resaka.example.com/chat?projet=${projet.id}`;
-    window.open(url, "_blank", "noopener,noreferrer");
+    window.open(lienChatProjet(projet.id), "_blank", "noopener,noreferrer");
+  };
+
+  // ---------- ESTIMATION (B-esti) : direction / DRH uniquement (RF-34) ----------
+  const peutEstimer = user?.role === "direction" || user?.role === "drh";
+  const estimation = (e) => {
+    e?.stopPropagation();
+    window.open(BESTI_URL, "_blank", "noopener,noreferrer");
   };
 
   const peutArchiver = user && ROLES_GESTION.includes(user.role);
@@ -363,6 +370,17 @@ export default function Projets() {
                   className="p-1.5 text-slate-500 hover:text-i-blue hover:bg-i-blue/10 transition-colors"
                 >
                   <ChatIcon className="w-4 h-4" />
+                </button>
+              )}
+              {!p.archive && peutEstimer && (
+                <button
+                  onClick={estimation}
+                  title="Estimation du projet (B-estimation)"
+                  className="p-1.5 text-slate-500 hover:text-i-blue hover:bg-i-blue/10 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.6} stroke="currentColor" className="w-4 h-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h12m-12 2.25h12M3.375 4.5h17.25c.621 0 1.125.504 1.125 1.125v12.75c0 .621-.504 1.125-1.125 1.125H3.375a1.125 1.125 0 01-1.125-1.125V5.625c0-.621.504-1.125 1.125-1.125z" />
+                  </svg>
                 </button>
               )}
             </div>
