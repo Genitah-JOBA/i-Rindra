@@ -10,7 +10,6 @@ import {
   BtnIA,
   SelectProjet,
   AlertErreur,
-  BadgeIA,
   Spin,
   IconCheck,
   IconX,
@@ -95,68 +94,117 @@ function DispoBadge({ membres, date }) {
   );
 }
 
-// Carte d'une suggestion (section « suggérées » ou « rejetées »)
-function SuggestionCarte({ suggestion: s, membresDispo, onValider, onRejeter, onRestaurer }) {
+const PRIORITE = {
+  haute: { libelle: "Haute", barre: "bg-red-500", badge: "bg-red-50 text-red-700 border-red-200", rang: 0 },
+  moyenne: { libelle: "Moyenne", barre: "bg-orange-400", badge: "bg-orange-50 text-orange-700 border-orange-200", rang: 1 },
+  basse: { libelle: "Basse", barre: "bg-yellow-400", badge: "bg-yellow-50 text-yellow-700 border-yellow-200", rang: 2 },
+};
+
+// Tri : priorité haute d'abord, puis échéance la plus proche (sans date à la fin).
+function trier(liste) {
+  return [...liste].sort((a, b) => {
+    const pa = PRIORITE[a.priorite]?.rang ?? 1;
+    const pb = PRIORITE[b.priorite]?.rang ?? 1;
+    if (pa !== pb) return pa - pb;
+    const ea = toISO(a.echeance) || "9999-12-31";
+    const eb = toISO(b.echeance) || "9999-12-31";
+    return ea.localeCompare(eb);
+  });
+}
+
+function IconCalendrier({ className = "w-3.5 h-3.5" }) {
   return (
-    <Carte className="p-4 flex flex-col gap-2">
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h4 className="font-semibold text-slate-900">{s.titre}</h4>
-            <span className={`text-[10px] px-2 py-0.5 ${STYLE_STATUT[s.statut] || STYLE_STATUT.en_attente}`}>
-              {LIBELLE_STATUT[s.statut] || LIBELLE_STATUT.en_attente}
-            </span>
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+    </svg>
+  );
+}
+
+// Une suggestion (vue « suggérées » ou « rejetées »)
+function SuggestionCarte({ suggestion: s, numero, membresDispo, onValider, onRejeter, onRestaurer }) {
+  const [deplie, setDeplie] = useState(false);
+  const prio = PRIORITE[s.priorite] || PRIORITE.moyenne;
+  const longue = (s.description || "").length > 180;
+
+  return (
+    <div className={`relative flex border border-slate-200 bg-white shadow-sm ${s.statut === "rejetee" ? "opacity-75" : ""}`}>
+      <span className={`w-1 flex-shrink-0 ${prio.barre}`} />
+      <div className="min-w-0 flex-1 p-4">
+        {/* En-tête : numéro, titre, méta-infos */}
+        <div className="flex items-start gap-3">
+          <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center bg-i-primary text-[11px] font-bold text-white">
+            {numero}
+          </span>
+          <div className="min-w-0 flex-1">
+            <h4 className="font-semibold leading-snug text-i-primary">{s.titre}</h4>
+            <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px]">
+              <span className={`border px-2 py-0.5 font-semibold ${prio.badge}`}>Priorité {prio.libelle.toLowerCase()}</span>
+              <span className="inline-flex items-center gap-1 border border-slate-200 bg-slate-50 px-2 py-0.5 text-slate-600">
+                <IconCalendrier /> {s.echeance ? toFR(s.echeance) : "Sans échéance"}
+              </span>
+              {s.statut !== "en_attente" && (
+                <span className={`px-2 py-0.5 ${STYLE_STATUT[s.statut]}`}>{LIBELLE_STATUT[s.statut]}</span>
+              )}
+            </div>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Priorité {s.priorite} · Échéance {toFR(s.echeance)}
-          </p>
         </div>
-        <BadgeIA modele={null} />
+
+        {s.description && (
+          <div className="mt-3 pl-9">
+            <p className={`text-sm leading-relaxed text-slate-600 ${!deplie && longue ? "line-clamp-2" : ""}`}>
+              {s.description}
+            </p>
+            {longue && (
+              <button onClick={() => setDeplie((d) => !d)} className="mt-1 text-xs font-medium text-i-blue hover:underline">
+                {deplie ? "Réduire" : "Voir plus"}
+              </button>
+            )}
+          </div>
+        )}
+
+        {s.statut === "en_attente" && s.echeance && (
+          <div className="pl-9">
+            <DispoBadge membres={membresDispo} date={s.echeance} />
+          </div>
+        )}
+
+        {/* Actions */}
+        {s.statut === "en_attente" && (onValider || onRejeter) && (
+          <div className="mt-3 flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
+            {onRejeter && (
+              <button
+                onClick={() => onRejeter(s)}
+                className="flex items-center gap-1 border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-50"
+              >
+                <IconX /> Rejeter
+              </button>
+            )}
+            {onValider && (
+              <button
+                onClick={() => onValider(s)}
+                className="flex items-center gap-1 bg-brand-gradient px-3 py-1.5 text-xs font-semibold text-black transition hover:brightness-110"
+              >
+                <IconCheck /> Valider et créer la tâche
+                <IconArrowRight className="h-3 w-3" />
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Réintégration : une tâche rejetée peut revenir dans la liste à valider. */}
+        {s.statut === "rejetee" && onRestaurer && (
+          <div className="mt-3 flex justify-end border-t border-slate-100 pt-3">
+            <button
+              onClick={() => onRestaurer(s)}
+              title="Remettre cette tâche dans la liste « à valider »"
+              className="flex items-center gap-1 border border-i-blue/40 bg-i-blue/5 px-3 py-1.5 text-xs font-semibold text-i-blue transition hover:bg-i-blue/10"
+            >
+              <IconRefresh /> Réintégrer
+            </button>
+          </div>
+        )}
       </div>
-
-      {s.description && (
-        <p className="text-sm text-slate-600 whitespace-pre-wrap line-clamp-3">{s.description}</p>
-      )}
-
-      {s.statut === "en_attente" && s.echeance && (
-        <DispoBadge membres={membresDispo} date={s.echeance} />
-      )}
-
-      {s.statut === "en_attente" && (onValider || onRejeter) && (
-        <div className="mt-auto flex items-center gap-2 pt-2 border-t border-slate-100">
-          {onRejeter && (
-            <button
-              onClick={() => onRejeter(s)}
-              className="flex items-center gap-1 border border-red-300 px-2.5 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50"
-            >
-              <IconX /> Rejeter
-            </button>
-          )}
-          {onValider && (
-            <button
-              onClick={() => onValider(s)}
-              className="flex items-center gap-1 bg-brand-gradient px-2.5 py-1 text-xs font-semibold text-black transition hover:brightness-110 ml-auto"
-            >
-              <IconCheck /> Valider
-              <IconArrowRight className="w-3 h-3" />
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Réintégration : une tâche rejetée peut revenir dans la liste à valider. */}
-      {s.statut === "rejetee" && onRestaurer && (
-        <div className="mt-auto flex items-center gap-2 pt-2 border-t border-slate-100">
-          <button
-            onClick={() => onRestaurer(s)}
-            title="Remettre cette tâche dans la liste « à valider »"
-            className="flex items-center gap-1 border border-i-blue/40 bg-i-blue/5 px-2.5 py-1 text-xs font-semibold text-i-blue transition hover:bg-i-blue/10 ml-auto"
-          >
-            <IconRefresh /> Réintégrer
-          </button>
-        </div>
-      )}
-    </Carte>
+    </div>
   );
 }
 
@@ -285,6 +333,14 @@ export default function ExtractionTab({ projets }) {
   };
 
   const valider = async (s) => {
+    const ok = await showConfirm({
+      type: "success",
+      title: "Valider la suggestion",
+      message: `Créer la tâche « ${s.titre} » dans le Kanban du projet ?`,
+      confirmLabel: "Valider",
+      cancelLabel: "Annuler",
+    });
+    if (!ok) return;
     try {
       await iaService.validerSuggestion(s.id);
       showSuccess(`Tâche « ${s.titre} » créée dans le Kanban !`);
@@ -299,8 +355,9 @@ export default function ExtractionTab({ projets }) {
     const ok = await showConfirm({
       type: "warning",
       title: "Rejeter la suggestion",
-      message: `Rejeter la suggestion « ${s.titre} » ? Vous pourrez la restaurer plus tard.`,
+      message: `Rejeter la suggestion « ${s.titre} » ? Vous pourrez la réintégrer plus tard.`,
       confirmLabel: "Rejeter",
+      cancelLabel: "Annuler",
     });
     if (!ok) return;
     try {
@@ -324,8 +381,9 @@ export default function ExtractionTab({ projets }) {
     }
   };
 
-  const suggestionsEnAttente = suggestions.filter((s) => s.statut === "en_attente");
-  const suggestionsRejetees = suggestions.filter((s) => s.statut === "rejetee");
+  const suggestionsEnAttente = trier(suggestions.filter((s) => s.statut === "en_attente"));
+  const suggestionsRejetees = trier(suggestions.filter((s) => s.statut === "rejetee"));
+  const nbHautes = suggestionsEnAttente.filter((s) => s.priorite === "haute").length;
 
   return (
     <div className="h-full overflow-y-auto space-y-4 animate__animated animate__fadeIn">
@@ -395,12 +453,18 @@ export default function ExtractionTab({ projets }) {
             </p>
           </Carte>
         ) : (
-          <div className="grid gap-3 grid-cols-1 lg:grid-cols-2">
-            {suggestionsEnAttente.map((s) => {
+          <div className="space-y-3">
+            <p className="text-xs text-slate-500">
+              {suggestionsEnAttente.length} tâche{suggestionsEnAttente.length > 1 ? "s" : ""} à valider
+              {nbHautes > 0 && <> · <span className="font-semibold text-red-600">{nbHautes} priorité haute</span></>}
+              {" "}— classées par priorité puis par échéance.
+            </p>
+            {suggestionsEnAttente.map((s, i) => {
               const dateKey = toISO(s.echeance);
               return (
                 <SuggestionCarte
                   key={s.id}
+                  numero={i + 1}
                   suggestion={s}
                   membresDispo={dateKey ? dispos[dateKey] : null}
                   onValider={valider}
@@ -418,9 +482,9 @@ export default function ExtractionTab({ projets }) {
             <p className="text-sm text-slate-500">{"Aucune tâche rejetée."}</p>
           </Carte>
         ) : (
-          <div className="grid gap-3 grid-cols-1 lg:grid-cols-2">
-            {suggestionsRejetees.map((s) => (
-              <SuggestionCarte key={s.id} suggestion={s} onRestaurer={restaurer} />
+          <div className="space-y-3">
+            {suggestionsRejetees.map((s, i) => (
+              <SuggestionCarte key={s.id} numero={i + 1} suggestion={s} onRestaurer={restaurer} />
             ))}
           </div>
         )

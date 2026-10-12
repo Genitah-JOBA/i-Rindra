@@ -1,5 +1,6 @@
 // src/components/TaskDetailModal.jsx — Détail d'une tâche + commentaires (RF-14).
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { tachesService } from "../api/taches";
 import { useAuth } from "../auth/AuthContext";
 import { useChrono } from "../context/ChronoContext";
@@ -36,24 +37,47 @@ function formaterDate(iso) {
   if (!iso) return "";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString("fr-FR", { 
-    day: "2-digit", 
-    month: "2-digit", 
+  return d.toLocaleDateString("fr-FR", {
+    day: "2-digit",
+    month: "2-digit",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit"
   });
 }
 
-export default function TaskDetailModal({ 
-  tache, 
-  membres, 
-  onClose, 
+export default function TaskDetailModal({
+  tache,
+  membres,
+  onClose,
   onCommentaireAjoute,
-  utilisateurs = [] 
+  utilisateurs = [],
+  peutAffecter = false,
+  onAffectee,
 }) {
-  
+
   const { user } = useAuth();
+
+  // Affectation d'une tâche non assignée (direction, DRH, chef de projet)
+  const [responsableId, setResponsableId] = useState(tache?.responsable_id ?? null);
+  const [choixResponsable, setChoixResponsable] = useState("");
+  const [affectation, setAffectation] = useState(false);
+  const [erreurAffectation, setErreurAffectation] = useState("");
+
+  const affecter = async () => {
+    if (!choixResponsable) return;
+    setAffectation(true);
+    setErreurAffectation("");
+    try {
+      const maj = await tachesService.affecter(tache.id, Number(choixResponsable));
+      setResponsableId(Number(choixResponsable));
+      onAffectee?.(maj || { ...tache, responsable_id: Number(choixResponsable) });
+    } catch (error) {
+      setErreurAffectation(error.response?.data?.detail || "Affectation impossible.");
+    } finally {
+      setAffectation(false);
+    }
+  };
 
   const [commentaires, setCommentaires] = useState([]);
   const [loadingComments, setLoadingComments] = useState(true);
@@ -93,7 +117,7 @@ export default function TaskDetailModal({
   // Tic-tac du chronomètre : géré par le ChronoContext (continue même modale fermée)
 
   const estResponsable =
-    user?.id != null && tache?.responsable_id != null && user.id === tache.responsable_id;
+    user?.id != null && responsableId != null && user.id === responsableId;
 
   const formaterChrono = (totalSecondes) => {
     const h = Math.floor(totalSecondes / 3600);
@@ -136,31 +160,31 @@ export default function TaskDetailModal({
   // Fonction pour obtenir le nom complet d'un utilisateur par son ID
   const getNomUtilisateur = (utilisateurId) => {
     if (!utilisateurId) return null;
-    
+
     // Chercher dans les membres du projet (différents formats possibles)
-    const membre = membres.find(m => 
-      m.id === utilisateurId || 
+    const membre = membres.find(m =>
+      m.id === utilisateurId ||
       m.utilisateur_id === utilisateurId ||
       m.user_id === utilisateurId
     );
     if (membre) {
       return `${membre.prenom} ${membre.nom}`;
     }
-    
+
     // Chercher dans la liste des utilisateurs
-    const userData = utilisateurs.find(u => 
+    const userData = utilisateurs.find(u =>
       u.id === utilisateurId ||
       u.user_id === utilisateurId
     );
     if (userData) {
       return `${userData.prenom} ${userData.nom}`;
     }
-    
+
     // Si c'est l'utilisateur connecté
     if (user && user.id === utilisateurId) {
       return `${user.prenom} ${user.nom}`;
     }
-    
+
     return null;
   };
 
@@ -168,14 +192,14 @@ export default function TaskDetailModal({
   const getNomAuteur = (commentaire) => {
     // Afficher les données du commentaire pour déboguer
     console.log("Commentaire:", commentaire);
-    
+
     // Vérifier tous les champs possibles pour l'ID utilisateur
-    const userId = commentaire.utilisateur_id || 
-                   commentaire.auteur_id || 
+    const userId = commentaire.utilisateur_id ||
+                   commentaire.auteur_id ||
                    commentaire.user_id ||
                    commentaire.createur_id ||
                    commentaire.created_by;
-    
+
     if (userId) {
       const nom = getNomUtilisateur(userId);
       if (nom) {
@@ -183,24 +207,24 @@ export default function TaskDetailModal({
         return nom;
       }
     }
-    
+
     // Vérifier si le commentaire contient déjà un nom
-    const nom = commentaire.utilisateur_nom || 
-                commentaire.auteur_nom || 
+    const nom = commentaire.utilisateur_nom ||
+                commentaire.auteur_nom ||
                 commentaire.user_nom ||
                 commentaire.createur ||
                 commentaire.created_by_name;
-    
+
     if (nom) {
       console.log("Nom trouvé directement:", nom);
       return nom;
     }
-    
+
     // Si l'utilisateur connecté a créé le commentaire
     if (user && commentaire.auteur_id === user.id) {
       return `${user.prenom} ${user.nom}`;
     }
-    
+
     console.warn("Aucun nom trouvé pour le commentaire:", commentaire);
     return "Utilisateur inconnu";
   };
@@ -217,7 +241,7 @@ export default function TaskDetailModal({
     setEnvoi(true);
     try {
       const c = await tachesService.ajouterCommentaire(tache.id, nouveau.trim());
-      
+
       // Ajouter l'utilisateur actuel au commentaire pour l'affichage
       const commentaireAvecUser = {
         ...c,
@@ -226,7 +250,7 @@ export default function TaskDetailModal({
         auteur_id: user?.id,
         auteur_nom: user ? `${user.prenom} ${user.nom}` : "Utilisateur inconnu",
       };
-      
+
       setCommentaires((prev) => [...prev, commentaireAvecUser]);
       setNouveau("");
       onCommentaireAjoute?.();
@@ -243,8 +267,9 @@ export default function TaskDetailModal({
   // Si les membres sont vides, essayer d'utiliser l'utilisateur connecté
   const membresAvecUser = membres.length > 0 ? membres : (user ? [user] : []);
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate__animated animate__fadeIn">
+  // Rendue dans <body> (portail) : sinon le header collant passe par-dessus.
+  return createPortal(
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 animate__animated animate__fadeIn">
       <div className="flex max-h-[90vh] w-full max-w-2xl flex-col bg-white shadow-xl  animate__animated animate__zoomIn">
         {/* En-tête */}
         <div className="flex items-start justify-between gap-3 border-b border-slate-200 p-5">
@@ -267,12 +292,12 @@ export default function TaskDetailModal({
               >
                 {labelPriorite[tache?.priorite] || tache?.priorite}
               </span>
-              {tache?.responsable_id && (
+              {responsableId && (
                 <span className="text-slate-500 flex items-center gap-1">
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                   </svg>
-                  {nomResponsable(tache.responsable_id)}
+                  {nomResponsable(responsableId)}
                 </span>
               )}
               {tache?.echeance && (
@@ -318,6 +343,48 @@ export default function TaskDetailModal({
               <p className="whitespace-pre-wrap text-sm text-slate-700 bg-slate-50 p-3 ">
                 {description}
               </p>
+            </div>
+          )}
+
+          {/* Affectation : tâche sans responsable */}
+          {!responsableId && (
+            <div className="mb-5">
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Responsable
+              </h3>
+              {peutAffecter ? (
+                <div className="border border-amber-200 bg-amber-50 p-3">
+                  <p className="mb-2 text-sm text-amber-800">Cette tâche n'est pas encore assignée.</p>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <select
+                      value={choixResponsable}
+                      onChange={(e) => setChoixResponsable(e.target.value)}
+                      className="flex-1 border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-i-blue"
+                    >
+                      <option value="">— Choisir un membre —</option>
+                      {membres.map((m) => (
+                        <option key={m.utilisateur_id ?? m.id} value={m.utilisateur_id ?? m.id}>
+                          {m.prenom} {m.nom}
+                          {m.metier ? ` — ${m.metier}` : ""}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={affecter}
+                      disabled={!choixResponsable || affectation}
+                      className="bg-brand-gradient px-4 py-2 text-sm font-semibold text-black transition hover:brightness-110 disabled:opacity-50"
+                    >
+                      {affectation ? "Assignation…" : "Assigner"}
+                    </button>
+                  </div>
+                  {membres.length === 0 && (
+                    <p className="mt-2 text-xs text-amber-700">Aucun membre dans l'équipe du projet.</p>
+                  )}
+                  {erreurAffectation && <p className="mt-2 text-xs text-red-600">{erreurAffectation}</p>}
+                </div>
+              ) : (
+                <p className="bg-slate-50 p-3 text-sm text-slate-500">Cette tâche n'est pas encore assignée.</p>
+              )}
             </div>
           )}
 
@@ -404,10 +471,10 @@ export default function TaskDetailModal({
               <ul className="space-y-3">
                 {commentaires.map((c) => {
                   const nomAuteur = getNomAuteur(c);
-                  const initiales = nomAuteur !== "Utilisateur inconnu" 
+                  const initiales = nomAuteur !== "Utilisateur inconnu"
                     ? nomAuteur.split(' ').map(word => word.charAt(0)).join('').toUpperCase().slice(0, 2)
                     : '?';
-                  
+
                   return (
                     <li key={c.id} className=" border border-slate-200 bg-slate-50 p-3 hover:bg-slate-100 transition-colors">
                       <div className="mb-1 flex items-center justify-between gap-2">
@@ -463,5 +530,7 @@ export default function TaskDetailModal({
         </div>
       </div>
     </div>
+  ,
+    document.body,
   );
 }

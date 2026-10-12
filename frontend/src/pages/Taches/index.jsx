@@ -520,6 +520,12 @@ export default function Taches() {
           membres={membres}
           onClose={() => setTacheActive(null)}
           onCommentaireAjoute={() => handleCommentaireAjoute(tacheActive.id)}
+          peutAffecter={estGestion}
+          onAffectee={(maj) =>
+            setTaches((prev) =>
+              prev.map((t) => (t.id === maj.id ? { ...t, responsable_id: maj.responsable_id } : t)),
+            )
+          }
         />
       )}
     </div>
