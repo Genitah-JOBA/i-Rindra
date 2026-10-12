@@ -67,12 +67,12 @@ export default function RechercheTab({ projets }) {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Que cherchez-vous ? (ex : Livraison, bug, refonte)"
-            className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-i-blue rounded-md"
+            className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-i-blue rounded-none"
           />
           <button
             type="submit"
             disabled={loading}
-            className="bg-brand-gradient px-5 py-2 text-sm font-semibold text-black transition hover:brightness-110 disabled:opacity-50 rounded-md"
+            className="bg-brand-gradient px-5 py-2 text-sm font-semibold text-black transition hover:brightness-110 disabled:opacity-50"
           >
             {loading ? "Recherche…" : "Rechercher"}
           </button>
@@ -100,7 +100,7 @@ export default function RechercheTab({ projets }) {
           ) : (
             <div className="space-y-2">
               {resultat.resultats.map((r) => (
-                <div key={`${r.type}-${r.id}`} className="border border-slate-200 px-4 py-3 rounded-lg bg-slate-50/60">
+                <div key={`${r.type}-${r.id}`} className="border border-slate-200 px-4 py-3 bg-slate-50/60">
                   <span className="text-sm flex items-start gap-2">
                     <span className="flex-shrink-0">
                       {(ICONE_TYPE[r.type] || IconDocumentText)({ className: "w-4 h-4 text-i-blue mt-0.5" })}

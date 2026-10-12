@@ -54,7 +54,7 @@ function DispoBadge({ membres, date }) {
   const occupes = membres.filter((m) => !m.disponible);
 
   return (
-    <div className="mt-2 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+    <div className="mt-2 bg-slate-50 border border-slate-200 px-3 py-2">
       <div className="flex items-center gap-1.5 mb-1.5">
         <IconUsers className="w-3.5 h-3.5 text-slate-500" />
         <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
@@ -67,9 +67,9 @@ function DispoBadge({ membres, date }) {
           {dispos.map((m) => (
             <span
               key={m.utilisateur_id}
-              className="inline-flex items-center gap-1 bg-green-100 text-green-800 text-[11px] px-2 py-0.5 rounded-full"
+              className="inline-flex items-center gap-1 bg-green-100 text-green-800 text-[11px] px-2 py-0.5"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0" />
+              <span className="w-1.5 h-1.5 bg-green-500 flex-shrink-0" />
               {m.nom}
               {m.metier && <span className="text-green-600"> · {m.metier}</span>}
             </span>
@@ -82,9 +82,9 @@ function DispoBadge({ membres, date }) {
           {occupes.map((m) => (
             <span
               key={m.utilisateur_id}
-              className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-[11px] px-2 py-0.5 rounded-full line-through opacity-60"
+              className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-[11px] px-2 py-0.5 line-through opacity-60"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" />
+              <span className="w-1.5 h-1.5 bg-amber-400 flex-shrink-0" />
               {m.nom}
               <span className="text-amber-500">({m.taches_fenetre} tâches)</span>
             </span>
@@ -103,7 +103,7 @@ function SuggestionCarte({ suggestion: s, membresDispo, onValider, onRejeter, on
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <h4 className="font-semibold text-slate-900">{s.titre}</h4>
-            <span className={`text-[10px] px-2 py-0.5 rounded-full ${STYLE_STATUT[s.statut] || STYLE_STATUT.en_attente}`}>
+            <span className={`text-[10px] px-2 py-0.5 ${STYLE_STATUT[s.statut] || STYLE_STATUT.en_attente}`}>
               {LIBELLE_STATUT[s.statut] || LIBELLE_STATUT.en_attente}
             </span>
           </div>
@@ -127,7 +127,7 @@ function SuggestionCarte({ suggestion: s, membresDispo, onValider, onRejeter, on
           {onRejeter && (
             <button
               onClick={() => onRejeter(s)}
-              className="flex items-center gap-1 border border-red-300 px-2.5 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50 rounded-md"
+              className="flex items-center gap-1 border border-red-300 px-2.5 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50"
             >
               <IconX /> Rejeter
             </button>
@@ -135,7 +135,7 @@ function SuggestionCarte({ suggestion: s, membresDispo, onValider, onRejeter, on
           {onValider && (
             <button
               onClick={() => onValider(s)}
-              className="flex items-center gap-1 bg-brand-gradient px-2.5 py-1 text-xs font-semibold text-black transition hover:brightness-110 rounded-md ml-auto"
+              className="flex items-center gap-1 bg-brand-gradient px-2.5 py-1 text-xs font-semibold text-black transition hover:brightness-110 ml-auto"
             >
               <IconCheck /> Valider
               <IconArrowRight className="w-3 h-3" />
@@ -150,7 +150,7 @@ function SuggestionCarte({ suggestion: s, membresDispo, onValider, onRejeter, on
           <button
             onClick={() => onRestaurer(s)}
             title="Remettre cette tâche dans la liste « à valider »"
-            className="flex items-center gap-1 border border-i-blue/40 bg-i-blue/5 px-2.5 py-1 text-xs font-semibold text-i-blue transition hover:bg-i-blue/10 rounded-md ml-auto"
+            className="flex items-center gap-1 border border-i-blue/40 bg-i-blue/5 px-2.5 py-1 text-xs font-semibold text-i-blue transition hover:bg-i-blue/10 ml-auto"
           >
             <IconRefresh /> Réintégrer
           </button>
@@ -343,7 +343,7 @@ export default function ExtractionTab({ projets }) {
               value={texte}
               onChange={(e) => setTexte(e.target.value)}
               placeholder="Collez ici un contenu précis à découper en tâches…"
-              className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-i-blue rounded-md"
+              className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-i-blue rounded-none"
             />
           </div>
           <BtnIA onClick={extraire} loading={generation} className="text-black">

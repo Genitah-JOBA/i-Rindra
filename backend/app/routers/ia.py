@@ -18,12 +18,14 @@ from datetime import date, timedelta
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.config import settings
 from app.core.database import get_db
 from app.models.projet import ProjetMembre
 from app.models.tache import StatutTache, Tache
 from app.models.utilisateur import Utilisateur
+from app.models.conversation_ia import ConversationIA, MessageIA
 from app.routers.auth import get_current_user_id, get_current_user_role
 from app.routers.projets import check_projet_access, check_direction_or_chef_projet
 from app.schemas.ia import (
@@ -31,6 +33,10 @@ from app.schemas.ia import (
     IaStatus,
     ChatRequest,
     ChatResponse,
+    ConversationDetail,
+    ConversationResume,
+    DerniereAnalyseCdc,
+    MessageHistorique,
     AnalyseCdcResponse,
     ExtractionRequest,
     ExtractionResponse,
@@ -62,6 +68,7 @@ from app.services.ia import (
     ReponseIAInvalideError,
     analyser_cdc,
     contexte_utilisateur,
+    derniere_analyse_cdc,
     detecter_alertes,
     extraire_taches,
     lister_suggestions,
@@ -223,11 +230,20 @@ async def ia_chat(
     # Construit la liste des messages pour l'API OpenAI
     messages = [{"role": "system", "content": system}]
 
+    # Conversation enregistrée à poursuivre : son historique fait foi.
+    conversation = None
+    if data.conversation_id:
+        conversation = await _conversation_de(db, data.conversation_id, user_id)
+    historique = (
+        [{"role": m.role, "content": m.contenu} for m in conversation.messages]
+        if conversation
+        else [{"role": m.role, "content": m.content} for m in (data.historique or [])]
+    )
+
     # Ajoute l'historique (tronqué aux 20 derniers pour limiter les tokens)
-    if data.historique:
-        for msg in data.historique[-20:]:
-            if msg.role in ("user", "assistant"):
-                messages.append({"role": msg.role, "content": msg.content})
+    for msg in historique[-20:]:
+        if msg["role"] in ("user", "assistant"):
+            messages.append(msg)
 
     # Ajoute le message courant
     messages.append({"role": "user", "content": data.message})
@@ -262,13 +278,113 @@ async def ia_chat(
             # La sauvegarde ne doit jamais bloquer la conversation.
             suggestion_devis_sauvee = False
 
+    # Historique des conversations : l'échange est enregistré. Un échec
+    # d'enregistrement ne doit pas faire perdre la réponse à l'utilisateur.
+    conversation_id = None
+    try:
+        if conversation is None:
+            conversation = ConversationIA(
+                utilisateur_id=user_id, titre=_titre_conversation(data.message)
+            )
+            db.add(conversation)
+            await db.flush()
+        db.add_all([
+            MessageIA(conversation_id=conversation.id, role="user", contenu=data.message),
+            MessageIA(
+                conversation_id=conversation.id, role="assistant",
+                contenu=resultat.content.strip(), devis_sauve=int(suggestion_devis_sauvee),
+            ),
+        ])
+        conversation.modifie_le = func.now()
+        await db.commit()
+        conversation_id = conversation.id
+    except Exception as exc:  # noqa: BLE001
+        await db.rollback()
+        logger.warning("Conversation IA non enregistrée : %s", exc)
+
     return ChatResponse(
         reponse=resultat.content.strip(),
         modele=resultat.modele,
         tokens=resultat.tokens,
         suggestion_devis_sauvee=suggestion_devis_sauvee,
         nb_projets_contexte=contexte.nb_projets if contexte else None,
+        conversation_id=conversation_id,
     )
+
+
+# ============================================================
+# Historique des conversations (chaque utilisateur ne voit que les siennes)
+# ============================================================
+
+def _titre_conversation(message: str) -> str:
+    titre = " ".join(message.split())
+    return titre if len(titre) <= 80 else titre[:77].rstrip() + "…"
+
+
+async def _conversation_de(db: AsyncSession, conversation_id: int, user_id: int) -> ConversationIA:
+    conv = (await db.execute(
+        select(ConversationIA)
+        .options(selectinload(ConversationIA.messages))
+        .where(ConversationIA.id == conversation_id, ConversationIA.utilisateur_id == user_id)
+    )).scalar_one_or_none()
+    if conv is None:
+        raise HTTPException(status_code=404, detail="Conversation introuvable.")
+    return conv
+
+
+@router.get("/conversations", response_model=List[ConversationResume])
+async def ia_lister_conversations(
+    db: AsyncSession = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+    _: str = Depends(_pilote_ou_plus),
+):
+    """Conversations de l'utilisateur, la plus récente d'abord."""
+    nb = (
+        select(MessageIA.conversation_id, func.count(MessageIA.id).label("nb"))
+        .group_by(MessageIA.conversation_id)
+        .subquery()
+    )
+    lignes = (await db.execute(
+        select(ConversationIA, func.coalesce(nb.c.nb, 0))
+        .outerjoin(nb, nb.c.conversation_id == ConversationIA.id)
+        .where(ConversationIA.utilisateur_id == user_id)
+        .order_by(ConversationIA.modifie_le.desc(), ConversationIA.id.desc())
+        .limit(100)
+    )).all()
+    return [
+        ConversationResume(id=c.id, titre=c.titre, nb_messages=n, modifie_le=c.modifie_le)
+        for c, n in lignes
+    ]
+
+
+@router.get("/conversations/{conversation_id}", response_model=ConversationDetail)
+async def ia_lire_conversation(
+    conversation_id: int,
+    db: AsyncSession = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+    _: str = Depends(_pilote_ou_plus),
+):
+    conv = await _conversation_de(db, conversation_id, user_id)
+    return ConversationDetail(
+        id=conv.id,
+        titre=conv.titre,
+        messages=[
+            MessageHistorique(role=m.role, content=m.contenu, devis_sauve=bool(m.devis_sauve), cree_le=m.cree_le)
+            for m in conv.messages
+        ],
+    )
+
+
+@router.delete("/conversations/{conversation_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def ia_supprimer_conversation(
+    conversation_id: int,
+    db: AsyncSession = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+    _: str = Depends(_pilote_ou_plus),
+):
+    conv = await _conversation_de(db, conversation_id, user_id)
+    await db.delete(conv)
+    await db.commit()
 
 
 # ============================================================
@@ -320,6 +436,20 @@ async def ia_analyser_cdc(
         return await analyser_cdc(db, projet_id, texte=texte)
     except Exception as exc:
         _erreur_ia(exc)
+
+
+@router.get("/projets/{projet_id}/analyse-cdc", response_model=DerniereAnalyseCdc)
+async def ia_derniere_analyse_cdc(
+    projet_id: int,
+    projet: object = Depends(check_projet_access),
+    db: AsyncSession = Depends(get_db),
+    _: str = Depends(check_direction_or_chef_projet),
+):
+    """
+    Indique si le projet a un cahier des charges joint et renvoie la dernière
+    analyse enregistrée (affichée à la re-sélection du projet).
+    """
+    return await derniere_analyse_cdc(db, projet_id)
 
 
 # ============================================================

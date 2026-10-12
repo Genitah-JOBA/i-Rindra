@@ -164,6 +164,15 @@ async def update_utilisateur(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Rôle invalide"
             )
 
+    # Métier obligatoire pour l'équipe interne (vérifié sur l'état FINAL :
+    # rôle et métier peuvent changer dans la même requête).
+    role_final = donnees.get("role", utilisateur.role)
+    metier_final = donnees["metier"] if "metier" in donnees else utilisateur.metier
+    if role_final != RoleUtilisateur.CLIENT and not metier_final:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Le métier est obligatoire."
+        )
+
     # L'unicité de l'email est ce qui permet à « mot de passe oublié » de
     # retrouver LE bon compte. Elle doit donc être garantie aussi par cette voie,
     # et pas seulement à la création.

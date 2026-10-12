@@ -74,7 +74,7 @@ export default function AssistantIA() {
           <p className="text-xs text-slate-500 truncate">L'IA propose, l'humain valide.</p>
         </div>
         {config && !config.configuree && (
-          <span className="text-[11px] px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-red-600 whitespace-nowrap">
+          <span className="text-[11px] px-2.5 py-1 bg-red-50 border border-red-200 text-red-600 whitespace-nowrap">
             IA non configurée
           </span>
         )}

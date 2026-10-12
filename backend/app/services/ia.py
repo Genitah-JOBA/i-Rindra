@@ -10,6 +10,7 @@ Règles d'or (cf. doc projet) :
   - « l'IA propose, l'humain valide » (RF-15, RF-26) : l'extraction de
     tâches ne crée que des `SuggestionTache`, jamais de `Tache`.
 """
+import asyncio
 import json
 import logging
 import re
@@ -214,25 +215,43 @@ async def _taches(db: AsyncSession, projet_id: int) -> List[Tache]:
     return list(res.scalars().all())
 
 
+# Noms qui désignent un cahier des charges (comparés sans accents ni casse).
+_MOTS_CDC = ("cdc", "cahier", "charges", "specification", "spec")
+# Documents joints qui ne sont certainement PAS un cahier des charges.
+_MOTS_NON_CDC = ("facture", "devis", "logo", "contrat", "recu")
+_EXTENSIONS_CDC = (".pdf", ".docx", ".doc", ".txt", ".md", ".csv")
+
+
+def _nom_normalise(nom: str) -> str:
+    nom = unicodedata.normalize("NFKD", nom or "").encode("ascii", "ignore").decode()
+    return nom.lower()
+
+
 async def _texte_cdc_projet(db: AsyncSession, projet_id: int) -> Tuple[Optional[str], Optional[str]]:
     """
-    Récupère le contenu d'un cahier des charges joint au projet (RF-25/RF-26).
+    Récupère le contenu du cahier des charges joint au projet (RF-25/RF-26).
 
-    Lit les fichiers texte (txt/md/csv) du projet. Retourne (texte, nom_fichier).
-    Les PDF/Word ne sont pas encore parsés (à brancher plus tard).
+    Lit les documents du projet (PDF, Word, texte). Priorité aux fichiers dont
+    le nom désigne un cahier des charges (« CDC », « cahier des charges »…),
+    sinon le document le plus récent qui n'est manifestement pas autre chose
+    (facture, devis, logo…). Retourne (texte, nom_fichier) ou (None, None).
     """
-    res = await db.execute(select(Fichier).where(Fichier.projet_id == projet_id))
-    fichiers = res.scalars().all()
-    for f in fichiers or []:
-        nom = (f.nom or "").lower()
-        if nom.endswith((".txt", ".md", ".csv")):
-            try:
-                chemin = Path(f.chemin_ou_url)
-                if chemin.exists():
-                    texte = chemin.read_text(encoding="utf-8", errors="ignore")
-                    return _tronquer(texte), f.nom
-            except Exception as exc:
-                logger.warning("Lecture CDC impossible (%s) : %s", f.nom, exc)
+    from app.services.texte_documents import extraire_texte_fichier_stocke
+
+    res = await db.execute(
+        select(Fichier).where(Fichier.projet_id == projet_id).order_by(Fichier.cree_le.desc(), Fichier.id.desc())
+    )
+    fichiers = [f for f in res.scalars().all() if (f.nom or "").lower().endswith(_EXTENSIONS_CDC)]
+    nommes = [f for f in fichiers if any(m in _nom_normalise(f.nom) for m in _MOTS_CDC)]
+    autres = [f for f in fichiers if f not in nommes and not any(m in _nom_normalise(f.nom) for m in _MOTS_NON_CDC)]
+    for f in nommes + autres:
+        try:
+            texte = await asyncio.to_thread(extraire_texte_fichier_stocke, f.chemin_ou_url)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Lecture CDC impossible (%s) : %s", f.nom, exc)
+            continue
+        if texte and len(texte.strip()) >= 50:
+            return _tronquer(texte), f.nom
     return None, None
 
 
@@ -408,8 +427,8 @@ async def analyser_cdc(db: AsyncSession, projet_id: int, texte: Optional[str] = 
     entree, source = await _entree_cdc(db, projet, texte)
     if not entree:
         raise ContenuIndisponibleError(
-            "Aucun cahier des charges trouvé. Importez un fichier texte (txt/md/csv) "
-            "dans le projet ou passez le paramètre `texte`."
+            "Aucun cahier des charges trouvé pour ce projet. Importez-le ici ou "
+            "ajoutez-le dans les documents du projet."
         )
 
     donnees, modele, analyse_id = await _appel_json(
@@ -428,6 +447,33 @@ async def analyser_cdc(db: AsyncSession, projet_id: int, texte: Optional[str] = 
         "risques": donnees.get("risques", []),
         "recommandations": donnees.get("recommandations", []),
         "modele": modele,
+    }
+
+
+async def derniere_analyse_cdc(db: AsyncSession, projet_id: int) -> dict:
+    """Cahier des charges disponible ? + dernière analyse CDC enregistrée du projet."""
+    _, nom = await _texte_cdc_projet(db, projet_id)
+    analyse = (await db.execute(
+        select(AnalyseIA)
+        .where(AnalyseIA.projet_id == projet_id, AnalyseIA.type == TypeAnalyseIA.ANALYSE_CDC)
+        .order_by(AnalyseIA.cree_le.desc(), AnalyseIA.id.desc())
+        .limit(1)
+    )).scalar_one_or_none()
+    donnees = analyse.resultat_json if analyse and isinstance(analyse.resultat_json, dict) else None
+    if donnees is not None and not any(k in donnees for k in ("points_cles", "perimetre", "risques", "recommandations")):
+        donnees = None  # réponse illisible journalisée : rien à réafficher
+    return {
+        "cdc_disponible": nom is not None,
+        "cdc_nom": nom,
+        "analyse": {
+            "analyse_id": analyse.id,
+            "points_cles": donnees.get("points_cles") or [],
+            "perimetre": donnees.get("perimetre") or "",
+            "risques": donnees.get("risques") or [],
+            "recommandations": donnees.get("recommandations") or [],
+            "modele": analyse.modele or "",
+        } if donnees is not None else None,
+        "analyse_le": analyse.cree_le if donnees is not None else None,
     }
 
 

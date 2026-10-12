@@ -165,7 +165,7 @@ export function IconArrowRight({ className = "w-4 h-4" }) {
 // Carte blanche standard
 export function Carte({ children, className = "" }) {
   return (
-    <div className={`bg-white border border-slate-200 shadow-sm rounded-lg ${className}`}>
+    <div className={`bg-white border border-slate-200 shadow-sm ${className}`}>
       {children}
     </div>
   );
@@ -175,7 +175,7 @@ export function Carte({ children, className = "" }) {
 export function BadgeIA({ modele }) {
   if (!modele) return null;
   return (
-    <span className="text-[10px] bg-i-blue/10 text-i-blue px-2 py-0.5 rounded-full">
+    <span className="text-[10px] bg-i-blue/10 text-i-blue px-2 py-0.5">
       IA · {modele}
     </span>
   );
@@ -201,7 +201,7 @@ export function SelectProjet({ projets, value, onChange }) {
     <select
       value={value || ""}
       onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)}
-      className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-i-blue rounded-md"
+      className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-i-blue rounded-none"
     >
       <option value="">— Sélectionner un projet —</option>
       {projets.map((p) => (
@@ -220,7 +220,7 @@ export function SelectTache({ taches, value, onChange, disabled = false }) {
       value={value || ""}
       onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)}
       disabled={disabled}
-      className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-i-blue rounded-md disabled:bg-slate-50 disabled:text-slate-400"
+      className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:border-i-blue rounded-none disabled:bg-slate-50 disabled:text-slate-400"
     >
       <option value="">
         {disabled
@@ -240,7 +240,7 @@ export function SelectTache({ taches, value, onChange, disabled = false }) {
 export function AlertErreur({ children }) {
   if (!children) return null;
   return (
-    <div className="mb-4 bg-red-50 px-4 py-3 text-sm text-red-700 border border-red-200 rounded-lg animate__animated animate__shakeX flex items-start gap-2">
+    <div className="mb-4 bg-red-50 px-4 py-3 text-sm text-red-700 border border-red-200 animate__animated animate__shakeX flex items-start gap-2">
       <IconAlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
       <span>{children}</span>
     </div>
@@ -257,7 +257,7 @@ export function Spin({ label = "Chargement…" }) {
 export function NoteIa({ children }) {
   if (!children) return null;
   return (
-    <div className="mt-3 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 text-sm rounded-lg flex items-start gap-2">
+    <div className="mt-3 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 text-sm flex items-start gap-2">
       <IconInfo className="w-4 h-4 flex-shrink-0 mt-0.5" />
       <span>{children}</span>
     </div>

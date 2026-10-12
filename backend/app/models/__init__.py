@@ -13,6 +13,7 @@ from app.models.analyse_ia import AnalyseIA, SuggestionTache, TypeAnalyseIA, Sta
 from app.models.absence import Absence, TypeAbsence, StatutAbsence
 from app.models.suggestion_devis import SuggestionDevis, StatutSuggestionDevis
 from app.models.mot_de_passe_reinit import MotDePasseReinit
+from app.models.conversation_ia import ConversationIA, MessageIA
 
 __all__ = [
     "Utilisateur",
@@ -41,4 +42,6 @@ __all__ = [
     "SuggestionDevis",
     "StatutSuggestionDevis",
     "MotDePasseReinit",
+    "ConversationIA",
+    "MessageIA",
 ]

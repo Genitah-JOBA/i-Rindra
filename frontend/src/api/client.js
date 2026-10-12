@@ -25,10 +25,28 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Erreur de validation FastAPI (422) : `detail` est une LISTE d'objets
+// {type, loc, msg, input, ctx}. Les pages affichent `detail` tel quel ; un
+// objet rendu dans React fait planter la page. On le convertit en texte lisible.
+const texteValidation = (detail) =>
+  detail
+    .map((e) =>
+      e?.loc?.at?.(-1) === "email"
+        ? "Adresse email invalide."
+        : String(e?.msg ?? e).replace(/^Value error, /, ""),
+    )
+    .filter(Boolean)
+    .join(" ");
+
 // Si le token est invalide/expiré, on nettoie et on renvoie vers /login.
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    const data = error.response?.data;
+    if (data && Array.isArray(data.detail)) {
+      data.erreursValidation = data.detail;
+      data.detail = texteValidation(data.detail) || "Données invalides.";
+    }
     if (error.response && error.response.status === 401) {
       localStorage.removeItem("token");
       if (window.location.pathname !== "/login") {

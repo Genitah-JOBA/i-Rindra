@@ -6,6 +6,7 @@ import { useState } from "react";
 import { iaService } from "../../api/ia";
 import { useMessage } from "../../context/MessageContext";
 import { Carte, BtnIA, SelectProjet, AlertErreur, BadgeIA, TitreSection, PuceList, Spin, IconCheckCircle, IconExclamationCircle, IconAlertTriangle } from "./Shared";
+import ReponseIA from "../../components/ReponseIA";
 
 const CONFIG = {
   resume: {
@@ -114,12 +115,12 @@ export default function AnalyseProjetTab({ variante: varianteInitiale, projets, 
       <AlertErreur>{erreur}</AlertErreur>
 
       {compatibles.length > 1 && (
-        <div className="inline-flex flex-wrap items-center gap-1 border border-slate-200 bg-white p-1 shadow-sm rounded-md">
+        <div className="inline-flex flex-wrap items-center gap-1 border border-slate-200 bg-white p-1 shadow-sm">
           {compatibles.map((v) => (
             <button
               key={v.id}
               onClick={() => changerVariante(v.id)}
-              className={`px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors rounded-md ${
+              className={`px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors ${
                 varianteId === v.id
                   ? "bg-brand-gradient text-black"
                   : "text-slate-600 hover:bg-slate-100"
@@ -157,9 +158,9 @@ export default function AnalyseProjetTab({ variante: varianteInitiale, projets, 
               {resultat.avancement_estime != null && (
                 <div className="mb-4 flex items-center gap-3">
                   <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Avancement estimé</span>
-                  <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="flex-1 h-2 bg-slate-100 overflow-hidden">
                     <div
-                      className="h-full bg-brand-gradient rounded-full transition-all"
+                      className="h-full bg-brand-gradient transition-all"
                       style={{ width: `${Math.min(resultat.avancement_estime, 100)}%` }}
                     />
                   </div>
@@ -168,13 +169,13 @@ export default function AnalyseProjetTab({ variante: varianteInitiale, projets, 
                   </span>
                 </div>
               )}
-              <p className="text-sm text-slate-700 whitespace-pre-wrap mb-4">{resultat.resume}</p>
+              <div className="text-sm text-slate-700 mb-4"><ReponseIA texte={resultat.resume} /></div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="bg-emerald-50 border border-emerald-100 p-3 rounded-lg">
+                <div className="bg-emerald-50 border border-emerald-100 p-3">
                   <TitreSection className="text-emerald-700">Points forts</TitreSection>
                   <PuceList items={resultat.points_forts} />
                 </div>
-                <div className="bg-amber-50 border border-amber-100 p-3 rounded-lg">
+                <div className="bg-amber-50 border border-amber-100 p-3">
                   <TitreSection className="text-amber-700">Points d'attention</TitreSection>
                   <PuceList items={resultat.points_attention} />
                 </div>
@@ -185,16 +186,16 @@ export default function AnalyseProjetTab({ variante: varianteInitiale, projets, 
           {varianteId === "detec" && (
             <>
               {resultat.alertes.length === 0 ? (
-                <p className="flex items-center gap-1.5 text-sm text-emerald-700 bg-emerald-50 border border-emerald-100 px-4 py-3 rounded-lg">
+                <p className="flex items-center gap-1.5 text-sm text-emerald-700 bg-emerald-50 border border-emerald-100 px-4 py-3">
                   <IconCheckCircle className="w-4 h-4 flex-shrink-0" />
                   Aucune alerte détectée : le projet semble sain.
                 </p>
               ) : (
                 <div className="space-y-2">
                   {resultat.alertes.map((a, i) => (
-                    <div key={i} className={`flex flex-col gap-1 px-4 py-3 border rounded-lg ${NIVEAU_ALERTE[a.niveau] || NIVEAU_ALERTE.info}`}>
+                    <div key={i} className={`flex flex-col gap-1 px-4 py-3 border ${NIVEAU_ALERTE[a.niveau] || NIVEAU_ALERTE.info}`}>
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-[10px] font-semibold uppercase px-2 py-0.5 bg-white/70 rounded-full">
+                        <span className="text-[10px] font-semibold uppercase px-2 py-0.5 bg-white/70">
                           {LIBELLE_TYPE[a.type] || a.type}
                         </span>
                         {a.tache_titre && <span className="text-xs font-medium">« {a.tache_titre} »</span>}
@@ -211,11 +212,11 @@ export default function AnalyseProjetTab({ variante: varianteInitiale, projets, 
                 const sante = STATUT_SANTE[resultat.statut_propose];
                 return (
                   <>
-                    <div className={`mb-4 inline-flex items-center gap-1.5 px-4 py-2 border rounded-lg text-sm font-bold ${sante?.classe}`}>
+                    <div className={`mb-4 inline-flex items-center gap-1.5 px-4 py-2 border text-sm font-bold ${sante?.classe}`}>
                       {sante && <sante.Icon className="w-4 h-4 flex-shrink-0" />}
                       {sante?.texte || resultat.statut_propose}
                     </div>
-                    <p className="text-sm text-slate-700 whitespace-pre-wrap">{resultat.justification}</p>
+                    <div className="text-sm text-slate-700"><ReponseIA texte={resultat.justification} /></div>
                   </>
                 );
               })()}

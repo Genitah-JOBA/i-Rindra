@@ -1,8 +1,10 @@
-// src/pages/AssistantIA/ChatTab.jsx — conversation avec l'assistant IA.
+// src/pages/AssistantIA/ChatTab.jsx — conversation avec l'assistant IA,
+// avec historique des conversations (enregistrées côté serveur, par utilisateur).
 import { useState, useRef, useEffect } from "react";
 import { useMessage } from "../../context/MessageContext";
 import { iaService } from "../../api/ia";
 import { IconSparkles, IconCheck, IconArrowRight } from "./Shared";
+import ReponseIA from "../../components/ReponseIA";
 
 function IconSend({ className }) {
   return (
@@ -20,6 +22,36 @@ function IconTrash({ className }) {
   );
 }
 
+function IconPlus({ className }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className={className}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+    </svg>
+  );
+}
+
+function IconHistorique({ className }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  );
+}
+
+// Regroupe les conversations par ancienneté pour la liste latérale.
+function groupeDate(iso) {
+  if (!iso) return "Plus ancien";
+  const d = new Date(iso);
+  const auj = new Date();
+  const debutJour = new Date(auj.getFullYear(), auj.getMonth(), auj.getDate());
+  const jours = Math.floor((debutJour - new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 86400000);
+  if (jours <= 0) return "Aujourd'hui";
+  if (jours === 1) return "Hier";
+  if (jours < 7) return "7 derniers jours";
+  if (jours < 30) return "30 derniers jours";
+  return "Plus ancien";
+}
+
 const SUGGESTIONS = [
   "Résume l'avancement de mes projets",
   "Quels projets sont en retard ?",
@@ -28,13 +60,18 @@ const SUGGESTIONS = [
 ];
 
 export default function ChatTab() {
-  const { showError } = useMessage();
+  const { showError, showConfirm } = useMessage();
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [config, setConfig] = useState(null);
   const [contexteProjets, setContexteProjets] = useState(null);
+  // Historique : liste des conversations et conversation ouverte (null = nouvelle)
+  const [conversations, setConversations] = useState([]);
+  const [conversationId, setConversationId] = useState(null);
+  const [ouvertureId, setOuvertureId] = useState(null);
+  const [historiqueVisible, setHistoriqueVisible] = useState(false); // mobile
   const scrollContainerRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -54,7 +91,56 @@ export default function ChatTab() {
       }
     };
     checkStatus();
+    iaService.conversations().then(setConversations).catch(() => {});
   }, []);
+
+  const rafraichirConversations = () =>
+    iaService.conversations().then(setConversations).catch(() => {});
+
+  const nouvelleConversation = () => {
+    setMessages([]);
+    setConversationId(null);
+    setHistoriqueVisible(false);
+    inputRef.current?.focus();
+  };
+
+  const ouvrirConversation = async (id) => {
+    if (loading || id === conversationId) {
+      setHistoriqueVisible(false);
+      return;
+    }
+    setOuvertureId(id);
+    try {
+      const conv = await iaService.conversation(id);
+      setMessages(
+        conv.messages.map((m) => ({ role: m.role, content: m.content, noteDevis: m.devis_sauve })),
+      );
+      setConversationId(conv.id);
+      setHistoriqueVisible(false);
+    } catch (err) {
+      showError(err.response?.data?.detail || "Impossible d'ouvrir cette conversation.");
+    } finally {
+      setOuvertureId(null);
+    }
+  };
+
+  const supprimerConversation = async (conv) => {
+    const ok = await showConfirm({
+      type: "error",
+      title: "Supprimer la conversation",
+      message: `Supprimer définitivement la conversation « ${conv.titre} » ?`,
+      confirmLabel: "Supprimer",
+      cancelLabel: "Annuler",
+    });
+    if (!ok) return;
+    try {
+      await iaService.supprimerConversation(conv.id);
+      setConversations((prev) => prev.filter((c) => c.id !== conv.id));
+      if (conv.id === conversationId) nouvelleConversation();
+    } catch (err) {
+      showError(err.response?.data?.detail || "Suppression impossible.");
+    }
+  };
 
   const handleSend = async (text = null) => {
     const messageText = (text || input).trim();
@@ -72,7 +158,11 @@ export default function ChatTab() {
         content: m.content,
       }));
 
-      const result = await iaService.chat(messageText, historique);
+      const result = await iaService.chat(messageText, historique, conversationId);
+      if (result.conversation_id) {
+        setConversationId(result.conversation_id);
+        rafraichirConversations();
+      }
 
       if (result.nb_projets_contexte != null) {
         setContexteProjets(result.nb_projets_contexte);
@@ -104,19 +194,88 @@ export default function ChatTab() {
     }
   };
 
-  const handleClear = () => setMessages([]);
-
   const estConfigure = config?.configuree === true;
 
   return (
-    <div className="flex flex-col h-[62vh] overflow-hidden bg-slate-50 border border-slate-200">
+    <div className="relative flex h-[62vh] overflow-hidden border border-slate-200 bg-slate-50">
+      {/* Historique des conversations */}
+      <aside
+        className={`${historiqueVisible ? "flex" : "hidden"} absolute inset-y-0 left-0 z-10 w-64 flex-col border-r border-slate-200 bg-white shadow-lg md:static md:flex md:shadow-none`}
+      >
+        <div className="border-b border-slate-200 p-3">
+          <button
+            onClick={nouvelleConversation}
+            disabled={loading}
+            className="flex w-full items-center justify-center gap-1.5 bg-brand-gradient px-3 py-2 text-sm font-semibold text-black transition hover:brightness-110 disabled:opacity-50"
+          >
+            <IconPlus className="h-4 w-4" />
+            Nouvelle conversation
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto py-2">
+          {conversations.length === 0 ? (
+            <p className="px-4 py-6 text-center text-xs text-slate-400">
+              Aucune conversation enregistrée.
+            </p>
+          ) : (
+            conversations.map((c, i) => {
+              const groupe = groupeDate(c.modifie_le);
+              const actif = c.id === conversationId;
+              return (
+                <div key={c.id}>
+                  {(i === 0 || groupeDate(conversations[i - 1].modifie_le) !== groupe) && (
+                    <p className="px-4 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                      {groupe}
+                    </p>
+                  )}
+                  <div
+                    className={`group flex items-center gap-1 border-l-2 pr-1 ${
+                      actif ? "border-i-blue bg-i-blue/10" : "border-transparent hover:bg-slate-50"
+                    }`}
+                  >
+                    <button
+                      onClick={() => ouvrirConversation(c.id)}
+                      className={`min-w-0 flex-1 px-3 py-2 text-left text-sm ${actif ? "font-semibold text-i-primary" : "text-slate-600"}`}
+                      title={c.titre}
+                    >
+                      <span className="block truncate">{ouvertureId === c.id ? "Ouverture…" : c.titre}</span>
+                    </button>
+                    <button
+                      onClick={() => supprimerConversation(c)}
+                      className="p-1.5 text-slate-300 opacity-0 transition hover:bg-red-50 hover:text-red-500 group-hover:opacity-100 focus:opacity-100"
+                      title="Supprimer la conversation"
+                    >
+                      <IconTrash className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </aside>
+
+      <div className="flex min-w-0 flex-1 flex-col">
+      {/* Bouton historique (mobile) */}
+      <div className="flex items-center justify-between border-b border-slate-200 bg-white px-3 py-2 md:hidden">
+        <button
+          onClick={() => setHistoriqueVisible((v) => !v)}
+          className="flex items-center gap-1.5 text-sm font-medium text-slate-600"
+        >
+          <IconHistorique className="h-4 w-4" />
+          Historique
+        </button>
+        <button onClick={nouvelleConversation} className="p-1 text-i-blue" title="Nouvelle conversation">
+          <IconPlus className="h-5 w-5" />
+        </button>
+      </div>
       {/* Zone scrollable */}
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto min-h-0">
         <div className="px-4 py-6">
           <div className="max-w-2xl mx-auto space-y-4">
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center text-center py-8 animate__animated animate__fadeInUp">
-                 <div className="w-14 h-14 bg-i-blue/10 rounded-full flex items-center justify-center mb-3">
+                 <div className="w-14 h-14 bg-i-blue/10 flex items-center justify-center mb-3">
                   <IconSparkles className="w-7 h-7 text-i-blue" />
                 </div>
                 <h2 className="text-lg font-semibold text-slate-800 mb-2">
@@ -158,11 +317,11 @@ export default function ChatTab() {
 
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate__animated animate__fadeIn`}>
-                <div className={`max-w-[78%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${msg.role === "user" ? "bg-brand-gradient text-i-primary" : "bg-white text-slate-800 border border-slate-200"}`}>
+                <div className={`max-w-[78%] px-4 py-3 text-sm leading-relaxed ${msg.role === "user" ? "whitespace-pre-wrap " : ""}${msg.role === "user" ? "bg-brand-gradient text-i-primary" : "bg-white text-slate-800 border border-slate-200"}`}>
                   {msg.role === "assistant" && (
                     <span className="block text-[10px] font-semibold text-i-blue uppercase mb-1">IA</span>
                   )}
-                  {msg.content}
+                  {msg.role === "assistant" ? <ReponseIA texte={msg.content} /> : msg.content}
                   {msg.noteDevis && (
                     <a href="/suggestion-devis" className="mt-2 flex items-center gap-1 text-[11px] font-medium text-i-blue bg-i-blue/10 border border-i-blue/30 px-3 py-1.5 hover:bg-brand-gradient/20 transition-colors">
                       <IconCheck className="w-3.5 h-3.5 flex-shrink-0" />
@@ -176,7 +335,7 @@ export default function ChatTab() {
 
             {loading && (
               <div className="flex justify-start animate__animated animate__fadeIn">
-                <div className="bg-white border border-slate-200 px-4 py-3 text-sm text-slate-500 rounded-lg">
+                <div className="bg-white border border-slate-200 px-4 py-3 text-sm text-slate-500">
                   <span className="inline-flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: "0ms" }} />
                     <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: "150ms" }} />
@@ -192,7 +351,7 @@ export default function ChatTab() {
       {/* Zone de saisie */}
       <footer className="border-t border-slate-200 bg-white px-4 py-3 flex-shrink-0">
         <div className="flex items-end gap-3 max-w-2xl mx-auto">
-          <span>{config && <span className={`hidden md:inline-flex text-[10px] px-2 py-1 rounded-full ${estConfigure ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>{estConfigure ? config.modele : "Non configuré"}</span>}</span>
+          <span>{config && <span className={`hidden md:inline-flex text-[10px] px-2 py-1 ${estConfigure ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>{estConfigure ? config.modele : "Non configuré"}</span>}</span>
           <textarea
             ref={inputRef}
             value={input}
@@ -217,11 +376,12 @@ export default function ChatTab() {
           </button>
           {messages.length > 0 && (
             <button
-              onClick={handleClear}
-              className="p-2 text-slate-400 hover:text-red-500 transition-colors hover:bg-red-50 flex-shrink-0"
-              title="Effacer la conversation"
+              onClick={nouvelleConversation}
+              disabled={loading}
+              className="p-2 text-slate-400 hover:text-i-blue transition-colors hover:bg-i-blue/10 flex-shrink-0 disabled:opacity-40"
+              title="Nouvelle conversation (celle-ci reste dans l'historique)"
             >
-              <IconTrash className="w-5 h-5" />
+              <IconPlus className="w-5 h-5" />
             </button>
           )}
         </div>
@@ -231,6 +391,7 @@ export default function ChatTab() {
             : "Les réponses sont générées par une IA et peuvent contenir des erreurs. Vérifiez les informations importantes."}
         </p>
       </footer>
+      </div>
     </div>
   );
 }

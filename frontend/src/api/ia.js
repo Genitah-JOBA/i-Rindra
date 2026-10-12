@@ -16,10 +16,29 @@ export const iaService = {
     return data;
   },
 
-  // Conversation avec l'assistant
-  chat: async (message, historique = []) => {
-    const { data } = await api.post("/ia/chat", { message, historique });
+  // Conversation avec l'assistant (conversationId : conversation à poursuivre)
+  chat: async (message, historique = [], conversationId = null) => {
+    const { data } = await api.post("/ia/chat", {
+      message,
+      historique,
+      conversation_id: conversationId,
+    });
     return data;
+  },
+
+  // Historique des conversations de l'utilisateur
+  conversations: async () => {
+    const { data } = await api.get("/ia/conversations");
+    return data;
+  },
+
+  conversation: async (id) => {
+    const { data } = await api.get(`/ia/conversations/${id}`);
+    return data;
+  },
+
+  supprimerConversation: async (id) => {
+    await api.delete(`/ia/conversations/${id}`);
   },
 
   // --- RF-25 : analyse du cahier des charges ---
@@ -38,6 +57,12 @@ export const iaService = {
     const { data } = await api.post(`/ia/projets/${projetId}/analyser-cdc`, {
       texte: options.texte || null,
     });
+    return data;
+  },
+
+  // CDC joint au projet ? + dernière analyse enregistrée
+  derniereAnalyseCdc: async (projetId) => {
+    const { data } = await api.get(`/ia/projets/${projetId}/analyse-cdc`);
     return data;
   },
 

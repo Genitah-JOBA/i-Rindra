@@ -6,7 +6,7 @@ Schémas Pydantic pour le module IA (statut, ping, chat, analysis métier).
 
 from pydantic import BaseModel, Field
 from typing import Optional, List
-from datetime import date
+from datetime import date, datetime
 
 
 class IaStatus(BaseModel):
@@ -37,6 +37,10 @@ class ChatRequest(BaseModel):
         default=None,
         description="Historique de conversation (max 20 derniers messages)",
     )
+    conversation_id: Optional[int] = Field(
+        default=None,
+        description="Conversation à poursuivre (sinon une nouvelle est créée)",
+    )
 
 
 class ChatResponse(BaseModel):
@@ -46,6 +50,28 @@ class ChatResponse(BaseModel):
     tokens: Optional[int] = None
     suggestion_devis_sauvee: bool = False  # devis enregistré dans "Suggestion devis par IA"
     nb_projets_contexte: Optional[int] = None  # projets réels injectés dans le prompt
+    conversation_id: Optional[int] = None  # conversation où l'échange a été enregistré
+
+
+class ConversationResume(BaseModel):
+    """Entrée de la liste « Historique des conversations »."""
+    id: int
+    titre: str
+    nb_messages: int = 0
+    modifie_le: Optional[datetime] = None
+
+
+class MessageHistorique(BaseModel):
+    role: str
+    content: str
+    devis_sauve: bool = False
+    cree_le: Optional[datetime] = None
+
+
+class ConversationDetail(BaseModel):
+    id: int
+    titre: str
+    messages: List[MessageHistorique] = Field(default_factory=list)
 
 
 # ============================================================
@@ -69,6 +95,14 @@ class AnalyseCdcResponse(BaseModel):
     risques: List[str] = Field(default_factory=list)
     recommandations: List[str] = Field(default_factory=list)
     modele: str
+
+
+class DerniereAnalyseCdc(BaseModel):
+    """Cahier des charges disponible + dernière analyse enregistrée d'un projet."""
+    cdc_disponible: bool
+    cdc_nom: Optional[str] = None
+    analyse: Optional[AnalyseCdcResponse] = None
+    analyse_le: Optional[datetime] = None
 
 
 # ============================================================

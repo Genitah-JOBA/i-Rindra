@@ -77,6 +77,10 @@ const FORM_VIDE = {
   actif: true,
 };
 
+// Nom / prénom : lettres (accents compris) séparées par une espace, un tiret ou
+// une apostrophe — même règle que le backend (schemas/utilisateur.py).
+const NOM_VALIDE = /^\p{L}+(?:[ '’-]\p{L}+)*$/u;
+
 export default function Membres() {
   const { user } = useAuth();
   const { showSuccess, showError } = useMessage();
@@ -139,15 +143,28 @@ export default function Membres() {
   const enregistrer = async (e) => {
     e.preventDefault();
     setFormErreur("");
+    const invalide = !NOM_VALIDE.test(form.prenom.trim())
+      ? "prénom"
+      : !NOM_VALIDE.test(form.nom.trim())
+        ? "nom"
+        : null;
+    if (invalide) {
+      setFormErreur(`Le ${invalide} ne doit contenir que des lettres, espaces, tirets ou apostrophes (pas de chiffre ni de caractère spécial).`);
+      return;
+    }
+    if (!form.metier.trim()) {
+      setFormErreur("Le métier est obligatoire.");
+      return;
+    }
     setEnregistrement(true);
     try {
       if (editionId) {
         await utilisateursService.update(editionId, {
           nom: form.nom,
           prenom: form.prenom,
-          email: form.email,
+          email: form.email.trim(),
           role: form.role,
-          metier: form.metier || null,
+          metier: form.metier.trim(),
           actif: form.actif,
         });
         showSuccess("Membre modifié avec succès !");
@@ -155,10 +172,10 @@ export default function Membres() {
         await utilisateursService.create({
           nom: form.nom,
           prenom: form.prenom,
-          email: form.email,
+          email: form.email.trim(),
           mot_de_passe: form.mot_de_passe,
           role: form.role,
-          metier: form.metier || null,
+          metier: form.metier.trim(),
         });
         showSuccess("Membre ajouté avec succès !");
       }
@@ -376,6 +393,22 @@ export default function Membres() {
                 </div>
               </div>
 
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-600">
+                  Email <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  required
+                  autoComplete="off"
+                  placeholder="prenom.nom@exemple.com"
+                  className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent"
+                  style={{ "--tw-ring-color": C.blue }}
+                />
+              </div>
+
               {!editionId && (
                 <div>
                   <label className="mb-1 block text-xs font-medium text-slate-600">
@@ -386,10 +419,14 @@ export default function Membres() {
                     value={form.mot_de_passe}
                     onChange={(e) => setForm({ ...form, mot_de_passe: e.target.value })}
                     required
-                    minLength={4}
+                    minLength={8}
+                    autoComplete="new-password"
                     className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent"
                     style={{ "--tw-ring-color": C.blue }}
                   />
+                  <p className="mt-1 text-[11px] text-slate-400">
+                    8 caractères minimum, dont une majuscule et un chiffre.
+                  </p>
                 </div>
               )}
 
@@ -412,12 +449,13 @@ export default function Membres() {
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-slate-600">
-                    Métier
+                    Métier <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={form.metier}
                     onChange={(e) => setForm({ ...form, metier: e.target.value })}
+                    required
                     placeholder="développeur, graphiste…"
                     className="w-full border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-i-blue focus:border-transparent"
                     style={{ "--tw-ring-color": C.blue }}
