@@ -1,4 +1,4 @@
-﻿# app/besti/service.py
+# app/besti/service.py
 """
 Règles métier de la liaison Besti.
 
@@ -27,6 +27,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.besti.schemas import BestiUser
+from app.models.client import Client
 from app.models.mot_de_passe_reinit import MotDePasseReinit
 from app.models.utilisateur import RoleUtilisateur, Utilisateur
 from app.utils.emails import normaliser_email
@@ -65,6 +66,41 @@ async def _revoquer_jetons_reinitialisation(db: AsyncSession, utilisateur_id: in
     await db.execute(
         delete(MotDePasseReinit).where(MotDePasseReinit.utilisateur_id == utilisateur_id)
     )
+
+
+def _nom_fiche(compte: BestiUser) -> str:
+    """Nom de la fiche client : la société, sinon « Prénom Nom »."""
+    societe = (compte.companyName or "").strip()
+    return (societe or f"{compte.firstName} {compte.lastName}".strip())[:150]
+
+
+async def _synchroniser_fiche_client(db: AsyncSession, utilisateur: Utilisateur, compte: BestiUser) -> None:
+    """
+    Donne au compte lié sa fiche entreprise (table `client`).
+
+    Sans fiche, le compte existe mais n'apparaît nulle part dans iRindra (la
+    page Clients liste les fiches) et ne peut être rattaché à aucun projet.
+
+    - pas encore de fiche : on en crée une (jamais de rattachement à une fiche
+      existante par l'email — même règle que pour les comptes : une simple
+      coïncidence d'adresse ne doit pas ouvrir les projets d'un autre client) ;
+    - fiche existante : contact et email suivent Besti ; le nom de la société
+      aussi quand Besti en fournit un. La devise et le téléphone, gérés par
+      l'agence, ne sont jamais modifiés.
+    """
+    contact = f"{compte.firstName} {compte.lastName}".strip()[:150]
+    email = normaliser_email(compte.email)
+    fiche = await db.get(Client, utilisateur.client_id) if utilisateur.client_id else None
+    if fiche is None:
+        fiche = Client(nom=_nom_fiche(compte), contact=contact, email=email, devise="Ar")
+        db.add(fiche)
+        await db.flush()  # attribue l'id de la fiche
+        utilisateur.client_id = fiche.id
+        return
+    fiche.contact = contact
+    fiche.email = email
+    if (compte.companyName or "").strip():
+        fiche.nom = _nom_fiche(compte)
 
 
 async def _desactiver(db: AsyncSession, compte: BestiUser) -> None:
@@ -129,6 +165,10 @@ async def appliquer(db: AsyncSession, evenement: str, compte: BestiUser) -> Util
             role=ROLE_COMPTE_BESTI,
             actif=True,
         )
+        # Fiche AVANT le compte : la contrainte `chk_client_lien` refuse un
+        # compte client sans fiche (l'insertion échouait, d'où un 500 et des
+        # webhooks Besti jamais reçus).
+        await _synchroniser_fiche_client(db, utilisateur, compte)
         db.add(utilisateur)
         logger.info(
             "Compte lié Besti créé (id %s) : le rôle client est imposé par iRindra.",
@@ -141,6 +181,10 @@ async def appliquer(db: AsyncSession, evenement: str, compte: BestiUser) -> Util
         utilisateur.prenom = compte.firstName
         utilisateur.email = email
         utilisateur.actif = True
+        # La fiche n'est gérée que pour un compte resté client (un compte
+        # promu côté iRindra garde son rattachement tel quel).
+        if utilisateur.role == ROLE_COMPTE_BESTI:
+            await _synchroniser_fiche_client(db, utilisateur, compte)
 
     await db.commit()
     await db.refresh(utilisateur)

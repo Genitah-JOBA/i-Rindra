@@ -61,6 +61,7 @@ class FauxSession:
     def __init__(self, utilisateurs=None):
         self.utilisateurs = list(utilisateurs or [])
         self.ajouts = 0
+        self.clients = []
         self.commits = 0
         self._prochain_id = 1000
 
@@ -90,6 +91,12 @@ class FauxSession:
         return next((u for u in self.utilisateurs if condition(u)), None)
 
     def add(self, utilisateur):
+        from app.models.client import Client
+
+        if isinstance(utilisateur, Client):  # fiche client : table à part
+            utilisateur.id = 500 + len(self.clients)
+            self.clients.append(utilisateur)
+            return
         self.ajouts += 1
         self._prochain_id += 1
         utilisateur.id = self._prochain_id
@@ -100,6 +107,12 @@ class FauxSession:
 
     async def refresh(self, utilisateur):
         pass
+
+    async def flush(self):
+        pass
+
+    async def get(self, modele, ident):
+        return next((c for c in self.clients if c.id == ident), None)
 
 
 def _local(email="direction@exemple.fr", role=RoleUtilisateur.DIRECTION):

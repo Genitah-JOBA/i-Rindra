@@ -75,6 +75,7 @@ class FauxSession:
         self.utilisateur = utilisateur
         self.commits = 0
         self.en_attente = []
+        self.clients = []
         self._prochaine_id = 99
 
     async def execute(self, requete):
@@ -111,7 +112,19 @@ class FauxSession:
         return Resultat(None)
 
     def add(self, objet):
+        from app.models.client import Client
+
+        if isinstance(objet, Client):  # fiche client : table à part
+            objet.id = 500 + len(self.clients)
+            self.clients.append(objet)
+            return
         self.en_attente.append(objet)
+
+    async def flush(self):
+        pass
+
+    async def get(self, modele, ident):
+        return next((c for c in self.clients if c.id == ident), None)
 
     async def commit(self):
         self.commits += 1
