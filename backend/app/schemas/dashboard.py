@@ -51,6 +51,20 @@ class DashboardAlerte(BaseModel):
     date: date
 
 
+class ChargeMembre(BaseModel):
+    """Charge de travail d'un membre (RF-17)."""
+    utilisateur_id: int
+    nom: str
+    metier: Optional[str] = None
+    taches_ouvertes: int
+    taches_en_retard: int
+    taches_haute_priorite: int
+    nb_projets: int
+    prochaine_echeance: Optional[date] = None
+    charge_pct: int           # part du seuil de surcharge atteinte (0 à 100)
+    surcharge: bool
+
+
 class DashboardResponse(BaseModel):
     """Réponse agrégée du dashboard : projets + indicateurs + alertes."""
     projets: List[DashboardProjet]

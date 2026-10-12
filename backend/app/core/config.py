@@ -80,6 +80,13 @@ class Settings(BaseSettings):
     EMBEDDING_SEUIL: float = float(os.getenv("EMBEDDING_SEUIL", 0.20))
     EMBEDDING_SEUIL_RELATIF: float = float(os.getenv("EMBEDDING_SEUIL_RELATIF", 0.60))
 
+    # Charge par membre (RF-17) / surcharge (RF-18) : un membre est en surcharge à
+    # partir de N tâches ouvertes OU de M tâches en retard.
+    CHARGE_SEUIL_TACHES: int = int(os.getenv("CHARGE_SEUIL_TACHES", 5))
+    CHARGE_SEUIL_RETARD: int = int(os.getenv("CHARGE_SEUIL_RETARD", 2))
+    # Rappel « échéance proche » envoyé au responsable N jours avant l'échéance.
+    RAPPEL_ECHEANCE_JOURS: int = int(os.getenv("RAPPEL_ECHEANCE_JOURS", 2))
+
     # Frontend — sert à construire le lien absolu du formulaire de
     # réinitialisation de mot de passe (le backend doit connaître l'URL publique).
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173").rstrip("/")

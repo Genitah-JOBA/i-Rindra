@@ -74,6 +74,15 @@ async def init_db():
         await conn.execute(
             text("ALTER TABLE tache ADD COLUMN IF NOT EXISTS retard_notifie_le TIMESTAMPTZ")
         )
+        # Migrations idempotentes : marqueurs anti-doublon des notifications
+        # internes (projet en retard / rouge, échéance proche, surcharge).
+        for ddl in (
+            "ALTER TABLE projet ADD COLUMN IF NOT EXISTS retard_notifie_le TIMESTAMPTZ",
+            "ALTER TABLE projet ADD COLUMN IF NOT EXISTS rouge_notifie_le TIMESTAMPTZ",
+            "ALTER TABLE tache ADD COLUMN IF NOT EXISTS echeance_rappelee DATE",
+            "ALTER TABLE utilisateur ADD COLUMN IF NOT EXISTS surcharge_notifiee_le TIMESTAMPTZ",
+        ):
+            await conn.execute(text(ddl))
         # Migration idempotente : comptes clients partagés avec Besti.
         # `besti_id` reste NULL pour les comptes iRindra classiques, qui
         # conservent leur mot de passe local. L'index unique est ce qui rend le

@@ -18,7 +18,9 @@ from app.models.projet import Projet, StatutSante
 from app.models.tache import Tache, StatutTache
 from app.models.projet import ProjetMembre
 from app.models.utilisateur import Utilisateur
+from app.services import charge as charge_service
 from app.schemas.dashboard import (
+    ChargeMembre,
     DashboardProjet,
     DashboardIndicateurs,
     DashboardAlerte,
@@ -26,6 +28,50 @@ from app.schemas.dashboard import (
 )
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
+
+ROLES_GESTION = ("direction", "drh", "chef_de_projet")
+
+
+async def _ids_projets_accessibles(db: AsyncSession, role: str, user_id: int, client_id) -> List[int]:
+    """Projets actifs visibles selon le rôle (même règle que les autres vues du dashboard)."""
+    q = select(Projet.id).where(Projet.archive == False)  # noqa: E712
+    if role in ROLES_GESTION:
+        pass
+    elif role == "equipe":
+        membre = select(ProjetMembre.projet_id).where(ProjetMembre.utilisateur_id == user_id)
+        q = q.where(or_(Projet.responsable_id == user_id, Projet.id.in_(membre)))
+    elif role == "client" and client_id:
+        q = q.where(Projet.client_id == client_id)
+    else:
+        return []
+    return list((await db.execute(q)).scalars().all())
+
+
+# ============================================================
+# CHARGE PAR MEMBRE (RF-17)
+# ============================================================
+
+@router.get("/charge", response_model=List[ChargeMembre])
+async def get_dashboard_charge(
+    token: str = Depends(oauth2_scheme),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Charge de travail par membre : tâches ouvertes, en retard, priorité haute,
+    prochaine échéance et indicateur de surcharge (RF-17 / RF-18).
+
+    Direction, DRH et chef de projet voient toute l'équipe ; un membre de
+    l'équipe ne voit que sa propre charge ; le client n'y a pas accès.
+    """
+    payload = decode_access_token(token)
+    role, user_id = payload.get("role"), int(payload.get("sub"))
+    if role not in ROLES_GESTION + ("equipe",):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès réservé à l'équipe interne.")
+    ids = await _ids_projets_accessibles(db, role, user_id, payload.get("client_id"))
+    charge = await charge_service.charge_par_membre(db, ids)
+    if role == "equipe":
+        charge = [c for c in charge if c["utilisateur_id"] == user_id]
+    return charge
 
 # ============================================================
 # DASHBOARD PRINCIPAL
@@ -327,7 +373,7 @@ async def get_dashboard_alertes(
                     Tache.statut != StatutTache.TERMINE
                 )
             )
-            .limit(limit - len(alertes))
+            .limit(max(0, limit - len(alertes)))
         )
         taches_retard = result.scalars().all()
         
@@ -356,7 +402,7 @@ async def get_dashboard_alertes(
                     )
                 )
                 .order_by(Tache.echeance)
-                .limit(limit - len(alertes))
+                .limit(max(0, limit - len(alertes)))
             )
             taches_approche = result.scalars().all()
             

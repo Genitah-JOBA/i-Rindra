@@ -298,14 +298,22 @@ async def boucle_surveillance_retards(intervalle_secondes: int = 3600):
     action utilisateur ne le déclenche. Un échec est journalisé puis la boucle
     repart — elle ne doit jamais mourir en silence.
     """
+    attente = 60  # premier scan peu après le démarrage, puis toutes les `intervalle_secondes`
     while True:
         try:
-            await asyncio.sleep(intervalle_secondes)
+            await asyncio.sleep(attente)
+            attente = intervalle_secondes
             async with AsyncSessionLocal() as session:
                 n = await scanner_taches_en_retard(session)
+                # Import local : alertes_internes importe ce module.
+                from app.services.alertes_internes import scanner_alertes_internes
+                m = await scanner_alertes_internes(session)
+                # Commit même sans notification : les marqueurs réarmés doivent être enregistrés.
+                await session.commit()
                 if n:
-                    await session.commit()
                     logger.info("%s tâche(s) en retard signalée(s)", n)
+                if m:
+                    logger.info("%s notification(s) interne(s) envoyée(s)", m)
         except asyncio.CancelledError:
             raise
         except Exception:

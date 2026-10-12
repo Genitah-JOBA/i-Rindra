@@ -33,6 +33,8 @@ class Utilisateur(Base):
     # MǸtier du membre (dǸveloppeur, graphiste, intǸgrateur�?�) �?" sert �� savoir qui affecter �� une tǽche
     metier = Column(String(100), nullable=True)
     actif = Column(Boolean, default=True, nullable=False)
+    # Anti-doublon de la notification de surcharge (remis à None en sortie de surcharge)
+    surcharge_notifiee_le = Column(DateTime(timezone=True), nullable=True)
     cree_le = Column(DateTime(timezone=True), server_default=func.now())
 
     def __repr__(self):

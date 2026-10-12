@@ -5,6 +5,8 @@ import { facturesService } from "../api/factures";
 import { clientsService } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import Spin from "../components/Spin";
+import ChargeMembres from "../components/ChargeMembres";
+import { dashboardService } from "../api/dashboard";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -138,6 +140,9 @@ export default function Dashboard() {
   const [argent, setArgent] = useState(null);
   const [evolutionData, setEvolutionData] = useState([]);
   const [vueFinance, setVueFinance] = useState("tous");
+  // Charge par membre (RF-17) : null = bloc indisponible. Les alertes (RF-18)
+  // arrivent en notifications (cloche) côté équipe interne.
+  const [charge, setCharge] = useState(null);
 
   useEffect(() => {
     chargerDonnees();
@@ -164,6 +169,9 @@ export default function Dashboard() {
           setArgent(null);
         }
       }
+
+      // Charge par membre : un échec n'empêche pas d'afficher le reste
+      setCharge(await dashboardService.charge().catch(() => null));
 
       try {
         const evolution = await projetsService.getEvolution();
@@ -533,6 +541,9 @@ export default function Dashboard() {
               <StatCard title={"Tâches"} value={`${statsAffiches.tachesTerminees}/${statsAffiches.tachesTotales}`} color="text-[#7DA1AF]" icon={<TachesIcon className="w-5 h-5 text-[#7DA1AF]" />} />
             </div>
           </div>
+
+          {/* Charge par membre (RF-17) */}
+          <ChargeMembres charge={charge} />
 
           {/* Graphiques */}
           {projetsAffiches.length > 0 ? (

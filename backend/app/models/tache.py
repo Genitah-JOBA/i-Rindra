@@ -43,6 +43,9 @@ class Tache(Base):
     # Dernière alerte de retard envoyée (anti-doublon, remis à None dès que la
     # tâche n'est plus en retard : elle peut alors être re-alertée).
     retard_notifie_le = Column(DateTime(timezone=True), nullable=True)
+    # Échéance pour laquelle le rappel « échéance proche » a été envoyé
+    # (une échéance repoussée déclenche un nouveau rappel).
+    echeance_rappelee = Column(Date, nullable=True)
     cree_le = Column(DateTime(timezone=True), server_default=func.now())
     modifie_le = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 

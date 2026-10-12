@@ -18,10 +18,17 @@ const formatDate = (iso) => {
   }
 };
 
-// Alertes de pilotage : retard d'une tâche et suppression. Ces deux événements
-// appellent une décision (relancer, replanifier), ils se distinguent donc du
-// reste du flux.
-const TYPES_ALERTE = ["tache_retard", "tache_supprimee"];
+// Alertes de pilotage : retards, suppression, projet au rouge, échéance proche,
+// surcharge. Ces événements appellent une décision (relancer, replanifier,
+// répartir), ils se distinguent donc du reste du flux.
+const TYPES_ALERTE = [
+  "tache_retard",
+  "tache_supprimee",
+  "projet_retard",
+  "projet_rouge",
+  "deadline_approche",
+  "surcharge",
+];
 const estAlerte = (n) => TYPES_ALERTE.includes(n.type);
 
 export default function NotificationBell() {

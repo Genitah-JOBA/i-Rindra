@@ -35,6 +35,10 @@ class Projet(Base):
     statut_sante = Column(pg_enum(StatutSante, "statut_sante"), nullable=False, default=StatutSante.VERT)
     avancement_pct = Column(Integer, nullable=False, default=0)   # calculé depuis les tâches (RF-09)
     archive = Column(Boolean, nullable=False, default=False)
+    # Anti-doublon des notifications internes (alertes_internes.py) : remis à
+    # None dès que la situation disparaît, pour pouvoir re-notifier.
+    retard_notifie_le = Column(DateTime(timezone=True), nullable=True)
+    rouge_notifie_le = Column(DateTime(timezone=True), nullable=True)
     cree_le = Column(DateTime(timezone=True), server_default=func.now())
     modifie_le = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
