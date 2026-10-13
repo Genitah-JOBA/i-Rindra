@@ -19,6 +19,9 @@ Invariants tenus ici, quels que soient les données reçues :
 * **Idempotence.** Besti peut renvoyer le même événement plusieurs fois (retry,
   rejeu manuel, double clic). L'upsert se fait sur `besti_id`, jamais sur
   l'email : il n'y a donc jamais de doublon ni d'exception d'unicité.
+* **Une fiche client par compte lié.** Un compte lié sans fiche en reçoit une
+  nouvelle (jamais une fiche existante de même nom) ; une fiche déjà
+  attribuée n'est jamais modifiée ni remplacée.
 """
 import logging
 
@@ -27,6 +30,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.besti.schemas import BestiUser
+from app.besti.service_projet import archiver_projets_du_compte, desarchiver_projets_du_compte
 from app.models.client import Client
 from app.models.mot_de_passe_reinit import MotDePasseReinit
 from app.models.utilisateur import RoleUtilisateur, Utilisateur
@@ -68,39 +72,27 @@ async def _revoquer_jetons_reinitialisation(db: AsyncSession, utilisateur_id: in
     )
 
 
-def _nom_fiche(compte: BestiUser) -> str:
-    """Nom de la fiche client : la société, sinon « Prénom Nom »."""
-    societe = (compte.companyName or "").strip()
-    return (societe or f"{compte.firstName} {compte.lastName}".strip())[:150]
-
-
-async def _synchroniser_fiche_client(db: AsyncSession, utilisateur: Utilisateur, compte: BestiUser) -> None:
+async def _creer_fiche_client(db: AsyncSession, compte: BestiUser, email: str) -> int:
     """
-    Donne au compte lié sa fiche entreprise (table `client`).
+    Crée la fiche client (entité qui porte les projets) d'un compte Besti et
+    retourne son id.
 
-    Sans fiche, le compte existe mais n'apparaît nulle part dans iRindra (la
-    page Clients liste les fiches) et ne peut être rattaché à aucun projet.
-
-    - pas encore de fiche : on en crée une (jamais de rattachement à une fiche
-      existante par l'email — même règle que pour les comptes : une simple
-      coïncidence d'adresse ne doit pas ouvrir les projets d'un autre client) ;
-    - fiche existante : contact et email suivent Besti ; le nom de la société
-      aussi quand Besti en fournit un. La devise et le téléphone, gérés par
-      l'agence, ne sont jamais modifiés.
+    Toujours une NOUVELLE fiche : rattacher le compte à une fiche existante de
+    même nom donnerait à ce client Besti l'accès aux projets d'un autre (deux
+    entreprises peuvent porter le même nom), comme une fusion par email.
     """
-    contact = f"{compte.firstName} {compte.lastName}".strip()[:150]
-    email = normaliser_email(compte.email)
-    fiche = await db.get(Client, utilisateur.client_id) if utilisateur.client_id else None
-    if fiche is None:
-        fiche = Client(nom=_nom_fiche(compte), contact=contact, email=email, devise="Ar")
-        db.add(fiche)
-        await db.flush()  # attribue l'id de la fiche
-        utilisateur.client_id = fiche.id
-        return
-    fiche.contact = contact
-    fiche.email = email
-    if (compte.companyName or "").strip():
-        fiche.nom = _nom_fiche(compte)
+    nom_complet = f"{compte.firstName} {compte.lastName}".strip()
+    fiche = Client(
+        nom=(compte.companyName or "").strip() or nom_complet,
+        contact=nom_complet,
+        email=email,
+    )
+    db.add(fiche)
+    # Le flush attribue l'id sans valider : fiche et compte sont enregistrés
+    # par le même commit, ou pas du tout.
+    await db.flush()
+    logger.info("Fiche client créée pour le compte Besti %s.", compte.bestiId)
+    return fiche.id
 
 
 async def _desactiver(db: AsyncSession, compte: BestiUser) -> None:
@@ -118,6 +110,8 @@ async def _desactiver(db: AsyncSession, compte: BestiUser) -> None:
 
     utilisateur.actif = False
     await _revoquer_jetons_reinitialisation(db, utilisateur.id)
+    # Ses projets Besti sont archivés avec lui (motif « compte désactivé »).
+    await archiver_projets_du_compte(db, utilisateur.id)
     await db.commit()
 
 
@@ -164,11 +158,11 @@ async def appliquer(db: AsyncSession, evenement: str, compte: BestiUser) -> Util
             besti_id=compte.bestiId,
             role=ROLE_COMPTE_BESTI,
             actif=True,
+            # Fiche créée AVANT d'ajouter le compte : la contrainte
+            # `chk_client_lien` refuse un compte client sans fiche, et le flush
+            # de la fiche enregistrerait sinon le compte avec client_id vide.
+            client_id=await _creer_fiche_client(db, compte, email),
         )
-        # Fiche AVANT le compte : la contrainte `chk_client_lien` refuse un
-        # compte client sans fiche (l'insertion échouait, d'où un 500 et des
-        # webhooks Besti jamais reçus).
-        await _synchroniser_fiche_client(db, utilisateur, compte)
         db.add(utilisateur)
         logger.info(
             "Compte lié Besti créé (id %s) : le rôle client est imposé par iRindra.",
@@ -181,10 +175,14 @@ async def appliquer(db: AsyncSession, evenement: str, compte: BestiUser) -> Util
         utilisateur.prenom = compte.firstName
         utilisateur.email = email
         utilisateur.actif = True
-        # La fiche n'est gérée que pour un compte resté client (un compte
-        # promu côté iRindra garde son rattachement tel quel).
-        if utilisateur.role == ROLE_COMPTE_BESTI:
-            await _synchroniser_fiche_client(db, utilisateur, compte)
+        # Les projets archivés par la désactivation reviennent avec le compte.
+        await desarchiver_projets_du_compte(db, utilisateur.id)
+
+    # Sans fiche client, un compte « client » ne voit aucun projet. Une fiche
+    # déjà attribuée (ou réattribuée par un administrateur) n'est jamais
+    # touchée ; un compte lié créé avant cette règle en reçoit une ici.
+    if utilisateur.client_id is None:
+        utilisateur.client_id = await _creer_fiche_client(db, compte, email)
 
     await db.commit()
     await db.refresh(utilisateur)

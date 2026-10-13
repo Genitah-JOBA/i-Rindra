@@ -18,7 +18,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from app.routers import auth, projets, taches, dashboard, client, fichiers, utilisateurs, notifications, clients, factures, ia, absences, suggestion_devis, besti
+from app.routers import auth, projets, taches, dashboard, client, fichiers, utilisateurs, notifications, clients, factures, ia, absences, suggestion_devis, besti, besti_client
 from app.besti.liaison import router as besti_liaison_router
 from app.core.database import engine, Base
 from app.services import notifications as notif_service
@@ -59,6 +59,7 @@ app.include_router(absences.router)
 app.include_router(suggestion_devis.router)
 app.include_router(besti.router)
 app.include_router(besti_liaison_router)  # test de liaison (Paramètres)
+app.include_router(besti_client.router)
 
 @app.on_event("startup")
 async def init_db():

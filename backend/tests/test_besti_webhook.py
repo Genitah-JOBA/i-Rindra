@@ -21,6 +21,7 @@ from httpx import ASGITransport, AsyncClient
 from app.besti.schemas import BestiUser
 from app.besti.service import appliquer
 from app.core.config import settings
+from app.models.client import Client
 from app.models.utilisateur import RoleUtilisateur, Utilisateur
 
 SECRET = "secret-de-test-besti"
@@ -103,8 +104,8 @@ class FauxSession:
     def __init__(self, utilisateurs=None):
         self.utilisateurs = list(utilisateurs or [])
         self.en_attente = []
-        self.supprimes = []
         self.clients = []
+        self.supprimes = []
         self.commits = 0
         self._prochaine_id = max((u.id or 0 for u in self.utilisateurs), default=0) + 1
 
@@ -134,19 +135,15 @@ class FauxSession:
         return ResultatFaux([])
 
     def add(self, objet):
-        from app.models.client import Client
-
-        if isinstance(objet, Client):  # fiche client : table à part
-            objet.id = 500 + len(self.clients)
+        if isinstance(objet, Client):
+            objet.id = self._prochaine_id
+            self._prochaine_id += 1
             self.clients.append(objet)
             return
         self.en_attente.append(objet)
 
     async def flush(self):
         pass
-
-    async def get(self, modele, ident):
-        return next((c for c in self.clients if c.id == ident), None)
 
     async def commit(self):
         self.commits += 1
@@ -503,29 +500,3 @@ async def test_le_role_existant_est_conserve_a_la_mise_a_jour():
 def test_evenements_contrat_puis_webhook_et_ping():
     """Rappel du contrat : ces quatre événements sont les seuls acceptés."""
     assert set(EVENTS) == set(EVENTS) and len(EVENTS) == 4
-
-# --- Fiche client (table `client`) --------------------------------------------
-
-
-@pytest.mark.anyio
-async def test_compte_cree_recoit_sa_fiche_client():
-    """Sans fiche, le client Besti resterait invisible dans la page Clients."""
-    session = FauxSession()
-    utilisateur = await appliquer(session, "user.activated", _compte(companyName="Société X"))
-
-    assert len(session.clients) == 1
-    fiche = session.clients[0]
-    assert utilisateur.client_id == fiche.id
-    assert fiche.nom == "Société X" and fiche.email == utilisateur.email and fiche.devise == "Ar"
-
-
-@pytest.mark.anyio
-async def test_sans_societe_la_fiche_porte_le_nom_du_client_et_n_est_pas_dupliquee():
-    session = FauxSession()
-    await appliquer(session, "user.activated", _compte(companyName=None))
-    await appliquer(session, "user.activated", _compte(companyName=None))   # rejeu
-    utilisateur = await appliquer(session, "user.updated", _compte(companyName="Nouvelle SARL"))
-
-    assert len(session.clients) == 1                     # aucune fiche en double
-    assert session.clients[0].nom == "Nouvelle SARL"      # la société suit Besti
-    assert utilisateur.client_id == session.clients[0].id

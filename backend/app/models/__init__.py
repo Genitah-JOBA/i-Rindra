@@ -14,6 +14,9 @@ from app.models.absence import Absence, TypeAbsence, StatutAbsence
 from app.models.suggestion_devis import SuggestionDevis, StatutSuggestionDevis
 from app.models.mot_de_passe_reinit import MotDePasseReinit
 from app.models.conversation_ia import ConversationIA, MessageIA
+from app.models.besti_projet import (
+    BestiProjet, BestiCahier, BestiFichier, BestiLien, BestiStatutHistorique,
+)
 
 __all__ = [
     "Utilisateur",
@@ -44,4 +47,9 @@ __all__ = [
     "MotDePasseReinit",
     "ConversationIA",
     "MessageIA",
+    "BestiProjet",
+    "BestiCahier",
+    "BestiFichier",
+    "BestiLien",
+    "BestiStatutHistorique",
 ]

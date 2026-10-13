@@ -27,6 +27,7 @@ from httpx import ASGITransport, AsyncClient
 from app.besti.service import appliquer
 from app.core.config import settings
 from app.core.security import hash_password
+from app.models.client import Client
 from app.models.utilisateur import RoleUtilisateur, Utilisateur
 from app.routers import auth
 
@@ -60,8 +61,8 @@ class FauxSession:
 
     def __init__(self, utilisateurs=None):
         self.utilisateurs = list(utilisateurs or [])
-        self.ajouts = 0
         self.clients = []
+        self.ajouts = 0
         self.commits = 0
         self._prochain_id = 1000
 
@@ -90,29 +91,23 @@ class FauxSession:
     def _premier(self, condition):
         return next((u for u in self.utilisateurs if condition(u)), None)
 
-    def add(self, utilisateur):
-        from app.models.client import Client
-
-        if isinstance(utilisateur, Client):  # fiche client : table à part
-            utilisateur.id = 500 + len(self.clients)
-            self.clients.append(utilisateur)
+    def add(self, objet):
+        self._prochain_id += 1
+        objet.id = self._prochain_id
+        if isinstance(objet, Client):
+            self.clients.append(objet)
             return
         self.ajouts += 1
-        self._prochain_id += 1
-        utilisateur.id = self._prochain_id
-        self.utilisateurs.append(utilisateur)
+        self.utilisateurs.append(objet)
+
+    async def flush(self):
+        pass
 
     async def commit(self):
         self.commits += 1
 
     async def refresh(self, utilisateur):
         pass
-
-    async def flush(self):
-        pass
-
-    async def get(self, modele, ident):
-        return next((c for c in self.clients if c.id == ident), None)
 
 
 def _local(email="direction@exemple.fr", role=RoleUtilisateur.DIRECTION):
@@ -337,6 +332,70 @@ async def test_rejeu_du_meme_evenement_ne_duplique_pas():
     await appliquer(session, "user.activated", _valider(charge))
 
     assert len(session.utilisateurs) == 1
+    assert len(session.clients) == 1, "le rejeu ne crée pas une seconde fiche"
+
+
+# --- 2 bis. Fiche client ----------------------------------------------------
+
+@pytest.mark.anyio
+async def test_activation_crée_et_rattache_une_fiche_client(session):
+    u = await appliquer(session, "user.activated", _valider(_charge()))
+
+    assert len(session.clients) == 1
+    fiche = session.clients[0]
+    assert u.client_id == fiche.id
+    assert fiche.nom == "SCI Curie"
+    assert fiche.contact == "Marie Curie"
+    assert fiche.email == "client@exemple.fr"
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize("societe", [None, "", "   "])
+async def test_fiche_sans_société_prend_le_nom_du_client(session, societe):
+    charge = _charge() | {"companyName": societe}
+    await appliquer(session, "user.activated", _valider(charge))
+
+    assert session.clients[0].nom == "Marie Curie"
+
+
+@pytest.mark.anyio
+async def test_fiche_existante_jamais_remplacée(session):
+    """Une fiche attribuée (ou réattribuée par un administrateur) est conservée."""
+    besti_id = uuid.uuid4()
+    u = await appliquer(session, "user.activated", _valider(_charge(besti_id=besti_id)))
+    u.client_id = 42
+
+    await appliquer(session, "user.updated", _valider(_charge(besti_id=besti_id)))
+
+    assert u.client_id == 42
+    assert len(session.clients) == 1
+
+
+@pytest.mark.anyio
+async def test_compte_lié_sans_fiche_en_reçoit_une(session):
+    """Compte créé avant la règle : la fiche arrive au prochain événement."""
+    besti_id = uuid.uuid4()
+    ancien = Utilisateur(
+        id=7, email="client@exemple.fr", nom="Curie", prenom="Marie",
+        mot_de_passe_hash=None, besti_id=besti_id,
+        role=RoleUtilisateur.CLIENT, actif=True, client_id=None,
+    )
+    session.utilisateurs.append(ancien)
+
+    await appliquer(session, "user.updated", _valider(_charge(besti_id=besti_id)))
+
+    assert len(session.clients) == 1
+    assert ancien.client_id == session.clients[0].id
+
+
+@pytest.mark.anyio
+async def test_conflit_d_email_ne_crée_aucune_fiche(session):
+    session.utilisateurs.append(_local(email="direction@exemple.fr"))
+
+    with pytest.raises(HTTPException):
+        await appliquer(session, "user.activated", _valider(_charge(email="direction@exemple.fr")))
+
+    assert session.clients == []
 
 
 # --- 3. Service -------------------------------------------------------------
@@ -475,6 +534,10 @@ async def test_compte_liaison_appelle_besti(session, monkeypatch):
     assert r.status_code == 200, r.text
     assert vus == [("nouveau@exemple.fr", "MotDePasse1")]
     assert r.json()["role"] == "client", "un client Besti est un rôle client"
+    from app.core.security import decode_access_token
+
+    jeton = decode_access_token(r.json()["access_token"])
+    assert jeton["client_id"] == session.clients[0].id, "le jeton porte la fiche client"
     assert len(session.utilisateurs) == 1
     assert session.utilisateurs[0].mot_de_passe_hash is None
 

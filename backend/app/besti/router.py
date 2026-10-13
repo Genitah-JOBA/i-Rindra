@@ -24,6 +24,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.besti.schemas import BestiUser
 from app.besti.service import appliquer
+from app.besti.service_projet import EVENEMENTS_PROJET, appliquer_evenement_projet
 from app.besti.signature import verifier_signature_besti
 from app.core.database import get_db
 
@@ -32,7 +33,9 @@ logger = logging.getLogger("i-rindra.besti")
 router = APIRouter(prefix="/besti", tags=["Besti"])
 
 #: Événements connus. `ping` est traité à part (il ne crée rien).
-EVENEMENTS_CONNUS = ("user.activated", "user.updated", "user.deactivated", "ping")
+EVENEMENTS_CONNUS = (
+    "user.activated", "user.updated", "user.deactivated", "ping", *EVENEMENTS_PROJET
+)
 
 
 @router.post("/webhook", status_code=status.HTTP_204_NO_CONTENT)
@@ -40,7 +43,8 @@ async def besti_webhook(
     x_besti_event: str = Header(
         ...,
         alias="X-Besti-Event",
-        description="user.activated | user.updated | user.deactivated | ping",
+        description="user.activated | user.updated | user.deactivated | ping | "
+        "project.created | project.updated | project.deleted",
     ),
     corps: bytes = Depends(verifier_signature_besti),
     db: AsyncSession = Depends(get_db),
@@ -53,7 +57,9 @@ async def besti_webhook(
       - 400 : corps invalide ou événement inconnu ;
       - 401 : signature absente, fausse ou horodatage hors tolérance ;
       - 409 : l'email est déjà pris par un compte iRindra non lié (rien n'est
-        modifié chez ce compte).
+        modifié chez ce compte) ;
+      - 503 : projet d'un client encore inconnu, ou erreur temporaire (Besti
+        réessaie).
     """
     evenement = x_besti_event.strip()
 
@@ -66,6 +72,13 @@ async def besti_webhook(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Événement inconnu",
         )
+
+    if evenement in EVENEMENTS_PROJET:
+        # Projets : corps validé (400) et appliqué par le service projet. Aiguillé
+        # AVANT la validation `BestiUser`, réservée aux événements de comptes.
+        await appliquer_evenement_projet(db, evenement, corps)
+        logger.info("Événement Besti %s traité.", evenement)
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
 
     try:
         # Validation manuelle (et non un paramètre Pydantic) : le contrat veut

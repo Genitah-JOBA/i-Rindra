@@ -1,0 +1,37 @@
+# === Python / Backend ===
+.venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+
+# === Node / Frontend ===
+node_modules/
+frontend/dist/
+
+# === Secrets & environnements locaux ===
+backend/.env
+frontend/.env
+frontend/.env.local
+*.env.local
+
+
+# === Fichiers uploadés (ne jamais versionner) ===
+uploads/
+
+# === Doc de déploiement (contient la SECRET_KEY / hash admin) ===
+DEPLOIEMENT.md
+
+# === OS / éditeurs ===
+.DS_Store
+Thumbs.db
+.vscode/
+# === Cache du modèle d'embeddings (~500 Mo, retéléchargé au besoin) ===
+backend/.cache/
+
+# === Documents de travail locaux ===
+CAHIER DES CHARGES-Bienfe.docx
+REGLES_GESTION.md
+
+# === Python (compilés) ===
+*.py[cod]
