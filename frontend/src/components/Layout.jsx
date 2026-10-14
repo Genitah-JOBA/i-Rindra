@@ -580,10 +580,13 @@ const pleinEcran = pathname.startsWith("/assistant-ia");
             </button>
 
             {profilMenuOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white shadow-lg border border-slate-200 py-1 z-50 animate__animated animate__fadeInDown">
+              <div className="absolute right-0 mt-2 min-w-56 bg-white shadow-lg border border-slate-200 py-1 z-50 animate__animated animate__fadeInDown">
                 <div className="px-4 py-3 border-b border-slate-100">
                   <p className="text-sm font-medium text-slate-900">
-                    {user?.prenom} {user?.nom}
+                    {user?.prenom}
+                  </p>
+                   <p className="text-sm font-medium text-slate-900">
+                    {user?.nom}
                   </p>
                   <p className="text-xs text-slate-500">{user?.email}</p>
                 </div>
