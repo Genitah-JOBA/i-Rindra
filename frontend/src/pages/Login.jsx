@@ -83,7 +83,7 @@ export default function Login() {
       navigate(destination, { replace: true });
     } catch (err) {
       if (!err.response) {
-        setErreur("Impossible de joindre le serveur. Vérifiez que le backend est démarré (http://localhost:8000).");
+        setErreur("Impossible de joindre le serveur. Veuillez contacter l'administrateur");
       } else if (err.response.status === 401) {
         setErreur("Email ou mot de passe incorrect.");
       } else {
