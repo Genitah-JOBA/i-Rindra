@@ -197,7 +197,7 @@ déploiement qu'une réinitialisation inopérante en production.
 ## 🗺️ Reste à faire
 
 - **Module IA** (analyse du cahier des charges, extraction de tâches, résumés…) via Groq (gratuit).
-- **Interconnexions** e-resaka (chat) et B-estimation (devis) par deep-link.
+- **Interconnexions** i-Resaka (chat) et B-estimation (devis) par deep-link.
 - **Recherche intelligente** (pgvector ou recherche plein-texte selon l'hébergement).
 - Tests automatisés, migrations Alembic.
 

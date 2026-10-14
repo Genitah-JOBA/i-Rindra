@@ -494,7 +494,7 @@ const pleinEcran = pathname.startsWith("/assistant-ia");
       <div className="flex-1 flex flex-col h-screen w-0 min-w-0">
         {/* Header */}
         <header className="border-b bg-white px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center sticky top-0 z-30 shadow-sm">
-          {/* Chat e-resaka */}
+          {/* Chat i-Resaka */}
           <a
             href={ERESAKA_URL}
             target="_blank"
@@ -515,7 +515,7 @@ const pleinEcran = pathname.startsWith("/assistant-ia");
                 d="M20.25 8.511v.011m0 4.5v.011m0-4.5h-4.5m4.5 0h-4.5m0-4.5h4.5m0 0h-4.5m0 4.5h4.5m0 4.5h-4.5m4.5 0h-4.5m-9 4.5h4.5m-4.5 0h-4.5m4.5 0v-4.5m0 4.5V12m0-4.5h4.5m-4.5 0h-4.5m4.5 0v4.5m0 0h-4.5m0 4.5h4.5"
               />
             </svg>
-            Chat (e-resaka)
+            Ouvrir i-Resaka
             <span className="ml-auto text-[10px] bg-i-blue/20 text-i-blue px-2 py-0.5 flex-shrink-0">
               ↗
             </span>

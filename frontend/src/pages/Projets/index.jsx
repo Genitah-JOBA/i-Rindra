@@ -117,7 +117,7 @@ export default function Projets() {
     }
   };
 
-  // ---------- CHAT (redirection e-resaka) ----------
+  // ---------- CHAT (redirection i-Resaka) ----------
   const chat = (projet, e) => {
     e?.stopPropagation();
     window.open(lienChatProjet(projet.id), "_blank", "noopener,noreferrer");
