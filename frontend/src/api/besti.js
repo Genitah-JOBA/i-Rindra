@@ -1,5 +1,6 @@
 // src/api/besti.js — liaison Besti (test, direction / DRH) et projets Besti
-// du client connecté (consultation seule).
+// en consultation seule : le client ne voit que ses projets, la gestion
+// (direction, DRH, chef de projet) voit tous les projets.
 import api from "./client";
 
 export const bestiService = {

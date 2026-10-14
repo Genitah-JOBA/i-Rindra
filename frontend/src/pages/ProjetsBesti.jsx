@@ -1,7 +1,11 @@
-// ProjetsBesti.jsx — projets créés par le client dans Besti, en CONSULTATION SEULE.
+// ProjetsBesti.jsx — projets créés par les clients dans Besti, en CONSULTATION SEULE.
 // Tout se modifie dans Besti : aucune action d'écriture ici.
+// Le client ne voit que ses projets ; la gestion (direction, DRH, chef de
+// projet) voit tous les projets, avec l'email du propriétaire quand il est
+// renseigné par l'API (`proprietaire_email`).
 import { useEffect, useState } from "react";
 import { bestiService } from "../api/besti";
+import { useAuth } from "../auth/AuthContext";
 import Spin from "../components/Spin";
 
 const URL_BESTI = "https://besti.bef4prod.com";
@@ -99,6 +103,11 @@ function DetailProjet({ projetId }) {
           <h2 className="text-lg font-bold text-slate-900">{projet.nom}</h2>
           <PastilleStatut statut={projet.statut} />
         </div>
+        {projet.proprietaire_email && (
+          <p className="mt-1 text-xs text-slate-500">
+            {"Client :"} {projet.proprietaire_email}
+          </p>
+        )}
         {projet.archive_le && (
           <p className="mt-1 text-sm text-orange-700">
             {MOTIF_ARCHIVAGE[projet.motif_archivage] || "Archivé le"} {fmtDate(projet.archive_le)}
@@ -197,6 +206,8 @@ function DetailProjet({ projetId }) {
 }
 
 export default function ProjetsBesti() {
+  const { user } = useAuth();
+  const estGestion = ["direction", "drh", "chef_de_projet"].includes(user?.role);
   const [archives, setArchives] = useState(false);
   const [projets, setProjets] = useState(null);
   const [projetId, setProjetId] = useState(null);
@@ -212,7 +223,7 @@ export default function ProjetsBesti() {
         setProjetId(data[0]?.id || null);
       })
       .catch((err) => {
-        if (!annule) setErreur(err.response?.data?.detail || "Impossible de charger vos projets Besti.");
+        if (!annule) setErreur(err.response?.data?.detail || "Impossible de charger les projets Besti.");
       });
     return () => {
       annule = true;
@@ -266,7 +277,7 @@ export default function ProjetsBesti() {
         <Spin className="py-8" />
       ) : projets.length === 0 ? (
         <p className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-          {archives ? "Aucun projet archivé." : "Aucun projet Besti pour le moment."}
+          {archives ? "Aucun projet archivé." : estGestion ? "Aucun projet Besti pour le moment." : "Aucun projet Besti pour votre compte pour le moment."}
         </p>
       ) : (
         <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
@@ -283,6 +294,9 @@ export default function ProjetsBesti() {
                   }`}
                 >
                   <p className="truncate text-sm font-medium text-slate-900">{p.nom}</p>
+                  {p.proprietaire_email && (
+                    <p className="truncate text-xs text-slate-500">{p.proprietaire_email}</p>
+                  )}
                   <div className="mt-1 flex items-center justify-between gap-2">
                     <PastilleStatut statut={p.statut} />
                     <span className="text-xs text-slate-400">

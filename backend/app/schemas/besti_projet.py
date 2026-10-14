@@ -31,6 +31,10 @@ class BestiProjetResume(BaseModel):
     archive_le: Optional[datetime] = None
     # `supprime_besti` | `compte_desactive` | None
     motif_archivage: Optional[str] = None
+    # Renseigné pour la gestion (qui voit tous les projets) : à quel compte
+    # client le projet appartient. Le client lui-même le reçoit aussi (son id).
+    utilisateur_id: Optional[int] = None
+    proprietaire_email: Optional[str] = None
 
 
 class BestiFichierResponse(BaseModel):

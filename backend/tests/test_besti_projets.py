@@ -95,8 +95,8 @@ async def api(sessions):
 
 # --- Données ------------------------------------------------------------------
 
-async def _compte(sessions, *, actif=True) -> Utilisateur:
-    """Compte client lié à Besti, déjà présent dans iRindra."""
+async def _compte(sessions, *, actif=True, role=RoleUtilisateur.CLIENT) -> Utilisateur:
+    """Compte lié à Besti, déjà présent dans iRindra (client par défaut)."""
     async with sessions() as db:
         u = Utilisateur(
             nom="Curie",
@@ -104,7 +104,7 @@ async def _compte(sessions, *, actif=True) -> Utilisateur:
             email=f"{uuid.uuid4().hex[:8]}@exemple.fr",
             mot_de_passe_hash=None,
             besti_id=uuid.uuid4(),
-            role=RoleUtilisateur.CLIENT,
+            role=role,
             actif=actif,
         )
         db.add(u)
@@ -112,9 +112,12 @@ async def _compte(sessions, *, actif=True) -> Utilisateur:
         return u
 
 
-def _jeton(utilisateur: Utilisateur, role: str = "client") -> dict:
+def _jeton(utilisateur: Utilisateur, role: str | None = None) -> dict:
+    # Par défaut, le jeton porte le vrai rôle en base (un jeton périmé ne doit
+    # pas élargir l'accès) ; un rôle explicite permet de simuler un jeton périmé.
+    valeur_role = role or utilisateur.role.value
     jeton = create_access_token(
-        {"sub": str(utilisateur.id), "role": role, "email": utilisateur.email, "client_id": None}
+        {"sub": str(utilisateur.id), "role": valeur_role, "email": utilisateur.email, "client_id": None}
     )
     return {"Authorization": f"Bearer {jeton}"}
 
@@ -540,10 +543,52 @@ async def test_projet_d_un_autre_client_renvoie_404(api, sessions):
 
 
 @pytest.mark.anyio
-async def test_lecture_réservée_aux_clients(api, sessions):
-    moi = await _compte(sessions)
+async def test_gestion_voit_tous_les_projets_client_cloisonne(api, sessions):
+    """Gestion (direction/DRH/chef) voit tout ; client ne voit que ses projets."""
+    moi, autre = await _compte(sessions), await _compte(sessions)
+    mien, sien = _projet(moi, name="Le mien"), _projet(autre, name="Le sien")
+    await _envoyer(api, "project.created", mien)
+    await _envoyer(api, "project.created", sien)
 
-    r = await api.get("/client/besti/projets", headers=_jeton(moi, role="direction"))
+    for role_gestion in (
+        RoleUtilisateur.DIRECTION,
+        RoleUtilisateur.DRH,
+        RoleUtilisateur.CHEF_DE_PROJET,
+    ):
+        admin = await _compte(sessions, role=role_gestion)
+        r = await api.get("/client/besti/projets", headers=_jeton(admin))
+        assert r.status_code == 200, (role_gestion, r.text)
+        noms = sorted(p["nom"] for p in r.json())
+        assert noms == ["Le mien", "Le sien"], role_gestion
+        # L'email du propriétaire est renseigné pour la gestion.
+        emails = {p["nom"]: p["proprietaire_email"] for p in r.json()}
+        assert emails["Le mien"] == moi.email
+        assert emails["Le sien"] == autre.email
+
+    # Le client reste cloisonné à ses seuls projets.
+    r = await api.get("/client/besti/projets", headers=_jeton(moi))
+    assert [p["nom"] for p in r.json()] == ["Le mien"]
+
+
+@pytest.mark.anyio
+async def test_gestion_voit_le_detail_d_un_autre_client(api, sessions):
+    moi, autre = await _compte(sessions), await _compte(sessions)
+    sien = _projet(autre, name="Le sien")
+    await _envoyer(api, "project.created", sien)
+    admin = await _compte(sessions, role=RoleUtilisateur.DIRECTION)
+
+    r = await api.get(f"/client/besti/projets/{sien['projectId']}", headers=_jeton(admin))
+
+    assert r.status_code == 200
+    assert r.json()["nom"] == "Le sien"
+    assert r.json()["proprietaire_email"] == autre.email
+
+
+@pytest.mark.anyio
+async def test_lecture_interdite_a_l_equipe(api, sessions):
+    equipier = await _compte(sessions, role=RoleUtilisateur.EQUIPE)
+
+    r = await api.get("/client/besti/projets", headers=_jeton(equipier))
 
     assert r.status_code == 403
 
