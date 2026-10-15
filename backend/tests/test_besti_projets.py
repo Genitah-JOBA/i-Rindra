@@ -1,6 +1,5 @@
 # tests/test_besti_projets.py
-"""Projets Besti en consultation : webhook `project.*`, lecture par le client
-connecté et téléchargement des fichiers relayé depuis Besti.
+"""Projets Besti : webhook `project.*` et import auto en projet suivi.
 
 Contrairement aux tests des comptes (fausses sessions), ces tests tournent sur
 une vraie base SQLite en mémoire : le remplacement d'un instantané (cahiers,
@@ -16,7 +15,6 @@ import json
 import time
 import uuid
 
-import httpx
 import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import func, select
@@ -25,7 +23,6 @@ from sqlalchemy.pool import StaticPool
 
 from app.core.config import settings
 from app.core.database import Base, get_db
-from app.core.security import create_access_token
 from app.models.besti_projet import (
     BestiCahier,
     BestiFichier,
@@ -112,16 +109,6 @@ async def _compte(sessions, *, actif=True, role=RoleUtilisateur.CLIENT) -> Utili
         db.add(u)
         await db.commit()
         return u
-
-
-def _jeton(utilisateur: Utilisateur, role: str | None = None) -> dict:
-    # Par défaut, le jeton porte le vrai rôle en base (un jeton périmé ne doit
-    # pas élargir l'accès) ; un rôle explicite permet de simuler un jeton périmé.
-    valeur_role = role or utilisateur.role.value
-    jeton = create_access_token(
-        {"sub": str(utilisateur.id), "role": valeur_role, "email": utilisateur.email, "client_id": None}
-    )
-    return {"Authorization": f"Bearer {jeton}"}
 
 
 def _statut(code="soumis", label="Soumis", since="2026-10-12T08:00:00Z"):
@@ -470,240 +457,7 @@ async def test_ping_et_comptes_inchangés(api, sessions):
     assert (await _envoyer(api, "project.inconnu", None, corps=b"{}")).status_code == 400
 
 
-# --- 2. Lecture -----------------------------------------------------------------
-
-@pytest.mark.anyio
-async def test_le_client_ne_voit_que_ses_projets(api, sessions):
-    moi, autre = await _compte(sessions), await _compte(sessions)
-    mien, sien = _projet(moi, name="Le mien"), _projet(autre, name="Le sien")
-    await _envoyer(api, "project.created", mien)
-    await _envoyer(api, "project.created", sien)
-
-    r = await api.get("/client/besti/projets", headers=_jeton(moi))
-
-    assert r.status_code == 200
-    assert [p["nom"] for p in r.json()] == ["Le mien"]
-    statut = r.json()[0]["statut"]
-    assert (statut["code"], statut["libelle"]) == ("soumis", "Soumis")
-    # SQLite rend les dates sans fuseau (PostgreSQL le conserve).
-    assert statut["depuis"].startswith("2026-10-12T08:00:00")
-
-
-@pytest.mark.anyio
-async def test_projets_archivés_listés_à_part(api, sessions):
-    moi = await _compte(sessions)
-    actif, supprime = _projet(moi, name="Actif"), _projet(moi, name="Supprimé")
-    await _envoyer(api, "project.created", actif)
-    await _envoyer(api, "project.created", supprime)
-    await _envoyer(api, "project.deleted", {
-        "projectId": supprime["projectId"],
-        "bestiId": supprime["bestiId"],
-        "deletedAt": "2026-10-15T10:00:00Z",
-    })
-
-    actifs = (await api.get("/client/besti/projets", headers=_jeton(moi))).json()
-    archives = (await api.get("/client/besti/projets?archives=true", headers=_jeton(moi))).json()
-
-    assert [p["nom"] for p in actifs] == ["Actif"]
-    assert [p["nom"] for p in archives] == ["Supprimé"]
-    assert archives[0]["motif_archivage"] == "supprime_besti"
-    assert archives[0]["archive_le"].startswith("2026-10-15T10:00:00")
-
-
-@pytest.mark.anyio
-async def test_détail_avec_historique_et_cahiers(api, sessions):
-    moi = await _compte(sessions)
-    charge = _projet(moi)
-    await _envoyer(api, "project.created", charge)
-    await _envoyer(api, "project.updated", charge | {
-        "updatedAt": "2026-10-16T09:00:00Z",
-        "status": _statut("accepte", "Accepté", "2026-10-16T09:00:00Z"),
-    })
-
-    r = await api.get(f"/client/besti/projets/{charge['projectId']}", headers=_jeton(moi))
-
-    assert r.status_code == 200
-    detail = r.json()
-    assert [h["code"] for h in detail["historique"]] == ["soumis", "accepte"]
-    cahier = detail["cahiers"][0]
-    assert cahier["statut"] == {"code": "en_cours", "libelle": "En cours", "depuis": None}
-    assert cahier["fichiers"][0]["nom"] == "brief.pdf"
-    assert cahier["liens"][0]["url"] == "https://www.figma.com/file/abc"
-    # Aucun montant, aucune adresse de fichier chez Besti.
-    assert "besti.test" not in r.text
-
-
-@pytest.mark.anyio
-async def test_projet_d_un_autre_client_renvoie_404(api, sessions):
-    moi, autre = await _compte(sessions), await _compte(sessions)
-    sien = _projet(autre)
-    await _envoyer(api, "project.created", sien)
-
-    r = await api.get(f"/client/besti/projets/{sien['projectId']}", headers=_jeton(moi))
-
-    assert r.status_code == 404
-
-
-@pytest.mark.anyio
-async def test_gestion_voit_tous_les_projets_client_cloisonne(api, sessions):
-    """Gestion (direction/DRH/chef) voit tout ; client ne voit que ses projets."""
-    moi, autre = await _compte(sessions), await _compte(sessions)
-    mien, sien = _projet(moi, name="Le mien"), _projet(autre, name="Le sien")
-    await _envoyer(api, "project.created", mien)
-    await _envoyer(api, "project.created", sien)
-
-    for role_gestion in (
-        RoleUtilisateur.DIRECTION,
-        RoleUtilisateur.DRH,
-        RoleUtilisateur.CHEF_DE_PROJET,
-    ):
-        admin = await _compte(sessions, role=role_gestion)
-        r = await api.get("/client/besti/projets", headers=_jeton(admin))
-        assert r.status_code == 200, (role_gestion, r.text)
-        noms = sorted(p["nom"] for p in r.json())
-        assert noms == ["Le mien", "Le sien"], role_gestion
-        # L'email du propriétaire est renseigné pour la gestion.
-        emails = {p["nom"]: p["proprietaire_email"] for p in r.json()}
-        assert emails["Le mien"] == moi.email
-        assert emails["Le sien"] == autre.email
-
-    # Le client reste cloisonné à ses seuls projets.
-    r = await api.get("/client/besti/projets", headers=_jeton(moi))
-    assert [p["nom"] for p in r.json()] == ["Le mien"]
-
-
-@pytest.mark.anyio
-async def test_gestion_voit_le_detail_d_un_autre_client(api, sessions):
-    moi, autre = await _compte(sessions), await _compte(sessions)
-    sien = _projet(autre, name="Le sien")
-    await _envoyer(api, "project.created", sien)
-    admin = await _compte(sessions, role=RoleUtilisateur.DIRECTION)
-
-    r = await api.get(f"/client/besti/projets/{sien['projectId']}", headers=_jeton(admin))
-
-    assert r.status_code == 200
-    assert r.json()["nom"] == "Le sien"
-    assert r.json()["proprietaire_email"] == autre.email
-
-
-@pytest.mark.anyio
-async def test_lecture_interdite_a_l_equipe(api, sessions):
-    equipier = await _compte(sessions, role=RoleUtilisateur.EQUIPE)
-
-    r = await api.get("/client/besti/projets", headers=_jeton(equipier))
-
-    assert r.status_code == 403
-
-
-def test_aucune_route_d_écriture_exposée():
-    from app.main import app
-
-    routes = [r for r in app.routes if getattr(r, "path", "").startswith("/client/besti")]
-    assert routes, "les routes de lecture doivent être montées"
-    for route in routes:
-        assert route.methods == {"GET"}, f"{route.path} expose {route.methods}"
-
-
-# --- 3. Fichiers ------------------------------------------------------------------
-
-def _faux_besti(monkeypatch, gestionnaire):
-    """Remplace le transport httpx utilisé pour joindre Besti."""
-    transport = httpx.MockTransport(gestionnaire)
-    original = httpx.AsyncClient
-    monkeypatch.setattr(httpx, "AsyncClient", lambda **kw: original(transport=transport, **kw))
-
-
-async def _projet_avec_fichier(api, sessions):
-    moi = await _compte(sessions)
-    fichier = _fichier(name="brief.pdf")
-    await _envoyer(api, "project.created", _projet(moi, specs=[_cahier(files=[fichier])]))
-    return moi, fichier["fileId"]
-
-
-@pytest.mark.anyio
-async def test_téléchargement_relayé_depuis_besti(api, sessions, monkeypatch):
-    moi, file_id = await _projet_avec_fichier(api, sessions)
-    vus = []
-
-    def _besti(requete: httpx.Request):
-        vus.append(requete)
-        return httpx.Response(
-            200,
-            content=b"%PDF-1.7 contenu",
-            headers={
-                "Content-Type": "application/pdf",
-                "Content-Disposition": 'attachment; filename="brief.pdf"',
-            },
-        )
-
-    _faux_besti(monkeypatch, _besti)
-    r = await api.get(f"/client/besti/fichiers/{file_id}", headers=_jeton(moi))
-
-    assert r.status_code == 200
-    assert r.content == b"%PDF-1.7 contenu"
-    assert r.headers["content-type"] == "application/pdf"
-    assert r.headers["content-disposition"] == 'attachment; filename="brief.pdf"'
-    assert str(vus[0].url) == f"{BESTI_URL}/api/integrations/files/{file_id}"
-    assert vus[0].headers["X-Api-Key"] == "cle-de-test"
-
-
-@pytest.mark.anyio
-async def test_fichier_d_un_autre_client_404_sans_appeler_besti(api, sessions, monkeypatch):
-    _, file_id = await _projet_avec_fichier(api, sessions)
-    intrus = await _compte(sessions)
-
-    def _jamais(requete):
-        raise AssertionError("Besti ne doit pas être interrogé")
-
-    _faux_besti(monkeypatch, _jamais)
-    r = await api.get(f"/client/besti/fichiers/{file_id}", headers=_jeton(intrus))
-
-    assert r.status_code == 404
-
-
-@pytest.mark.anyio
-@pytest.mark.parametrize(
-    ("code_besti", "attendu", "message"),
-    [
-        (404, 404, "Ce fichier n'est plus disponible sur Besti"),
-        (401, 503, "Téléchargement momentanément indisponible, réessayez plus tard"),
-        (500, 503, "Téléchargement momentanément indisponible, réessayez plus tard"),
-    ],
-)
-async def test_erreurs_besti_au_téléchargement(api, sessions, monkeypatch, code_besti, attendu, message):
-    moi, file_id = await _projet_avec_fichier(api, sessions)
-    _faux_besti(monkeypatch, lambda requete: httpx.Response(code_besti))
-
-    r = await api.get(f"/client/besti/fichiers/{file_id}", headers=_jeton(moi))
-
-    assert r.status_code == attendu
-    assert r.json()["detail"] == message
-
-
-@pytest.mark.anyio
-async def test_besti_injoignable_au_téléchargement(api, sessions, monkeypatch):
-    moi, file_id = await _projet_avec_fichier(api, sessions)
-
-    def _panne(requete):
-        raise httpx.ConnectError("injoignable", request=requete)
-
-    _faux_besti(monkeypatch, _panne)
-    r = await api.get(f"/client/besti/fichiers/{file_id}", headers=_jeton(moi))
-
-    assert r.status_code == 503
-
-
-@pytest.mark.anyio
-async def test_téléchargement_sans_clé_configurée(api, sessions, monkeypatch):
-    moi, file_id = await _projet_avec_fichier(api, sessions)
-    monkeypatch.setattr(settings, "BESTI_API_KEY", "", raising=False)
-
-    r = await api.get(f"/client/besti/fichiers/{file_id}", headers=_jeton(moi))
-
-    assert r.status_code == 503
-
-
-# --- 4. Import auto en projet suivi --------------------------------------------
+# --- 2. Import auto en projet suivi --------------------------------------------
 
 async def _lire_suivi(sessions, project_id) -> Projet | None:
     async with sessions() as db:

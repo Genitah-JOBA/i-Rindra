@@ -1,6 +1,4 @@
 // MonProjet.jsx — dashboard client : le client voit uniquement son projet (RF-19 à RF-22).
-// Les projets Besti sont désormais enregistrés en `projet` suivi : l'onglet
-// miroir `ProjetsBesti` est en sommeil, seul le suivi reste affiché.
 import { useEffect, useState } from "react";
 import api from "../api/client";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
