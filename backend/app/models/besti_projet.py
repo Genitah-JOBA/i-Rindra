@@ -24,6 +24,7 @@ MOTIF_SUPPRIME_BESTI = "supprime_besti"
 MOTIF_COMPTE_DESACTIVE = "compte_desactive"
 
 
+
 class BestiProjet(Base):
     """Table 'besti_projet' : dernier instantané d'un projet Besti."""
 
