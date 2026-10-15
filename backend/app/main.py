@@ -18,7 +18,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from app.routers import auth, projets, taches, dashboard, client, fichiers, utilisateurs, notifications, clients, factures, ia, absences, suggestion_devis, besti, besti_client
+from app.routers import auth, projets, taches, dashboard, client, fichiers, utilisateurs, notifications, clients, factures, ia, absences, suggestion_devis, besti
 from app.besti.liaison import router as besti_liaison_router
 from app.core.database import engine, Base
 from app.services import notifications as notif_service
@@ -59,7 +59,6 @@ app.include_router(absences.router)
 app.include_router(suggestion_devis.router)
 app.include_router(besti.router)
 app.include_router(besti_liaison_router)  # test de liaison (Paramètres)
-app.include_router(besti_client.router)
 
 @app.on_event("startup")
 async def init_db():
@@ -101,6 +100,19 @@ async def init_db():
         )
         await conn.execute(
             text("ALTER TABLE utilisateur ALTER COLUMN mot_de_passe_hash DROP NOT NULL")
+        )
+        # Migration idempotente : lien projet interne -> projet Besti d'origine.
+        # `besti_projet_id` reste NULL pour les projets créés localement.
+        # L'index unique rend l'import webhook idempotent (un seul projet
+        # suivi par projet Besti). Les NULL multiples restent autorisés.
+        await conn.execute(
+            text("ALTER TABLE projet ADD COLUMN IF NOT EXISTS besti_projet_id UUID")
+        )
+        await conn.execute(
+            text(
+                "CREATE UNIQUE INDEX IF NOT EXISTS ix_projet_besti_projet_id "
+                "ON projet (besti_projet_id)"
+            )
         )
         # Recherche sémantique (RF-31) : table document_chunk + index pgvector.
         # Sans l'extension `vector`, ne fait rien (recherche plein texte seule).

@@ -55,6 +55,14 @@ class ResultatFaux:
         # `scalars().first()` : le service l'utilise pour certain(e)s lectures.
         return self._valeur
 
+    def all(self):
+        # `scalars().all()` : import auto des projets suivis (aucun ici).
+        if self._valeur is None:
+            return []
+        if isinstance(self._valeur, list):
+            return list(self._valeur)
+        return [self._valeur]
+
 
 class FauxSession:
     """Session SQLAlchemy de substitution : `utilisateurs` tient la table."""

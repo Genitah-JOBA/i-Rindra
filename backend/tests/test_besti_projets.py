@@ -1,6 +1,5 @@
 # tests/test_besti_projets.py
-"""Projets Besti en consultation : webhook `project.*`, lecture par le client
-connecté et téléchargement des fichiers relayé depuis Besti.
+"""Projets Besti : webhook `project.*` et import auto en projet suivi.
 
 Contrairement aux tests des comptes (fausses sessions), ces tests tournent sur
 une vraie base SQLite en mémoire : le remplacement d'un instantané (cahiers,
@@ -16,7 +15,6 @@ import json
 import time
 import uuid
 
-import httpx
 import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import func, select
@@ -25,7 +23,6 @@ from sqlalchemy.pool import StaticPool
 
 from app.core.config import settings
 from app.core.database import Base, get_db
-from app.core.security import create_access_token
 from app.models.besti_projet import (
     BestiCahier,
     BestiFichier,
@@ -35,6 +32,7 @@ from app.models.besti_projet import (
 )
 from app.models.client import Client
 from app.models.mot_de_passe_reinit import MotDePasseReinit
+from app.models.projet import Projet
 from app.models.utilisateur import RoleUtilisateur, Utilisateur
 
 SECRET = "secret-de-test-besti"
@@ -44,6 +42,7 @@ TABLES = [
     Client.__table__,
     Utilisateur.__table__,
     MotDePasseReinit.__table__,
+    Projet.__table__,
     BestiProjet.__table__,
     BestiCahier.__table__,
     BestiFichier.__table__,
@@ -95,8 +94,8 @@ async def api(sessions):
 
 # --- Données ------------------------------------------------------------------
 
-async def _compte(sessions, *, actif=True) -> Utilisateur:
-    """Compte client lié à Besti, déjà présent dans iRindra."""
+async def _compte(sessions, *, actif=True, role=RoleUtilisateur.CLIENT) -> Utilisateur:
+    """Compte lié à Besti, déjà présent dans iRindra (client par défaut)."""
     async with sessions() as db:
         u = Utilisateur(
             nom="Curie",
@@ -104,19 +103,12 @@ async def _compte(sessions, *, actif=True) -> Utilisateur:
             email=f"{uuid.uuid4().hex[:8]}@exemple.fr",
             mot_de_passe_hash=None,
             besti_id=uuid.uuid4(),
-            role=RoleUtilisateur.CLIENT,
+            role=role,
             actif=actif,
         )
         db.add(u)
         await db.commit()
         return u
-
-
-def _jeton(utilisateur: Utilisateur, role: str = "client") -> dict:
-    jeton = create_access_token(
-        {"sub": str(utilisateur.id), "role": role, "email": utilisateur.email, "client_id": None}
-    )
-    return {"Authorization": f"Bearer {jeton}"}
 
 
 def _statut(code="soumis", label="Soumis", since="2026-10-12T08:00:00Z"):
@@ -465,29 +457,109 @@ async def test_ping_et_comptes_inchangés(api, sessions):
     assert (await _envoyer(api, "project.inconnu", None, corps=b"{}")).status_code == 400
 
 
-# --- 2. Lecture -----------------------------------------------------------------
+# --- 2. Import auto en projet suivi --------------------------------------------
 
-@pytest.mark.anyio
-async def test_le_client_ne_voit_que_ses_projets(api, sessions):
-    moi, autre = await _compte(sessions), await _compte(sessions)
-    mien, sien = _projet(moi, name="Le mien"), _projet(autre, name="Le sien")
-    await _envoyer(api, "project.created", mien)
-    await _envoyer(api, "project.created", sien)
-
-    r = await api.get("/client/besti/projets", headers=_jeton(moi))
-
-    assert r.status_code == 200
-    assert [p["nom"] for p in r.json()] == ["Le mien"]
-    statut = r.json()[0]["statut"]
-    assert (statut["code"], statut["libelle"]) == ("soumis", "Soumis")
-    # SQLite rend les dates sans fuseau (PostgreSQL le conserve).
-    assert statut["depuis"].startswith("2026-10-12T08:00:00")
+async def _lire_suivi(sessions, project_id) -> Projet | None:
+    async with sessions() as db:
+        resultat = await db.execute(
+            select(Projet).where(Projet.besti_projet_id == uuid.UUID(str(project_id)))
+        )
+        return resultat.scalar_one_or_none()
 
 
 @pytest.mark.anyio
-async def test_projets_archivés_listés_à_part(api, sessions):
-    moi = await _compte(sessions)
-    actif, supprime = _projet(moi, name="Actif"), _projet(moi, name="Supprimé")
+async def test_import_cree_projet_suivi_champs_communs(api, sessions):
+    compte = await _compte(sessions)
+    charge = _projet(compte)
+
+    assert (await _envoyer(api, "project.created", charge)).status_code == 204
+
+    suivi = await _lire_suivi(sessions, charge["projectId"])
+    assert suivi is not None
+    assert suivi.nom == "Refonte du site vitrine"
+    assert suivi.description == "Nouveau site"
+    assert str(suivi.date_debut) == "2026-10-12"
+    assert str(suivi.date_fin_prevue) == "2026-12-01"
+    assert suivi.archive is False
+    assert suivi.statut_sante.value == "vert"
+    assert suivi.avancement_pct == 0
+    assert suivi.responsable_id is None
+    # Client repris de la fiche du compte (créée à la volée ici).
+    assert suivi.client_id is not None
+    async with sessions() as db:
+        fiche = await db.get(Client, suivi.client_id)
+        assert fiche is not None
+        assert fiche.email == compte.email
+
+
+@pytest.mark.anyio
+async def test_import_rejeu_ne_duplique_pas_le_suivi(api, sessions):
+    compte = await _compte(sessions)
+    charge = _projet(compte)
+
+    for _ in range(2):
+        assert (await _envoyer(api, "project.created", charge)).status_code == 204
+
+    assert await _compter(sessions, Projet) == 1
+
+
+@pytest.mark.anyio
+async def test_import_updated_met_a_jour_sans_ecraser_le_pilotage(api, sessions):
+    from app.models.projet import StatutSante
+
+    compte = await _compte(sessions)
+    charge = _projet(compte)
+    await _envoyer(api, "project.created", charge)
+
+    # Pilotage iRindra : santé et avancement changés par la gestion.
+    async with sessions() as db:
+        resultat = await db.execute(
+            select(Projet).where(Projet.besti_projet_id == uuid.UUID(charge["projectId"]))
+        )
+        suivi = resultat.scalar_one()
+        suivi.statut_sante = StatutSante.ORANGE
+        suivi.avancement_pct = 42
+        await db.commit()
+
+    charge |= {
+        "updatedAt": "2026-10-16T09:00:00Z",
+        "name": "Nouveau nom",
+        "description": "Nouvelle description",
+        "desiredDeadline": "2027-01-15",
+    }
+    assert (await _envoyer(api, "project.updated", charge)).status_code == 204
+
+    suivi = await _lire_suivi(sessions, charge["projectId"])
+    assert suivi.nom == "Nouveau nom"
+    assert suivi.description == "Nouvelle description"
+    assert str(suivi.date_fin_prevue) == "2027-01-15"
+    assert suivi.statut_sante.value == "orange"
+    assert suivi.avancement_pct == 42
+    assert await _compter(sessions, Projet) == 1
+
+
+@pytest.mark.anyio
+async def test_import_deleted_archive_puis_updated_desarchive_le_suivi(api, sessions):
+    compte = await _compte(sessions)
+    charge = _projet(compte)
+    await _envoyer(api, "project.created", charge)
+
+    suppression = {
+        "projectId": charge["projectId"],
+        "bestiId": charge["bestiId"],
+        "deletedAt": "2026-10-15T10:00:00Z",
+    }
+    assert (await _envoyer(api, "project.deleted", suppression)).status_code == 204
+    assert (await _lire_suivi(sessions, charge["projectId"])).archive is True
+
+    await _envoyer(api, "project.updated", charge | {"updatedAt": "2026-10-16T09:00:00Z"})
+    assert (await _lire_suivi(sessions, charge["projectId"])).archive is False
+
+
+@pytest.mark.anyio
+async def test_import_desactivation_reactivation_archive_le_suivi(api, sessions):
+    compte = await _compte(sessions)
+    actif, supprime = _projet(compte), _projet(compte)
     await _envoyer(api, "project.created", actif)
     await _envoyer(api, "project.created", supprime)
     await _envoyer(api, "project.deleted", {
@@ -496,161 +568,11 @@ async def test_projets_archivés_listés_à_part(api, sessions):
         "deletedAt": "2026-10-15T10:00:00Z",
     })
 
-    actifs = (await api.get("/client/besti/projets", headers=_jeton(moi))).json()
-    archives = (await api.get("/client/besti/projets?archives=true", headers=_jeton(moi))).json()
+    assert (await _envoyer(api, "user.deactivated", _compte_besti(compte))).status_code == 204
+    assert (await _lire_suivi(sessions, actif["projectId"])).archive is True
+    assert (await _lire_suivi(sessions, supprime["projectId"])).archive is True
 
-    assert [p["nom"] for p in actifs] == ["Actif"]
-    assert [p["nom"] for p in archives] == ["Supprimé"]
-    assert archives[0]["motif_archivage"] == "supprime_besti"
-    assert archives[0]["archive_le"].startswith("2026-10-15T10:00:00")
-
-
-@pytest.mark.anyio
-async def test_détail_avec_historique_et_cahiers(api, sessions):
-    moi = await _compte(sessions)
-    charge = _projet(moi)
-    await _envoyer(api, "project.created", charge)
-    await _envoyer(api, "project.updated", charge | {
-        "updatedAt": "2026-10-16T09:00:00Z",
-        "status": _statut("accepte", "Accepté", "2026-10-16T09:00:00Z"),
-    })
-
-    r = await api.get(f"/client/besti/projets/{charge['projectId']}", headers=_jeton(moi))
-
-    assert r.status_code == 200
-    detail = r.json()
-    assert [h["code"] for h in detail["historique"]] == ["soumis", "accepte"]
-    cahier = detail["cahiers"][0]
-    assert cahier["statut"] == {"code": "en_cours", "libelle": "En cours", "depuis": None}
-    assert cahier["fichiers"][0]["nom"] == "brief.pdf"
-    assert cahier["liens"][0]["url"] == "https://www.figma.com/file/abc"
-    # Aucun montant, aucune adresse de fichier chez Besti.
-    assert "besti.test" not in r.text
-
-
-@pytest.mark.anyio
-async def test_projet_d_un_autre_client_renvoie_404(api, sessions):
-    moi, autre = await _compte(sessions), await _compte(sessions)
-    sien = _projet(autre)
-    await _envoyer(api, "project.created", sien)
-
-    r = await api.get(f"/client/besti/projets/{sien['projectId']}", headers=_jeton(moi))
-
-    assert r.status_code == 404
-
-
-@pytest.mark.anyio
-async def test_lecture_réservée_aux_clients(api, sessions):
-    moi = await _compte(sessions)
-
-    r = await api.get("/client/besti/projets", headers=_jeton(moi, role="direction"))
-
-    assert r.status_code == 403
-
-
-def test_aucune_route_d_écriture_exposée():
-    from app.main import app
-
-    routes = [r for r in app.routes if getattr(r, "path", "").startswith("/client/besti")]
-    assert routes, "les routes de lecture doivent être montées"
-    for route in routes:
-        assert route.methods == {"GET"}, f"{route.path} expose {route.methods}"
-
-
-# --- 3. Fichiers ------------------------------------------------------------------
-
-def _faux_besti(monkeypatch, gestionnaire):
-    """Remplace le transport httpx utilisé pour joindre Besti."""
-    transport = httpx.MockTransport(gestionnaire)
-    original = httpx.AsyncClient
-    monkeypatch.setattr(httpx, "AsyncClient", lambda **kw: original(transport=transport, **kw))
-
-
-async def _projet_avec_fichier(api, sessions):
-    moi = await _compte(sessions)
-    fichier = _fichier(name="brief.pdf")
-    await _envoyer(api, "project.created", _projet(moi, specs=[_cahier(files=[fichier])]))
-    return moi, fichier["fileId"]
-
-
-@pytest.mark.anyio
-async def test_téléchargement_relayé_depuis_besti(api, sessions, monkeypatch):
-    moi, file_id = await _projet_avec_fichier(api, sessions)
-    vus = []
-
-    def _besti(requete: httpx.Request):
-        vus.append(requete)
-        return httpx.Response(
-            200,
-            content=b"%PDF-1.7 contenu",
-            headers={
-                "Content-Type": "application/pdf",
-                "Content-Disposition": 'attachment; filename="brief.pdf"',
-            },
-        )
-
-    _faux_besti(monkeypatch, _besti)
-    r = await api.get(f"/client/besti/fichiers/{file_id}", headers=_jeton(moi))
-
-    assert r.status_code == 200
-    assert r.content == b"%PDF-1.7 contenu"
-    assert r.headers["content-type"] == "application/pdf"
-    assert r.headers["content-disposition"] == 'attachment; filename="brief.pdf"'
-    assert str(vus[0].url) == f"{BESTI_URL}/api/integrations/files/{file_id}"
-    assert vus[0].headers["X-Api-Key"] == "cle-de-test"
-
-
-@pytest.mark.anyio
-async def test_fichier_d_un_autre_client_404_sans_appeler_besti(api, sessions, monkeypatch):
-    _, file_id = await _projet_avec_fichier(api, sessions)
-    intrus = await _compte(sessions)
-
-    def _jamais(requete):
-        raise AssertionError("Besti ne doit pas être interrogé")
-
-    _faux_besti(monkeypatch, _jamais)
-    r = await api.get(f"/client/besti/fichiers/{file_id}", headers=_jeton(intrus))
-
-    assert r.status_code == 404
-
-
-@pytest.mark.anyio
-@pytest.mark.parametrize(
-    ("code_besti", "attendu", "message"),
-    [
-        (404, 404, "Ce fichier n'est plus disponible sur Besti"),
-        (401, 503, "Téléchargement momentanément indisponible, réessayez plus tard"),
-        (500, 503, "Téléchargement momentanément indisponible, réessayez plus tard"),
-    ],
-)
-async def test_erreurs_besti_au_téléchargement(api, sessions, monkeypatch, code_besti, attendu, message):
-    moi, file_id = await _projet_avec_fichier(api, sessions)
-    _faux_besti(monkeypatch, lambda requete: httpx.Response(code_besti))
-
-    r = await api.get(f"/client/besti/fichiers/{file_id}", headers=_jeton(moi))
-
-    assert r.status_code == attendu
-    assert r.json()["detail"] == message
-
-
-@pytest.mark.anyio
-async def test_besti_injoignable_au_téléchargement(api, sessions, monkeypatch):
-    moi, file_id = await _projet_avec_fichier(api, sessions)
-
-    def _panne(requete):
-        raise httpx.ConnectError("injoignable", request=requete)
-
-    _faux_besti(monkeypatch, _panne)
-    r = await api.get(f"/client/besti/fichiers/{file_id}", headers=_jeton(moi))
-
-    assert r.status_code == 503
-
-
-@pytest.mark.anyio
-async def test_téléchargement_sans_clé_configurée(api, sessions, monkeypatch):
-    moi, file_id = await _projet_avec_fichier(api, sessions)
-    monkeypatch.setattr(settings, "BESTI_API_KEY", "", raising=False)
-
-    r = await api.get(f"/client/besti/fichiers/{file_id}", headers=_jeton(moi))
-
-    assert r.status_code == 503
+    assert (await _envoyer(api, "user.activated", _compte_besti(compte))).status_code == 204
+    assert (await _lire_suivi(sessions, actif["projectId"])).archive is False
+    # Supprimé dans Besti : reste archivé des deux côtés.
+    assert (await _lire_suivi(sessions, supprime["projectId"])).archive is True

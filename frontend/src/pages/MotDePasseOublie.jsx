@@ -42,7 +42,7 @@ export default function MotDePasseOublie() {
     } catch (err) {
       if (!err.response) {
         setErreur(
-          "Impossible de joindre le serveur. Vérifiez que le backend est démarré (http://localhost:8000).",
+          "Impossible de joindre le serveur. Veuillez contacter l'administrateur",
         );
       } else {
         setErreur(err.response.data?.detail || "Une erreur est survenue.");
