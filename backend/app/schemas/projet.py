@@ -39,9 +39,6 @@ class ProjetUpdate(BaseModel):
 
 class ProjetResponse(ProjetBase):
     """Schéma pour la réponse (lecture)"""
-    # Un projet importé de Besti arrive sans responsable (colonne nullable) :
-    # l'exiger ici faisait échouer GET /projets/{id} en 500.
-    responsable_id: Optional[int] = None
     id: int
     statut_sante: StatutSanteEnum
     responsable_id: Optional[int] = None
