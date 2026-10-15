@@ -1,7 +1,7 @@
 # projet.py
 from sqlalchemy import (
     Column, Integer, String, Text, Date, DateTime, Boolean, ForeignKey,
-    CheckConstraint, UniqueConstraint,
+    CheckConstraint, UniqueConstraint, Uuid,
 )
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
@@ -39,6 +39,10 @@ class Projet(Base):
     # None dès que la situation disparaît, pour pouvoir re-notifier.
     retard_notifie_le = Column(DateTime(timezone=True), nullable=True)
     rouge_notifie_le = Column(DateTime(timezone=True), nullable=True)
+    # Lien vers le projet Besti d'origine (UUID public Besti). NULL = projet
+    # créé localement. Renseigné uniquement par l'import auto webhook
+    # (base seule : nom/description/dates), jamais par l'API manuelle.
+    besti_projet_id = Column(Uuid, unique=True, nullable=True, index=True)
     cree_le = Column(DateTime(timezone=True), server_default=func.now())
     modifie_le = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 

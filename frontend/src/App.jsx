@@ -34,7 +34,6 @@ const AssistantIA = lazy(() => import("./pages/AssistantIA/index.jsx"));
 const SuggestionDevis = lazy(() => import("./pages/SuggestionDevis"));
 const DevisEstimations = lazy(() => import("./pages/DevisEstimations"));
 const Parametres = lazy(() => import("./pages/Parametres"));
-const ProjetsBesti = lazy(() => import("./pages/ProjetsBesti"));
 
 // Affiché pendant le téléchargement d'un chunk de page. Volontairement sobre :
 // ce n'est pas un blocage, c'est un aller-retour réseau de quelques dizaines de
@@ -78,18 +77,6 @@ export default function App() {
           {/* Devis validés : consultation par toute l'équipe interne (lecture seule
               hors direction / DRH, filtrée côté API selon le rôle) */}
           <Route path="devis-estimations" element={<DevisEstimations />} />
-        </Route>
-
-        {/* Projets Besti — gestion (direction, DRH, chef de projet) : tous les
-            projets, en consultation seule. Les clients y accèdent via /mon-projet. */}
-        <Route
-          element={
-            <ProtectedRoute roles={["direction", "drh", "chef_de_projet"]}>
-              <Layout />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="projets-besti" element={<ProjetsBesti />} />
         </Route>
 
         {/* Volet financier — Direction / DRH uniquement */}

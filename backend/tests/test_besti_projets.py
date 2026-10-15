@@ -35,6 +35,7 @@ from app.models.besti_projet import (
 )
 from app.models.client import Client
 from app.models.mot_de_passe_reinit import MotDePasseReinit
+from app.models.projet import Projet
 from app.models.utilisateur import RoleUtilisateur, Utilisateur
 
 SECRET = "secret-de-test-besti"
@@ -44,6 +45,7 @@ TABLES = [
     Client.__table__,
     Utilisateur.__table__,
     MotDePasseReinit.__table__,
+    Projet.__table__,
     BestiProjet.__table__,
     BestiCahier.__table__,
     BestiFichier.__table__,
@@ -699,3 +701,124 @@ async def test_téléchargement_sans_clé_configurée(api, sessions, monkeypatch
     r = await api.get(f"/client/besti/fichiers/{file_id}", headers=_jeton(moi))
 
     assert r.status_code == 503
+
+
+# --- 4. Import auto en projet suivi --------------------------------------------
+
+async def _lire_suivi(sessions, project_id) -> Projet | None:
+    async with sessions() as db:
+        resultat = await db.execute(
+            select(Projet).where(Projet.besti_projet_id == uuid.UUID(str(project_id)))
+        )
+        return resultat.scalar_one_or_none()
+
+
+@pytest.mark.anyio
+async def test_import_cree_projet_suivi_champs_communs(api, sessions):
+    compte = await _compte(sessions)
+    charge = _projet(compte)
+
+    assert (await _envoyer(api, "project.created", charge)).status_code == 204
+
+    suivi = await _lire_suivi(sessions, charge["projectId"])
+    assert suivi is not None
+    assert suivi.nom == "Refonte du site vitrine"
+    assert suivi.description == "Nouveau site"
+    assert str(suivi.date_debut) == "2026-10-12"
+    assert str(suivi.date_fin_prevue) == "2026-12-01"
+    assert suivi.archive is False
+    assert suivi.statut_sante.value == "vert"
+    assert suivi.avancement_pct == 0
+    assert suivi.responsable_id is None
+    # Client repris de la fiche du compte (créée à la volée ici).
+    assert suivi.client_id is not None
+    async with sessions() as db:
+        fiche = await db.get(Client, suivi.client_id)
+        assert fiche is not None
+        assert fiche.email == compte.email
+
+
+@pytest.mark.anyio
+async def test_import_rejeu_ne_duplique_pas_le_suivi(api, sessions):
+    compte = await _compte(sessions)
+    charge = _projet(compte)
+
+    for _ in range(2):
+        assert (await _envoyer(api, "project.created", charge)).status_code == 204
+
+    assert await _compter(sessions, Projet) == 1
+
+
+@pytest.mark.anyio
+async def test_import_updated_met_a_jour_sans_ecraser_le_pilotage(api, sessions):
+    from app.models.projet import StatutSante
+
+    compte = await _compte(sessions)
+    charge = _projet(compte)
+    await _envoyer(api, "project.created", charge)
+
+    # Pilotage iRindra : santé et avancement changés par la gestion.
+    async with sessions() as db:
+        resultat = await db.execute(
+            select(Projet).where(Projet.besti_projet_id == uuid.UUID(charge["projectId"]))
+        )
+        suivi = resultat.scalar_one()
+        suivi.statut_sante = StatutSante.ORANGE
+        suivi.avancement_pct = 42
+        await db.commit()
+
+    charge |= {
+        "updatedAt": "2026-10-16T09:00:00Z",
+        "name": "Nouveau nom",
+        "description": "Nouvelle description",
+        "desiredDeadline": "2027-01-15",
+    }
+    assert (await _envoyer(api, "project.updated", charge)).status_code == 204
+
+    suivi = await _lire_suivi(sessions, charge["projectId"])
+    assert suivi.nom == "Nouveau nom"
+    assert suivi.description == "Nouvelle description"
+    assert str(suivi.date_fin_prevue) == "2027-01-15"
+    assert suivi.statut_sante.value == "orange"
+    assert suivi.avancement_pct == 42
+    assert await _compter(sessions, Projet) == 1
+
+
+@pytest.mark.anyio
+async def test_import_deleted_archive_puis_updated_desarchive_le_suivi(api, sessions):
+    compte = await _compte(sessions)
+    charge = _projet(compte)
+    await _envoyer(api, "project.created", charge)
+
+    suppression = {
+        "projectId": charge["projectId"],
+        "bestiId": charge["bestiId"],
+        "deletedAt": "2026-10-15T10:00:00Z",
+    }
+    assert (await _envoyer(api, "project.deleted", suppression)).status_code == 204
+    assert (await _lire_suivi(sessions, charge["projectId"])).archive is True
+
+    await _envoyer(api, "project.updated", charge | {"updatedAt": "2026-10-16T09:00:00Z"})
+    assert (await _lire_suivi(sessions, charge["projectId"])).archive is False
+
+
+@pytest.mark.anyio
+async def test_import_desactivation_reactivation_archive_le_suivi(api, sessions):
+    compte = await _compte(sessions)
+    actif, supprime = _projet(compte), _projet(compte)
+    await _envoyer(api, "project.created", actif)
+    await _envoyer(api, "project.created", supprime)
+    await _envoyer(api, "project.deleted", {
+        "projectId": supprime["projectId"],
+        "bestiId": supprime["bestiId"],
+        "deletedAt": "2026-10-15T10:00:00Z",
+    })
+
+    assert (await _envoyer(api, "user.deactivated", _compte_besti(compte))).status_code == 204
+    assert (await _lire_suivi(sessions, actif["projectId"])).archive is True
+    assert (await _lire_suivi(sessions, supprime["projectId"])).archive is True
+
+    assert (await _envoyer(api, "user.activated", _compte_besti(compte))).status_code == 204
+    assert (await _lire_suivi(sessions, actif["projectId"])).archive is False
+    # Supprimé dans Besti : reste archivé des deux côtés.
+    assert (await _lire_suivi(sessions, supprime["projectId"])).archive is True

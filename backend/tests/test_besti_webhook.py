@@ -91,6 +91,10 @@ class ResultatFaux:
     def first(self):
         return self._valeurs[0] if self._valeurs else None
 
+    def all(self):
+        # `scalars().all()` : import auto des projets suivis (aucun ici).
+        return list(self._valeurs)
+
 
 class FauxSession:
     """

@@ -7,19 +7,21 @@ le webhook APRÈS la vérification de signature.
 
 Invariants tenus ici :
 
-* **Consultation seule.** iRindra reflète le dernier instantané de Besti ; rien
-  n'est jamais écrit dans l'autre sens.
+* **Miroir + projet suivi.** iRindra garde le dernier instantané de Besti
+  (miroir, seul maître : Besti) ET crée/met à jour le `projet` interne suivi
+  (base seule : nom/description/dates/client). Rien n'est jamais écrit vers Besti.
 * **Jamais de compte créé par un projet.** Un `bestiId` sans compte lié répond
   503 : Besti réessaiera, le compte arrivant normalement avant ses projets.
 * **Un instantané s'applique en entier ou pas du tout** : une seule
-  transaction par événement.
+  transaction miroir + suivi par événement.
 * **Ordre et rejeu.** Un instantané dont `updatedAt` n'est pas plus récent que
   celui enregistré est ignoré (204) : un envoi rejoué ou arrivé en retard ne
   change rien et n'ajoute aucune ligne d'historique.
-* **Jamais d'effacement d'un projet** : `project.deleted` archive. Les cahiers,
-  fichiers et liens absents d'un instantané sont en revanche supprimés : ce ne
-  sont que des métadonnées dont Besti est le seul maître, et un fichier retiré
-  n'est de toute façon plus téléchargeable chez Besti.
+* **Jamais d'effacement d'un projet** : `project.deleted` archive (miroir +
+  suivi). Les cahiers, fichiers et liens absents d'un instantané sont en
+  revanche supprimés du miroir : ce ne sont que des métadonnées dont Besti
+  est le seul maître, et un fichier retiré n'est de toute façon plus
+  téléchargeable chez Besti.
 """
 import logging
 from datetime import datetime, timezone
@@ -46,6 +48,7 @@ from app.models.besti_projet import (
     BestiStatutHistorique,
 )
 from app.models.utilisateur import Utilisateur
+from app.besti import service_import as import_suivi
 
 logger = logging.getLogger("i-rindra.besti")
 
@@ -211,6 +214,8 @@ async def _appliquer_instantane(db: AsyncSession, instantane: BestiProjetInstant
         projet.motif_archivage = None
 
     _remplacer_cahiers(projet, instantane.specifications)
+    # Projet suivi interne (base seule) : même transaction que le miroir.
+    await import_suivi.assurer_projet_suivi(db, compte, projet)
     await db.commit()
 
 
@@ -232,6 +237,7 @@ async def _archiver_supprime(db: AsyncSession, suppression: BestiProjetSupprime)
     projet.motif_archivage = MOTIF_SUPPRIME_BESTI
     # Un instantané antérieur à la suppression, arrivé en retard, sera ignoré.
     projet.maj_besti_le = quand
+    await import_suivi.archiver_projet_suivi(db, suppression.projectId)
     await db.commit()
 
 
@@ -267,6 +273,7 @@ async def archiver_projets_du_compte(db: AsyncSession, utilisateur_id: int) -> N
         .where(BestiProjet.utilisateur_id == utilisateur_id, BestiProjet.archive_le.is_(None))
         .values(archive_le=datetime.now(timezone.utc), motif_archivage=MOTIF_COMPTE_DESACTIVE)
     )
+    await import_suivi.archiver_projets_suivis_du_compte(db, utilisateur_id)
 
 
 async def desarchiver_projets_du_compte(db: AsyncSession, utilisateur_id: int) -> None:
@@ -282,3 +289,4 @@ async def desarchiver_projets_du_compte(db: AsyncSession, utilisateur_id: int) -
         )
         .values(archive_le=None, motif_archivage=None)
     )
+    await import_suivi.desarchiver_projets_suivis_du_compte(db, utilisateur_id)
