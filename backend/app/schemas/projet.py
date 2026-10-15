@@ -41,6 +41,7 @@ class ProjetResponse(ProjetBase):
     """Schéma pour la réponse (lecture)"""
     id: int
     statut_sante: StatutSanteEnum
+    responsable_id: Optional[int] = None
     avancement_pct: float
     archive: bool
     cree_le: datetime
