@@ -92,6 +92,13 @@ class FauxSession:
             def first(self):
                 return self._valeur
 
+            def all(self):
+                if self._valeur is None:
+                    return []
+                if isinstance(self._valeur, list):
+                    return list(self._valeur)
+                return [self._valeur]
+
         params = dict(requete.compile().params)
         if self.utilisateur is None:
             return Resultat(None)
