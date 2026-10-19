@@ -63,7 +63,7 @@ const formatTaille = (octets) => {
 
 export default function ProjetDetail() {
   const { user } = useAuth();
-  const { showConfirm, showError } = useMessage();
+  const { showConfirm, showError, showSuccess } = useMessage();
   const { id } = useParams();
   const estGestion = ["direction", "drh", "chef_de_projet"].includes(user?.role);
 
@@ -180,11 +180,13 @@ export default function ProjetDetail() {
     }
     setAjoutEnCours(true);
     try {
-      await projetsService.addMembre(id, {
-        utilisateur_id: parseInt(nouvelUtilisateurId, 10),
-      });
+      const utilisateurId = parseInt(nouvelUtilisateurId, 10);
+      const membre = await projetsService.addMembre(id, { utilisateur_id: utilisateurId });
+      // Mise à jour locale : pas de rechargement de la page
+      setMembres((prev) => [...prev, membre]);
+      setDisponibles((prev) => prev.filter((u) => u.id !== utilisateurId));
       setNouvelUtilisateurId("");
-      await charger(); // recharge membres + disponibles
+      showSuccess(`${membre.prenom} ${membre.nom} a été ajouté à l'équipe.`);
     } catch (err) {
       setAjoutErreur(err.response?.data?.detail || "Erreur lors de l'ajout.");
     } finally {
@@ -202,7 +204,21 @@ export default function ProjetDetail() {
     if (!ok) return;
     try {
       await projetsService.removeMembre(id, membre.utilisateur_id);
-      await charger();
+      // Mise à jour locale : le membre quitte l'équipe et redevient disponible
+      setMembres((prev) => prev.filter((m) => m.utilisateur_id !== membre.utilisateur_id));
+      setDisponibles((prev) =>
+        [
+          ...prev,
+          {
+            id: membre.utilisateur_id,
+            prenom: membre.prenom,
+            nom: membre.nom,
+            metier: membre.metier,
+            role: membre.role_global,
+          },
+        ].sort((a, b) => `${a.nom} ${a.prenom}`.localeCompare(`${b.nom} ${b.prenom}`)),
+      );
+      showSuccess(`${membre.prenom} ${membre.nom} a été retiré de l'équipe.`);
     } catch (err) {
       showError(err.response?.data?.detail || "Impossible de retirer ce membre.");
     }

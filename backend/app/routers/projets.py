@@ -503,7 +503,9 @@ async def ajouter_membre(
 
     # 6. Retourne la réponse
     return MembreResponse(
-        id=nouveau_membre.id,
+        # ProjetMembre n'a pas d'`id` mappé (clé = projet + utilisateur) :
+        # comme la liste des membres, on expose l'id de l'utilisateur.
+        id=nouveau_membre.utilisateur_id,
         projet_id=nouveau_membre.projet_id,
         utilisateur_id=nouveau_membre.utilisateur_id,
         nom=utilisateur.nom,
@@ -570,7 +572,7 @@ async def modifier_membre(
     utilisateur = result.scalar_one_or_none()
     
     return MembreResponse(
-        id=membre.id,
+        id=membre.utilisateur_id,
         projet_id=membre.projet_id,
         utilisateur_id=membre.utilisateur_id,
         nom=utilisateur.nom,
