@@ -215,7 +215,9 @@ async def _appliquer_instantane(db: AsyncSession, instantane: BestiProjetInstant
 
     _remplacer_cahiers(projet, instantane.specifications)
     # Projet suivi interne (base seule) : même transaction que le miroir.
-    await import_suivi.assurer_projet_suivi(db, compte, projet)
+    suivi = await import_suivi.assurer_projet_suivi(db, compte, projet)
+    if instantane.team is not None:
+        await import_suivi.synchroniser_equipe(db, suivi, instantane.team)
     await db.commit()
 
 

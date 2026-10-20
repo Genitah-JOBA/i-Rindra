@@ -46,6 +46,15 @@ class BestiCahierInfo(BaseModel):
     links: list[BestiLienInfo] = []
 
 
+class BestiAffectation(BaseModel):
+    """Membre de l'agence affecté au projet dans Besti (assignments)."""
+
+    email: str
+    firstName: str | None = None
+    lastName: str | None = None
+    assignedAt: datetime | None = None
+
+
 class BestiProjetInstantane(BaseModel):
     """Corps de `project.created` / `project.updated` : instantané COMPLET."""
 
@@ -58,6 +67,9 @@ class BestiProjetInstantane(BaseModel):
     status: BestiStatut
     updatedAt: datetime
     specifications: list[BestiCahierInfo] = []
+    # Affectations de l'équipe. Absent (None) : Besti ne les transmet pas, l'équipe
+    # iRindra n'est pas touchée ; liste vide : plus personne n'est affecté.
+    team: list[BestiAffectation] | None = None
 
 
 class BestiProjetSupprime(BaseModel):

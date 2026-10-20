@@ -41,7 +41,9 @@ class JalonListResponse(BaseModel):
     """Schéma pour la liste des jalons (version simplifiée)"""
     id: int
     titre: str
+    description: Optional[str] = None
     echeance: date
     atteint: bool
+    date_atteint: Optional[datetime] = None
     
     model_config = ConfigDict(from_attributes=True)

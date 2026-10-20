@@ -6,6 +6,7 @@ import { clientsService } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import Spin from "../components/Spin";
 import ChargeMembres from "../components/ChargeMembres";
+import TempsPasse from "../components/TempsPasse";
 import { dashboardService } from "../api/dashboard";
 import {
   Chart as ChartJS,
@@ -143,6 +144,7 @@ export default function Dashboard() {
   // Charge par membre (RF-17) : null = bloc indisponible. Les alertes (RF-18)
   // arrivent en notifications (cloche) côté équipe interne.
   const [charge, setCharge] = useState(null);
+  const [temps, setTemps] = useState(null);
 
   useEffect(() => {
     chargerDonnees();
@@ -172,6 +174,7 @@ export default function Dashboard() {
 
       // Charge par membre : un échec n'empêche pas d'afficher le reste
       setCharge(await dashboardService.charge().catch(() => null));
+      setTemps(await dashboardService.temps().catch(() => null));
 
       try {
         const evolution = await projetsService.getEvolution();
@@ -544,6 +547,9 @@ export default function Dashboard() {
 
           {/* Charge par membre (RF-17) */}
           <ChargeMembres charge={charge} />
+
+          {/* Temps passé par projet et par membre (RF-24) */}
+          <TempsPasse donnees={temps} mode="global" className="mb-4 sm:mb-6 animate__animated animate__fadeInUp" />
 
           {/* Graphiques */}
           {projetsAffiches.length > 0 ? (

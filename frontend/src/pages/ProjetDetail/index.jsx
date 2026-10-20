@@ -1,4 +1,5 @@
-// src/pages/ProjetDetail/index.jsx — fiche d'un projet : infos + gestion des membres (RF-06, RF-13) + fichiers (RF-08).
+// src/pages/ProjetDetail/index.jsx — fiche d'un projet : infos + gestion des membres (RF-06, RF-13),
+// transfert de responsabilité (RF-46), jalons (RF-07), temps passé (RF-24) + fichiers (RF-08).
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { projetsService } from "../../api/projets";
@@ -7,6 +8,8 @@ import { useAuth } from "../../auth/AuthContext";
 import { useMessage } from "../../context/MessageContext";
 import LiensProjet from "../../components/LiensProjet";
 import ApercuFichier from "../../components/ApercuFichier";
+import JalonsProjet from "../../components/JalonsProjet";
+import TempsPasse from "../../components/TempsPasse";
 import Spin from "../../components/Spin";
 
 // Palette login
@@ -66,12 +69,15 @@ export default function ProjetDetail() {
   const { showConfirm, showError, showSuccess } = useMessage();
   const { id } = useParams();
   const estGestion = ["direction", "drh", "chef_de_projet"].includes(user?.role);
+  const estInterne = estGestion || user?.role === "equipe";
 
   const [projet, setProjet] = useState(null);
   const [membres, setMembres] = useState([]);
   const [disponibles, setDisponibles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erreur, setErreur] = useState("");
+  const [temps, setTemps] = useState(null);
+  const [transfertEnCours, setTransfertEnCours] = useState(null);
 
   // Formulaire d'ajout de membre (on n'a plus besoin d'un rôle : le métier du membre suffit)
   const [nouvelUtilisateurId, setNouvelUtilisateurId] = useState("");
@@ -89,13 +95,15 @@ export default function ProjetDetail() {
     setLoading(true);
     setErreur("");
     try {
-      const [p, m, dispo, f] = await Promise.all([
+      const [p, m, dispo, f, t] = await Promise.all([
         projetsService.get(id),
         projetsService.getMembres(id).catch(() => []),
         projetsService.getMembresDisponibles(id).catch(() => []),
         fichiersService.listByProjet(id).catch(() => []),
+        estInterne ? projetsService.getTemps(id).catch(() => null) : Promise.resolve(null),
       ]);
       setProjet(p);
+      setTemps(t);
       setMembres(m || []);
       setDisponibles(dispo || []);
       setFichiers(f || []);
@@ -104,7 +112,7 @@ export default function ProjetDetail() {
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, estInterne]);
 
   useEffect(() => {
     charger();
@@ -224,6 +232,37 @@ export default function ProjetDetail() {
     }
   };
 
+  // Transfert de la responsabilité du projet (RF-46) : mise à jour locale
+  const transfererResponsabilite = async (membre) => {
+    const ok = await showConfirm({
+      type: "warning",
+      title: "Transférer la responsabilité",
+      message: `Confier la responsabilité du projet à ${membre.prenom} ${membre.nom} ? Le responsable actuel restera membre de l'équipe.`,
+      confirmLabel: "Transférer",
+    });
+    if (!ok) return;
+    setTransfertEnCours(membre.utilisateur_id);
+    try {
+      const p = await projetsService.transfererResponsabilite(id, membre.utilisateur_id);
+      setProjet(p);
+      setMembres((prev) =>
+        prev.map((m) => {
+          const estNouveau = m.utilisateur_id === membre.utilisateur_id;
+          return {
+            ...m,
+            est_responsable: estNouveau,
+            role_dans_projet: estNouveau ? "responsable" : m.est_responsable ? "membre" : m.role_dans_projet,
+          };
+        }),
+      );
+      showSuccess(`${membre.prenom} ${membre.nom} est désormais responsable du projet.`);
+    } catch (err) {
+      showError(err.response?.data?.detail || "Impossible de transférer la responsabilité.");
+    } finally {
+      setTransfertEnCours(null);
+    }
+  };
+
   if (loading) return <Spin taille="lg" className="py-12" />;
   if (erreur)
     return (
@@ -287,7 +326,7 @@ export default function ProjetDetail() {
         {projet.description && (
           <p className="mb-4 text-sm text-slate-600">{projet.description}</p>
         )}
-        {!projet.archive && <LiensProjet projetId={projet.id} className="mb-4" />}
+        {!projet.archive && <LiensProjet projetId={projet.id} bestiProjetId={projet.besti_projet_id} className="mb-4" />}
         <div className="mb-1 h-2 w-full overflow-hidden bg-slate-100">
           <div
             className="h-full"
@@ -314,6 +353,14 @@ export default function ProjetDetail() {
           </Link>
         </div>
       </div>
+
+      {/* Jalons (RF-07) */}
+      <JalonsProjet
+        projetId={id}
+        peutGerer={estGestion}
+        peutAtteindre={estInterne}
+        lectureSeule={projet.archive}
+      />
 
       {/* Membres de l'équipe */}
       <div className="border bg-white p-6 shadow-sm">
@@ -357,6 +404,17 @@ export default function ProjetDetail() {
                 </p>
               </div>
               {estGestion && !m.est_responsable && (
+                <div className="flex shrink-0 gap-2">
+                {!projet.archive && m.role_global !== "client" && (
+                  <button
+                    onClick={() => transfererResponsabilite(m)}
+                    disabled={transfertEnCours !== null}
+                    title="Confier la responsabilité du projet à ce membre"
+                    className="border border-i-blue/40 bg-i-blue/5 px-2.5 py-1 text-xs font-medium text-i-blue transition-colors hover:bg-i-blue/10 disabled:opacity-50"
+                  >
+                    {transfertEnCours === m.utilisateur_id ? "Transfert…" : "Rendre responsable"}
+                  </button>
+                )}
                 <button
                   onClick={() => retirerMembre(m)}
                   className="border border-slate-200 px-2.5 py-1 text-xs text-slate-600 transition-colors"
@@ -371,6 +429,7 @@ export default function ProjetDetail() {
                 >
                   Retirer
                 </button>
+                </div>
               )}
             </li>
           ))}
@@ -430,6 +489,9 @@ export default function ProjetDetail() {
           </p>
         )}
       </div>
+
+      {/* Temps passé (RF-24) */}
+      {estInterne && <TempsPasse donnees={temps} mode="projet" />}
 
       {/* Fichiers du projet */}
       <div className="border bg-white p-6 shadow-sm">

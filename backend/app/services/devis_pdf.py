@@ -176,10 +176,11 @@ def extraire_conditions(contenu: str) -> List[str]:
                     if bloc:
                         break
                     continue
-                s = _sans_markdown(suite).lstrip("-• ").strip()
+                # puce Markdown (« - », « * », « + ») ou typographique : le rendu ajoute la sienne
+                s = re.sub(r"^(?:[•*]\s*|[-+]\s+)+", "", _sans_markdown(suite).strip()).strip()
                 if s:
                     bloc.append(s)
-                if len(bloc) >= 8:
+                if len(bloc) >= 12:
                     break
             return bloc
     return []

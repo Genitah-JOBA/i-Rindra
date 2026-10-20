@@ -114,6 +114,13 @@ async def init_db():
                 "ON projet (besti_projet_id)"
             )
         )
+        # Migration idempotente : membres venus des affectations Besti.
+        await conn.execute(
+            text(
+                "ALTER TABLE projet_membre ADD COLUMN IF NOT EXISTS "
+                "ajoute_par_besti BOOLEAN NOT NULL DEFAULT false"
+            )
+        )
         # Recherche sémantique (RF-31) : table document_chunk + index pgvector.
         # Sans l'extension `vector`, ne fait rien (recherche plein texte seule).
         await vecteurs_service.preparer_base(conn)

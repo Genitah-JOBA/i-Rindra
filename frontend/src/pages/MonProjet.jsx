@@ -1,4 +1,4 @@
-// MonProjet.jsx — dashboard client : le client voit uniquement son projet (RF-19 à RF-22).
+// MonProjet.jsx — dashboard client : le client voit uniquement son projet (RF-19 à RF-22), jalons compris (RF-07).
 import { useEffect, useState } from "react";
 import api from "../api/client";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
@@ -6,6 +6,7 @@ import { Doughnut } from "react-chartjs-2";
 import Spin from "../components/Spin";
 import "animate.css";
 import LiensProjet from "../components/LiensProjet";
+import JalonsProjet from "../components/JalonsProjet";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -213,7 +214,7 @@ function SuiviProjet() {
               {projet.nom}
             </h1>
             <p className="text-sm text-slate-500">{"Voici l'avancement de votre projet."}</p>
-            <LiensProjet projetId={projet.id} className="mt-3" />
+            <LiensProjet projetId={projet.id} bestiProjetId={projet.besti_projet_id} className="mt-3" />
           </div>
           <div className="flex items-center gap-2">
             <span
@@ -440,6 +441,11 @@ function SuiviProjet() {
           ✓ {"Aucune alerte. Tout va bien."}
         </div>
       )}
+
+      {/* Jalons du projet (RF-07), en consultation */}
+      <div className="mb-6">
+        <JalonsProjet key={projet.id} projetId={projet.id} lectureSeule />
+      </div>
 
       {/* Liste des tâches */}
       <div className="bg-white border border-slate-200 shadow-sm">

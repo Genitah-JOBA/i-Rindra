@@ -1,13 +1,14 @@
 // src/components/LiensProjet.jsx — accès aux applications liées depuis un projet :
 //   - « Chat du projet » vers i-Resaka (RF-20 / RF-32), pour tous ;
-//   - « Estimation » vers B-esti (RF-34), réservé à la direction / DRH
+//   - « Estimation » vers B-esti (RF-34), réservé à la direction / DRH ; le lien
+//     est contextuel (RF-35) : il cible le projet d'origine dans B-esti ;
 //     (cahier des charges : le bouton n'est pas présenté au chef de projet) ;
 //   - « Mes devis » vers B-esti pour le client (RF-21) ;
 //   - « Devis & estimations » (devis validés du projet, consultation) pour le
 //     chef de projet et l'équipe.
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
-import { BESTI_URL, lienChatProjet } from "../config/liens";
+import { lienBestiProjet, lienChatProjet } from "../config/liens";
 
 const IconeChat = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.6} stroke="currentColor" className="h-4 w-4">
@@ -24,7 +25,7 @@ const IconeDevis = () => (
 const BOUTON =
   "inline-flex items-center gap-2 border border-i-primary/20 bg-white px-3 py-2 text-sm font-medium text-i-primary transition-colors hover:border-i-blue hover:bg-[#EEFBF6]";
 
-export default function LiensProjet({ projetId, className = "" }) {
+export default function LiensProjet({ projetId, bestiProjetId = null, className = "" }) {
   const { user } = useAuth();
   const role = user?.role;
   const estFinance = role === "direction" || role === "drh";
@@ -39,8 +40,8 @@ export default function LiensProjet({ projetId, className = "" }) {
         Chat du projet
       </a>
       {(estFinance || estClient) && (
-        <a href={BESTI_URL} target="_blank" rel="noopener noreferrer" className={BOUTON}
-           title={estClient ? "Consulter vos devis dans B-estimation" : "Ouvrir l'estimation dans B-estimation"}>
+        <a href={lienBestiProjet(bestiProjetId, estClient)} target="_blank" rel="noopener noreferrer" className={BOUTON}
+           title={estClient ? "Consulter ce projet et ses devis dans B-estimation" : "Ouvrir l'estimation de ce projet dans B-estimation"}>
           <IconeDevis />
           {estClient ? "Mes devis" : "Estimation"}
         </a>

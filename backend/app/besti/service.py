@@ -95,6 +95,47 @@ async def _creer_fiche_client(db: AsyncSession, compte: BestiUser, email: str) -
     return fiche.id
 
 
+#: Pays « national » de l'agence : Madagascar (code ISO, ISO-3, indicatif).
+CODES_NATIONAUX = {"MG", "MDG", "261", "+261"}
+DEVISE_NATIONALE = "Ar"
+#: Devise d'un client international dont la fiche était encore en ariary.
+DEVISE_INTERNATIONALE = "EUR"
+
+
+def est_pays_national(code: str | None, nom: str | None) -> bool | None:
+    """True / False selon le pays reçu de Besti ; None si Besti n'en dit rien."""
+    code = (code or "").strip().upper()
+    nom = (nom or "").strip().lower()
+    if not code and not nom:
+        return None
+    return code in CODES_NATIONAUX or "madagascar" in nom
+
+
+def devise_selon_pays(devise_actuelle: str | None, national: bool | None) -> str | None:
+    """
+    Devise de la fiche client d'après le pays Besti. Une devise étrangère déjà
+    choisie (USD, EUR…) est gardée pour un client international ; seul le
+    passage national <-> international la change.
+    """
+    actuelle = (devise_actuelle or DEVISE_NATIONALE).strip()
+    est_ariary = actuelle.upper() in ("AR", "MGA", "ARIARY")
+    if national is None:
+        return actuelle
+    if national:
+        return DEVISE_NATIONALE
+    return DEVISE_INTERNATIONALE if est_ariary else actuelle
+
+
+async def _appliquer_pays(db: AsyncSession, client_id: int | None, compte: BestiUser) -> None:
+    """Classe la fiche client national / international d'après le pays Besti."""
+    national = est_pays_national(compte.countryCode, compte.countryName)
+    if client_id is None or national is None:
+        return
+    fiche = await db.get(Client, client_id)
+    if fiche is not None:
+        fiche.devise = devise_selon_pays(fiche.devise, national)
+
+
 async def _desactiver(db: AsyncSession, compte: BestiUser) -> None:
     """Désactive le compte lié et purge ses sessions, qu'il existe ou non."""
     utilisateur = await _par_besti_id(db, compte.bestiId)
@@ -183,6 +224,8 @@ async def appliquer(db: AsyncSession, evenement: str, compte: BestiUser) -> Util
     # touchée ; un compte lié créé avant cette règle en reçoit une ici.
     if utilisateur.client_id is None:
         utilisateur.client_id = await _creer_fiche_client(db, compte, email)
+
+    await _appliquer_pays(db, utilisateur.client_id, compte)
 
     await db.commit()
     await db.refresh(utilisateur)

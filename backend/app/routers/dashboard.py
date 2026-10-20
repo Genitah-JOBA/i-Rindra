@@ -19,6 +19,7 @@ from app.models.tache import Tache, StatutTache
 from app.models.projet import ProjetMembre
 from app.models.utilisateur import Utilisateur
 from app.services import charge as charge_service
+from app.services import temps as temps_service
 from app.schemas.dashboard import (
     ChargeMembre,
     DashboardProjet,
@@ -72,6 +73,28 @@ async def get_dashboard_charge(
     if role == "equipe":
         charge = [c for c in charge if c["utilisateur_id"] == user_id]
     return charge
+
+# ============================================================
+# TEMPS PASSÉ (RF-24)
+# ============================================================
+
+@router.get("/temps")
+async def get_dashboard_temps(
+    token: str = Depends(oauth2_scheme),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Temps passé agrégé par projet et par membre, sur les projets actifs (RF-24).
+
+    Direction, DRH et chef de projet voient le temps de toute l'équipe ; un
+    membre de l'équipe ne voit que son propre temps ; le client n'y a pas accès.
+    """
+    payload = decode_access_token(token)
+    role, user_id = payload.get("role"), int(payload.get("sub"))
+    if role not in ROLES_GESTION + ("equipe",):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès réservé à l'équipe interne.")
+    ids = await _ids_projets_accessibles(db, role, user_id, payload.get("client_id"))
+    return await temps_service.temps_agrege(db, ids, user_id if role == "equipe" else None)
 
 # ============================================================
 # DASHBOARD PRINCIPAL

@@ -25,3 +25,7 @@ class BestiUser(BaseModel):
     lastName: str
     companyName: str | None = None
     status: str | None = None
+    # Pays du compte (Besti : users.id_country). Absent : la devise de la fiche
+    # client n'est pas touchée. Sert à classer le client national / international.
+    countryCode: str | None = None
+    countryName: str | None = None

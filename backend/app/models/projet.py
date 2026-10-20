@@ -78,6 +78,9 @@ class ProjetMembre(Base):
     projet_id = Column(Integer, ForeignKey("projet.id", ondelete="CASCADE"), primary_key=True, index=True)
     utilisateur_id = Column(Integer, ForeignKey("utilisateur.id", ondelete="CASCADE"), primary_key=True, index=True)
     role_dans_projet = Column(String(60), nullable=True)
+    # Membre venu d'une affectation Besti : retiré si Besti retire l'affectation.
+    # Un membre ajouté à la main dans iRindra n'est jamais touché par Besti.
+    ajoute_par_besti = Column(Boolean, nullable=False, default=False, server_default="false")
 
     projet = relationship("Projet", back_populates="membres")
     utilisateur = relationship("Utilisateur")

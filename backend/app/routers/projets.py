@@ -15,6 +15,7 @@ from app.models.utilisateur import Utilisateur, RoleUtilisateur
 from app.models.projet import ProjetMembre
 from app.models.tache import Tache, StatutTache
 from app.services import notifications as notif_service
+from app.services import temps as temps_service
 from app.schemas.projet import ProjetCreate, ProjetUpdate, ProjetResponse, ProjetListResponse
 from app.schemas.membre import (
     MembreCreate,
@@ -720,6 +721,25 @@ async def transferer_responsabilite(
     
     return ProjetResponse.model_validate(projet)
 
+@router.get("/{projet_id}/temps/synthese")
+async def get_temps_synthese(
+    projet_id: int,
+    projet: Projet = Depends(check_projet_access),
+    db: AsyncSession = Depends(get_db),
+    role: str = Depends(get_current_user_role)
+):
+    """
+    Temps passé sur le projet, agrégé par membre et par tâche (RF-24).
+
+    **Permissions :** équipe interne ayant accès au projet ; pas le client.
+    """
+    if role == "client":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Le suivi du temps est réservé à l'équipe interne"
+        )
+    return await temps_service.temps_agrege(db, [projet_id])
+
 @router.get("/{projet_id}/membres/disponibles")
 async def get_membres_disponibles(
     projet_id: int,
@@ -960,13 +980,20 @@ async def atteindre_jalon(
     projet_id: int,
     jalon_id: int,
     projet: Projet = Depends(check_projet_access),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    role: str = Depends(get_current_user_role)
 ):
     """
     Marque un jalon comme atteint (RF-07).
     
-    **Permissions :** Tout membre du projet peut marquer un jalon comme atteint.
+    **Permissions :** Tout membre interne du projet peut marquer un jalon comme
+    atteint ; le client le consulte seulement.
     """
+    if role == "client":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Le client consulte les jalons sans pouvoir les modifier"
+        )
     # Récupère le jalon
     result = await db.execute(
         select(Jalon).where(

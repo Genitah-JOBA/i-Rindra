@@ -2,6 +2,7 @@
 
 from pydantic import BaseModel, Field
 from datetime import date, datetime
+from uuid import UUID
 from typing import Optional, List
 from enum import Enum
 
@@ -45,6 +46,8 @@ class ProjetResponse(ProjetBase):
     avancement_pct: float
     archive: bool
     cree_le: datetime
+    # Projet d'origine dans B-estimation (lien contextuel, RF-35)
+    besti_projet_id: Optional[UUID] = None
     
     class Config:
         from_attributes = True  # Permet de convertir l'ORM en Pydantic

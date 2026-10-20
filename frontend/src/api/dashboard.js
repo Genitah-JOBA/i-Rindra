@@ -7,4 +7,9 @@ export const dashboardService = {
     const { data } = await api.get("/dashboard/charge");
     return data;
   },
+  // Temps passé agrégé par projet et par membre (RF-24)
+  temps: async () => {
+    const { data } = await api.get("/dashboard/temps");
+    return data;
+  },
 };

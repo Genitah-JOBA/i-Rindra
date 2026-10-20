@@ -89,7 +89,7 @@ export default function Clients() {
     setErreur("");
     try {
       const [ent, users] = await Promise.all([
-        clientsService.list(),
+        clientsService.list({ actifsSeulement: true }),
         utilisateursService.list().catch(() => []),
       ]);
       setEntreprises(ent || []);
@@ -188,9 +188,9 @@ export default function Clients() {
                         <p className="truncate font-medium text-slate-800">
                           {e.nom}
                         </p>
-                        <div className="flex items-center gap-1 text-xs text-slate-500">
-                          <MailIcon className="w-3 h-3" />
-                          <span className="truncate">{e.email || "—"}</span>
+                        <div className="flex items-start gap-1 text-xs text-slate-500">
+                          <MailIcon className="mt-0.5 w-3 h-3 shrink-0" />
+                          <span className="min-w-0 break-all">{e.email || "—"}</span>
                         </div>
                       </div>
                     </div>
@@ -211,8 +211,8 @@ export default function Clients() {
                       <div className="flex items-center gap-1 mt-1 pt-1 border-t border-slate-100">
                         {compte ? (
                           <>
-                            <CheckIcon className="w-3.5 h-3.5" style={{ color: C.green }} />
-                            <span style={{ color: C.dark }}>{compte.email}</span>
+                            <CheckIcon className="w-3.5 h-3.5 shrink-0" style={{ color: C.green }} />
+                            <span className="min-w-0 break-all" style={{ color: C.dark }}>{compte.email}</span>
                           </>
                         ) : (
                           <>

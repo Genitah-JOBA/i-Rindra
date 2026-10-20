@@ -3,13 +3,14 @@
 Gestion des clients / entreprises clientes (entité métier).
 Lecture : tout compte interne. Création/modif/suppression : direction ou chef de projet.
 """
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from typing import List
 
 from app.core.database import get_db
 from app.models.client import Client
+from app.models.utilisateur import Utilisateur
 from app.routers.auth import get_current_user_role
 from app.schemas.client import ClientCreate, ClientUpdate, ClientResponse
 
@@ -29,9 +30,31 @@ async def _interne_seulement(role: str = Depends(get_current_user_role)):
 async def get_clients(
     db: AsyncSession = Depends(get_db),
     _: str = Depends(get_current_user_role),
+    actifs_seulement: bool = Query(
+        False,
+        description="Masque les clients retirés de Besti (compte lié supprimé ou désactivé)",
+    ),
 ):
-    """Liste des clients."""
-    result = await db.execute(select(Client).order_by(Client.nom))
+    """
+    Liste des clients.
+
+    Un client supprimé dans Besti arrive en `user.deactivated` : son compte lié
+    est désactivé et ses projets archivés, mais la fiche est conservée (projets,
+    factures). `actifs_seulement=true` la masque de la liste (écran Clients) ;
+    elle réapparaît si Besti réactive le compte.
+    """
+    q = select(Client).order_by(Client.nom)
+    if actifs_seulement:
+        lie_inactif = select(Utilisateur.client_id).where(
+            Utilisateur.besti_id.is_not(None),
+            Utilisateur.client_id.is_not(None),  # NOT IN sur un NULL ne renverrait rien
+            Utilisateur.actif == False,  # noqa: E712
+        )
+        actif = select(Utilisateur.client_id).where(
+            Utilisateur.client_id.is_not(None), Utilisateur.actif == True  # noqa: E712
+        )
+        q = q.where(Client.id.not_in(lie_inactif) | Client.id.in_(actif))
+    result = await db.execute(q)
     return result.scalars().all()
 
 

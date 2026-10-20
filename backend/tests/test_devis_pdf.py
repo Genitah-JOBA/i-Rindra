@@ -69,3 +69,10 @@ def test_route_pdf_refusee_au_client():
         assert client.get("/suggestion-devis/1/pdf").status_code == 403
     finally:
         app.dependency_overrides.clear()
+
+
+def test_conditions_sans_puce_markdown():
+    texte = chr(10).join(["## Conditions de paiement et délais", "1. Modalités de paiement :",
+                        "*   40% à la signature", "* 60% à la livraison", "- Délai : 6 semaines"])
+    assert extraire_conditions(texte) == ["1. Modalités de paiement :", "40% à la signature",
+                                          "60% à la livraison", "Délai : 6 semaines"]

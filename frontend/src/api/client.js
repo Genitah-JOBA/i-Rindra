@@ -59,8 +59,11 @@ api.interceptors.response.use(
 
 export const clientsService = {
   // Liste des clients
-  list: async () => {
-    const response = await api.get("/clients/");
+  // `actifsSeulement` : masque les clients supprimés / désactivés dans Besti
+  list: async ({ actifsSeulement = false } = {}) => {
+    const response = await api.get("/clients/", {
+      params: actifsSeulement ? { actifs_seulement: true } : {},
+    });
     return response.data;
   },
 

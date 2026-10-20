@@ -32,7 +32,7 @@ from app.models.besti_projet import (
 )
 from app.models.client import Client
 from app.models.mot_de_passe_reinit import MotDePasseReinit
-from app.models.projet import Projet
+from app.models.projet import Projet, ProjetMembre
 from app.models.utilisateur import RoleUtilisateur, Utilisateur
 
 SECRET = "secret-de-test-besti"
@@ -43,6 +43,7 @@ TABLES = [
     Utilisateur.__table__,
     MotDePasseReinit.__table__,
     Projet.__table__,
+    ProjetMembre.__table__,
     BestiProjet.__table__,
     BestiCahier.__table__,
     BestiFichier.__table__,
@@ -576,3 +577,114 @@ async def test_import_desactivation_reactivation_archive_le_suivi(api, sessions)
     assert (await _lire_suivi(sessions, actif["projectId"])).archive is False
     # Supprimé dans Besti : reste archivé des deux côtés.
     assert (await _lire_suivi(sessions, supprime["projectId"])).archive is True
+
+
+# --- 3. Affectations, pays, clients retirés -------------------------------------
+
+async def _interne(sessions, email, role=RoleUtilisateur.EQUIPE, actif=True) -> Utilisateur:
+    async with sessions() as db:
+        u = Utilisateur(nom="Rabe", prenom="Ana", email=email, mot_de_passe_hash="x", role=role, actif=actif)
+        db.add(u)
+        await db.commit()
+        return u
+
+
+async def _suivi_et_membres(sessions, project_id):
+    async with sessions() as db:
+        suivi = (await db.execute(
+            select(Projet).where(Projet.besti_projet_id == uuid.UUID(str(project_id)))
+        )).scalar_one()
+        membres = (await db.execute(
+            select(ProjetMembre).where(ProjetMembre.projet_id == suivi.id)
+        )).scalars().all()
+        return suivi, {m.utilisateur_id: m for m in membres}
+
+
+@pytest.mark.anyio
+async def test_affectations_besti_alimentent_l_equipe(api, sessions):
+    compte = await _compte(sessions)
+    chef = await _interne(sessions, "chef@bienfe.mg", RoleUtilisateur.CHEF_DE_PROJET)
+    dev = await _interne(sessions, "dev@bienfe.mg")
+    charge = _projet(compte) | {"team": [
+        {"email": "Chef@Bienfe.mg"}, {"email": "dev@bienfe.mg"}, {"email": "inconnu@bienfe.mg"},
+    ]}
+
+    assert (await _envoyer(api, "project.created", charge)).status_code == 204
+    suivi, membres = await _suivi_et_membres(sessions, charge["projectId"])
+    assert set(membres) == {chef.id, dev.id}
+    assert suivi.responsable_id == chef.id               # premier affecté
+    assert membres[chef.id].role_dans_projet == "responsable"
+    assert all(m.ajoute_par_besti for m in membres.values())
+
+    # Besti retire le développeur : il quitte l'équipe ; un membre ajouté à la main reste
+    manuel = await _interne(sessions, "manuel@bienfe.mg")
+    async with sessions() as db:
+        db.add(ProjetMembre(projet_id=suivi.id, utilisateur_id=manuel.id, role_dans_projet="membre"))
+        await db.commit()
+    maj = charge | {"updatedAt": "2026-10-15T09:00:00Z", "team": [{"email": "chef@bienfe.mg"}]}
+    assert (await _envoyer(api, "project.updated", maj)).status_code == 204
+    _, membres = await _suivi_et_membres(sessions, charge["projectId"])
+    assert set(membres) == {chef.id, manuel.id}
+
+
+@pytest.mark.anyio
+async def test_sans_champ_team_l_equipe_n_est_pas_touchee(api, sessions):
+    compte = await _compte(sessions)
+    await _interne(sessions, "chef@bienfe.mg", RoleUtilisateur.CHEF_DE_PROJET)
+    charge = _projet(compte) | {"team": [{"email": "chef@bienfe.mg"}]}
+    await _envoyer(api, "project.created", charge)
+    sans = {k: v for k, v in charge.items() if k != "team"} | {"updatedAt": "2026-10-15T09:00:00Z"}
+    await _envoyer(api, "project.updated", sans)
+    _, membres = await _suivi_et_membres(sessions, charge["projectId"])
+    assert len(membres) == 1
+
+
+@pytest.mark.anyio
+async def test_un_client_ou_un_compte_inactif_n_est_jamais_affecte(api, sessions):
+    compte = await _compte(sessions)
+    await _interne(sessions, "client@ex.fr", RoleUtilisateur.CLIENT)
+    await _interne(sessions, "parti@bienfe.mg", actif=False)
+    charge = _projet(compte) | {"team": [{"email": "client@ex.fr"}, {"email": "parti@bienfe.mg"}]}
+    await _envoyer(api, "project.created", charge)
+    suivi, membres = await _suivi_et_membres(sessions, charge["projectId"])
+    assert membres == {} and suivi.responsable_id is None
+
+
+async def _devise(sessions, compte_id):
+    async with sessions() as db:
+        u = await db.get(Utilisateur, compte_id)
+        return (await db.get(Client, u.client_id)).devise
+
+
+@pytest.mark.anyio
+async def test_pays_besti_classe_le_client(api, sessions):
+    compte = await _compte(sessions)
+    await _envoyer(api, "user.updated", _compte_besti(compte))
+    assert await _devise(sessions, compte.id) == "Ar"            # pas de pays : défaut national
+    await _envoyer(api, "user.updated", _compte_besti(compte, countryCode="FR", countryName="France"))
+    assert await _devise(sessions, compte.id) == "EUR"
+    await _envoyer(api, "user.updated", _compte_besti(compte))   # pays absent : inchangé
+    assert await _devise(sessions, compte.id) == "EUR"
+    await _envoyer(api, "user.updated", _compte_besti(compte, countryName="Madagascar"))
+    assert await _devise(sessions, compte.id) == "Ar"
+
+
+@pytest.mark.anyio
+async def test_client_supprime_dans_besti_masque_de_la_liste(api, sessions):
+    from app.main import app
+    from app.routers.auth import get_current_user_role
+
+    garde, suppr = await _compte(sessions), await _compte(sessions)
+    for c in (garde, suppr):
+        await _envoyer(api, "user.activated", _compte_besti(c))
+    await _envoyer(api, "user.deactivated", _compte_besti(suppr))
+
+    app.dependency_overrides[get_current_user_role] = lambda: "direction"
+    try:
+        tous = (await api.get("/clients/")).json()
+        actifs = (await api.get("/clients/", params={"actifs_seulement": True})).json()
+    finally:
+        app.dependency_overrides.pop(get_current_user_role, None)
+    assert len(tous) == 2 and len(actifs) == 1
+    async with sessions() as db:
+        assert actifs[0]["id"] == (await db.get(Utilisateur, garde.id)).client_id
