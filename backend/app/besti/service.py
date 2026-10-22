@@ -24,6 +24,7 @@ Invariants tenus ici, quels que soient les données reçues :
   attribuée n'est jamais modifiée ni remplacée.
 """
 import logging
+import re
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
@@ -95,8 +96,10 @@ async def _creer_fiche_client(db: AsyncSession, compte: BestiUser, email: str) -
     return fiche.id
 
 
-#: Pays « national » de l'agence : Madagascar (code ISO, ISO-3, indicatif).
-CODES_NATIONAUX = {"MG", "MDG", "261", "+261"}
+#: Pays « national » de l'agence : Madagascar. Besti stocke ses codes pays tels
+#: quels (« MGA », « fr-FR », « USA ») : ISO-2, ISO-3, code ariary et indicatif
+#: sont tous acceptés.
+CODES_NATIONAUX = {"MG", "MDG", "MGA", "261", "+261"}
 DEVISE_NATIONALE = "Ar"
 #: Devise d'un client international dont la fiche était encore en ariary.
 DEVISE_INTERNATIONALE = "EUR"
@@ -104,7 +107,8 @@ DEVISE_INTERNATIONALE = "EUR"
 
 def est_pays_national(code: str | None, nom: str | None) -> bool | None:
     """True / False selon le pays reçu de Besti ; None si Besti n'en dit rien."""
-    code = (code or "").strip().upper()
+    # Locale « fr-FR » / « fr_MG » : seule la partie pays (après le séparateur) compte.
+    code = re.split(r"[-_\s]+", (code or "").strip().upper())[-1]
     nom = (nom or "").strip().lower()
     if not code and not nom:
         return None

@@ -688,3 +688,14 @@ async def test_client_supprime_dans_besti_masque_de_la_liste(api, sessions):
     assert len(tous) == 2 and len(actifs) == 1
     async with sessions() as db:
         assert actifs[0]["id"] == (await db.get(Utilisateur, garde.id)).client_id
+
+
+@pytest.mark.parametrize("code, nom, attendu", [
+    ("MG", None, True), ("MDG", None, True), ("MGA", None, True), ("mg", None, True),
+    ("fr-MG", None, True), ("FR", None, False), ("fr-FR", None, False), ("USA", None, False),
+    (None, "Madagascar", True), ("XX", "République de Madagascar", True), (None, "France", False),
+    (None, None, None), ("", "", None),
+])
+def test_codes_pays_besti(code, nom, attendu):
+    from app.besti.service import est_pays_national
+    assert est_pays_national(code, nom) is attendu
