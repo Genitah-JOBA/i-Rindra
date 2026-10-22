@@ -35,6 +35,7 @@ from app.besti.service_projet import archiver_projets_du_compte, desarchiver_pro
 from app.models.client import Client
 from app.models.mot_de_passe_reinit import MotDePasseReinit
 from app.models.utilisateur import RoleUtilisateur, Utilisateur
+from app.services.suppression_client import supprimer_fiche_client
 from app.utils.emails import normaliser_email
 
 logger = logging.getLogger("i-rindra.besti")
@@ -160,6 +161,45 @@ async def _desactiver(db: AsyncSession, compte: BestiUser) -> None:
     await db.commit()
 
 
+async def _supprimer(db: AsyncSession, compte: BestiUser) -> None:
+    """
+    Client supprimé dans Besti (`user.deleted`) : le compte lié est effacé, et
+    avec lui sa fiche client et ses projets si personne d'autre ne l'utilise.
+
+    Une fiche qui porte des factures n'est jamais effacée (conservation
+    comptable) : le compte est alors seulement désactivé, comme pour
+    `user.deactivated`, et la fiche disparaît de la liste des clients actifs.
+    """
+    from sqlalchemy import delete, func
+
+    utilisateur = await _par_besti_id(db, compte.bestiId)
+    if utilisateur is None:
+        logger.info("Suppression Besti reçue pour un compte inconnu de iRindra : ignorée.")
+        return
+
+    client_id = utilisateur.client_id
+    autres = 0
+    if client_id is not None:
+        autres = (
+            await db.execute(
+                select(func.count(Utilisateur.id)).where(
+                    Utilisateur.client_id == client_id, Utilisateur.id != utilisateur.id
+                )
+            )
+        ).scalar_one()
+
+    if client_id is not None and not autres:
+        if not await supprimer_fiche_client(db, client_id):
+            logger.info("Client Besti supprimé mais facturé : compte désactivé, fiche conservée.")
+            await _desactiver(db, compte)
+            return
+    else:
+        # Fiche partagée avec d'autres comptes (ou absente) : seul ce compte part.
+        await db.execute(delete(Utilisateur).where(Utilisateur.id == utilisateur.id))
+    await db.commit()
+    logger.info("Compte lié Besti %s supprimé.", compte.bestiId)
+
+
 async def appliquer(db: AsyncSession, evenement: str, compte: BestiUser) -> Utilisateur | None:
     """
     Applique un événement Besti et retourne l'utilisateur concerné.
@@ -170,6 +210,10 @@ async def appliquer(db: AsyncSession, evenement: str, compte: BestiUser) -> Util
       retourne l'utilisateur.
     - autre événement : `HTTPException` 400.
     """
+    if evenement == "user.deleted":
+        await _supprimer(db, compte)
+        return None
+
     if evenement == "user.deactivated":
         await _desactiver(db, compte)
         return None

@@ -34,7 +34,7 @@ router = APIRouter(prefix="/besti", tags=["Besti"])
 
 #: Événements connus. `ping` est traité à part (il ne crée rien).
 EVENEMENTS_CONNUS = (
-    "user.activated", "user.updated", "user.deactivated", "ping", *EVENEMENTS_PROJET
+    "user.activated", "user.updated", "user.deactivated", "user.deleted", "ping", *EVENEMENTS_PROJET
 )
 
 
@@ -43,7 +43,7 @@ async def besti_webhook(
     x_besti_event: str = Header(
         ...,
         alias="X-Besti-Event",
-        description="user.activated | user.updated | user.deactivated | ping | "
+        description="user.activated | user.updated | user.deactivated | user.deleted | ping | "
         "project.created | project.updated | project.deleted",
     ),
     corps: bytes = Depends(verifier_signature_besti),

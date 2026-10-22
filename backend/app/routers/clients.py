@@ -11,6 +11,7 @@ from typing import List
 from app.core.database import get_db
 from app.models.client import Client
 from app.models.utilisateur import Utilisateur
+from app.services.suppression_client import supprimer_fiche_client
 from app.routers.auth import get_current_user_role
 from app.schemas.client import ClientCreate, ClientUpdate, ClientResponse
 
@@ -109,13 +110,27 @@ async def update_client(
 async def delete_client(
     client_id: int,
     db: AsyncSession = Depends(get_db),
-    _: str = Depends(_interne_seulement),
+    role: str = Depends(get_current_user_role),
 ):
-    """Supprimer un client."""
-    result = await db.execute(select(Client).where(Client.id == client_id))
-    client = result.scalar_one_or_none()
+    """
+    Supprimer définitivement un client : fiche, comptes clients, projets
+    (tâches, jalons, fichiers suivent) et suggestions de devis.
+
+    Refusé (409) si le client a des factures : elles doivent être conservées.
+    Réservé à la direction, au DRH et au chef de projet.
+    """
+    if role not in ("direction", "drh", "chef_de_projet"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Seule la gestion peut supprimer un client",
+        )
+    client = await db.get(Client, client_id)
     if not client:
         raise HTTPException(status_code=404, detail="Client non trouvé")
-    await db.delete(client)
+    if not await supprimer_fiche_client(db, client_id):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Ce client a des factures : il ne peut pas être supprimé.",
+        )
     await db.commit()
     return None

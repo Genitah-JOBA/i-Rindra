@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { clientsService } from "../api/client";
 import { utilisateursService } from "../api/utilisateurs";
 import { useMessage } from "../context/MessageContext";
+import { useAuth } from "../auth/AuthContext";
 import Spin from "../components/Spin";
 import 'animate.css';
 
@@ -76,7 +77,9 @@ const C = {
 };
 
 export default function Clients() {
-  const { showError } = useMessage();
+  const { showError, showConfirm, showSuccess } = useMessage();
+  const { user } = useAuth();
+  const peutSupprimer = ["direction", "drh", "chef_de_projet"].includes(user?.role);
 
   const [entreprises, setEntreprises] = useState([]);
   const [comptes, setComptes] = useState([]);
@@ -106,6 +109,25 @@ export default function Clients() {
   useEffect(() => {
     chargerTout();
   }, []);
+
+  // Suppression définitive (fiche, compte, projets) ; refusée si le client est facturé
+  const supprimerClient = async (e) => {
+    const ok = await showConfirm({
+      type: "error",
+      title: "Supprimer le client",
+      message: `Supprimer définitivement « ${e.nom} » ? Son compte, ses projets (tâches, jalons, fichiers) et ses suggestions de devis seront effacés. Un client qui a des factures ne peut pas être supprimé.`,
+      confirmLabel: "Supprimer",
+    });
+    if (!ok) return;
+    try {
+      await clientsService.delete(e.id);
+      setEntreprises((prev) => prev.filter((x) => x.id !== e.id));
+      setComptes((prev) => prev.filter((c) => c.client_id !== e.id));
+      showSuccess(`« ${e.nom} » a été supprimé.`);
+    } catch (err) {
+      showError(err.response?.data?.detail || "Impossible de supprimer ce client.");
+    }
+  };
 
   const compteDe = (clientId) => comptes.find((c) => c.client_id === clientId);
 
@@ -242,6 +264,17 @@ export default function Clients() {
                         <span className="text-[10px] text-slate-500">
                           Devise : {e.devise || "Ar"}
                         </span>
+                        {peutSupprimer && (
+                          <button
+                            type="button"
+                            onClick={() => supprimerClient(e)}
+                            title="Supprimer définitivement ce client"
+                            className="ml-auto flex items-center gap-1 border border-slate-200 px-2 py-0.5 text-[11px] text-slate-500 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                          >
+                            <TrashIcon className="w-3.5 h-3.5" />
+                            Supprimer
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>

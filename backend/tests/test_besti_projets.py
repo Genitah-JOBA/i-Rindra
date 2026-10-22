@@ -32,7 +32,9 @@ from app.models.besti_projet import (
 )
 from app.models.client import Client
 from app.models.mot_de_passe_reinit import MotDePasseReinit
+from app.models.facture import Facture
 from app.models.projet import Projet, ProjetMembre
+from app.models.suggestion_devis import SuggestionDevis
 from app.models.utilisateur import RoleUtilisateur, Utilisateur
 
 SECRET = "secret-de-test-besti"
@@ -44,6 +46,8 @@ TABLES = [
     MotDePasseReinit.__table__,
     Projet.__table__,
     ProjetMembre.__table__,
+    Facture.__table__,
+    SuggestionDevis.__table__,
     BestiProjet.__table__,
     BestiCahier.__table__,
     BestiFichier.__table__,
@@ -699,3 +703,68 @@ async def test_client_supprime_dans_besti_masque_de_la_liste(api, sessions):
 def test_codes_pays_besti(code, nom, attendu):
     from app.besti.service import est_pays_national
     assert est_pays_national(code, nom) is attendu
+
+
+
+# --- 4. Suppression d'un client dans Besti (user.deleted) ----------------------
+
+async def _etat(sessions, compte_id, client_id):
+    async with sessions() as db:
+        return (
+            await db.get(Utilisateur, compte_id),
+            await db.get(Client, client_id),
+            (await db.execute(select(func.count()).select_from(Projet).where(Projet.client_id == client_id))).scalar_one(),
+        )
+
+
+async def _client_avec_projet(api, sessions):
+    compte = await _compte(sessions)
+    await _envoyer(api, "user.activated", _compte_besti(compte))
+    await _envoyer(api, "project.created", _projet(compte))
+    async with sessions() as db:
+        client_id = (await db.get(Utilisateur, compte.id)).client_id
+    return compte, client_id
+
+
+@pytest.mark.anyio
+async def test_user_deleted_efface_compte_fiche_et_projets(api, sessions):
+    compte, client_id = await _client_avec_projet(api, sessions)
+    assert (await _etat(sessions, compte.id, client_id))[2] == 1
+
+    assert (await _envoyer(api, "user.deleted", _compte_besti(compte))).status_code == 204
+    assert await _etat(sessions, compte.id, client_id) == (None, None, 0)
+    # rejeu : compte déjà parti, rien à faire
+    assert (await _envoyer(api, "user.deleted", _compte_besti(compte))).status_code == 204
+
+
+@pytest.mark.anyio
+async def test_user_deleted_client_facture_seulement_desactive(api, sessions):
+    from datetime import date
+    from decimal import Decimal
+
+    compte, client_id = await _client_avec_projet(api, sessions)
+    async with sessions() as db:
+        db.add(Facture(numero="F-2026-0001", client_id=client_id, montant_ht=Decimal("100"),
+                       taux_tva=Decimal("20"), montant_ttc=Decimal("120"), date_emission=date.today()))
+        await db.commit()
+
+    assert (await _envoyer(api, "user.deleted", _compte_besti(compte))).status_code == 204
+    u, fiche, nb = await _etat(sessions, compte.id, client_id)
+    assert u is not None and u.actif is False and fiche is not None and nb == 1
+
+
+@pytest.mark.anyio
+async def test_suppression_manuelle_d_un_client(api, sessions):
+    from app.main import app
+    from app.routers.auth import get_current_user_role
+
+    compte, client_id = await _client_avec_projet(api, sessions)
+    app.dependency_overrides[get_current_user_role] = lambda: "equipe"
+    try:
+        assert (await api.delete(f"/clients/{client_id}")).status_code == 403
+        app.dependency_overrides[get_current_user_role] = lambda: "direction"
+        assert (await api.delete(f"/clients/{client_id}")).status_code == 204
+        assert (await api.delete(f"/clients/{client_id}")).status_code == 404
+    finally:
+        app.dependency_overrides.pop(get_current_user_role, None)
+    assert await _etat(sessions, compte.id, client_id) == (None, None, 0)
