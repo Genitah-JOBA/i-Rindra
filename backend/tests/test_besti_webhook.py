@@ -448,37 +448,12 @@ async def test_email_d_un_autre_client_besti_donne_409():
 
 
 @pytest.mark.anyio
-async def test_deactivation_desactive_le_compte_et_purge_ses_jetons():
-    session = FauxSession()
-    utilisateur = await appliquer(session, "user.activated", _compte())
-    utilisateur.id = 42
-
-    resultat = await appliquer(session, "user.deactivated", _compte())
-
-    assert resultat is None
-    assert session.utilisateurs[0].actif is False
-    assert ("jetons", 42) in session.supprimes
-
-
-@pytest.mark.anyio
 async def test_deactivation_d_un_compte_inconnu_renvoie_sans_erreur():
     """Besti peut notifier une désactivation avant l'activation : 204 attendu."""
     session = FauxSession()
 
     assert await appliquer(session, "user.deactivated", _compte()) is None
     assert session.utilisateurs == []
-
-
-@pytest.mark.anyio
-async def test_reactivation_remet_le_compte_actif():
-    session = FauxSession()
-    await appliquer(session, "user.activated", _compte())
-    await appliquer(session, "user.deactivated", _compte())
-
-    utilisateur = await appliquer(session, "user.activated", _compte())
-
-    assert utilisateur.actif is True
-    assert len(session.utilisateurs) == 1
 
 
 @pytest.mark.anyio

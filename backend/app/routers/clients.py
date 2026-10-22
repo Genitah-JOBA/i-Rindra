@@ -39,10 +39,9 @@ async def get_clients(
     """
     Liste des clients.
 
-    Un client supprimé dans Besti arrive en `user.deactivated` : son compte lié
-    est désactivé et ses projets archivés, mais la fiche est conservée (projets,
-    factures). `actifs_seulement=true` la masque de la liste (écran Clients) ;
-    elle réapparaît si Besti réactive le compte.
+    Un client supprimé dans Besti est effacé d'iRindra, sauf s'il a des
+    factures : son compte est alors seulement désactivé et la fiche conservée.
+    `actifs_seulement=true` masque ces fiches de la liste (écran Clients).
     """
     q = select(Client).order_by(Client.nom)
     if actifs_seulement:

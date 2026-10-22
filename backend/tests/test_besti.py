@@ -447,16 +447,6 @@ async def test_email_d_un_compte_local_refusé_et_compte_intact(session):
 
 
 @pytest.mark.anyio
-async def test_désactivation_désactive_le_compte(session):
-    besti_id = uuid.uuid4()
-    await appliquer(session, "user.activated", _valider(_charge(besti_id=besti_id)))
-    assert session.utilisateurs[0].actif is True
-
-    await appliquer(session, "user.deactivated", _valider(_charge(besti_id=besti_id)))
-    assert session.utilisateurs[0].actif is False
-
-
-@pytest.mark.anyio
 async def test_désactivation_d_un_compte_inconnu_ne_échoue_pas(session):
     """L'ordre des envois n'est pas garanti : une désactivation peut arriver
     avant la création. Elle doit rester sans effet et sans erreur."""

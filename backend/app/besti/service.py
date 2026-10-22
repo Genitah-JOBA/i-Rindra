@@ -163,12 +163,12 @@ async def _desactiver(db: AsyncSession, compte: BestiUser) -> None:
 
 async def _supprimer(db: AsyncSession, compte: BestiUser) -> None:
     """
-    Client supprimé dans Besti (`user.deleted`) : le compte lié est effacé, et
+    Client supprimé ou désactivé dans Besti : le compte lié est effacé, et
     avec lui sa fiche client et ses projets si personne d'autre ne l'utilise.
 
     Une fiche qui porte des factures n'est jamais effacée (conservation
-    comptable) : le compte est alors seulement désactivé, comme pour
-    `user.deactivated`, et la fiche disparaît de la liste des clients actifs.
+    comptable) : le compte est alors seulement désactivé (projets archivés) et
+    la fiche disparaît de la liste des clients actifs.
     """
     from sqlalchemy import delete, func
 
@@ -204,18 +204,17 @@ async def appliquer(db: AsyncSession, evenement: str, compte: BestiUser) -> Util
     """
     Applique un événement Besti et retourne l'utilisateur concerné.
 
-    - `user.deactivated` : désactive le compte lié (204 même s'il n'existe pas)
-      et retourne `None`.
+    - `user.deactivated` / `user.deleted` : supprime le compte lié, sa fiche et
+      ses projets (204 même s'il n'existe pas) et retourne `None`. Besti envoie
+      `user.deactivated` aussi bien pour une suppression que pour une
+      désactivation : dans les deux cas le client quitte iRindra. Seul un
+      client facturé est gardé (désactivé), pour conserver ses factures.
     - `user.activated` / `user.updated` : crée ou met à jour le compte lié et
       retourne l'utilisateur.
     - autre événement : `HTTPException` 400.
     """
-    if evenement == "user.deleted":
+    if evenement in ("user.deactivated", "user.deleted"):
         await _supprimer(db, compte)
-        return None
-
-    if evenement == "user.deactivated":
-        await _desactiver(db, compte)
         return None
 
     if evenement not in EVENEMENTS_ACTIVATION:
@@ -228,6 +227,20 @@ async def appliquer(db: AsyncSession, evenement: str, compte: BestiUser) -> Util
 
     utilisateur = await _par_besti_id(db, compte.bestiId)
     homonyme = await _par_email(db, email)
+
+    # Ancien compte Besti désactivé (client supprimé puis recréé dans Besti, qui
+    # lui donne un nouvel identifiant) : ce n'est pas un compte local, le
+    # nouveau compte Besti le reprend au lieu d'être refusé.
+    if (
+        utilisateur is None
+        and homonyme is not None
+        and homonyme.besti_id is not None
+        and homonyme.besti_id != compte.bestiId
+        and not homonyme.actif
+    ):
+        logger.info("Ancien compte Besti désactivé repris par le compte %s.", compte.bestiId)
+        homonyme.besti_id = compte.bestiId
+        utilisateur = homonyme
 
     # Conflit d'email : le compte trouvé n'est pas celui de ce client Besti.
     # Le compte existant n'est pas modifié (ni rattaché, ni désactivé).

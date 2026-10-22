@@ -403,10 +403,12 @@ def _compte_besti(compte, **champs):
 
 @pytest.mark.anyio
 async def test_désactivation_archive_et_réactivation_désarchive(api, sessions):
+    """Client facturé : la désactivation Besti ne peut pas l'effacer, elle archive."""
     compte = await _compte(sessions)
     actif, supprime = _projet(compte), _projet(compte)
     await _envoyer(api, "project.created", actif)
     await _envoyer(api, "project.created", supprime)
+    await _facturer(sessions, compte.id)
     await _envoyer(api, "project.deleted", {
         "projectId": supprime["projectId"],
         "bestiId": supprime["bestiId"],
@@ -563,10 +565,12 @@ async def test_import_deleted_archive_puis_updated_desarchive_le_suivi(api, sess
 
 @pytest.mark.anyio
 async def test_import_desactivation_reactivation_archive_le_suivi(api, sessions):
+    """Client facturé : projets suivis archivés puis désarchivés."""
     compte = await _compte(sessions)
     actif, supprime = _projet(compte), _projet(compte)
     await _envoyer(api, "project.created", actif)
     await _envoyer(api, "project.created", supprime)
+    await _facturer(sessions, compte.id)
     await _envoyer(api, "project.deleted", {
         "projectId": supprime["projectId"],
         "bestiId": supprime["bestiId"],
@@ -678,10 +682,12 @@ async def test_client_supprime_dans_besti_masque_de_la_liste(api, sessions):
     from app.main import app
     from app.routers.auth import get_current_user_role
 
-    garde, suppr = await _compte(sessions), await _compte(sessions)
-    for c in (garde, suppr):
+    garde, suppr, facture = await _compte(sessions), await _compte(sessions), await _compte(sessions)
+    for c in (garde, suppr, facture):
         await _envoyer(api, "user.activated", _compte_besti(c))
-    await _envoyer(api, "user.deactivated", _compte_besti(suppr))
+    await _facturer(sessions, facture.id)
+    await _envoyer(api, "user.deactivated", _compte_besti(suppr))     # effacé
+    await _envoyer(api, "user.deactivated", _compte_besti(facture))   # gardé, masqué
 
     app.dependency_overrides[get_current_user_role] = lambda: "direction"
     try:
@@ -727,14 +733,15 @@ async def _client_avec_projet(api, sessions):
 
 
 @pytest.mark.anyio
-async def test_user_deleted_efface_compte_fiche_et_projets(api, sessions):
+@pytest.mark.parametrize("evenement", ["user.deactivated", "user.deleted"])
+async def test_client_retire_de_besti_efface_compte_fiche_et_projets(api, sessions, evenement):
     compte, client_id = await _client_avec_projet(api, sessions)
     assert (await _etat(sessions, compte.id, client_id))[2] == 1
 
-    assert (await _envoyer(api, "user.deleted", _compte_besti(compte))).status_code == 204
+    assert (await _envoyer(api, evenement, _compte_besti(compte))).status_code == 204
     assert await _etat(sessions, compte.id, client_id) == (None, None, 0)
     # rejeu : compte déjà parti, rien à faire
-    assert (await _envoyer(api, "user.deleted", _compte_besti(compte))).status_code == 204
+    assert (await _envoyer(api, evenement, _compte_besti(compte))).status_code == 204
 
 
 @pytest.mark.anyio
@@ -768,3 +775,36 @@ async def test_suppression_manuelle_d_un_client(api, sessions):
     finally:
         app.dependency_overrides.pop(get_current_user_role, None)
     assert await _etat(sessions, compte.id, client_id) == (None, None, 0)
+
+
+async def _facturer(sessions, compte_id):
+    """Ajoute une facture à la fiche client du compte (qui ne peut alors plus être effacée)."""
+    from datetime import date
+    from decimal import Decimal
+
+    async with sessions() as db:
+        client_id = (await db.get(Utilisateur, compte_id)).client_id
+        db.add(Facture(numero=f"F-{uuid.uuid4().hex[:8]}", client_id=client_id, montant_ht=Decimal("100"),
+                       taux_tva=Decimal("20"), montant_ttc=Decimal("120"), date_emission=date.today()))
+        await db.commit()
+
+
+@pytest.mark.anyio
+async def test_client_recree_dans_besti_reprend_l_ancien_compte_desactive(api, sessions):
+    """Supprimé puis recréé dans Besti (nouvel identifiant, même email) : pas de 409."""
+    ancien = await _compte(sessions, actif=False)
+    nouveau_id = uuid.uuid4()
+    charge = _compte_besti(ancien) | {"bestiId": str(nouveau_id)}
+
+    assert (await _envoyer(api, "user.activated", charge)).status_code == 204
+    async with sessions() as db:
+        comptes = (await db.execute(select(Utilisateur))).scalars().all()
+    assert len(comptes) == 1
+    assert comptes[0].besti_id == nouveau_id and comptes[0].actif is True
+
+
+@pytest.mark.anyio
+async def test_compte_besti_actif_de_meme_email_reste_en_conflit(api, sessions):
+    actif = await _compte(sessions)
+    charge = _compte_besti(actif) | {"bestiId": str(uuid.uuid4())}
+    assert (await _envoyer(api, "user.activated", charge)).status_code == 409
